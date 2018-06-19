@@ -1,5 +1,7 @@
 #include "GLWindow.hpp"
 
+#include <Config.hpp>
+
 #include <GLFW/glfw3.h>
 #include <sstream>
 #include <map>
@@ -211,6 +213,11 @@ Magma::Framework::Input::GLWindow::~GLWindow()
 		glfwTerminate();
 }
 
+void Magma::Framework::Input::GLWindow::MakeCurrent()
+{
+	glfwMakeContextCurrent((GLFWwindow*)m_glfwWindow);
+}
+
 void Magma::Framework::Input::GLWindow::PollEvents()
 {
 	glfwPollEvents();
@@ -225,3 +232,29 @@ void Magma::Framework::Input::GLWindow::SwapBuffers()
 {
 	glfwSwapBuffers((GLFWwindow*)m_glfwWindow);
 }
+
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+int main(int argc, char** argv)
+{
+	Main(argc, argv);
+}
+
+namespace Magma
+{
+	namespace Framework
+	{
+		namespace Input
+		{
+			Magma::Framework::Input::Window* CreateWindow(unsigned int width, unsigned int height, const std::string& title, Magma::Framework::Input::Window::Mode mode)
+			{
+				return new Magma::Framework::Input::GLWindow(width, height, title, mode);
+			}
+
+			void DestroyWindow(Magma::Framework::Input::Window* window)
+			{
+				delete window;
+			}
+		}
+	}
+}
+#endif

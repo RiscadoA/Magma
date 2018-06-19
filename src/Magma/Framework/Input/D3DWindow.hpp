@@ -9,9 +9,9 @@ namespace Magma
 		namespace Input
 		{
 			/// <summary>
-			///		Window class implementation for OpenGL (uses GLFW)
+			///		Window class implementation for DirectX (uses Windows API)
 			/// </summary>
-			class GLWindow : public Window
+			class D3DWindow : public Window
 			{
 			public:
 				/// <summary>
@@ -21,12 +21,12 @@ namespace Magma
 				/// <param name="height">Window height</param>
 				/// <param name="title">Window title</param>
 				/// <param name="mode">Window mode</param>
-				GLWindow(unsigned int width, unsigned int height, const std::string& title, Window::Mode mode = Window::Mode::Windowed);
+				D3DWindow(unsigned int width, unsigned int height, const std::string& title, Window::Mode mode = Window::Mode::Windowed);
 
 				/// <summary>
 				///		Closes a window.
 				/// </summary>
-				~GLWindow();
+				~D3DWindow();
 
 				/// <summary>
 				///		Sets this window as the current for rendering.
@@ -48,8 +48,14 @@ namespace Magma
 				/// </summary>
 				virtual void SwapBuffers() final;
 
+				/// <summary>
+				///		Gets the windows API handle of this window.
+				/// </summary>
+				/// <returns>Window windows API handle</returns>
+				inline void* GetHWND() const { return m_hwnd; }
+
 			private:
-				void* m_glfwWindow;
+				void* m_hwnd;
 			};
 		}
 	}

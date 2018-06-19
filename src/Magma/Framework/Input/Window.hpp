@@ -42,6 +42,11 @@ namespace Magma
 				virtual ~Window() = default;
 
 				/// <summary>
+				///		Sets this window as the current for rendering.
+				/// </summary>
+				virtual void MakeCurrent() = 0;
+
+				/// <summary>
 				///		Polls events from this window.
 				/// </summary>
 				virtual void PollEvents() = 0;
@@ -102,11 +107,27 @@ namespace Magma
 				Event<Mouse> OnMouseUp;
 
 				/// <summary>
-				///		Fired when a mouse button goes dwon.
+				///		Fired when a mouse button goes down.
 				///		Params: { mouse button; }
 				/// </summary>
 				Event<Mouse> OnMouseDown;
 			};
+
+			/// <summary>
+			///		Creates a window.
+			/// </summary>
+			/// <param name="width">Window width</param>
+			/// <param name="height">Window height</param>
+			/// <param name="title">Window title</param>
+			/// <param name="mode">Window mode</param>
+			/// <returns>Window</returns>
+			extern Magma::Framework::Input::Window* CreateWindow(unsigned int width, unsigned int height, const std::string& title, Magma::Framework::Input::Window::Mode mode = Magma::Framework::Input::Window::Mode::Windowed);
+			
+			/// <summary>
+			///		Destroys a window created with Magma::Framework::Input::CreateWindow.
+			/// </summary>
+			/// <param name="window">Window to destroy</param>
+			extern void DestroyWindow(Magma::Framework::Input::Window* window);
 		}
 	}
 }

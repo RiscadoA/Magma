@@ -17,9 +17,6 @@ else()
 endif()
 configure_file(Config.hpp.in Config.hpp)
 
-
-message(${CMAKE_CURRENT_BINARY_DIR})
-
 # Add files as library
 add_library(Magma-Framework ${Magma_Framework_Source} ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp)
 set_target_properties (Magma-Framework PROPERTIES FOLDER Magma)
