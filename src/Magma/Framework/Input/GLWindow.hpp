@@ -48,8 +48,29 @@ namespace Magma
 				/// </summary>
 				void SwapBuffers();
 
+				/// <summary>
+				///		Gets the width of the window.
+				/// </summary>
+				/// <returns>Window width</returns>
+				inline virtual unsigned int GetWidth() final { return m_width; }
+
+				/// <summary>
+				///		Gets the height of the window.
+				/// </summary>
+				/// <returns>Window height</returns>
+				inline virtual unsigned int GetHeight() final { return m_height; }
+
+				/// <summary>
+				///		Gets the window mode
+				/// </summary>
+				/// <returns>Window mode</returns>
+				inline virtual Window::Mode GetMode() final { return m_mode; }
+
 			private:
 				void* m_glfwWindow;
+				unsigned int m_width;
+				unsigned int m_height;
+				Window::Mode m_mode;
 			};
 		}
 	}

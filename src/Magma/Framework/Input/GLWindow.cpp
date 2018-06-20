@@ -162,6 +162,10 @@ void GLFWCursorEnterCallback(GLFWwindow* window, int enter)
 
 Magma::Framework::Input::GLWindow::GLWindow(unsigned int width, unsigned int height, const std::string& title, Mode mode)
 {
+	m_width = width;
+	m_height = height;
+	m_mode = mode;
+
 	if (glfwWindows.size() == 0)
 	{
 		glfwSetErrorCallback(GLFWErrorCallback);

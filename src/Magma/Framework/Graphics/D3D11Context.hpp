@@ -23,7 +23,7 @@ namespace Magma
 				virtual void SetClearColor(glm::vec4 color) final;
 				virtual void Clear(BufferBit mask) final;
 				virtual void SwapBuffers() final;
-				virtual void * CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* vertexShader) final;
+				virtual void * CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program) final;
 				virtual void DestroyVertexBuffer(void * vertexBuffer) final;
 				virtual void BindVertexBuffer(void * vertexBuffer) final;
 				virtual void Draw(size_t vertexCount, size_t offset, DrawMode mode) final;

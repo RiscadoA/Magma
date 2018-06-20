@@ -4,7 +4,7 @@
 
 using namespace Magma;
 
-void Main(int argc, char** argv)
+void Main(int argc, char** argv) try
 {
 	bool running = true;
 
@@ -49,9 +49,44 @@ void Main(int argc, char** argv)
 		}
 
 		)shader";
-
+		
 		vertexShader = context->CreateShader(Framework::Graphics::ShaderType::Vertex, source);
 		pixelShader = context->CreateShader(Framework::Graphics::ShaderType::Pixel, source);
+
+		/*std::string vertexSource = R"shader(
+		#version 330 core	
+
+		in vec3 position;
+		in vec4 color;
+
+		//out vec4 gl_Position;	
+		out vec4 vertColor;
+
+		void main()
+		{
+			gl_Position = vec4(position, 1.0);
+			vertColor = color;
+		}			
+
+		)shader";
+
+		std::string pixelSource = R"shader(
+		#version 330 core	
+		
+		in vec4 vertColor;
+		out vec4 fragColor;
+
+		void main()
+		{
+			fragColor = vertColor;
+			//fragColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
+		}			
+
+		)shader";
+
+		vertexShader = context->CreateShader(Framework::Graphics::ShaderType::Vertex, vertexSource);
+		pixelShader = context->CreateShader(Framework::Graphics::ShaderType::Pixel, pixelSource);*/
+
 		program = context->CreateProgram();
 		context->AttachShader(program, vertexShader);
 		context->AttachShader(program, pixelShader);
@@ -66,30 +101,28 @@ void Main(int argc, char** argv)
 			0.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
 			0.0f, 1.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 1.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
-			1.0f, 0.0f, 0.0f,       1.0f, 1.0f, 1.0f, 1.0f,
+			//1.0f, 0.0f, 0.0f,       1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
 		Framework::Graphics::VertexLayout layout;
 		layout.elements.emplace_back();
 		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float3;
-		layout.elements.back().index = 0;
 		layout.elements.back().name = "position";
 		layout.elements.back().offset = 0;
 
 		layout.elements.emplace_back();
 		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float4;
-		layout.elements.back().index = 0;
 		layout.elements.back().name = "color";
 		layout.elements.back().offset = sizeof(float) * 3;
 
-
 		layout.size = sizeof(float) * 3 + sizeof(float) * 4;
 
-		vb = context->CreateVertexBuffer(data, sizeof(data), layout, vertexShader);
+		
+		vb = context->CreateVertexBuffer(data, sizeof(data), layout, program);
 	}
 
 	// Create index buffer
-	void* ib = nullptr;
+	/*void* ib = nullptr;
 	{
 		unsigned int data[] =
 		{
@@ -98,7 +131,7 @@ void Main(int argc, char** argv)
 		};
 
 		ib = context->CreateIndexBuffer(data, sizeof(data), Framework::Graphics::IndexFormat::UInt32);
-	}
+	}*/
 
 	while (running)
 	{
@@ -108,9 +141,10 @@ void Main(int argc, char** argv)
 
 		context->BindProgram(program);
 		context->BindVertexBuffer(vb);
-		context->BindIndexBuffer(ib);
-		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
-		context->BindIndexBuffer(nullptr);
+		context->Draw(3, 0, Framework::Graphics::DrawMode::Triangles);
+		//context->BindIndexBuffer(ib);
+		//context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
+		//context->BindIndexBuffer(nullptr);
 		context->BindVertexBuffer(nullptr);
 		context->BindProgram(nullptr);
 		
@@ -123,4 +157,10 @@ void Main(int argc, char** argv)
 	context->Terminate();
 	delete context;
 	delete window;
+}
+catch (std::exception& e)
+{
+	std::cout << e.what() << std::endl;
+	getchar();
+	return;
 }

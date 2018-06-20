@@ -111,7 +111,6 @@ namespace Magma
 			{
 				VertexElementFormat format;
 				std::string name;
-				unsigned int index;
 				unsigned int offset;
 			};
 
@@ -164,9 +163,9 @@ namespace Magma
 				/// <param name="data">Data to fill buffer</param>
 				/// <param name="size">Data size</param>
 				/// <param name="layout">Data layout</param>
-				/// <param name="vertexShader">Vertex shader handle</param>
+				/// <param name="program">Program handle</param>
 				/// <returns>Vertex buffer handle</returns>
-				virtual void* CreateVertexBuffer(void* data, size_t size, const VertexLayout& layout, void* vertexShader) = 0;
+				virtual void* CreateVertexBuffer(void* data, size_t size, const VertexLayout& layout, void* program) = 0;
 
 				/// <summary>
 				///		Destroys a vertex buffer

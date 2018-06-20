@@ -15,6 +15,16 @@ else()
 	set (MAGMA_FRAMEWORK_USE_DIRECTX 0)
 	message("Magma-Framework using OpenGL")
 endif()
+
+option (MAGMA_FRAMEWORK_CONTEXT_DEBUG "Will the framework do debug checks on graphic contexts?" ON)
+if (MAGMA_FRAMEWORK_CONTEXT_DEBUG)
+	set (MAGMA_FRAMEWORK_CONTEXT_DEBUG 1)
+	message("Magma-Framework Context Debug activated")
+else()
+	set (MAGMA_FRAMEWORK_CONTEXT_DEBUG 0)
+	message("Magma-Framework Context Debug deactivated")
+endif()
+
 configure_file(Config.hpp.in Config.hpp)
 
 # Add files as library

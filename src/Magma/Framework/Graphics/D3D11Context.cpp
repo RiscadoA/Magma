@@ -174,7 +174,7 @@ void Magma::Framework::Graphics::D3D11Context::SwapBuffers()
 	((IDXGISwapChain*)m_swapChain)->Present(0, 0);
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* vertexShader)
+void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program)
 {
 	HRESULT hr = 0;
 
@@ -209,34 +209,34 @@ void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data,
 	{
 		switch (layout.elements[i].format)
 		{
-		case VertexElementFormat::Float1: inputDesc[i].Format = DXGI_FORMAT_R32_FLOAT; break;
-		case VertexElementFormat::Float2: inputDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT; break;
-		case VertexElementFormat::Float3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
-		case VertexElementFormat::Float4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
-		case VertexElementFormat::Int1: inputDesc[i].Format = DXGI_FORMAT_R32_SINT; break;
-		case VertexElementFormat::Int2: inputDesc[i].Format = DXGI_FORMAT_R32G32_SINT; break;
-		case VertexElementFormat::Int3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_SINT; break;
-		case VertexElementFormat::Int4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_SINT; break;
-		case VertexElementFormat::UInt1: inputDesc[i].Format = DXGI_FORMAT_R32_UINT; break;
-		case VertexElementFormat::UInt2: inputDesc[i].Format = DXGI_FORMAT_R32G32_UINT; break;
-		case VertexElementFormat::UInt3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_UINT; break;
-		case VertexElementFormat::UInt4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT; break;
-		default: throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nUnsupported vertex layout element format");
+			case VertexElementFormat::Float1: inputDesc[i].Format = DXGI_FORMAT_R32_FLOAT; break;
+			case VertexElementFormat::Float2: inputDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT; break;
+			case VertexElementFormat::Float3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
+			case VertexElementFormat::Float4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
+			case VertexElementFormat::Int1: inputDesc[i].Format = DXGI_FORMAT_R32_SINT; break;
+			case VertexElementFormat::Int2: inputDesc[i].Format = DXGI_FORMAT_R32G32_SINT; break;
+			case VertexElementFormat::Int3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_SINT; break;
+			case VertexElementFormat::Int4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_SINT; break;
+			case VertexElementFormat::UInt1: inputDesc[i].Format = DXGI_FORMAT_R32_UINT; break;
+			case VertexElementFormat::UInt2: inputDesc[i].Format = DXGI_FORMAT_R32G32_UINT; break;
+			case VertexElementFormat::UInt3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_UINT; break;
+			case VertexElementFormat::UInt4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT; break;
+			default: throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nUnsupported vertex layout element format");
 		}
 
 		inputDesc[i].SemanticName = layout.elements[i].name.c_str();
-		inputDesc[i].SemanticIndex = layout.elements[i].index;
+		inputDesc[i].SemanticIndex = 0;
 		inputDesc[i].InputSlot = 0;
 		inputDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 		inputDesc[i].AlignedByteOffset = layout.elements[i].offset;
 		inputDesc[i].InstanceDataStepRate = 0;
 	}
 
-	if (((Shader*)vertexShader)->type != ShaderType::Vertex)
+	if (((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex] == nullptr)
 		throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nShader passed isn't a vertex shader");
-
+	
 	ID3D11InputLayout* inputLayout;
-	hr = ((ID3D11Device*)m_device)->CreateInputLayout(inputDesc, layout.elements.size(), ((Shader*)vertexShader)->blob->GetBufferPointer(), ((Shader*)vertexShader)->blob->GetBufferSize(), &inputLayout);
+	hr = ((ID3D11Device*)m_device)->CreateInputLayout(inputDesc, layout.elements.size(), ((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex]->blob->GetBufferPointer(), ((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex]->blob->GetBufferSize(), &inputLayout);
 	delete[] inputDesc;
 
 	if (FAILED(hr))
@@ -520,7 +520,7 @@ void Magma::Framework::Graphics::D3D11Context::Terminate()
 	throw std::runtime_error("Failed to terminate D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void Magma::Framework::Graphics::D3D11Context::SetClearColor(glm::vec3 color)
+void Magma::Framework::Graphics::D3D11Context::SetClearColor(glm::vec4 color)
 {
 	throw std::runtime_error("Failed to set clear color on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
@@ -535,7 +535,7 @@ void Magma::Framework::Graphics::D3D11Context::SwapBuffers()
 	throw std::runtime_error("Failed to swap buffers on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout)
+void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* vertexShader)
 {
 	throw std::runtime_error("Failed to create vertex buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
@@ -550,7 +550,7 @@ void Magma::Framework::Graphics::D3D11Context::BindVertexBuffer(void * vertexBuf
 	throw std::runtime_error("Failed to bind vertex buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void Magma::Framework::Graphics::D3D11Context::Draw(DrawMode mode)
+void Magma::Framework::Graphics::D3D11Context::Draw(size_t vertexCount, size_t offset, DrawMode mode)
 {
 	throw std::runtime_error("Failed to draw on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
@@ -595,7 +595,7 @@ void Magma::Framework::Graphics::D3D11Context::BindProgram(void * program)
 	throw std::runtime_error("Failed to bind program on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateIndexBuffer(void * data, size_t size, IndexType type)
+void * Magma::Framework::Graphics::D3D11Context::CreateIndexBuffer(void * data, size_t size, IndexFormat type)
 {
 	throw std::runtime_error("Failed to create index buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
