@@ -17,7 +17,7 @@ set_target_properties (Tetris PROPERTIES FOLDER Games)
 
 # Include magma libraries
 include_directories(../)
-include_directories(../../../extern/glm/)
+include_directories(../../extern/glm/)
 
 # Link magma libraries
 target_link_libraries(Tetris Magma-Framework)

@@ -44,9 +44,9 @@ namespace Magma
 				virtual void WaitForEvents() final;
 
 				/// <summary>
-				///		Swaps the window buffers.
+				///		Swaps the GLFW window buffers
 				/// </summary>
-				virtual void SwapBuffers() final;
+				void SwapBuffers();
 
 			private:
 				void* m_glfwWindow;

@@ -2,6 +2,7 @@
 
 #include <Config.hpp>
 
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 #include <Windows.h>
 #include <windowsx.h>
 #include <map>
@@ -100,6 +101,10 @@ Magma::Framework::Input::Keyboard WindowsToMagmaKey(int key)
 
 Magma::Framework::Input::D3DWindow::D3DWindow(unsigned int width, unsigned int height, const std::string & title, Window::Mode mode)
 {
+	m_width = width;
+	m_height = height;
+	m_mode = mode;
+
 	HWND hWnd;
 
 	{
@@ -217,9 +222,19 @@ void Magma::Framework::Input::D3DWindow::WaitForEvents()
 	DispatchMessage(&msg);
 }
 
-void Magma::Framework::Input::D3DWindow::SwapBuffers()
+unsigned int Magma::Framework::Input::D3DWindow::GetWidth()
 {
+	return m_width;
+}
 
+unsigned int Magma::Framework::Input::D3DWindow::GetHeight()
+{
+	return m_height;
+}
+
+Magma::Framework::Input::Window::Mode Magma::Framework::Input::D3DWindow::GetMode()
+{
+	return m_mode;
 }
 
 LRESULT CALLBACK WindowProc(
@@ -333,8 +348,6 @@ LRESULT CALLBACK WindowProc(
 	return 0;
 }
 
-#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-
 int WINAPI WinMain(
 	HINSTANCE hInstance,
 	HINSTANCE hpPrevInstance,
@@ -354,23 +367,45 @@ int WINAPI WinMain(
 	return 0;
 }
 
-#undef CreateWindow
-namespace Magma
-{
-	namespace Framework
-	{
-		namespace Input
-		{
-			Magma::Framework::Input::Window* CreateWindow(unsigned int width, unsigned int height, const std::string& title, Magma::Framework::Input::Window::Mode mode)
-			{
-				return new Magma::Framework::Input::D3DWindow(width, height, title, mode);
-			}
+#else
 
-			void DestroyWindow(Magma::Framework::Input::Window* window)
-			{
-				delete window;
-			}
-		}
-	}
+Magma::Framework::Input::D3DWindow::D3DWindow(unsigned int width, unsigned int height, const std::string & title, Window::Mode mode)
+{
+	throw std::runtime_error("Failed to construct D3DWindow: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+Magma::Framework::Input::D3DWindow::~D3DWindow()
+{
+	
+}
+
+void Magma::Framework::Input::D3DWindow::MakeCurrent()
+{
+	throw std::runtime_error("Failed to make D3DWindow current: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Input::D3DWindow::PollEvents()
+{
+	throw std::runtime_error("Failed to poll events on D3DWindow: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Input::D3DWindow::WaitForEvents()
+{
+	throw std::runtime_error("Failed to wait for events on D3DWindow: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+unsigned int Magma::Framework::Input::D3DWindow::GetWidth()
+{
+	throw std::runtime_error("Failed to get D3DWindow width: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+unsigned int Magma::Framework::Input::D3DWindow::GetHeight()
+{
+	throw std::runtime_error("Failed to get D3DWindow height: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+Magma::Framework::Input::Window::Mode Magma::Framework::Input::D3DWindow::GetMode()
+{
+	throw std::runtime_error("Failed to get D3DWindow mode: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 #endif

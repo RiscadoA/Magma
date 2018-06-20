@@ -55,11 +55,6 @@ namespace Magma
 				///		Waits for an event and handles it.
 				/// </summary>
 				virtual void WaitForEvents() = 0;
-				
-				/// <summary>
-				///		Swaps the window buffers.
-				/// </summary>
-				virtual void SwapBuffers() = 0;
 
 				/// <summary>
 				///		Fired when the user tries to close the window.
@@ -111,23 +106,25 @@ namespace Magma
 				///		Params: { mouse button; }
 				/// </summary>
 				Event<Mouse> OnMouseDown;
-			};
 
-			/// <summary>
-			///		Creates a window.
-			/// </summary>
-			/// <param name="width">Window width</param>
-			/// <param name="height">Window height</param>
-			/// <param name="title">Window title</param>
-			/// <param name="mode">Window mode</param>
-			/// <returns>Window</returns>
-			extern Magma::Framework::Input::Window* CreateWindow(unsigned int width, unsigned int height, const std::string& title, Magma::Framework::Input::Window::Mode mode = Magma::Framework::Input::Window::Mode::Windowed);
-			
-			/// <summary>
-			///		Destroys a window created with Magma::Framework::Input::CreateWindow.
-			/// </summary>
-			/// <param name="window">Window to destroy</param>
-			extern void DestroyWindow(Magma::Framework::Input::Window* window);
+				/// <summary>
+				///		Gets the width of the window.
+				/// </summary>
+				/// <returns>Window width</returns>
+				virtual unsigned int GetWidth() = 0;
+
+				/// <summary>
+				///		Gets the height of the window.
+				/// </summary>
+				/// <returns>Window height</returns>
+				virtual unsigned int GetHeight() = 0;
+
+				/// <summary>
+				///		Gets the window mode
+				/// </summary>
+				/// <returns>Window mode</returns>
+				virtual Window::Mode GetMode() = 0;
+			};
 		}
 	}
 }

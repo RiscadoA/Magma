@@ -44,18 +44,34 @@ namespace Magma
 				virtual void WaitForEvents() final;
 
 				/// <summary>
-				///		Swaps the window buffers.
-				/// </summary>
-				virtual void SwapBuffers() final;
-
-				/// <summary>
 				///		Gets the windows API handle of this window.
 				/// </summary>
 				/// <returns>Window windows API handle</returns>
 				inline void* GetHWND() const { return m_hwnd; }
 
+				/// <summary>
+				///		Gets the width of the window.
+				/// </summary>
+				/// <returns>Window width</returns>
+				virtual unsigned int GetWidth() final;
+
+				/// <summary>
+				///		Gets the height of the window.
+				/// </summary>
+				/// <returns>Window height</returns>
+				virtual unsigned int GetHeight() final;
+
+				/// <summary>
+				///		Gets the window mode
+				/// </summary>
+				/// <returns>Window mode</returns>
+				virtual Window::Mode GetMode() final;
+
 			private:
 				void* m_hwnd;
+				unsigned int m_width;
+				unsigned int m_height;
+				Window::Mode m_mode;
 			};
 		}
 	}

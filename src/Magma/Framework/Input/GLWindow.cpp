@@ -2,6 +2,7 @@
 
 #include <Config.hpp>
 
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 #include <GLFW/glfw3.h>
 #include <sstream>
 #include <map>
@@ -233,28 +234,33 @@ void Magma::Framework::Input::GLWindow::SwapBuffers()
 	glfwSwapBuffers((GLFWwindow*)m_glfwWindow);
 }
 
-#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 int main(int argc, char** argv)
 {
 	Main(argc, argv);
 }
-
-namespace Magma
+#else
+Magma::Framework::Input::GLWindow::GLWindow(unsigned int width, unsigned int height, const std::string& title, Mode mode)
 {
-	namespace Framework
-	{
-		namespace Input
-		{
-			Magma::Framework::Input::Window* CreateWindow(unsigned int width, unsigned int height, const std::string& title, Magma::Framework::Input::Window::Mode mode)
-			{
-				return new Magma::Framework::Input::GLWindow(width, height, title, mode);
-			}
+	throw std::runtime_error("Failed to construct GLWindow: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
 
-			void DestroyWindow(Magma::Framework::Input::Window* window)
-			{
-				delete window;
-			}
-		}
-	}
+Magma::Framework::Input::GLWindow::~GLWindow()
+{
+	
+}
+
+void Magma::Framework::Input::GLWindow::MakeCurrent()
+{
+	throw std::runtime_error("Failed to construct GLWindow: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Input::GLWindow::PollEvents()
+{
+	throw std::runtime_error("Failed to poll events on GLWindow: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Input::GLWindow::WaitForEvents()
+{
+	throw std::runtime_error("Failed to wait for events on GLWindow: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 #endif
