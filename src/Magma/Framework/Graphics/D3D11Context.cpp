@@ -3,15 +3,21 @@
 #include <Config.hpp>
 
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+#include "MFXToHLSL.hpp"
+
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
+#pragma comment (lib, "dxguid.lib")
 
 #include <glm/gtc/type_ptr.hpp>
 #include <sstream>
+#include <map>
+
+#define MAX_BINDING_POINTS 16
 
 using namespace Magma::Framework::Graphics;
 
@@ -20,11 +26,7 @@ struct Shader
 	ID3D10Blob* blob;
 	void* shader;
 	ShaderType type;
-};
-
-struct ShaderProgram
-{
-	Shader* shaders[(size_t)ShaderType::Count];
+	ID3D11ShaderReflection* reflection;
 };
 
 struct VertexBuffer
@@ -38,6 +40,25 @@ struct IndexBuffer
 {
 	ID3D11Buffer* buffer;
 	DXGI_FORMAT format;
+};
+
+struct ConstantBuffer
+{
+	ID3D11Buffer* buffer;
+};
+
+struct BindingPoint
+{
+	size_t index;
+	std::string name;
+	bool exists[(size_t)ShaderType::Count];
+	bool occupied;
+};
+
+struct ShaderProgram
+{
+	Shader* shaders[(size_t)ShaderType::Count];
+	BindingPoint bindingPoints[MAX_BINDING_POINTS];
 };
 
 Magma::Framework::Graphics::D3D11Context::D3D11Context()
@@ -54,6 +75,7 @@ Magma::Framework::Graphics::D3D11Context::D3D11Context()
 
 void Magma::Framework::Graphics::D3D11Context::Init(Input::Window * window, const ContextSettings& settings)
 {
+	m_settings = settings;
 	m_window = dynamic_cast<Input::D3DWindow*>(window);
 	if (m_window == nullptr)
 		throw std::runtime_error("Failed to init D3D11Context:\nCouldn't cast from Magma::Framework::Input::Window* to Magma::Framework::Input::D3DWindow*");
@@ -171,7 +193,7 @@ void Magma::Framework::Graphics::D3D11Context::Clear(BufferBit mask)
 
 void Magma::Framework::Graphics::D3D11Context::SwapBuffers()
 {
-	((IDXGISwapChain*)m_swapChain)->Present(0, 0);
+	((IDXGISwapChain*)m_swapChain)->Present(m_settings.enableVsync ? 1 : 0, 0);
 }
 
 void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program)
@@ -291,6 +313,20 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 {
 	HRESULT hr = 0;
 
+	std::string compiledSrc;
+	try
+	{
+		Compile(src, compiledSrc);
+	}
+	catch (std::runtime_error& e)
+	{
+		std::stringstream ss;
+		ss << "Failed to create shader on D3D11Context:" << std::endl;
+		ss << "Failed to compile from MFX to HLSL on D3D11Context:" << std::endl;
+		ss << e.what();
+		throw std::runtime_error(ss.str());
+	}
+	
 	auto shader = new Shader();
 	shader->type = type;
 	switch (type)
@@ -298,7 +334,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 	case ShaderType::Vertex:
 	{
 		ID3DBlob* errorMessages;
-		hr = D3DCompile(src.c_str(), src.size(), nullptr, nullptr, nullptr, "VS", "vs_4_0", 0, 0, &shader->blob, &errorMessages);
+		hr = D3DCompile(compiledSrc.c_str(), compiledSrc.size(), nullptr, nullptr, nullptr, "VS", "vs_4_0", D3D10_SHADER_PACK_MATRIX_COLUMN_MAJOR, 0, &shader->blob, &errorMessages);
 		if (FAILED(hr))
 		{
 			std::stringstream ss;
@@ -322,7 +358,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 	case ShaderType::Pixel:
 	{
 		ID3DBlob* errorMessages;
-		hr = D3DCompile(src.c_str(), src.size(), nullptr, nullptr, nullptr, "PS", "ps_4_0", 0, 0, &shader->blob, &errorMessages);
+		hr = D3DCompile(compiledSrc.c_str(), compiledSrc.size(), nullptr, nullptr, nullptr, "PS", "ps_4_0", D3D10_SHADER_PACK_MATRIX_COLUMN_MAJOR, 0, &shader->blob, &errorMessages);
 		if (FAILED(hr))
 		{
 			std::stringstream ss;
@@ -347,6 +383,15 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 		delete shader;
 		throw std::runtime_error("Failed to create shader on D3D11Context:\nUnsupported shader type");
 		break;
+	}
+
+	hr = D3DReflect(shader->blob->GetBufferPointer(), shader->blob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&shader->reflection);
+	if (FAILED(hr))
+	{
+		std::stringstream ss;
+		ss << "Failed to create shader on D3D11Context:\nFailed to create pixel shader reflection:\n";
+		ss << "Error: " << hr;
+		throw std::runtime_error(ss.str());
 	}
 
 	return shader;
@@ -411,7 +456,15 @@ void Magma::Framework::Graphics::D3D11Context::DetachShader(void * program, void
 
 void Magma::Framework::Graphics::D3D11Context::LinkProgram(void * program)
 {
-	// Do nothing, this step isn't necessary on D3D11
+	auto prgm = (ShaderProgram*)program;
+	for (size_t i = 0; i < MAX_BINDING_POINTS; ++i)
+	{
+		for (size_t j = 0; j < (size_t)ShaderType::Count; ++j)
+			prgm->bindingPoints[i].exists[j] = false;
+		prgm->bindingPoints[i].index = 0;
+		prgm->bindingPoints[i].name = "";
+		prgm->bindingPoints[i].occupied = false;
+	}
 }
 
 void Magma::Framework::Graphics::D3D11Context::BindProgram(void * program)
@@ -454,7 +507,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateIndexBuffer(void * data, 
 	if (FAILED(hr))
 	{
 		std::stringstream ss;
-		ss << "Failed to create index buffer on D3D11Context:\nFailed to create buffer:\n";
+		ss << "Failed to create index buffer on D3D11Context:\nD3D11 failed to create buffer:\n";
 		ss << "Error: " << hr;
 		throw std::runtime_error(ss.str());
 	}
@@ -502,6 +555,129 @@ void Magma::Framework::Graphics::D3D11Context::DrawIndexed(size_t indexedCount, 
 	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(topology);
 
 	((ID3D11DeviceContext*)m_deviceContext)->DrawIndexed(indexedCount, offset, 0);
+}
+
+void * Magma::Framework::Graphics::D3D11Context::CreateConstantBuffer(void * data, size_t size)
+{
+	auto buffer = new ConstantBuffer();
+
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = size;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	if (data != nullptr)
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = data;
+
+		HRESULT hr = ((ID3D11Device*)m_device)->CreateBuffer(&desc, &initData, &buffer->buffer);
+		if (FAILED(hr))
+		{
+			delete buffer;
+			std::stringstream ss;
+			ss << "Failed to create constant buffer on D3D11Context:\nD3D11 failed to create buffer:\n";
+			ss << "Error: " << hr;
+			throw std::runtime_error(ss.str());
+		}
+	}
+	else
+	{
+		HRESULT hr = ((ID3D11Device*)m_device)->CreateBuffer(&desc, nullptr, &buffer->buffer);
+		if (FAILED(hr))
+		{
+			delete buffer;
+			std::stringstream ss;
+			ss << "Failed to create constant buffer on D3D11Context:\nD3D11 failed to create buffer:\n";
+			ss << "Error: " << hr;
+			throw std::runtime_error(ss.str());
+		}
+	}
+
+	return buffer;
+}
+
+void Magma::Framework::Graphics::D3D11Context::DestroyConstantBuffer(void * constantBuffer)
+{
+	auto buffer = (ConstantBuffer*)constantBuffer;
+	buffer->buffer->Release();
+	delete buffer;
+}
+
+void Magma::Framework::Graphics::D3D11Context::UpdateConstantBuffer(void * constantBuffer, void * data)
+{
+	auto buffer = (ConstantBuffer*)constantBuffer;
+	((ID3D11DeviceContext*)m_deviceContext)->UpdateSubresource(buffer->buffer, 0, NULL, data, 0, 0);
+}
+
+void Magma::Framework::Graphics::D3D11Context::BindConstantBuffer(void * constantBuffer, void * bindingPoint)
+{
+	auto buffer = (ConstantBuffer*)constantBuffer;
+	auto bind = (BindingPoint*)bindingPoint;
+
+	if (bind->exists[(size_t)ShaderType::Vertex])
+		((ID3D11DeviceContext*)m_deviceContext)->VSSetConstantBuffers(bind->index, 1, &buffer->buffer);
+	if (bind->exists[(size_t)ShaderType::Pixel])
+		((ID3D11DeviceContext*)m_deviceContext)->PSSetConstantBuffers(bind->index, 1, &buffer->buffer);
+}
+
+void * Magma::Framework::Graphics::D3D11Context::GetBindingPoint(void * program, const std::string & name)
+{
+	if (name == "")
+		throw std::runtime_error("Failed to get binding point from D3D11Context:\nName cannot be empty");
+
+	auto prgm = (ShaderProgram*)program;
+
+	BindingPoint* bind = nullptr;
+
+	for (size_t i = 0; i < MAX_BINDING_POINTS; ++i)
+	{
+		if (!prgm->bindingPoints[i].occupied)
+		{
+			bind = &prgm->bindingPoints[i];
+			continue;
+		}
+
+		if (prgm->bindingPoints[i].name == name)
+			return &prgm->bindingPoints[i];
+	}
+
+	if (bind == nullptr)
+		throw std::runtime_error("Failed to get binding point from D3D11Context:\nBinding point count limit has been achieved");
+
+	size_t index;
+	bool success = false;
+	for (size_t s = 0; s < (size_t)ShaderType::Count; ++s)
+	{
+		if (prgm->shaders[s] == nullptr)
+			continue;
+
+		D3D11_SHADER_INPUT_BIND_DESC desc;
+		HRESULT hr = prgm->shaders[s]->reflection->GetResourceBindingDescByName(name.c_str(), &desc);
+
+		if (FAILED(hr))
+			bind->exists[s] = false;
+		else
+		{
+			bind->exists[s] = true;
+			success = true;
+		}
+	}
+
+	if (!success)
+	{
+		std::stringstream ss;
+		ss << "Failed to get binding point from D3D11Context:" << std::endl;
+		ss << "No binding point with name \"" << name << "\"" << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
+	bind->occupied = true;
+	bind->name = name;
+	return bind;
 }
 
 #else
@@ -613,6 +789,31 @@ void Magma::Framework::Graphics::D3D11Context::BindIndexBuffer(void * indexBuffe
 void Magma::Framework::Graphics::D3D11Context::DrawIndexed(size_t vertexCount, size_t offset, DrawMode mode)
 {
 	throw std::runtime_error("Failed to draw (indexed) on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void * Magma::Framework::Graphics::D3D11Context::CreateConstantBuffer(void * data, size_t size)
+{
+	throw std::runtime_error("Failed to create constant buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::DestroyConstantBuffer(void * constantBuffer)
+{
+	throw std::runtime_error("Failed to destroy constant buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::UpdateConstantBuffer(void * constantBuffer, void * data)
+{
+	throw std::runtime_error("Failed to update constant buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::BindConstantBuffer(void * constantBuffer, void * bindingPoint)
+{
+	throw std::runtime_error("Failed to bind constant buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void * Magma::Framework::Graphics::D3D11Context::GetBindingPoint(void * program, const std::string & name)
+{
+	throw std::runtime_error("Failed to get binding point on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
 #endif

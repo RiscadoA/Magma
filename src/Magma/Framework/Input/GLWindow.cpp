@@ -238,10 +238,12 @@ void Magma::Framework::Input::GLWindow::SwapBuffers()
 	glfwSwapBuffers((GLFWwindow*)m_glfwWindow);
 }
 
+#if not defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
 int main(int argc, char** argv)
 {
 	Main(argc, argv);
 }
+#endif
 #else
 Magma::Framework::Input::GLWindow::GLWindow(unsigned int width, unsigned int height, const std::string& title, Mode mode)
 {

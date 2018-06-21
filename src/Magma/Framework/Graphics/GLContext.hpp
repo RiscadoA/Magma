@@ -37,9 +37,15 @@ namespace Magma
 				virtual void DestroyIndexBuffer(void * indexBuffer) final;
 				virtual void BindIndexBuffer(void * indexBuffer) final;
 				virtual void DrawIndexed(size_t indexCount, size_t offset, DrawMode mode) final;
+				virtual void * CreateConstantBuffer(void * data, size_t size) final;
+				virtual void DestroyConstantBuffer(void * constantBuffer) final;
+				virtual void UpdateConstantBuffer(void * constantBuffer, void * data) final;
+				virtual void BindConstantBuffer(void * constantBuffer, void * bindingPoint) final;
+				virtual void * GetBindingPoint(void * program, const std::string & name) final;
 
 			private:
 				Input::GLWindow* m_window;
+				void* m_boundIndexBuffer;
 			};
 		}
 	}

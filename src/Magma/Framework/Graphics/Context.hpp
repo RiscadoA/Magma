@@ -6,6 +6,23 @@
 #include <vector>
 #include <string>
 
+/*
+	Each context implementation will convert the framework's own effect language (Magma FX, ".mfx") into the context language (GLSL, HLSL, etc).
+
+	Magma FX example:
+
+		#mfx version 1.0
+
+		#context d3d11
+		// HLSL vertex and fragment shader
+
+		#context gl
+		#shader vertex
+		// GL Vertex shader
+		#shader pixel
+		// GL Pixel shader
+*/
+
 namespace Magma
 {
 	namespace Framework
@@ -77,6 +94,7 @@ namespace Magma
 			struct ContextSettings
 			{
 				unsigned int multisampleCount = 4;
+				bool enableVsync = false;
 			};
 
 			/// <summary>
@@ -267,6 +285,42 @@ namespace Magma
 				/// <param name="offset">Starting vertex ID</param>
 				/// <param name="mode">Draw mode</param>
 				virtual void DrawIndexed(size_t indexCount, size_t offset, DrawMode mode) = 0;
+
+				/// <summary>
+				///		Creates a new constant buffer
+				/// </summary>
+				/// <param name="data">Constant buffer data</param>
+				/// <param name="size">Constant buffer size</param>
+				/// <returns>Constant buffer handle</returns>
+				virtual void* CreateConstantBuffer(void* data, size_t size) = 0;
+
+				/// <summary>
+				///		Destroys a constant buffer
+				/// </summary>
+				/// <param name="constantBuffer">Constant buffer handle</param>
+				virtual void DestroyConstantBuffer(void* constantBuffer) = 0;
+
+				/// <summary>
+				///		Updates a constant buffer with new data
+				/// </summary>
+				/// <param name="constantBuffer">Constant buffer handle</param>
+				/// <param name="data">New data pointer</param>
+				virtual void UpdateConstantBuffer(void* constantBuffer, void* data) = 0;
+
+				/// <summary>
+				///		Binds a constant buffer to the the currently bound program
+				/// </summary>
+				/// <param name="constantBuffer">Constant buffer handle</param>
+				/// <param name="bindingPoint">Constant buffer binding point handle</param>
+				virtual void BindConstantBuffer(void* constantBuffer, void* bindingPoint) = 0;
+
+				/// <summary>
+				///		Gets a program constant buffer binding point
+				/// </summary>
+				/// <param name="program">Program handle</param>
+				/// <param name="name">Binding point name</param>
+				/// <returns>Binding point handle</returns>
+				virtual void* GetBindingPoint(void* program, const std::string& name) = 0;
 			};
 		}
 	}

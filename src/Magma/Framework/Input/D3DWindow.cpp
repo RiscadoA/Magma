@@ -2,7 +2,7 @@
 
 #include <Config.hpp>
 
-#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+#if defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
 #include <Windows.h>
 #include <windowsx.h>
 #include <map>
@@ -371,7 +371,7 @@ int WINAPI WinMain(
 
 Magma::Framework::Input::D3DWindow::D3DWindow(unsigned int width, unsigned int height, const std::string & title, Window::Mode mode)
 {
-	throw std::runtime_error("Failed to construct D3DWindow: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to construct D3DWindow: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }
 
 Magma::Framework::Input::D3DWindow::~D3DWindow()
@@ -381,31 +381,31 @@ Magma::Framework::Input::D3DWindow::~D3DWindow()
 
 void Magma::Framework::Input::D3DWindow::MakeCurrent()
 {
-	throw std::runtime_error("Failed to make D3DWindow current: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to make D3DWindow current: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }
 
 void Magma::Framework::Input::D3DWindow::PollEvents()
 {
-	throw std::runtime_error("Failed to poll events on D3DWindow: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to poll events on D3DWindow: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }
 
 void Magma::Framework::Input::D3DWindow::WaitForEvents()
 {
-	throw std::runtime_error("Failed to wait for events on D3DWindow: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to wait for events on D3DWindow: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }
 
 unsigned int Magma::Framework::Input::D3DWindow::GetWidth()
 {
-	throw std::runtime_error("Failed to get D3DWindow width: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to get D3DWindow width: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }
 
 unsigned int Magma::Framework::Input::D3DWindow::GetHeight()
 {
-	throw std::runtime_error("Failed to get D3DWindow height: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to get D3DWindow height: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }
 
 Magma::Framework::Input::Window::Mode Magma::Framework::Input::D3DWindow::GetMode()
 {
-	throw std::runtime_error("Failed to get D3DWindow mode: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to get D3DWindow mode: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }
 #endif

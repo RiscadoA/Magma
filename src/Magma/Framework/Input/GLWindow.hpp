@@ -66,6 +66,12 @@ namespace Magma
 				/// <returns>Window mode</returns>
 				inline virtual Window::Mode GetMode() final { return m_mode; }
 
+				/// <summary>
+				///		Returns a pointer to the underlying GLFW window
+				/// </summary>
+				/// <returns>GLFW window pinter</returns>
+				inline void* GetGLFWWindow() const { return m_glfwWindow; }
+
 			private:
 				void* m_glfwWindow;
 				unsigned int m_width;
