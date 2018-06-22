@@ -41,7 +41,14 @@ namespace Magma
 				virtual void DestroyConstantBuffer(void * constantBuffer) final;
 				virtual void UpdateConstantBuffer(void * constantBuffer, void * data) final;
 				virtual void BindConstantBuffer(void * constantBuffer, void * bindingPoint) final;
-				virtual void * GetBindingPoint(void * program, const std::string & name) final;
+				virtual void * GetConstantBindingPoint(void * program, const std::string & name) final;
+				virtual void * CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format) final;
+				virtual void DestroyTexture2D(void * texture) final;
+				virtual void * GetTextureBindingPoint(void * program, const std::string & name) final;
+				virtual void BindTexture2D(void * texture, void * bindPoint) final;
+				virtual void * CreateSampler(const SamplerSettings & settings) final;
+				virtual void DestroySampler(void * sampler) final;
+				virtual void BindSampler(void * sampler, void * bindPoint) final;
 
 			private:
 				Input::GLWindow* m_window;

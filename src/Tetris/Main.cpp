@@ -37,27 +37,34 @@ void Main(int argc, char** argv) try
 		#version 330 core
 
 		in vec3 position;
+		in vec2 texcoords;
 		in vec4 color;
 
+		out vec2 vertTexCoords;
 		out vec4 vertColor;
 
 		layout(std140) uniform cbTransform
 		{
-			mat4 model;
+			mat4 mvp;
 		};
 			
 		void main()
 		{
-			gl_Position = model * vec4(position, 1.0);
+			gl_Position = mvp * vec4(position, 1.0);
+			vertTexCoords = texcoords;
 			vertColor = color;
 		}
 	
 		#shader pixel
 		#version 330 core		
 
+		in vec2 vertTexCoords;
 		in vec4 vertColor;
 		
 		out vec4 fragColor;
+
+		uniform sampler2D gTexture;
+		uniform sampler2D gTexture2;
 
 		layout(std140) uniform cbMaterial
 		{
@@ -66,14 +73,20 @@ void Main(int argc, char** argv) try
 
 		void main()
 		{
-			fragColor = vertColor * diffuse;
+			fragColor = vertColor * diffuse * texture2D(gTexture, vertTexCoords) * texture2D(gTexture2, vertTexCoords);
 		}
 
 		#context hlsl
 
+		Texture2D<float4> gTexture;
+		SamplerState gTexture_sampler;
+
+		Texture2D<float4> gTexture2;
+		SamplerState gTexture2_sampler;
+
 		cbuffer cbTransform
 		{
-			float4x4 model;
+			float4x4 mvp;
 		};
 
 		cbuffer cbMaterial
@@ -84,14 +97,16 @@ void Main(int argc, char** argv) try
 		struct VS_OUTPUT
 		{
 			float4 Pos : SV_POSITION;
+			float4 UVs : TEXCOORDS;
 			float4 Color : COLOR;
 		};
 
-		VS_OUTPUT VS(float3 inPos : POSITION, float4 inColor : COLOR)
+		VS_OUTPUT VS(float3 inPos : POSITION, float2 inUVs : TEXCOORDS, float4 inColor : COLOR)
 		{
 			VS_OUTPUT output;
 
-			output.Pos = mul(model, float4(inPos, 1.0f));
+			output.Pos =  mul(mvp, float4(inPos, 1.0f));
+			output.UVs = float4(inUVs.xy, 0.0f, 1.0f);
 			output.Color = inColor;
 
 			return output;
@@ -99,9 +114,8 @@ void Main(int argc, char** argv) try
 
 		float4 PS(VS_OUTPUT input) : SV_TARGET
 		{
-			return input.Color * diffuse;
+			return input.Color * diffuse * gTexture.Sample(gTexture_sampler, input.UVs) * gTexture2.Sample(gTexture2_sampler, input.UVs);
 		}
-
 		)mfx";
 		
 		vertexShader = context->CreateShader(Framework::Graphics::ShaderType::Vertex, source);
@@ -118,10 +132,10 @@ void Main(int argc, char** argv) try
 	{
 		float data[] =
 		{
-			0.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
-			1.0f, 0.0f, 0.0f,       1.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, +1.0f, 0.0f,		0.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+1.0f, +1.0f, 0.0f,		1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+1.0f, -1.0f, 0.0f,     1.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
 		Framework::Graphics::VertexLayout layout;
@@ -131,11 +145,16 @@ void Main(int argc, char** argv) try
 		layout.elements.back().offset = 0;
 
 		layout.elements.emplace_back();
-		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float4;
-		layout.elements.back().name = "color";
+		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float2;
+		layout.elements.back().name = "texcoords";
 		layout.elements.back().offset = sizeof(float) * 3;
 
-		layout.size = sizeof(float) * 3 + sizeof(float) * 4;
+		layout.elements.emplace_back();
+		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float4;
+		layout.elements.back().name = "color";
+		layout.elements.back().offset = sizeof(float) * 3 + sizeof(float) * 2;
+
+		layout.size = sizeof(float) * 3 + sizeof(float) * 2 + sizeof(float) * 4;
 		
 		vb = context->CreateVertexBuffer(data, sizeof(data), layout, program);
 	}
@@ -168,36 +187,116 @@ void Main(int argc, char** argv) try
 		cbMaterial = context->CreateConstantBuffer(&material[0], sizeof(glm::vec4));
 	}
 
-	// Get binding points
-	void* cbTransformBind = context->GetBindingPoint(program, "cbTransform");
-	void* cbMaterialBind = context->GetBindingPoint(program, "cbMaterial");
+	// Create sampler
+	void* sampler = nullptr;
+	{
+		using namespace Framework::Graphics;
 
-	glm::mat4 model = glm::mat4(1.0f);
+		SamplerSettings settings;
+		settings.adressU = TextureAdressMode::Border;
+		settings.adressV = TextureAdressMode::Border;
+		settings.borderColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+		settings.minFilter = TextureFilter::Nearest;
+		settings.magFilter = TextureFilter::Nearest;
+
+		sampler = context->CreateSampler(settings);
+	}
+
+	//Create texture
+	void* texture = nullptr;
+	{
+		/*float data[] =
+		{
+		//	R		G		B		A
+			1.0f,	0.0f,	0.0f,	1.0f,
+			0.0f,	1.0f,	0.0f,	1.0f,
+			0.0f,	0.0f,	1.0f,	1.0f,
+			1.0f,	1.0f,	1.0f,	1.0f,
+		};*/
+
+		unsigned char data[] =
+		{
+		//	R		G		B		A
+			255,	255,	255,	255,
+			255,	255,	255,	255,
+			255,	255,	255,	255,
+			255,	255,	0,		255,
+		};
+
+		using namespace Framework::Graphics;
+
+		texture = context->CreateTexture2D(data, 2, 2, TextureFormat::RGBA8UInt);
+	}
+
+	void* texture2 = nullptr;
+	{
+		/*float data[] =
+		{
+		//	R		G		B		A
+		1.0f,	0.0f,	0.0f,	1.0f,
+		0.0f,	1.0f,	0.0f,	1.0f,
+		0.0f,	0.0f,	1.0f,	1.0f,
+		1.0f,	1.0f,	1.0f,	1.0f,
+		};*/
+
+		unsigned char data[] =
+		{
+		//	R		G		B		A
+			255,	0,		0,		255,
+			0,		255,	0,		255,
+			0,		0,		255,	255,
+			255,	255,	255,	255,
+		};
+
+		using namespace Framework::Graphics;
+
+		texture2 = context->CreateTexture2D(data, 2, 2, TextureFormat::RGBA8UInt);
+	}
+
+	// Get binding points
+	void* cbTransformBind = context->GetConstantBindingPoint(program, "cbTransform");
+	void* cbMaterialBind = context->GetConstantBindingPoint(program, "cbMaterial");
+	void* textureBind = context->GetTextureBindingPoint(program, "gTexture");
+	void* texture2Bind = context->GetTextureBindingPoint(program, "gTexture2");
+
+	glm::mat4 model, view, proj;
+	glm::mat4 mvp;
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(2.0f, 0.0f, -2.0f));
+	view = glm::mat4(1.0f);
+	view = glm::lookAt(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	while (running)
 	{
+		
+
 		window->PollEvents();
 
 		context->Clear(Framework::Graphics::BufferBit::Color | Framework::Graphics::BufferBit::Depth);
-
-		context->UpdateConstantBuffer(cbTransform, &model[0][0]);
 
 		context->BindProgram(program);
 		context->BindVertexBuffer(vb);
 		context->BindIndexBuffer(ib);
 		context->BindConstantBuffer(cbTransform, cbTransformBind);
 		context->BindConstantBuffer(cbMaterial, cbMaterialBind);
+		context->BindTexture2D(texture, textureBind);
+		context->BindSampler(sampler, textureBind);
+		context->BindTexture2D(texture2, texture2Bind);
+		context->BindSampler(sampler, texture2Bind);
 
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+		mvp = proj * view * model;
+		context->UpdateConstantBuffer(cbTransform, &mvp[0][0]);
 		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
 
-		context->BindIndexBuffer(nullptr);
-		context->BindVertexBuffer(nullptr);
-		context->BindProgram(nullptr);
-		
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		mvp = proj * view * model;
+		context->UpdateConstantBuffer(cbTransform, &mvp[0][0]);
+		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
 
 		context->SwapBuffers();
-
-		model = glm::translate(model, glm::vec3(-0.001f, 0.0f, 0.0f));
 	}
 
 	context->DestroyConstantBuffer(cbMaterial);

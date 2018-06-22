@@ -16,6 +16,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <sstream>
 #include <map>
+#include <comdef.h>
 
 #define MAX_BINDING_POINTS 16
 
@@ -50,6 +51,7 @@ struct ConstantBuffer
 struct BindingPoint
 {
 	size_t index;
+	size_t samplerIndex;
 	std::string name;
 	bool exists[(size_t)ShaderType::Count];
 	bool occupied;
@@ -59,6 +61,17 @@ struct ShaderProgram
 {
 	Shader* shaders[(size_t)ShaderType::Count];
 	BindingPoint bindingPoints[MAX_BINDING_POINTS];
+};
+
+struct Texture2D
+{
+	ID3D11Texture2D* texture;
+	ID3D11ShaderResourceView* view;
+};
+
+struct Sampler
+{
+	ID3D11SamplerState* samplerState;
 };
 
 Magma::Framework::Graphics::D3D11Context::D3D11Context()
@@ -75,6 +88,8 @@ Magma::Framework::Graphics::D3D11Context::D3D11Context()
 
 void Magma::Framework::Graphics::D3D11Context::Init(Input::Window * window, const ContextSettings& settings)
 {
+	HRESULT hr;
+
 	m_settings = settings;
 	m_window = dynamic_cast<Input::D3DWindow*>(window);
 	if (m_window == nullptr)
@@ -95,7 +110,7 @@ void Magma::Framework::Graphics::D3D11Context::Init(Input::Window * window, cons
 	scd.SampleDesc.Count = settings.multisampleCount;
 	scd.Windowed = (window->GetMode() == Input::Window::Mode::Fullscreen) ? FALSE : TRUE;
 
-	D3D11CreateDeviceAndSwapChain(
+	hr = D3D11CreateDeviceAndSwapChain(
 		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
@@ -108,46 +123,85 @@ void Magma::Framework::Graphics::D3D11Context::Init(Input::Window * window, cons
 		&device,
 		NULL,
 		&deviceContext);
-
-	m_swapChain = swapChain;
-	m_device = device;
-	m_deviceContext = deviceContext;
+	if (FAILED(hr))
+	{
+		std::stringstream ss;
+		ss << "Failed to create init D3D11Context:\nCouldn't create device and swap chain:\nError: " << hr;
+		throw std::runtime_error(ss.str());
+	}
 
 	// Create back buffer 
 	ID3D11Texture2D* backBuffer;
-	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer);
+	hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer);
+	if (FAILED(hr))
+	{
+		swapChain->Release();
+		device->Release();
+		deviceContext->Release();
+		std::stringstream ss;
+		ss << "Failed to create init D3D11Context:\nFailed to get back buffer:\nError: " << hr;
+		throw std::runtime_error(ss.str());
+	}
 
 	// Create render target view
 	ID3D11RenderTargetView* renderTargetView;
-	device->CreateRenderTargetView(backBuffer, NULL, &renderTargetView);
-	m_renderTargetView = renderTargetView;
+	hr = device->CreateRenderTargetView(backBuffer, NULL, &renderTargetView);
 	backBuffer->Release();
+	if (FAILED(hr))
+	{
+		swapChain->Release();
+		device->Release();
+		deviceContext->Release();
+		std::stringstream ss;
+		ss << "Failed to create init D3D11Context:\nFailed to create render target view:\nError: " << hr;
+		throw std::runtime_error(ss.str());
+	}
 
 	// Create depth stencil buffer and depth stencil view
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
 
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 	depthStencilDesc.Width = m_window->GetWidth();
 	depthStencilDesc.Height = m_window->GetHeight();
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
 	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.SampleDesc.Count = settings.multisampleCount;
 	depthStencilDesc.SampleDesc.Quality = 0;
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	depthStencilDesc.CPUAccessFlags = 0;
 	depthStencilDesc.MiscFlags = 0;
 
-	device->CreateTexture2D(&depthStencilDesc, NULL, &depthStencilBuffer);
-	device->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
+	hr = device->CreateTexture2D(&depthStencilDesc, NULL, &depthStencilBuffer);
+	if (FAILED(hr))
+	{
+		swapChain->Release();
+		device->Release();
+		deviceContext->Release();
+		renderTargetView->Release();
+		std::stringstream ss;
+		ss << "Failed to create init D3D11Context:\nFailed to create depth stencil texture:\nError: " << hr;
+		throw std::runtime_error(ss.str());
+	}
 
-	m_depthStencilBuffer = depthStencilBuffer;
-	m_depthStencilView = depthStencilView;
+	hr = device->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
+	if (FAILED(hr))
+	{
+		depthStencilBuffer->Release();
+		swapChain->Release();
+		device->Release();
+		deviceContext->Release();
+		renderTargetView->Release();
+		std::stringstream ss;
+		ss << "Failed to create init D3D11Context:\nFailed to create depth stencil view:\nError: " << hr;
+		throw std::runtime_error(ss.str());
+	}
 
 	// Set render target
-	deviceContext->OMSetRenderTargets(1, &renderTargetView, /*depthStencilView*/0);
+	deviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 
 	// Set viewport
 	D3D11_VIEWPORT viewport;
@@ -161,10 +215,46 @@ void Magma::Framework::Graphics::D3D11Context::Init(Input::Window * window, cons
 	viewport.MaxDepth = 1.0f;
 
 	deviceContext->RSSetViewports(1, &viewport);
+
+	// Set rasterizer state
+	D3D11_RASTERIZER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+
+	desc.FillMode = D3D11_FILL_SOLID;
+	desc.CullMode = D3D11_CULL_BACK;
+	desc.FrontCounterClockwise = TRUE;
+	desc.MultisampleEnable = TRUE;
+	desc.AntialiasedLineEnable = TRUE;
+
+	ID3D11RasterizerState* rasterState;
+	hr = device->CreateRasterizerState(&desc, &rasterState);
+	if (FAILED(hr))
+	{
+		depthStencilView->Release();
+		depthStencilBuffer->Release();
+		swapChain->Release();
+		device->Release();
+		deviceContext->Release();
+		renderTargetView->Release();
+		std::stringstream ss;
+		ss << "Failed to create init D3D11Context:\nFailed to create rasterizer state:\nError: " << hr;
+		throw std::runtime_error(ss.str());
+	}
+	deviceContext->RSSetState(rasterState);
+	
+	// Store variables
+	m_swapChain = swapChain;
+	m_device = device;
+	m_deviceContext = deviceContext;
+	m_renderTargetView = renderTargetView;
+	m_depthStencilBuffer = depthStencilBuffer;
+	m_depthStencilView = depthStencilView;
+	m_rasterState = rasterState;
 }
 
 void Magma::Framework::Graphics::D3D11Context::Terminate()
 {
+	((ID3D11RasterizerState*)m_rasterState)->Release();
 	((ID3D11Texture2D*)m_depthStencilBuffer)->Release();
 	((ID3D11DepthStencilView*)m_depthStencilView)->Release();
 	((ID3D11RenderTargetView*)m_renderTargetView)->Release();
@@ -219,6 +309,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data,
 	hr = ((ID3D11Device*)m_device)->CreateBuffer(&vbDesc, &vbData, &buffer->buffer);
 	if (FAILED(hr))
 	{
+		delete buffer;
 		std::stringstream ss;
 		ss << "Failed to create vertex buffer on D3D11Context:\nCouldn't create buffer:\nError: " << hr;
 		throw std::runtime_error(ss.str());
@@ -226,49 +317,59 @@ void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data,
 	buffer->vertexSize = layout.size;
 
 	// Create layout
-	auto inputDesc = new D3D11_INPUT_ELEMENT_DESC[layout.elements.size()];
-	for (size_t i = 0; i < layout.elements.size(); ++i)
+	try
 	{
-		switch (layout.elements[i].format)
+		auto inputDesc = new D3D11_INPUT_ELEMENT_DESC[layout.elements.size()];
+		for (size_t i = 0; i < layout.elements.size(); ++i)
 		{
-			case VertexElementFormat::Float1: inputDesc[i].Format = DXGI_FORMAT_R32_FLOAT; break;
-			case VertexElementFormat::Float2: inputDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT; break;
-			case VertexElementFormat::Float3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
-			case VertexElementFormat::Float4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
-			case VertexElementFormat::Int1: inputDesc[i].Format = DXGI_FORMAT_R32_SINT; break;
-			case VertexElementFormat::Int2: inputDesc[i].Format = DXGI_FORMAT_R32G32_SINT; break;
-			case VertexElementFormat::Int3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_SINT; break;
-			case VertexElementFormat::Int4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_SINT; break;
-			case VertexElementFormat::UInt1: inputDesc[i].Format = DXGI_FORMAT_R32_UINT; break;
-			case VertexElementFormat::UInt2: inputDesc[i].Format = DXGI_FORMAT_R32G32_UINT; break;
-			case VertexElementFormat::UInt3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_UINT; break;
-			case VertexElementFormat::UInt4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT; break;
-			default: throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nUnsupported vertex layout element format");
+			switch (layout.elements[i].format)
+			{
+				case VertexElementFormat::Float1: inputDesc[i].Format = DXGI_FORMAT_R32_FLOAT; break;
+				case VertexElementFormat::Float2: inputDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT; break;
+				case VertexElementFormat::Float3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
+				case VertexElementFormat::Float4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
+				case VertexElementFormat::Int1: inputDesc[i].Format = DXGI_FORMAT_R32_SINT; break;
+				case VertexElementFormat::Int2: inputDesc[i].Format = DXGI_FORMAT_R32G32_SINT; break;
+				case VertexElementFormat::Int3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_SINT; break;
+				case VertexElementFormat::Int4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_SINT; break;
+				case VertexElementFormat::UInt1: inputDesc[i].Format = DXGI_FORMAT_R32_UINT; break;
+				case VertexElementFormat::UInt2: inputDesc[i].Format = DXGI_FORMAT_R32G32_UINT; break;
+				case VertexElementFormat::UInt3: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_UINT; break;
+				case VertexElementFormat::UInt4: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT; break;
+				case VertexElementFormat::Invalid: throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\Invalid vertex layout element format"); break;
+				default: throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nUnsupported vertex layout element format"); break;
+			}
+
+			inputDesc[i].SemanticName = layout.elements[i].name.c_str();
+			inputDesc[i].SemanticIndex = 0;
+			inputDesc[i].InputSlot = 0;
+			inputDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+			inputDesc[i].AlignedByteOffset = layout.elements[i].offset;
+			inputDesc[i].InstanceDataStepRate = 0;
 		}
 
-		inputDesc[i].SemanticName = layout.elements[i].name.c_str();
-		inputDesc[i].SemanticIndex = 0;
-		inputDesc[i].InputSlot = 0;
-		inputDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-		inputDesc[i].AlignedByteOffset = layout.elements[i].offset;
-		inputDesc[i].InstanceDataStepRate = 0;
+		if (((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex] == nullptr)
+			throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nShader passed isn't a vertex shader");
+
+		ID3D11InputLayout* inputLayout;
+		hr = ((ID3D11Device*)m_device)->CreateInputLayout(inputDesc, layout.elements.size(), ((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex]->blob->GetBufferPointer(), ((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex]->blob->GetBufferSize(), &inputLayout);
+		delete[] inputDesc;
+
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create vertex buffer on D3D11Context:\nCouldn't create buffer:\nError: " << hr;
+			throw std::runtime_error(ss.str());
+		}
+
+		buffer->layout = inputLayout;
 	}
-
-	if (((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex] == nullptr)
-		throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nShader passed isn't a vertex shader");
-	
-	ID3D11InputLayout* inputLayout;
-	hr = ((ID3D11Device*)m_device)->CreateInputLayout(inputDesc, layout.elements.size(), ((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex]->blob->GetBufferPointer(), ((ShaderProgram*)program)->shaders[(size_t)ShaderType::Vertex]->blob->GetBufferSize(), &inputLayout);
-	delete[] inputDesc;
-
-	if (FAILED(hr))
+	catch (...)
 	{
-		std::stringstream ss;
-		ss << "Failed to create vertex buffer on D3D11Context:\nCouldn't create buffer:\nError: " << hr;
-		throw std::runtime_error(ss.str());
+		buffer->buffer->Release();
+		delete buffer;
+		throw;
 	}
-
-	buffer->layout = inputLayout;
 
 	return buffer;
 }
@@ -302,6 +403,7 @@ void Magma::Framework::Graphics::D3D11Context::Draw(size_t vertexCount, size_t o
 		case DrawMode::LineStrip: topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP; break;
 		case DrawMode::Triangles: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
 		case DrawMode::TriangleStrip: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
+		case DrawMode::Invalid: throw std::runtime_error("Failed to draw on D3D11Context:\nInvalid draw mode"); break;
 		default: throw std::runtime_error("Failed to draw on D3D11Context:\nUnsupported draw mode"); break;
 	}
 
@@ -349,9 +451,10 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 		hr = ((ID3D11Device*)m_device)->CreateVertexShader(shader->blob->GetBufferPointer(), shader->blob->GetBufferSize(), NULL, vertShader);
 		if (FAILED(hr))
 		{
+			delete shader;
 			std::stringstream ss;
 			ss << "Failed to create shader on D3D11Context:\nFailed to create vertex shader:\n";
-			ss << "Error: " << hr;
+			ss << _com_error(hr).ErrorMessage();
 			throw std::runtime_error(ss.str());
 		}
 	} break;
@@ -373,12 +476,17 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 		hr = ((ID3D11Device*)m_device)->CreatePixelShader(shader->blob->GetBufferPointer(), shader->blob->GetBufferSize(), NULL, pixelShader);
 		if (FAILED(hr))
 		{
+			delete shader;
 			std::stringstream ss;
 			ss << "Failed to create shader on D3D11Context:\nFailed to create pixel shader:\n";
-			ss << "Error: " << hr;
+			ss << _com_error(hr).ErrorMessage();
 			throw std::runtime_error(ss.str());
 		}
 	} break;
+	case ShaderType::Invalid:
+		delete shader;
+		throw std::runtime_error("Failed to create shader on D3D11Context:\nInvalid shader type");
+		break;
 	default:
 		delete shader;
 		throw std::runtime_error("Failed to create shader on D3D11Context:\nUnsupported shader type");
@@ -388,9 +496,15 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 	hr = D3DReflect(shader->blob->GetBufferPointer(), shader->blob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&shader->reflection);
 	if (FAILED(hr))
 	{
+		switch (type)
+		{
+			case ShaderType::Vertex: ((ID3D11VertexShader*)shader->shader)->Release(); break;
+			case ShaderType::Pixel: ((ID3D11PixelShader*)shader->shader)->Release(); break;
+		}
+		delete shader;
 		std::stringstream ss;
 		ss << "Failed to create shader on D3D11Context:\nFailed to create pixel shader reflection:\n";
-		ss << "Error: " << hr;
+		ss << _com_error(hr).ErrorMessage();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -408,6 +522,10 @@ void Magma::Framework::Graphics::D3D11Context::DestroyShader(void * shader)
 		break;
 	case ShaderType::Pixel:
 		((ID3D11PixelShader*)shd->shader)->Release();
+		break;
+	case ShaderType::Invalid:
+		delete shd;
+		throw std::runtime_error("Failed to destroy shader on D3D11Context:\Invalid shader type");
 		break;
 	default:
 		delete shd;
@@ -483,6 +601,9 @@ void Magma::Framework::Graphics::D3D11Context::BindProgram(void * program)
 			case ShaderType::Pixel:
 				((ID3D11DeviceContext*)m_deviceContext)->PSSetShader((ID3D11PixelShader*)prgm->shaders[i]->shader, nullptr, 0);
 				break;
+			case ShaderType::Invalid:
+				throw std::runtime_error("Failed to bind program on D3D11Context:\nThe program has an attached shader with an invalid type");
+				break;
 			default:
 				throw std::runtime_error("Failed to bind program on D3D11Context:\nThe program has an attached shader with an unsupported type");
 				break;
@@ -508,7 +629,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateIndexBuffer(void * data, 
 	{
 		std::stringstream ss;
 		ss << "Failed to create index buffer on D3D11Context:\nD3D11 failed to create buffer:\n";
-		ss << "Error: " << hr;
+		ss << _com_error(hr).ErrorMessage();
 		throw std::runtime_error(ss.str());
 	}
 
@@ -517,6 +638,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateIndexBuffer(void * data, 
 		case IndexFormat::UInt8: buffer->format = DXGI_FORMAT_R8_UINT; break;
 		case IndexFormat::UInt16: buffer->format = DXGI_FORMAT_R16_UINT; break;
 		case IndexFormat::UInt32: buffer->format = DXGI_FORMAT_R32_UINT; break;
+		case IndexFormat::Invalid: throw std::runtime_error("Failed to create index buffer on D3D11Context:\nInvalid index format"); break;
 		default: throw std::runtime_error("Failed to create index buffer on D3D11Context:\nUnsupported index format"); break;
 	}
 
@@ -549,7 +671,8 @@ void Magma::Framework::Graphics::D3D11Context::DrawIndexed(size_t indexedCount, 
 		case DrawMode::LineStrip: topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP; break;
 		case DrawMode::Triangles: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
 		case DrawMode::TriangleStrip: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
-		default: throw std::runtime_error("Failed to draw on D3D11Context:\nUnsupported draw mode"); break;
+		case DrawMode::Invalid: throw std::runtime_error("Failed to draw (indexed) on D3D11Context:\nInvalid draw mode"); break;
+		default: throw std::runtime_error("Failed to draw (indexed) on D3D11Context:\nUnsupported draw mode"); break;
 	}
 
 	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(topology);
@@ -580,7 +703,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateConstantBuffer(void * dat
 			delete buffer;
 			std::stringstream ss;
 			ss << "Failed to create constant buffer on D3D11Context:\nD3D11 failed to create buffer:\n";
-			ss << "Error: " << hr;
+			ss << _com_error(hr).ErrorMessage();
 			throw std::runtime_error(ss.str());
 		}
 	}
@@ -592,7 +715,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateConstantBuffer(void * dat
 			delete buffer;
 			std::stringstream ss;
 			ss << "Failed to create constant buffer on D3D11Context:\nD3D11 failed to create buffer:\n";
-			ss << "Error: " << hr;
+			ss << _com_error(hr).ErrorMessage();
 			throw std::runtime_error(ss.str());
 		}
 	}
@@ -624,10 +747,10 @@ void Magma::Framework::Graphics::D3D11Context::BindConstantBuffer(void * constan
 		((ID3D11DeviceContext*)m_deviceContext)->PSSetConstantBuffers(bind->index, 1, &buffer->buffer);
 }
 
-void * Magma::Framework::Graphics::D3D11Context::GetBindingPoint(void * program, const std::string & name)
+void * Magma::Framework::Graphics::D3D11Context::GetConstantBindingPoint(void * program, const std::string & name)
 {
 	if (name == "")
-		throw std::runtime_error("Failed to get binding point from D3D11Context:\nName cannot be empty");
+		throw std::runtime_error("Failed to get constant buffer binding point from D3D11Context:\nName cannot be empty");
 
 	auto prgm = (ShaderProgram*)program;
 
@@ -646,7 +769,7 @@ void * Magma::Framework::Graphics::D3D11Context::GetBindingPoint(void * program,
 	}
 
 	if (bind == nullptr)
-		throw std::runtime_error("Failed to get binding point from D3D11Context:\nBinding point count limit has been achieved");
+		throw std::runtime_error("Failed to get constant buffer binding point from D3D11Context:\nBinding point count limit has been achieved");
 
 	size_t index;
 	bool success = false;
@@ -658,10 +781,175 @@ void * Magma::Framework::Graphics::D3D11Context::GetBindingPoint(void * program,
 		D3D11_SHADER_INPUT_BIND_DESC desc;
 		HRESULT hr = prgm->shaders[s]->reflection->GetResourceBindingDescByName(name.c_str(), &desc);
 
-		if (FAILED(hr))
-			bind->exists[s] = false;
-		else
+		bind->exists[s] = false;
+
+		if (!FAILED(hr))
 		{
+			if (desc.Type != D3D_SHADER_INPUT_TYPE::D3D10_SIT_CBUFFER)
+				throw std::runtime_error("Failed to get constant buffer binding point from D3D11Context:\nBinding point doesn't point to a constant buffer");
+
+			bind->exists[s] = true;
+			success = true;
+		}
+	}
+
+	if (!success)
+	{
+		std::stringstream ss;
+		ss << "Failed to get constant buffer binding point from D3D11Context:" << std::endl;
+		ss << "No constant buffer binding point with name \"" << name << "\"" << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
+	bind->occupied = true;
+	bind->name = name;
+	return bind;
+}
+
+void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format)
+{
+	auto texture = new Texture2D();
+	HRESULT hr;
+
+	// Create texture
+	try
+	{
+		// Texture description
+		D3D11_TEXTURE2D_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+
+		desc.Width = width;
+		desc.Height = height;
+		desc.MipLevels = desc.ArraySize = 1;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+
+		// Initial texture data
+		D3D11_SUBRESOURCE_DATA initData;
+		ZeroMemory(&initData, sizeof(initData));
+		initData.pSysMem = data;
+
+		// Get format
+		switch (format)
+		{
+			case TextureFormat::R8UInt: desc.Format = DXGI_FORMAT_R8_UNORM; initData.SysMemPitch = 1 * height; break;
+			case TextureFormat::R16UInt: desc.Format = DXGI_FORMAT_R16_UNORM; initData.SysMemPitch = 2 * height; break;
+			case TextureFormat::RG8UInt: desc.Format = DXGI_FORMAT_R8G8_UNORM; initData.SysMemPitch = 2 * height; break;
+			case TextureFormat::RG16UInt: desc.Format = DXGI_FORMAT_R16G16_UNORM; initData.SysMemPitch = 4 * height; break;
+			case TextureFormat::RGBA8UInt: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; initData.SysMemPitch = 4 * height; break;
+			case TextureFormat::RGBA16UInt: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; initData.SysMemPitch = 8 * height; break;
+			case TextureFormat::R32Float: desc.Format = DXGI_FORMAT_R32_FLOAT; initData.SysMemPitch = 4 * height; break;
+			case TextureFormat::RG32Float: desc.Format = DXGI_FORMAT_R32G32_FLOAT; initData.SysMemPitch = 8 * height; break;
+			case TextureFormat::RGB32Float: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; initData.SysMemPitch = 12 * height; break;
+			case TextureFormat::RGBA32Float: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; initData.SysMemPitch = 16 * height; break;
+			case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nInvalid format"); break;
+			default: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nUnsupported format"); break;
+		}
+			
+		if (((ID3D11Device*)m_device)->CreateTexture2D(&desc, &initData, NULL) != S_FALSE)
+			throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D, invalid description or initial data:\n");
+
+		hr = ((ID3D11Device*)m_device)->CreateTexture2D(&desc, &initData, &texture->texture);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D:\n";
+			ss << _com_error(hr).ErrorMessage();
+			throw std::runtime_error(ss.str());
+		}
+	}
+	catch (...)
+	{
+		delete texture;
+		throw;
+	}
+
+	// Create resource view
+	try
+	{
+		hr = ((ID3D11Device*)m_device)->CreateShaderResourceView(texture->texture, NULL, &texture->view);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create 2D texture on D3D11Context:\nD3D11 failed to create shader resource view:\n";
+			ss << _com_error(hr).ErrorMessage();
+			throw std::runtime_error(ss.str());
+		}
+	}
+	catch (...)
+	{
+		texture->texture->Release();
+		delete texture;
+		throw;
+	}
+
+	return texture;
+}
+
+void Magma::Framework::Graphics::D3D11Context::DestroyTexture2D(void * texture)
+{
+	auto text = (Texture2D*)texture;
+	text->view->Release();
+	text->texture->Release();
+	delete text;
+}
+
+void * Magma::Framework::Graphics::D3D11Context::GetTextureBindingPoint(void * program, const std::string & name)
+{
+	// TO DO
+
+	if (name == "")
+		throw std::runtime_error("Failed to get texture binding point from D3D11Context:\nName cannot be empty");
+
+	auto prgm = (ShaderProgram*)program;
+
+	BindingPoint* bind = nullptr;
+
+	for (size_t i = 0; i < MAX_BINDING_POINTS; ++i)
+	{
+		if (!prgm->bindingPoints[i].occupied)
+		{
+			bind = &prgm->bindingPoints[i];
+			continue;
+		}
+
+		if (prgm->bindingPoints[i].name == name)
+			return &prgm->bindingPoints[i];
+	}
+
+	if (bind == nullptr)
+		throw std::runtime_error("Failed to get texture binding point from D3D11Context:\nBinding point count limit has been achieved");
+
+	size_t index;
+	bool success = false;
+	HRESULT hr;
+
+	for (size_t s = 0; s < (size_t)ShaderType::Count; ++s)
+	{
+		if (prgm->shaders[s] == nullptr)
+			continue;
+
+		D3D11_SHADER_INPUT_BIND_DESC desc;
+		hr = prgm->shaders[s]->reflection->GetResourceBindingDescByName(name.c_str(), &desc);
+
+		bind->exists[s] = false;
+
+		if (!FAILED(hr))
+		{
+			if (desc.Type != D3D_SHADER_INPUT_TYPE::D3D10_SIT_TEXTURE)
+				throw std::runtime_error("Failed to get texture binding point from D3D11Context:\nBinding point doesn't point to a texture");
+			bind->index = desc.BindPoint;
+
+			hr = prgm->shaders[s]->reflection->GetResourceBindingDescByName((name + "_sampler").c_str(), &desc);
+			if (FAILED(hr))
+				throw std::runtime_error("Failed to get texture binding point from D3D11Context:\nCouldn't finding texture corresponding sampler (name_sampler)");
+			if (desc.Type != D3D_SHADER_INPUT_TYPE::D3D10_SIT_SAMPLER)
+				throw std::runtime_error("Failed to get texture binding point from D3D11Context:\nBinding point name_sampler doesn't point to a sampler");
+
+			bind->samplerIndex = desc.BindPoint;
 			bind->exists[s] = true;
 			success = true;
 		}
@@ -680,6 +968,122 @@ void * Magma::Framework::Graphics::D3D11Context::GetBindingPoint(void * program,
 	return bind;
 }
 
+void Magma::Framework::Graphics::D3D11Context::BindTexture2D(void * texture, void * bindPoint)
+{
+	auto text = (Texture2D*)texture;
+	auto bind = (BindingPoint*)bindPoint;
+
+	if (bind->exists[(size_t)ShaderType::Vertex])
+		((ID3D11DeviceContext*)m_deviceContext)->VSSetShaderResources(bind->index, 1, &text->view);
+	if (bind->exists[(size_t)ShaderType::Pixel])
+		((ID3D11DeviceContext*)m_deviceContext)->PSSetShaderResources(bind->index, 1, &text->view);
+}
+
+void * Magma::Framework::Graphics::D3D11Context::CreateSampler(const SamplerSettings & settings)
+{
+	auto sampler = new Sampler();
+	HRESULT hr;
+
+	try
+	{
+		D3D11_SAMPLER_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.MaxAnisotropy = 1;
+		desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+		desc.MipLODBias = 0;
+		desc.MinLOD = 0;
+		desc.MaxLOD = 0;
+		desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+		// Set filter
+		switch (settings.minFilter)
+		{
+			case TextureFilter::Nearest:
+				switch (settings.magFilter)
+				{
+					case TextureFilter::Nearest: desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT; break;
+					case TextureFilter::Linear: desc.Filter = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT; break;
+					case TextureFilter::Invalid: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\Invalid magnifying filter"); break;
+					default: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\nUnsupported magnifying filter"); break;
+				}
+				break;
+			case TextureFilter::Linear:
+				switch (settings.magFilter)
+				{
+					case TextureFilter::Nearest: desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR; break;
+					case TextureFilter::Linear: desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR; break;
+					case TextureFilter::Invalid: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\Invalid magnifying filter"); break;
+					default: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\nUnsupported magnifying filter"); break;
+				}
+				break;
+			case TextureFilter::Invalid: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\Invalid mignifying filter"); break;
+			default: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\nUnsupported minifying filter"); break;
+		}
+
+		// Set adress mode for coordinate U
+		switch (settings.adressU)
+		{
+			case TextureAdressMode::Wrap: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Mirror: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Clamp: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Border: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\Invalid U coordinate texture adress mode"); break;
+			default: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\nUnsupported U coordinate texture adress mode"); break;
+		}
+
+		// Set adress mode for coordinate U
+		switch (settings.adressV)
+		{
+			case TextureAdressMode::Wrap: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Mirror: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Clamp: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Border: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\Invalid V coordinate texture adress mode"); break;
+			default: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid texture sampler:\nUnsupported V coordinate texture adress mode"); break;
+		}
+
+		// Set border color
+		desc.BorderColor[0] = settings.borderColor.r;
+		desc.BorderColor[1] = settings.borderColor.g;
+		desc.BorderColor[2] = settings.borderColor.b;
+		desc.BorderColor[3] = settings.borderColor.a;
+
+		// Create sampler state
+		hr = ((ID3D11Device*)m_device)->CreateSamplerState(&desc, &sampler->samplerState);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create sampler on D3D11Context:\nD3D11 failed to create sampler state:\n";
+			ss << _com_error(hr).ErrorMessage();
+			throw std::runtime_error(ss.str());
+		}
+	}
+	catch (...)
+	{
+		delete sampler;
+		throw;
+	}
+
+	return sampler;
+}
+
+void Magma::Framework::Graphics::D3D11Context::DestroySampler(void * sampler)
+{
+	auto smplr = (Sampler*)sampler;
+	smplr->samplerState->Release();
+	delete smplr;
+}
+
+void Magma::Framework::Graphics::D3D11Context::BindSampler(void * sampler, void * bindPoint)
+{
+	auto smplr = (Sampler*)sampler;
+	auto bind = (BindingPoint*)bindPoint;
+
+	if (bind->exists[(size_t)ShaderType::Vertex])
+		((ID3D11DeviceContext*)m_deviceContext)->VSSetSamplers(bind->samplerIndex, 1, &smplr->samplerState);
+	if (bind->exists[(size_t)ShaderType::Pixel])
+		((ID3D11DeviceContext*)m_deviceContext)->PSSetSamplers(bind->samplerIndex, 1, &smplr->samplerState);
+}
 #else
 Magma::Framework::Graphics::D3D11Context::D3D11Context()
 {
@@ -811,9 +1215,43 @@ void Magma::Framework::Graphics::D3D11Context::BindConstantBuffer(void * constan
 	throw std::runtime_error("Failed to bind constant buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void * Magma::Framework::Graphics::D3D11Context::GetBindingPoint(void * program, const std::string & name)
+void * Magma::Framework::Graphics::D3D11Context::GetConstantBindingPoint(void * program, const std::string & name)
 {
-	throw std::runtime_error("Failed to get binding point on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+	throw std::runtime_error("Failed to get constant binding point on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
+void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format)
+{
+	throw std::runtime_error("Failed to create 2D texture on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::DestroyTexture2D(void * texture)
+{
+	throw std::runtime_error("Failed to destroy 2D texture on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void * Magma::Framework::Graphics::D3D11Context::GetTextureBindingPoint(void * program, const std::string & name)
+{
+	throw std::runtime_error("Failed to get texture binding point on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::BindTexture2D(void * texture, void * bindPoint)
+{
+	throw std::runtime_error("Failed to bind texture 2D on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void * Magma::Framework::Graphics::D3D11Context::CreateSampler(const SamplerSettings & settings)
+{
+	throw std::runtime_error("Failed to create sampler on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::DestroySampler(void * sampler)
+{
+	throw std::runtime_error("Failed to destroy sampler on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::BindSampler(void * sampler, void * bindPoint)
+{
+	throw std::runtime_error("Failed to bind sampler on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
 #endif

@@ -87,6 +87,9 @@ void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const C
 	else
 		glfwSwapInterval(0);
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	GL_CHECK_ERROR("Failed to init GLContext");
 }
 
@@ -509,7 +512,7 @@ void Magma::Framework::Graphics::GLContext::BindConstantBuffer(void * constantBu
 	}
 }
 
-void * Magma::Framework::Graphics::GLContext::GetBindingPoint(void * program, const std::string & name)
+void * Magma::Framework::Graphics::GLContext::GetConstantBindingPoint(void * program, const std::string & name)
 {
 	if (name == "")
 		throw std::runtime_error("Failed to get binding point from GLContext:\nName cannot be empty");
@@ -552,6 +555,44 @@ void * Magma::Framework::Graphics::GLContext::GetBindingPoint(void * program, co
 void Magma::Framework::Graphics::GLContext::SwapBuffers()
 {
 	m_window->SwapBuffers();
+}
+
+void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format)
+{
+	
+	//glCreateTextures(GL_TEXTURE_2D, 1, &tex);
+
+	return nullptr;
+}
+
+void Magma::Framework::Graphics::GLContext::DestroyTexture2D(void * texture)
+{
+
+}
+
+void * Magma::Framework::Graphics::GLContext::GetTextureBindingPoint(void * program, const std::string & name)
+{
+	return nullptr;
+}
+
+void Magma::Framework::Graphics::GLContext::BindTexture2D(void * texture, void * bindPoint)
+{
+
+}
+
+void * Magma::Framework::Graphics::GLContext::CreateSampler(const SamplerSettings & settings)
+{
+	return nullptr;
+}
+
+void Magma::Framework::Graphics::GLContext::DestroySampler(void * sampler)
+{
+	
+}
+
+void Magma::Framework::Graphics::GLContext::BindSampler(void * sampler, void * bindPoint)
+{
+	
 }
 #else
 void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const ContextSettings& settings)
@@ -674,8 +715,48 @@ void Magma::Framework::Graphics::GLContext::UpdateConstantBuffer(void * constant
 	throw std::runtime_error("Failed to update constant buffer on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 
-void Magma::Framework::Graphics::GLContext::BindConstantBuffer(void * constantBuffer, const std::string & name)
+void Magma::Framework::Graphics::GLContext::BindConstantBuffer(void * constantBuffer, void * bindingPoint)
 {
 	throw std::runtime_error("Failed to bind constant buffer on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void * Magma::Framework::Graphics::GLContext::GetConstantBindingPoint(void * program, const std::string & name)
+{
+	throw std::runtime_error("Failed to get constant buffer binding point on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_t width, size_t height, const Texture2DSettings & settings)
+{
+	throw std::runtime_error("Failed to create 2D texture on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Graphics::GLContext::DestroyTexture2D(void * texture)
+{
+	throw std::runtime_error("Failed to destroy 2D texture on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void * Magma::Framework::Graphics::GLContext::GetTextureBindingPoint(void * program, const std::string & name)
+{
+	throw std::runtime_error("Failed to get texture binding point on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Graphics::GLContext::BindTexture2D(void * texture, void * bindPoint)
+{
+	throw std::runtime_error("Failed to bind texture 2D on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void * Magma::Framework::Graphics::GLContext::CreateSampler(const SamplerSettings & settings)
+{
+	throw std::runtime_error("Failed to create sampler on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Graphics::GLContext::DestroySampler(void * sampler)
+{
+	throw std::runtime_error("Failed to destroy sampler on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Graphics::GLContext::BindSampler(void * sampler, void * bindPoint)
+{
+	throw std::runtime_error("Failed to bind sampler on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 #endif

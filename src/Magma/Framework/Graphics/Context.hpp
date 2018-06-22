@@ -83,6 +83,70 @@ namespace Magma
 				Count
 			};
 
+			/// <summary>
+			///		Texture formats
+			/// </summary>
+			enum class TextureFormat
+			{
+				Invalid,
+
+				R8UInt,
+				R16UInt,
+
+				RG8UInt,
+				RG16UInt,
+				
+				RGBA8UInt,
+				RGBA16UInt,
+
+				R32Float,
+				RG32Float,
+				RGB32Float,
+				RGBA32Float,
+
+				Count,
+			};
+
+			/// <summary>
+			///		Texture filter types
+			/// </summary>
+			enum class TextureFilter
+			{
+				Invalid = -1,
+
+				Nearest,
+				Linear,
+
+				Count
+			};
+
+			/// <summary>
+			///		Texture adress mode
+			/// </summary>
+			enum class TextureAdressMode
+			{
+				Invalid = -1,
+				
+				Wrap,
+				Mirror,
+				Clamp,
+				Border,
+
+				Count
+			};
+
+			/// <summary>
+			///		Sampler settings
+			/// </summary>
+			struct SamplerSettings
+			{
+				TextureFilter minFilter = TextureFilter::Nearest;
+				TextureFilter magFilter = TextureFilter::Nearest;
+				TextureAdressMode adressU = TextureAdressMode::Border;
+				TextureAdressMode adressV = TextureAdressMode::Border;
+				glm::vec4 borderColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			};
+
 			inline BufferBit operator|(const BufferBit& lhs, const BufferBit& rhs) { return static_cast<BufferBit>(static_cast<int>(lhs) | static_cast<int>(rhs)); }
 			inline BufferBit operator&(const BufferBit& lhs, const BufferBit& rhs) { return static_cast<BufferBit>(static_cast<int>(lhs) & static_cast<int>(rhs)); }
 			inline BufferBit& operator|=(BufferBit& lhs, const BufferBit& rhs) { lhs = static_cast<BufferBit>(static_cast<int>(lhs) | static_cast<int>(rhs)); return lhs; }
@@ -123,7 +187,7 @@ namespace Magma
 			};
 
 			/// <summary>
-			///		Vertex data
+			///		Vertex layout element data
 			/// </summary>
 			struct VertexLayoutElement
 			{
@@ -132,6 +196,9 @@ namespace Magma
 				unsigned int offset;
 			};
 
+			/// <summary>
+			///		Vertex layout data
+			/// </summary>
 			struct VertexLayout
 			{
 				size_t size;
@@ -320,7 +387,59 @@ namespace Magma
 				/// <param name="program">Program handle</param>
 				/// <param name="name">Binding point name</param>
 				/// <returns>Binding point handle</returns>
-				virtual void* GetBindingPoint(void* program, const std::string& name) = 0;
+				virtual void* GetConstantBindingPoint(void* program, const std::string& name) = 0;
+
+				/// <summary>
+				///		Creates a new 2D texture
+				/// </summary>
+				/// <param name="data">Texture pixel data</param>
+				/// <param name="width">Texture width</param>
+				/// <param name="height">Texture height</param>
+				/// <param name="format">Texture data format</param>
+				/// <returns>2D Texture handle</returns>
+				virtual void* CreateTexture2D(void* data, size_t width, size_t height, TextureFormat format) = 0;
+
+				/// <summary>
+				///		Destroys a 2D texture
+				/// </summary>
+				/// <param name="texture">2D Texture handle</param>
+				virtual void DestroyTexture2D(void* texture) = 0;
+
+				/// <summary>
+				///		Gets a program texture binding point.
+				///		This texture sampler binding point will be got from name_sampler.
+				/// </summary>
+				/// <param name="program">Program handle</param>
+				/// <param name="name">Binding point name</param>
+				/// <returns>Binding point handle</returns>
+				virtual void* GetTextureBindingPoint(void* program, const std::string& name) = 0;
+
+				/// <summary>
+				///		Binds a texture to a texture binding point
+				/// </summary>
+				/// <param name="texture">Texture handle</param>
+				/// <param name="bindPoint">Binding point handle</param>
+				virtual void BindTexture2D(void* texture, void* bindPoint) = 0;
+
+				/// <summary>
+				///		Creates a new sampler
+				/// </summary>
+				/// <param name="settings">Sampler settings</param>
+				/// <returns>Sampler handle</returns>
+				virtual void* CreateSampler(const SamplerSettings& settings) = 0;
+
+				/// <summary>
+				///		Destroys a sampler
+				/// </summary>
+				/// <param name="sampler">Sampler handle</param>
+				virtual void DestroySampler(void* sampler) = 0;
+
+				/// <summary>
+				///		Binds a sampler to a texture binding point
+				/// </summary>
+				/// <param name="texture">Sampler handle</param>
+				/// <param name="bindPoint">Texture binding point handle</param>
+				virtual void BindSampler(void* sampler, void* bindPoint) = 0;
 			};
 		}
 	}
