@@ -47,21 +47,26 @@ namespace Magma
 				virtual void * CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format) final;
 				virtual void DestroyTexture2D(void * texture) final;
 				virtual void * GetTextureBindingPoint(void * program, const std::string & name) final;
-				virtual void BindTexture2D(void * texture, void * bindPoint) final;	
+				virtual void BindTexture2D(void * texture, void * bindPoint) final;
 				virtual void * CreateSampler(const SamplerSettings & settings) final;
 				virtual void DestroySampler(void * sampler) final;
 				virtual void BindSampler(void * sampler, void * bindPoint) final;
+				virtual void * CreateRenderTexture(size_t width, size_t height, TextureFormat format, bool depthBuffer = true) final;
+				virtual void DestroyRenderTexture(void * renderTexture) final;
+				virtual void SetRenderTarget(void * renderTexture) final;
 
 			private:
 				Input::D3DWindow* m_window;
 				ContextSettings m_settings;
-				
+
 				void* m_swapChain;
 				void* m_device;
 				void* m_deviceContext;
+				void* m_defaultRenderTargetView;
 				void* m_renderTargetView;
 				void* m_depthStencilBuffer;
 				void* m_depthStencilState;
+				void* m_defaultDepthStencilView;
 				void* m_depthStencilView;
 				void* m_rasterState;
 
@@ -69,7 +74,7 @@ namespace Magma
 
 				void* m_boundProgram;
 				void* m_boundVertexBuffer;
-				void* m_boundIndexBuffer;				
+				void* m_boundIndexBuffer;
 			};
 		}
 	}

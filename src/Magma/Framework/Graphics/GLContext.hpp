@@ -49,6 +49,9 @@ namespace Magma
 				virtual void * CreateSampler(const SamplerSettings & settings) final;
 				virtual void DestroySampler(void * sampler) final;
 				virtual void BindSampler(void * sampler, void * bindPoint) final;
+				virtual void * CreateRenderTexture(size_t width, size_t height, TextureFormat format, bool depthBuffer = true) final;
+				virtual void DestroyRenderTexture(void * renderTexture) final;
+				virtual void SetRenderTarget(void * renderTexture) final;
 
 			private:
 				Input::GLWindow* m_window;

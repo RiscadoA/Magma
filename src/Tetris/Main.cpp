@@ -10,18 +10,15 @@ void Main(int argc, char** argv) try
 {
 	bool running = true;
 
-	Framework::Input::Window* window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
-	
-	Framework::Graphics::Context* context = new Framework::Graphics::D3D11Context();
+	Framework::Input::Window* window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+
+	Framework::Graphics::Context* context = new Framework::Graphics::GLContext();
 	Framework::Graphics::ContextSettings contextSettings;
 	contextSettings.multisampleCount = 4;
 	contextSettings.enableVsync = true;
 	context->Init(window, contextSettings);
 
 	window->OnClose.AddListener([&running]() { running = false; });
-
-	// Set clear color
-	context->SetClearColor(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
 
 	// Create program and shaders
 	void* program = nullptr;
@@ -30,9 +27,9 @@ void Main(int argc, char** argv) try
 	{
 		std::string source = R"mfx(
 		#mfx version 1.0.0
-				
+
 		#context glsl
-		
+
 		#shader vertex
 		#version 330 core
 
@@ -47,20 +44,20 @@ void Main(int argc, char** argv) try
 		{
 			mat4 mvp;
 		};
-			
+
 		void main()
 		{
 			gl_Position = mvp * vec4(position, 1.0);
 			vertTexCoords = texcoords;
 			vertColor = color;
 		}
-	
+
 		#shader pixel
-		#version 330 core		
+		#version 330 core
 
 		in vec2 vertTexCoords;
 		in vec4 vertColor;
-		
+
 		out vec4 fragColor;
 
 		uniform sampler2D gTexture;
@@ -93,7 +90,7 @@ void Main(int argc, char** argv) try
 		{
 			float4 diffuse;
 		};
-		
+
 		struct VS_OUTPUT
 		{
 			float4 Pos : SV_POSITION;
@@ -120,7 +117,7 @@ void Main(int argc, char** argv) try
 			return color;
 		}
 		)mfx";
-		
+
 		vertexShader = context->CreateShader(Framework::Graphics::ShaderType::Vertex, source);
 		pixelShader = context->CreateShader(Framework::Graphics::ShaderType::Pixel, source);
 
@@ -135,10 +132,10 @@ void Main(int argc, char** argv) try
 	{
 		float data[] =
 		{
-			-1.0f, -1.0f, 0.0f,		-0.5f, -0.5f,		1.0f, 1.0f, 1.0f, 1.0f,
-			-1.0f, +1.0f, 0.0f,		-0.5f, +1.5f,		1.0f, 1.0f, 1.0f, 1.0f,
-			+1.0f, +1.0f, 0.0f,		+1.5f, +1.5f,		1.0f, 1.0f, 1.0f, 1.0f,
-			+1.0f, -1.0f, 0.0f,     +1.5f, -0.5f,		1.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f,		-0.0f, -0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, +1.0f, 0.0f,		-0.0f, +1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+1.0f, +1.0f, 0.0f,		+1.0f, +1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+1.0f, -1.0f, 0.0f,     +1.0f, -0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
 		Framework::Graphics::VertexLayout layout;
@@ -158,7 +155,7 @@ void Main(int argc, char** argv) try
 		layout.elements.back().offset = sizeof(float) * 3 + sizeof(float) * 2;
 
 		layout.size = sizeof(float) * 3 + sizeof(float) * 2 + sizeof(float) * 4;
-		
+
 		vb = context->CreateVertexBuffer(data, sizeof(data), layout, program);
 	}
 
@@ -221,8 +218,8 @@ void Main(int argc, char** argv) try
 		{
 			//	R		G		B		A
 			255,	0,		0,		255,
-			0,		255,	0,		0,
-			0,		0,		255,	0,
+			0,		255,	0,		255,
+			0,		0,		255,	255,
 			255,	255,	255,	255,
 		};
 
@@ -231,29 +228,11 @@ void Main(int argc, char** argv) try
 		texture = context->CreateTexture2D(data, 2, 2, TextureFormat::RGBA8UInt);
 	}
 
-	void* texture2 = nullptr;
+	void* renderTexture = nullptr;
 	{
-		/*float data[] =
-		{
-		//	R		G		B		A
-		1.0f,	0.0f,	0.0f,	1.0f,
-		0.0f,	1.0f,	0.0f,	1.0f,
-		0.0f,	0.0f,	1.0f,	1.0f,
-		1.0f,	1.0f,	1.0f,	1.0f,
-		};*/
-
-		unsigned char data[] =
-		{
-		//	R		G		B		A
-			0,		0,		255,	255,
-			0,		255,	0,		255,
-			255,	0,		0,		255,
-			0,		0,		0,		255,
-		};
-
 		using namespace Framework::Graphics;
 
-		texture2 = context->CreateTexture2D(data, 2, 2, TextureFormat::RGBA8UInt);
+		renderTexture = context->CreateRenderTexture(400, 400, TextureFormat::RGBA8UInt, true);
 	}
 
 	// Get binding points
@@ -267,15 +246,21 @@ void Main(int argc, char** argv) try
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(2.0f, 0.0f, -2.0f));
 	view = glm::mat4(1.0f);
-	view = glm::lookAt(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	view = glm::lookAt(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	while (running)
 	{
-		
-
 		window->PollEvents();
 
+		// Render to texture (fill with red)
+		context->SetRenderTarget(renderTexture);
+		context->SetClearColor(glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+		context->Clear(Framework::Graphics::BufferBit::Color | Framework::Graphics::BufferBit::Depth);
+
+		// Set default render target
+		context->SetRenderTarget(nullptr);
+		context->SetClearColor(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
 		context->Clear(Framework::Graphics::BufferBit::Color | Framework::Graphics::BufferBit::Depth);
 
 		context->BindProgram(program);
@@ -285,17 +270,17 @@ void Main(int argc, char** argv) try
 		context->BindConstantBuffer(cbMaterial, cbMaterialBind);
 		context->BindSampler(sampler, textureBind);
 
-		context->BindTexture2D(texture, textureBind);
-		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-		mvp = proj * view * model;
-		context->UpdateConstantBuffer(cbTransform, &mvp[0][0]);
-		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
-
-		context->BindTexture2D(texture2, textureBind);
+		context->BindTexture2D(renderTexture, textureBind);
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		mvp = proj * view * model;
 		context->UpdateConstantBuffer(cbTransform, &mvp[0][0]);
 		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
+
+		/*context->BindTexture2D(texture2, textureBind);
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		mvp = proj * view * model;
+		context->UpdateConstantBuffer(cbTransform, &mvp[0][0]);
+		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);*/
 
 		context->SwapBuffers();
 	}

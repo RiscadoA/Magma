@@ -26,7 +26,7 @@
 
 #include "MFXToGLSL.hpp"
 
-#define MAX_BINDING_POINTS 16 
+#define MAX_BINDING_POINTS 16
 
 struct VertexBuffer
 {
@@ -67,6 +67,9 @@ struct ConstantBuffer
 struct Texture2D
 {
 	GLuint texture;
+	GLuint framebuffer;
+	GLuint depthStencilBuffer;
+	size_t width, height;
 };
 
 struct Sampler
@@ -104,7 +107,6 @@ void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const C
 
 void Magma::Framework::Graphics::GLContext::Terminate()
 {
-	
 }
 
 void Magma::Framework::Graphics::GLContext::SetClearColor(glm::vec4 color)
@@ -294,7 +296,7 @@ void * Magma::Framework::Graphics::GLContext::CreateShader(ShaderType type, cons
 		ss << "Failed to create shader on GLContext:" << std::endl << "Shader compilation failed:" << std::endl;
 		ss << infoLog;
 		delete[] infoLog;
-	
+
 		throw std::runtime_error(ss.str());
 	}
 
@@ -444,12 +446,12 @@ void Magma::Framework::Graphics::GLContext::DrawIndexed(size_t indexCount, size_
 	GLenum gl_mode;
 	switch (mode)
 	{
-	case DrawMode::Points: gl_mode = GL_POINTS; break;
-	case DrawMode::Lines: gl_mode = GL_LINES; break;
-	case DrawMode::LineStrip: gl_mode = GL_LINE_STRIP; break;
-	case DrawMode::Triangles: gl_mode = GL_TRIANGLES; break;
-	case DrawMode::TriangleStrip: gl_mode = GL_TRIANGLE_STRIP; break;
-	default: throw std::runtime_error("Failed to draw (indexed) on GLContext:\nUnsupported draw mode"); break;
+		case DrawMode::Points: gl_mode = GL_POINTS; break;
+		case DrawMode::Lines: gl_mode = GL_LINES; break;
+		case DrawMode::LineStrip: gl_mode = GL_LINE_STRIP; break;
+		case DrawMode::Triangles: gl_mode = GL_TRIANGLES; break;
+		case DrawMode::TriangleStrip: gl_mode = GL_TRIANGLE_STRIP; break;
+		default: throw std::runtime_error("Failed to draw (indexed) on GLContext:\nUnsupported draw mode"); break;
 	}
 	glDrawElements(gl_mode, indexCount, ((IndexBuffer*)m_boundIndexBuffer)->type, reinterpret_cast<void*>(offset));
 	GL_CHECK_ERROR("Failed to draw (indexed) on GLContext");
@@ -543,7 +545,7 @@ void * Magma::Framework::Graphics::GLContext::GetConstantBindingPoint(void * pro
 
 	if (bind == nullptr)
 		throw std::runtime_error("Failed to get constant binding point from GLContext:\nBinding point count limit has been achieved");
-	
+
 	bind->index = glGetUniformBlockIndex(prgm->shaderProgram, name.c_str());
 	if (bind->index == -1)
 	{
@@ -604,6 +606,7 @@ void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, width, height, 0, gl_format, gl_type, data);
+			glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps
 
 			GL_CHECK_ERROR("Failed to create 2D texture on GL context {2}");
 		}
@@ -618,6 +621,11 @@ void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_
 		delete texture;
 		throw;
 	}
+
+	texture->depthStencilBuffer = 0;
+	texture->framebuffer = 0;
+	texture->width = width;
+	texture->height = height;
 
 	return texture;
 }
@@ -761,7 +769,134 @@ void Magma::Framework::Graphics::GLContext::BindSampler(void * sampler, void * b
 	auto bind = (BindingPoint*)bindPoint;
 
 	glBindSampler(bind->index, smplr->sampler);
- 	GL_CHECK_ERROR("Failed to bind sampler on GLContext");
+	GL_CHECK_ERROR("Failed to bind sampler on GLContext");
+}
+
+void * Magma::Framework::Graphics::GLContext::CreateRenderTexture(size_t width, size_t height, TextureFormat format, bool depthBuffer)
+{
+	auto texture = new Texture2D();
+
+	// Generate texture
+	try
+	{
+		glGenTextures(1, &texture->texture);
+		glBindTexture(GL_TEXTURE_2D, texture->texture);
+		GL_CHECK_ERROR("Failed to create render texture on GLContext {1}");
+
+		try
+		{
+			GLenum gl_type;
+			GLenum gl_internalFormat;
+			GLenum gl_format;
+
+			switch (format)
+			{
+				case TextureFormat::R8UInt: gl_internalFormat = GL_R8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_R; break;
+				case TextureFormat::R16UInt: gl_internalFormat = GL_R16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
+				case TextureFormat::RG8UInt: gl_internalFormat = GL_RG8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RG; break;
+				case TextureFormat::RG16UInt: gl_internalFormat = GL_RG16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
+				case TextureFormat::RGBA8UInt: gl_internalFormat = GL_RGBA8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RGBA; break;
+				case TextureFormat::RGBA16UInt: gl_internalFormat = GL_RGBA16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RGBA; break;
+				case TextureFormat::R32Float: gl_internalFormat = GL_R; gl_type = GL_FLOAT; gl_format = GL_R; break;
+				case TextureFormat::RG32Float: gl_internalFormat = GL_RG; gl_type = GL_FLOAT; gl_format = GL_RG; break;
+				case TextureFormat::RGB32Float: gl_internalFormat = GL_RGB; gl_type = GL_FLOAT; gl_format = GL_RGB; break;
+				case TextureFormat::RGBA32Float: gl_internalFormat = GL_RGBA; gl_type = GL_FLOAT; gl_format = GL_RGBA;  break;
+				case TextureFormat::Invalid: throw std::runtime_error("Failed to create render texture on GLContext:\nInvalid format"); break;
+				default: throw std::runtime_error("Failed to create render texture on GLContext:\nUnsupported format"); break;
+			}
+
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, width, height, 0, gl_format, gl_type, NULL);
+
+			GL_CHECK_ERROR("Failed to create render texture on GLContext {2}");
+
+			glGenFramebuffers(1, &texture->framebuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, texture->framebuffer);
+
+			GL_CHECK_ERROR("Failed to create render texture on GLContext {3}");
+
+			try
+			{
+				glGenRenderbuffers(1, &texture->depthStencilBuffer);
+
+				GL_CHECK_ERROR("Failed to create render texture on GLContext {4}");
+
+				try
+				{
+					// Configure depth stencil buffer
+					glBindRenderbuffer(GL_RENDERBUFFER, texture->depthStencilBuffer);
+					glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+					glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, texture->depthStencilBuffer);
+
+					GL_CHECK_ERROR("Failed to create render texture on GLContext {5}");
+
+					// Configure framebuffer
+					glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture->texture, 0);
+					GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+					glDrawBuffers(1, drawBuffers);
+
+					GL_CHECK_ERROR("Failed to create render texture on GLContext {6}");
+
+					if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+						throw std::runtime_error("Failed to create render texture on GLContext:\nFramebuffer is not complete");
+				}
+				catch (...)
+				{
+					glDeleteRenderbuffers(1, &texture->depthStencilBuffer);
+					throw;
+				}
+			}
+			catch (...)
+			{
+				glDeleteFramebuffers(1, &texture->framebuffer);
+				throw;
+			}
+		}
+		catch (...)
+		{
+			glDeleteTextures(1, &texture->texture);
+			throw;
+		}
+	}
+	catch (...)
+	{
+		delete texture;
+		throw;
+	}
+
+	texture->width = width;
+	texture->height = height;
+
+	return texture;
+}
+
+void Magma::Framework::Graphics::GLContext::DestroyRenderTexture(void * renderTexture)
+{
+	auto text = (Texture2D*)renderTexture;
+	glDeleteFramebuffers(1, &text->framebuffer);
+	glDeleteTextures(1, &text->depthStencilBuffer);
+	glDeleteTextures(1, &text->texture);
+	delete text;
+	GL_CHECK_ERROR("Failed to destroy render texture on GLContext");
+}
+
+void Magma::Framework::Graphics::GLContext::SetRenderTarget(void * renderTexture)
+{
+	if (renderTexture != nullptr)
+	{
+		auto text = (Texture2D*)renderTexture;
+		glBindFramebuffer(GL_FRAMEBUFFER, text->framebuffer);
+		glViewport(0, 0, text->width, text->height);
+	}
+	else
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, m_window->GetWidth(), m_window->GetHeight());
+	}
 }
 #else
 void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const ContextSettings& settings)
@@ -927,5 +1062,20 @@ void Magma::Framework::Graphics::GLContext::DestroySampler(void * sampler)
 void Magma::Framework::Graphics::GLContext::BindSampler(void * sampler, void * bindPoint)
 {
 	throw std::runtime_error("Failed to bind sampler on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void * Magma::Framework::Graphics::GLContext::CreateRenderTexture(size_t width, size_t height, TextureFormat format)
+{
+	throw std::runtime_error("Failed to create render texture on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Graphics::GLContext::DestroyRenderTexture(void * renderTexture)
+{
+	throw std::runtime_error("Failed to destroy render texture on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Graphics::GLContext::SetRenderTarget(void * renderTexture)
+{
+	throw std::runtime_error("Failed to set render target on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 #endif

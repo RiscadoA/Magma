@@ -440,6 +440,27 @@ namespace Magma
 				/// <param name="texture">Sampler handle</param>
 				/// <param name="bindPoint">Texture binding point handle</param>
 				virtual void BindSampler(void* sampler, void* bindPoint) = 0;
+
+				/// <summary>
+				///		Creates a new render texture that can be used as a render target
+				/// </summary>
+				/// <param name="width">Texture width</param>
+				/// <param name="height">Texture height</param>
+				/// <param name="format">Texture format</param>
+				/// <param name="depthBuffer">Create a depth buffer for this render texture?</param>
+				virtual void* CreateRenderTexture(size_t width, size_t height, TextureFormat format, bool depthBuffer = true) = 0;
+
+				/// <summary>
+				///		Destroys a render texture
+				/// </summary>
+				/// <param name="renderTexture">Render texture handle</param>
+				virtual void DestroyRenderTexture(void* renderTexture) = 0;
+
+				/// <summary>
+				///		Sets the current render target
+				/// </summary>
+				/// <param name="renderTexture">Render texture handle (set to nullptr to return to the default render target)</param>
+				virtual void SetRenderTarget(void* renderTexture) = 0;
 			};
 		}
 	}
