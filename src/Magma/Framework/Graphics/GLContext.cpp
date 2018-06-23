@@ -16,8 +16,7 @@
 	{\
 		std::stringstream ss;\
 		ss << (title) << ":" << std::endl;\
-		ss << "OpenGL error " << err << ":" << std::endl;\
-		ss << (const char*)glewGetErrorString(err);\
+		ss << "OpenGL error: " << err;\
 		throw std::runtime_error(ss.str());\
 	}\
 }
@@ -63,6 +62,16 @@ struct ConstantBuffer
 {
 	GLuint ubo;
 	size_t size;
+};
+
+struct Texture2D
+{
+	GLuint texture;
+};
+
+struct Sampler
+{
+	GLuint sampler;
 };
 
 void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const ContextSettings& settings)
@@ -515,7 +524,7 @@ void Magma::Framework::Graphics::GLContext::BindConstantBuffer(void * constantBu
 void * Magma::Framework::Graphics::GLContext::GetConstantBindingPoint(void * program, const std::string & name)
 {
 	if (name == "")
-		throw std::runtime_error("Failed to get binding point from GLContext:\nName cannot be empty");
+		throw std::runtime_error("Failed to get constant binding point from GLContext:\nName cannot be empty");
 
 	auto prgm = (ShaderProgram*)program;
 
@@ -533,13 +542,13 @@ void * Magma::Framework::Graphics::GLContext::GetConstantBindingPoint(void * pro
 	}
 
 	if (bind == nullptr)
-		throw std::runtime_error("Failed to get binding point from GLContext:\nBinding point count limit has been achieved");
+		throw std::runtime_error("Failed to get constant binding point from GLContext:\nBinding point count limit has been achieved");
 	
 	bind->index = glGetUniformBlockIndex(prgm->shaderProgram, name.c_str());
 	if (bind->index == -1)
 	{
 		std::stringstream ss;
-		ss << "Failed to get binding point from GLContext:" << std::endl;
+		ss << "Failed to get constant binding point from GLContext:" << std::endl;
 		ss << "No binding point with name \"" << name << "\"" << std::endl;
 		throw std::runtime_error(ss.str());
 	}
@@ -548,7 +557,7 @@ void * Magma::Framework::Graphics::GLContext::GetConstantBindingPoint(void * pro
 
 	bind->name = name;
 	bind->exists = true;
-	GL_CHECK_ERROR("Failed to get binding point from GLContext");
+	GL_CHECK_ERROR("Failed to get constant binding point from GLContext");
 	return bind;
 }
 
@@ -559,40 +568,200 @@ void Magma::Framework::Graphics::GLContext::SwapBuffers()
 
 void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format)
 {
-	
-	//glCreateTextures(GL_TEXTURE_2D, 1, &tex);
+	auto texture = new Texture2D();
 
-	return nullptr;
+	try
+	{
+		glGenTextures(1, &texture->texture);
+		glBindTexture(GL_TEXTURE_2D, texture->texture);
+		GL_CHECK_ERROR("Failed to create 2D texture on GL context {1}");
+
+		try
+		{
+			GLenum gl_type;
+			GLenum gl_internalFormat;
+			GLenum gl_format;
+
+			switch (format)
+			{
+				case TextureFormat::R8UInt: gl_internalFormat = GL_R8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_R; break;
+				case TextureFormat::R16UInt: gl_internalFormat = GL_R16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
+				case TextureFormat::RG8UInt: gl_internalFormat = GL_RG8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RG; break;
+				case TextureFormat::RG16UInt: gl_internalFormat = GL_RG16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
+				case TextureFormat::RGBA8UInt: gl_internalFormat = GL_RGB8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RGBA; break;
+				case TextureFormat::RGBA16UInt: gl_internalFormat = GL_RGB16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RGBA; break;
+				case TextureFormat::R32Float: gl_internalFormat = GL_R; gl_type = GL_FLOAT; gl_format = GL_R; break;
+				case TextureFormat::RG32Float: gl_internalFormat = GL_RG; gl_type = GL_FLOAT; gl_format = GL_RG; break;
+				case TextureFormat::RGB32Float: gl_internalFormat = GL_RGB; gl_type = GL_FLOAT; gl_format = GL_RGB; break;
+				case TextureFormat::RGBA32Float: gl_internalFormat = GL_RGBA; gl_type = GL_FLOAT; gl_format = GL_RGBA;  break;
+				case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on GLContext:\nInvalid format"); break;
+				default: throw std::runtime_error("Failed to create 2D texture on GLContext:\nUnsupported format"); break;
+			}
+
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, width, height, 0, gl_format, gl_type, data);
+
+			GL_CHECK_ERROR("Failed to create 2D texture on GL context {2}");
+		}
+		catch (...)
+		{
+			glDeleteTextures(1, &texture->texture);
+			throw;
+		}
+	}
+	catch (...)
+	{
+		delete texture;
+		throw;
+	}
+
+	return texture;
 }
 
 void Magma::Framework::Graphics::GLContext::DestroyTexture2D(void * texture)
 {
-
+	auto tex = (Texture2D*)texture;
+	glDeleteTextures(1, &tex->texture);
+	delete tex;
+	GL_CHECK_ERROR("Failed to destroy 2D texture on GLContext");
 }
 
 void * Magma::Framework::Graphics::GLContext::GetTextureBindingPoint(void * program, const std::string & name)
 {
-	return nullptr;
+	if (name == "")
+		throw std::runtime_error("Failed to get texture binding point from GLContext:\nName cannot be empty");
+
+	auto prgm = (ShaderProgram*)program;
+
+	BindingPoint* bind = nullptr;
+	for (size_t i = 0; i < MAX_BINDING_POINTS; ++i)
+	{
+		if (!prgm->bindingPoints[i].exists)
+		{
+			bind = &prgm->bindingPoints[i];
+			continue;
+		}
+
+		if (prgm->bindingPoints[i].name == name)
+			return &prgm->bindingPoints[i];
+	}
+
+	if (bind == nullptr)
+		throw std::runtime_error("Failed to get texture binding point from GLContext:\nBinding point count limit has been achieved");
+
+	bind->index = glGetUniformLocation(prgm->shaderProgram, name.c_str());
+	if (bind->index == -1)
+	{
+		std::stringstream ss;
+		ss << "Failed to get texture binding point from GLContext:" << std::endl;
+		ss << "No binding point with name \"" << name << "\"" << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
+	bind->name = name;
+	bind->exists = true;
+	GL_CHECK_ERROR("Failed to get texture binding point from GLContext");
+	return bind;
 }
 
 void Magma::Framework::Graphics::GLContext::BindTexture2D(void * texture, void * bindPoint)
 {
-
+	auto tex = (Texture2D*)texture;
+	auto bind = (BindingPoint*)bindPoint;
+	glActiveTexture(GL_TEXTURE0 + bind->index);
+	if (tex == nullptr)
+		glBindTexture(GL_TEXTURE_2D, 0);
+	else
+		glBindTexture(GL_TEXTURE_2D, tex->texture);
+	glUniform1i(bind->index, bind->index);
+	GL_CHECK_ERROR("Failed to bind 2D texture on GLContext");
 }
 
 void * Magma::Framework::Graphics::GLContext::CreateSampler(const SamplerSettings & settings)
 {
-	return nullptr;
+	auto sampler = new Sampler();
+
+	try
+	{
+		glGenSamplers(1, &sampler->sampler);
+		GL_CHECK_ERROR("Failed to create sampler on GLContext");
+
+		try
+		{
+			switch (settings.adressU)
+			{
+				case TextureAdressMode::Wrap: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_S, GL_REPEAT); break;
+				case TextureAdressMode::Mirror: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT); break;
+				case TextureAdressMode::Clamp: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); break;
+				case TextureAdressMode::Border: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); break;
+				case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\Invalid U coordinate texture adress mode"); break;
+				default: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\nUnsupported U coordinate texture adress mode"); break;
+			}
+
+			switch (settings.adressV)
+			{
+				case TextureAdressMode::Wrap: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_T, GL_REPEAT); break;
+				case TextureAdressMode::Mirror: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT); break;
+				case TextureAdressMode::Clamp: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); break;
+				case TextureAdressMode::Border: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); break;
+				case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\Invalid V coordinate texture adress mode"); break;
+				default: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\nUnsupported V coordinate texture adress mode"); break;
+			}
+
+			switch (settings.minFilter)
+			{
+				case TextureFilter::Nearest: glSamplerParameterf(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST); break;
+				case TextureFilter::Linear: glSamplerParameterf(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR); break;
+				case TextureFilter::Invalid: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\Invalid texture mignifying filter"); break;
+				default: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\nUnsupported texture mignifying filter"); break;
+			}
+
+			switch (settings.magFilter)
+			{
+				case TextureFilter::Nearest: glSamplerParameterf(sampler->sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST); break;
+				case TextureFilter::Linear: glSamplerParameterf(sampler->sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR); break;
+				case TextureFilter::Invalid: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\Invalid texture magnifying filter"); break;
+				default: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\nUnsupported texture magnifying filter"); break;
+			}
+
+			glSamplerParameterfv(sampler->sampler, GL_TEXTURE_BORDER_COLOR, &settings.borderColor[0]);
+
+			GL_CHECK_ERROR("Failed to create sampler on GLContext {2}");
+		}
+		catch (...)
+		{
+			glDeleteSamplers(1, &sampler->sampler);
+			throw;
+		}
+	}
+	catch (...)
+	{
+		delete sampler;
+		throw;
+	}
+
+	return sampler;
 }
 
 void Magma::Framework::Graphics::GLContext::DestroySampler(void * sampler)
 {
-	
+	auto smplr = (Sampler*)sampler;
+	glDeleteSamplers(1, &smplr->sampler);
+	delete smplr;
+	GL_CHECK_ERROR("Failed to destroy sampler on GLContext");
 }
 
 void Magma::Framework::Graphics::GLContext::BindSampler(void * sampler, void * bindPoint)
 {
-	
+	auto smplr = (Sampler*)sampler;
+	auto bind = (BindingPoint*)bindPoint;
+
+	glBindSampler(bind->index, smplr->sampler);
+ 	GL_CHECK_ERROR("Failed to bind sampler on GLContext");
 }
 #else
 void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const ContextSettings& settings)

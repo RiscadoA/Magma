@@ -10,9 +10,9 @@ void Main(int argc, char** argv) try
 {
 	bool running = true;
 
-	Framework::Input::Window* window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+	Framework::Input::Window* window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
 	
-	Framework::Graphics::Context* context = new Framework::Graphics::GLContext();
+	Framework::Graphics::Context* context = new Framework::Graphics::D3D11Context();
 	Framework::Graphics::ContextSettings contextSettings;
 	contextSettings.multisampleCount = 4;
 	contextSettings.enableVsync = true;
@@ -132,10 +132,10 @@ void Main(int argc, char** argv) try
 	{
 		float data[] =
 		{
-			-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
-			-1.0f, +1.0f, 0.0f,		0.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
-			+1.0f, +1.0f, 0.0f,		1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
-			+1.0f, -1.0f, 0.0f,     1.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f,		-0.5f, -0.5f,		1.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, +1.0f, 0.0f,		-0.5f, +1.5f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+1.0f, +1.0f, 0.0f,		+1.5f, +1.5f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+1.0f, -1.0f, 0.0f,     +1.5f, -0.5f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
 		Framework::Graphics::VertexLayout layout;
@@ -196,8 +196,8 @@ void Main(int argc, char** argv) try
 		settings.adressU = TextureAdressMode::Border;
 		settings.adressV = TextureAdressMode::Border;
 		settings.borderColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-		settings.minFilter = TextureFilter::Nearest;
-		settings.magFilter = TextureFilter::Nearest;
+		settings.minFilter = TextureFilter::Linear;
+		settings.magFilter = TextureFilter::Linear;
 
 		sampler = context->CreateSampler(settings);
 	}
@@ -214,13 +214,13 @@ void Main(int argc, char** argv) try
 			1.0f,	1.0f,	1.0f,	1.0f,
 		};*/
 
-		unsigned char data[] =
+		char data[] =
 		{
-		//	R		G		B		A
+			//	R		G		B		A
+			255,	0,		0,		255,
+			0,		255,	0,		255,
+			0,		0,		0,		255,
 			255,	255,	255,	255,
-			255,	255,	255,	255,
-			255,	255,	255,	255,
-			255,	255,	0,		255,
 		};
 
 		using namespace Framework::Graphics;
@@ -239,7 +239,7 @@ void Main(int argc, char** argv) try
 		1.0f,	1.0f,	1.0f,	1.0f,
 		};*/
 
-		unsigned char data[] =
+		char data[] =
 		{
 		//	R		G		B		A
 			255,	0,		0,		255,

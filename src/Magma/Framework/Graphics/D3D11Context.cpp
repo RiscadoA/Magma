@@ -1024,9 +1024,9 @@ void * Magma::Framework::Graphics::D3D11Context::CreateSampler(const SamplerSett
 		switch (settings.adressU)
 		{
 			case TextureAdressMode::Wrap: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
-			case TextureAdressMode::Mirror: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
-			case TextureAdressMode::Clamp: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
-			case TextureAdressMode::Border: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Mirror: desc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR; break;
+			case TextureAdressMode::Clamp: desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP; break;
+			case TextureAdressMode::Border: desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER; break;
 			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\Invalid U coordinate texture adress mode"); break;
 			default: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\nUnsupported U coordinate texture adress mode"); break;
 		}
@@ -1035,9 +1035,9 @@ void * Magma::Framework::Graphics::D3D11Context::CreateSampler(const SamplerSett
 		switch (settings.adressV)
 		{
 			case TextureAdressMode::Wrap: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
-			case TextureAdressMode::Mirror: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
-			case TextureAdressMode::Clamp: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
-			case TextureAdressMode::Border: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Mirror: desc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR; break;
+			case TextureAdressMode::Clamp: desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP; break;
+			case TextureAdressMode::Border: desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER; break;
 			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid sampler settings:\Invalid V coordinate texture adress mode"); break;
 			default: throw std::runtime_error("Failed to create sampler on D3D11Context:\nInvalid texture sampler:\nUnsupported V coordinate texture adress mode"); break;
 		}
