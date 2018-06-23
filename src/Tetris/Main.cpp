@@ -64,7 +64,6 @@ void Main(int argc, char** argv) try
 		out vec4 fragColor;
 
 		uniform sampler2D gTexture;
-		uniform sampler2D gTexture2;
 
 		layout(std140) uniform cbMaterial
 		{
@@ -73,16 +72,17 @@ void Main(int argc, char** argv) try
 
 		void main()
 		{
-			fragColor = vertColor * diffuse * texture2D(gTexture, vertTexCoords) * texture2D(gTexture2, vertTexCoords);
+			vec4 color = vertColor * diffuse * texture2D(gTexture, vertTexCoords);
+			if (color.a == 0.0)
+				discard;
+			else
+				fragColor = color;
 		}
 
 		#context hlsl
 
 		Texture2D<float4> gTexture;
 		SamplerState gTexture_sampler;
-
-		Texture2D<float4> gTexture2;
-		SamplerState gTexture2_sampler;
 
 		cbuffer cbTransform
 		{
@@ -114,7 +114,10 @@ void Main(int argc, char** argv) try
 
 		float4 PS(VS_OUTPUT input) : SV_TARGET
 		{
-			return input.Color * diffuse * gTexture.Sample(gTexture_sampler, input.UVs) * gTexture2.Sample(gTexture2_sampler, input.UVs);
+			float4 color = input.Color * diffuse * gTexture.Sample(gTexture_sampler, input.UVs);
+			if (color.a == 0)
+				discard;
+			return color;
 		}
 		)mfx";
 		
@@ -196,8 +199,8 @@ void Main(int argc, char** argv) try
 		settings.adressU = TextureAdressMode::Border;
 		settings.adressV = TextureAdressMode::Border;
 		settings.borderColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-		settings.minFilter = TextureFilter::Linear;
-		settings.magFilter = TextureFilter::Linear;
+		settings.minFilter = TextureFilter::Nearest;
+		settings.magFilter = TextureFilter::Nearest;
 
 		sampler = context->CreateSampler(settings);
 	}
@@ -214,12 +217,12 @@ void Main(int argc, char** argv) try
 			1.0f,	1.0f,	1.0f,	1.0f,
 		};*/
 
-		char data[] =
+		unsigned char data[] =
 		{
 			//	R		G		B		A
 			255,	0,		0,		255,
-			0,		255,	0,		255,
-			0,		0,		0,		255,
+			0,		255,	0,		0,
+			0,		0,		255,	0,
 			255,	255,	255,	255,
 		};
 
@@ -239,13 +242,13 @@ void Main(int argc, char** argv) try
 		1.0f,	1.0f,	1.0f,	1.0f,
 		};*/
 
-		char data[] =
+		unsigned char data[] =
 		{
 		//	R		G		B		A
-			255,	0,		0,		255,
-			0,		255,	0,		255,
 			0,		0,		255,	255,
-			255,	255,	255,	255,
+			0,		255,	0,		255,
+			255,	0,		0,		255,
+			0,		0,		0,		255,
 		};
 
 		using namespace Framework::Graphics;
@@ -257,7 +260,6 @@ void Main(int argc, char** argv) try
 	void* cbTransformBind = context->GetConstantBindingPoint(program, "cbTransform");
 	void* cbMaterialBind = context->GetConstantBindingPoint(program, "cbMaterial");
 	void* textureBind = context->GetTextureBindingPoint(program, "gTexture");
-	void* texture2Bind = context->GetTextureBindingPoint(program, "gTexture2");
 
 	glm::mat4 model, view, proj;
 	glm::mat4 mvp;
@@ -281,16 +283,15 @@ void Main(int argc, char** argv) try
 		context->BindIndexBuffer(ib);
 		context->BindConstantBuffer(cbTransform, cbTransformBind);
 		context->BindConstantBuffer(cbMaterial, cbMaterialBind);
-		context->BindTexture2D(texture, textureBind);
 		context->BindSampler(sampler, textureBind);
-		context->BindTexture2D(texture2, texture2Bind);
-		context->BindSampler(sampler, texture2Bind);
 
+		context->BindTexture2D(texture, textureBind);
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 		mvp = proj * view * model;
 		context->UpdateConstantBuffer(cbTransform, &mvp[0][0]);
 		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
 
+		context->BindTexture2D(texture2, textureBind);
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		mvp = proj * view * model;
 		context->UpdateConstantBuffer(cbTransform, &mvp[0][0]);

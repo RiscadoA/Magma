@@ -588,8 +588,8 @@ void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_
 				case TextureFormat::R16UInt: gl_internalFormat = GL_R16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
 				case TextureFormat::RG8UInt: gl_internalFormat = GL_RG8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RG; break;
 				case TextureFormat::RG16UInt: gl_internalFormat = GL_RG16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
-				case TextureFormat::RGBA8UInt: gl_internalFormat = GL_RGB8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RGBA; break;
-				case TextureFormat::RGBA16UInt: gl_internalFormat = GL_RGB16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RGBA; break;
+				case TextureFormat::RGBA8UInt: gl_internalFormat = GL_RGBA8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RGBA; break;
+				case TextureFormat::RGBA16UInt: gl_internalFormat = GL_RGBA16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RGBA; break;
 				case TextureFormat::R32Float: gl_internalFormat = GL_R; gl_type = GL_FLOAT; gl_format = GL_R; break;
 				case TextureFormat::RG32Float: gl_internalFormat = GL_RG; gl_type = GL_FLOAT; gl_format = GL_RG; break;
 				case TextureFormat::RGB32Float: gl_internalFormat = GL_RGB; gl_type = GL_FLOAT; gl_format = GL_RGB; break;
