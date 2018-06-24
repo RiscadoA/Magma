@@ -18,6 +18,8 @@
 #include <map>
 #include <comdef.h>
 
+#include "MSL/HLSLCompiler.hpp"
+
 #define MAX_BINDING_POINTS 16
 
 using namespace Magma::Framework::Graphics;
@@ -256,10 +258,15 @@ void Magma::Framework::Graphics::D3D11Context::Init(Input::Window * window, cons
 	m_defaultDepthStencilView = depthStencilView;
 	m_depthStencilView = depthStencilView;
 	m_rasterState = rasterState;
+
+	// Create MSL compiler
+	m_compiler = new MSL::HLSLCompiler();
 }
 
 void Magma::Framework::Graphics::D3D11Context::Terminate()
 {
+	delete (MSL::HLSLCompiler*)m_compiler;
+
 	((ID3D11RasterizerState*)m_rasterState)->Release();
 	((ID3D11Texture2D*)m_depthStencilBuffer)->Release();
 	((ID3D11DepthStencilView*)m_defaultDepthStencilView)->Release();
@@ -428,13 +435,15 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 	std::string compiledSrc;
 	try
 	{
-		Compile(src, compiledSrc);
+		((MSL::HLSLCompiler*)m_compiler)->Load(src);
+		((MSL::HLSLCompiler*)m_compiler)->Compile();
+		compiledSrc = ((MSL::HLSLCompiler*)m_compiler)->GetOutput();
 	}
 	catch (std::runtime_error& e)
 	{
 		std::stringstream ss;
 		ss << "Failed to create shader on D3D11Context:" << std::endl;
-		ss << "Failed to compile from MFX to HLSL on D3D11Context:" << std::endl;
+		ss << "Failed to compile from MSL to HLSL on D3D11Context:" << std::endl;
 		ss << e.what();
 		throw std::runtime_error(ss.str());
 	}

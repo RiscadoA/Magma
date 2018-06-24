@@ -55,6 +55,7 @@ namespace Magma
 
 			private:
 				Input::GLWindow* m_window;
+				void* m_compiler;
 				void* m_boundIndexBuffer;
 			};
 		}

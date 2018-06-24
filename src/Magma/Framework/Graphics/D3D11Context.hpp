@@ -70,6 +70,8 @@ namespace Magma
 				void* m_depthStencilView;
 				void* m_rasterState;
 
+				void* m_compiler;
+
 				glm::vec4 m_clearColor;
 
 				void* m_boundProgram;

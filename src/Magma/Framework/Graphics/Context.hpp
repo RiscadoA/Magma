@@ -7,20 +7,7 @@
 #include <string>
 
 /*
-	Each context implementation will convert the framework's own effect language (Magma FX, ".mfx") into the context language (GLSL, HLSL, etc).
-
-	Magma FX example:
-
-		#mfx version 1.0
-
-		#context d3d11
-		// HLSL vertex and fragment shader
-
-		#context gl
-		#shader vertex
-		// GL Vertex shader
-		#shader pixel
-		// GL Pixel shader
+	Each context implementation will convert the framework's own shading language (Magma Shading Language, ".msl") into the context shading language (GLSL, HLSL, etc).
 */
 
 namespace Magma

@@ -24,7 +24,7 @@
 #define GL_CHECK_ERROR(title)
 #endif
 
-#include "MFXToGLSL.hpp"
+#include "MSL/GLSLCompiler.hpp"
 
 #define MAX_BINDING_POINTS 16
 
@@ -103,10 +103,13 @@ void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const C
 	glDepthFunc(GL_LESS);
 
 	GL_CHECK_ERROR("Failed to init GLContext");
+
+	m_compiler = new MSL::GLSLCompiler();
 }
 
 void Magma::Framework::Graphics::GLContext::Terminate()
 {
+	delete (MSL::GLSLCompiler*)m_compiler;
 }
 
 void Magma::Framework::Graphics::GLContext::SetClearColor(glm::vec4 color)
@@ -254,7 +257,10 @@ void * Magma::Framework::Graphics::GLContext::CreateShader(ShaderType type, cons
 	std::string compiledSrc;
 	try
 	{
-		Compile(src, compiledSrc, type);
+		((MSL::GLSLCompiler*)m_compiler)->Load(src);
+		((MSL::GLSLCompiler*)m_compiler)->SetShaderType(type);
+		((MSL::GLSLCompiler*)m_compiler)->Compile();
+		compiledSrc = ((MSL::GLSLCompiler*)m_compiler)->GetOutput();
 	}
 	catch (std::runtime_error& e)
 	{
@@ -262,7 +268,7 @@ void * Magma::Framework::Graphics::GLContext::CreateShader(ShaderType type, cons
 
 		std::stringstream ss;
 		ss << "Failed to create shader on GLContext:" << std::endl;
-		ss << "Failed to compile from MFX to GLSL on GLContext:" << std::endl;
+		ss << "Failed to compile from MSL to GLSL on GLContext:" << std::endl;
 		ss << e.what();
 		throw std::runtime_error(ss.str());
 	}
