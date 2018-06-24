@@ -30,19 +30,12 @@ void Main(int argc, char** argv) try
 
 		#define COLOR_R 1.0
 
-		int(position.x.y.z)
-
-		/*VertexOutput vertexOut
+		VertexOutput vertexOut
 		{
 			
 		}
 
-		int test()
-		{
-			return -1.0f;
-		}*/
-
-		/*vec4 VertexShader(vec3 position)
+		vec4 VertexShader(vec3 position)
 		{
 			return vec4(position.x, position.y, position.z, 1.0);
 		}
@@ -50,7 +43,7 @@ void Main(int argc, char** argv) try
 		vec4 PixelShader()
 		{
 			return vec4(COLOR_R, COLOR_R, 0.0, 1.0);
-		}*/
+		}
 		
 		)msl";
 

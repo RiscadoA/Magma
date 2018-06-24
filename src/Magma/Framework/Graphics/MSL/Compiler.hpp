@@ -182,10 +182,43 @@ namespace Magma
 				/// <returns>Token type</returns>
 				TokenType GetTokenType(TokenSymbol symbol);
 
+				/// <summary>
+				///		Creates an abstract syntax tree node
+				/// </summary>
+				/// <param name="symbol">Node symbol</param>
+				/// <param name="attribute">Node attribute</param>
+				/// <returns>Node pointer</returns>
+				ASTNode* CreateTree(ASTNodeSymbol symbol, const std::string& attribute);
+
+				/// <summary>
+				///		Adds an abstract syntax tree node to a tree
+				/// </summary>
+				/// <param name="node">Mpde pointer</param>
+				/// <param name="tree">Tree pointer</param>
+				void AddToTree(ASTNode* node, ASTNode* tree);
+
+				/// <summary>
+				///		Creates and adds an abstract syntax tree node to a tree
+				/// </summary>
+				/// <param name="symbol">Node symbol</param>
+				/// <param name="attribute">Node attribute</param>
+				/// <param name="tree">Tree pointer</param>
+				ASTNode* AddToTree(ASTNodeSymbol symbol, const std::string& attribute, ASTNode* tree);
+
+				/// <summary>
+				///		Destroys an abstract syntax tree
+				/// </summary>
+				/// <param name="node">Abstract syntax tree root node</param>
+				void DestroyTree(ASTNode* node);
+
+				/// <summary>
+				///		Abstract class for compiling MSL
+				/// </summary>
 				class Compiler
 				{
 				public:
 					Compiler(int major, int minor, int patch);
+					virtual ~Compiler();
 
 					void Load(const std::string& code);
 					void Compile();
@@ -204,7 +237,7 @@ namespace Magma
 
 					std::vector<Token> m_tokens;
 
-					ASTNode m_astTree;
+					ASTNode* m_astTree;
 				};
 			}
 		}

@@ -9,8 +9,7 @@ struct ParserInfo
 {
 	std::vector<Token>::const_iterator it;
 	const std::vector<Token>& tokens;
-	ASTNode& tree;
-	ASTNode* node;
+	ASTNode* tree;
 	Token lastToken;
 };
 
@@ -154,82 +153,32 @@ void ExpectType(TokenType type, ParserInfo& info)
 	throw std::runtime_error(ss.str());
 }
 
-ASTNode* CreateTree(ASTNodeSymbol symbol, const std::string& attribute)
+ASTNode* VertexOutput(ParserInfo& info)
 {
-	auto node = new ASTNode();
-	node->symbol = symbol;
-	node->attribute = attribute;
-	node->parent = nullptr;
-	node->firstChild = nullptr;
-	node->lastChild = nullptr;
-	node->next = nullptr;
-	return node;
-}
-
-void AddToTree(ASTNode* node, ASTNode* tree)
-{
-	if (tree->lastChild == nullptr)
-		tree->firstChild = tree->lastChild = node;
-	else
-	{
-		tree->lastChild->next = node;
-		tree->lastChild = node;
-	}
-}
-
-ASTNode* AddToTree(ASTNodeSymbol symbol, const std::string& attribute, ASTNode* tree)
-{
-	auto node = new ASTNode();
-	node->symbol = symbol;
-	node->attribute = attribute;
-	node->firstChild = nullptr;
-	node->lastChild = nullptr;
-	node->next = nullptr;
-	AddToTree(node, tree);
-	return node;
-}
-
-void DestroyTree(ASTNode* node)
-{
-	ASTNode* c = node->firstChild;
-	while (c != nullptr)
-	{
-		DestroyTree(c);
-		c = c->next;
-	}
-
-	delete node;
-}
-
-void VertexOutput(ParserInfo& info)
-{
-	/*
-
-	AddNode(ASTNodeSymbol::VertexOutput, "", info);
+	auto vertexOutputNode = CreateTree(ASTNodeSymbol::VertexOutput, "");
 
 	// Get vertex output identifier
 	Expect(TokenSymbol::Identifier, info);
-	AddTerminalNode(ASTNodeSymbol::Identifier, info.lastToken.attribute, info);
+	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, vertexOutputNode);
 
 	Expect(TokenSymbol::OpenBrace, info);
 
 	// Get declarations
+	auto declarationsNode = AddToTree(ASTNodeSymbol::Scope, "", vertexOutputNode);
 	while (AcceptType(TokenType::Type, info))
 	{
-		AddNode(TypeTokenToAST(info.lastToken.symbol), "", info);
+		// Add declaration type
+		auto declarationNode = AddToTree(TypeTokenToAST(info.lastToken.symbol), "", declarationsNode);
 
 		Expect(TokenSymbol::Identifier, info);
-		AddTerminalNode(ASTNodeSymbol::Identifier, info.lastToken.attribute, info);
+		AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, declarationNode);
 
 		Expect(TokenSymbol::Semicolon, info);
-
-		UpNode(info);
 	}
 
 	Expect(TokenSymbol::CloseBrace, info);
-	UpNode(info);
-
-	*/
+	
+	return vertexOutputNode;
 }
 
 ASTNode* Expression(ParserInfo& info);
@@ -266,10 +215,6 @@ ASTNode* Constructor(ASTNodeSymbol type, ParserInfo& info)
 	return constructorNode;
 }
 
-
-// position.x.y
-// (position).x).y
-
 ASTNode* Identifier(ParserInfo& info)
 {
 	// Get identifier
@@ -287,7 +232,8 @@ ASTNode* Identifier(ParserInfo& info)
 			// Get second term
 			// Add identifiers to member operator
 			AddToTree(id1, op);
-			AddToTree(Identifier(info), op);
+			Expect(TokenSymbol::Identifier, info);
+			AddToTree(CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute), op);
 			id1 = op;
 		}
 		else break;
@@ -298,8 +244,12 @@ ASTNode* Identifier(ParserInfo& info)
 
 ASTNode* Factor(ParserInfo& info)
 {
+	// <identifier>
+	if (Peek(info) == TokenSymbol::Identifier)
+		return Identifier(info); // Get identifier
+
 	// ( <exp> )
-	if (Accept(TokenSymbol::OpenParenthesis, info))
+	else if (Accept(TokenSymbol::OpenParenthesis, info))
 	{
 		auto ret = Expression(info);
 		Expect(TokenSymbol::CloseParenthesis, info);
@@ -323,10 +273,6 @@ ASTNode* Factor(ParserInfo& info)
 	// <literal>
 	else if (AcceptType(TokenType::Literal, info))
 		return CreateTree(LiteralTokenToAST(info.lastToken.symbol), info.lastToken.attribute);
-
-	// <identifier>
-	else if (Peek(info) == TokenSymbol::Identifier)
-		return Identifier(info); // Get identifier
 }
 
 ASTNode* Term(ParserInfo& info)
@@ -356,25 +302,12 @@ ASTNode* Term(ParserInfo& info)
 	return factor1;
 }
 
-ASTNode* Assignemnt(ParserInfo& info)
-{
-	// TO DO
-	return nullptr;
-}
-
-ASTNode* Expression(ParserInfo& info)
+ASTNode* Assignment(ParserInfo& info)
 {
 	// Get term
 	auto term1 = Term(info);
 	ASTNode* term2 = nullptr;
 
-	// 2 + 4 + 7 + 9
-	// (((2 + 4) + 7) + 9)
-	
-	std::vector<Token> literals;
-
-
-	int levels = 0;
 	// While there are addition and subtraction operations
 	while (true)
 	{
@@ -386,7 +319,6 @@ ASTNode* Expression(ParserInfo& info)
 
 			// Get second term
 			term2 = Term(info);
-			levels++;
 
 			// Add terms to operator
 			AddToTree(term1, op);
@@ -400,30 +332,59 @@ ASTNode* Expression(ParserInfo& info)
 	return term1;
 }
 
-void Statement(ParserInfo& info)
+ASTNode* Expression(ParserInfo& info)
+{
+	// Get term
+	auto term1 = Assignment(info);
+	ASTNode* term2 = nullptr;
+
+	// While there are addition and subtraction operations
+	while (true)
+	{
+		if (Accept(TokenSymbol::Assignment, info))
+		{
+			// Create operator
+			auto op = CreateTree(ASTNodeSymbol::Assignment, "");
+
+			// Get second term
+			term2 = Assignment(info);
+
+			// Add terms to operator
+			AddToTree(term1, op);
+			AddToTree(term2, op);
+			term1 = op;
+		}
+		else break;
+	}
+
+	// Return tree
+	return term1;
+}
+
+ASTNode* Statement(ParserInfo& info)
 {
 	// Start statement
-	/*AddNode(ASTNodeSymbol::Statement, "", info);
+	auto statementNode = CreateTree(ASTNodeSymbol::Statement, "");
 
 	// If return statement
 	if (Accept(TokenSymbol::Return, info))
 	{
-		AddTerminalNode(ASTNodeSymbol::Return, "", info);
-
+		AddToTree(ASTNodeSymbol::Return, "", statementNode);
 		// Expression
-		Expression(info);
+		AddToTree(Expression(info), statementNode);
 	}
 
 	// End statement
 	Expect(TokenSymbol::Semicolon, info);
-	UpNode(info);*/
+
+	return statementNode;
 }
 
-void Scope(ParserInfo& info)
+ASTNode* Scope(ParserInfo& info)
 {
 	// Open scope
-	/*Expect(TokenSymbol::OpenBrace, info);
-	AddNode(ASTNodeSymbol::Scope, "", info);
+	Expect(TokenSymbol::OpenBrace, info);
+	auto scopeNode = CreateTree(ASTNodeSymbol::Scope, "");
 
 	// Get statements
 	while (true)
@@ -431,50 +392,47 @@ void Scope(ParserInfo& info)
 		// Found another scope
 		if (Peek(info) ==  TokenSymbol::OpenBrace)
 		{
-			Scope(info);
+			AddToTree(Scope(info), scopeNode);
 			continue;
 		}
 		// Scope end
 		if (Peek(info) == TokenSymbol::CloseBrace)
 			break;
 		// Statement
-		Statement(info);
+		AddToTree(Statement(info), scopeNode);
 	}
 
 	// Close scope
 	Expect(TokenSymbol::CloseBrace, info);
-	UpNode(info);
-
-	*/
+	return scopeNode;
 }
 
-void Function(ASTNodeSymbol type, ParserInfo& info)
+ASTNode* Function(ASTNodeSymbol type, ParserInfo& info)
 {
-	/*
-
-	// Add function type
-	AddNode(ASTNodeSymbol::Function, "", info);
-	AddTerminalNode(type, "", info);
+	// Create function
+	auto functionNode = CreateTree(ASTNodeSymbol::Function, "");
+	
+	// Add type
+	AddToTree(type, "", functionNode);
 
 	// Get and add function identifier
 	Expect(TokenSymbol::Identifier, info);
-	AddTerminalNode(ASTNodeSymbol::Identifier, info.lastToken.attribute, info);
+	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, functionNode);
 
 	// Open params
 	Expect(TokenSymbol::OpenParenthesis, info);
-	AddNode(ASTNodeSymbol::Params, "", info);
+	auto paramsNode = AddToTree(ASTNodeSymbol::Params, "", functionNode);
 
 	// Get params
 	if (AcceptType(TokenType::Type, info))
 	{
 		while (true)
 		{
-			AddNode(TypeTokenToAST(info.lastToken.symbol), "", info);
+			auto paramNode = AddToTree(TypeTokenToAST(info.lastToken.symbol), "", paramsNode);
 
 			Expect(TokenSymbol::Identifier, info);
-			AddTerminalNode(ASTNodeSymbol::Identifier, info.lastToken.attribute, info);
+			AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, paramNode);
 
-			UpNode(info);
 			if (!Accept(TokenSymbol::Comma, info))
 				break;
 			ExpectType(TokenType::Type, info);
@@ -483,38 +441,34 @@ void Function(ASTNodeSymbol type, ParserInfo& info)
 
 	// Exit params
 	Expect(TokenSymbol::CloseParenthesis, info);
-	UpNode(info);
 
 	// Scope
-	Scope(info);
+	AddToTree(Scope(info), functionNode);
 
-	// Get out of function
-	UpNode(info);
-	*/
+	return functionNode;
 }
 
 void Program(ParserInfo& info)
 {
-	bool newStuff = true;
-	while (newStuff)
+	while (true)
 	{
-		newStuff = false;
-
 		if (Ended(info))
 			break;
 
 		// Vertex output data struct
 		if (Accept(TokenSymbol::VertexOutput, info))
 		{
-			VertexOutput(info);
-			newStuff = true;
+			auto node = VertexOutput(info);
+			AddToTree(node, info.tree);
 		}
 		// Function
 		else if (AcceptType(TokenType::Type, info))
 		{
-			Function(TypeTokenToAST(info.lastToken.symbol), info);
-			newStuff = true;
+			auto node = Function(TypeTokenToAST(info.lastToken.symbol), info);
+			AddToTree(node, info.tree);
 		}
+		// No more stuff to parse, program ended
+		else break;
 	}
 }
 
@@ -533,17 +487,12 @@ void PrintTree(ASTNode* node, int depth = 0)
 
 void Magma::Framework::Graphics::MSL::Compiler::RunParser()
 {
-	m_astTree.symbol = ASTNodeSymbol::Program;
-	m_astTree.attribute = "";
-	m_astTree.parent = nullptr;
-	m_astTree.next = nullptr;
-	m_astTree.firstChild = nullptr;
-	m_astTree.lastChild = nullptr;
-	ParserInfo info = { m_tokens.begin(), m_tokens, m_astTree, &m_astTree, {} };
+	if (m_astTree != nullptr)
+		DestroyTree(m_astTree);
+	m_astTree = CreateTree(ASTNodeSymbol::Program, "");
 
-	//Program(info);
-	AddToTree(Expression(info), &m_astTree);
-
-	PrintTree(&m_astTree);
+	ParserInfo info = { m_tokens.begin(), m_tokens, m_astTree, {} };
+	Program(info);
+	PrintTree(m_astTree);
 	getchar();
 }

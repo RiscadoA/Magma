@@ -7,6 +7,14 @@ Magma::Framework::Graphics::MSL::Compiler::Compiler(int major, int minor, int pa
 	m_major = major;
 	m_minor = minor;
 	m_patch = patch;
+
+	m_astTree = nullptr;
+}
+
+Magma::Framework::Graphics::MSL::Compiler::~Compiler()
+{
+	if (m_astTree != nullptr)
+		DestroyTree(m_astTree);
 }
 
 void Magma::Framework::Graphics::MSL::Compiler::Load(const std::string & code)
@@ -77,4 +85,51 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		default:
 			return TokenType::Invalid;
 	}
+}
+
+ASTNode * Magma::Framework::Graphics::MSL::CreateTree(ASTNodeSymbol symbol, const std::string & attribute)
+{
+	auto node = new ASTNode();
+	node->symbol = symbol;
+	node->attribute = attribute;
+	node->parent = nullptr;
+	node->firstChild = nullptr;
+	node->lastChild = nullptr;
+	node->next = nullptr;
+	return node;
+}
+
+void Magma::Framework::Graphics::MSL::AddToTree(ASTNode * node, ASTNode * tree)
+{
+	if (tree->lastChild == nullptr)
+		tree->firstChild = tree->lastChild = node;
+	else
+	{
+		tree->lastChild->next = node;
+		tree->lastChild = node;
+	}
+}
+
+ASTNode * Magma::Framework::Graphics::MSL::AddToTree(ASTNodeSymbol symbol, const std::string & attribute, ASTNode * tree)
+{
+	auto node = new ASTNode();
+	node->symbol = symbol;
+	node->attribute = attribute;
+	node->firstChild = nullptr;
+	node->lastChild = nullptr;
+	node->next = nullptr;
+	AddToTree(node, tree);
+	return node;
+}
+
+void Magma::Framework::Graphics::MSL::DestroyTree(ASTNode * node)
+{
+	ASTNode* c = node->firstChild;
+	while (c != nullptr)
+	{
+		DestroyTree(c);
+		c = c->next;
+	}
+
+	delete node;
 }
