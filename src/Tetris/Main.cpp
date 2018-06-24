@@ -27,7 +27,7 @@ void Main(int argc, char** argv) try
 	{
 		std::string source = R"msl(
 		#version 1.0.0
-
+		
 		#define COLOR_R 1.0
 
 		VertexOutput vertexOut
@@ -37,7 +37,7 @@ void Main(int argc, char** argv) try
 
 		vec4 VertexShader(vec3 position)
 		{
-			return vec4(position.x, position.y, position.z, 1.0);
+			return vec4)(position.x, position.y, position.z, 1.0);
 		}
 
 		vec4 PixelShader()

@@ -17,8 +17,10 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 
 	// Remove comments
 	std::stringstream in(m_code);
-	std::string line;
+	
 	{
+		std::string line;
+		int lineCount = 0;
 		bool multiLineComment = false;
 		while (std::getline(in, line))
 		{
@@ -44,6 +46,8 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 			}
 
 			out << std::endl;
+			m_realCodeLines.push_back(lineCount);
+			++lineCount;
 		}
 	}
 
@@ -58,6 +62,7 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 
 	{
 		std::string line;
+		int lineCount = 0;
 		while (std::getline(in, line))
 		{
 			// Check version
@@ -80,6 +85,9 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 					ss << "Unsupported minor version '" << regMatch.str(1) << "." << regMatch.str(2) << "." << regMatch.str(3) << "'; current version is '" << m_major << "." << m_minor << "." << m_patch << "'" << std::endl;
 					throw std::runtime_error(ss.str());
 				}
+
+				m_realCodeLines.erase(m_realCodeLines.begin() + (lineCount - 1));
+				--lineCount;
 			}
 			else if (std::regex_match(line, regMatch, defineRegex))
 			{
@@ -90,8 +98,12 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 					ss << "Failed to compile MSL code:" << std::endl;
 					ss << "Preprocessor stage failed:" << std::endl;
 					ss << "A preprocessor definition cannot reference itself: #define " << regMatch.str(1) << " " << regMatch.str(2) << std::endl;
+					ss << "Line: " << m_realCodeLines[lineCount - 1] << std::endl;
 					throw std::runtime_error(ss.str());
 				}
+
+				m_realCodeLines.erase(m_realCodeLines.begin() + (lineCount - 1));
+				--lineCount;
 			}
 			else
 			{
@@ -107,7 +119,10 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 				}
 
 				out << line << std::endl;
+
 			}
+
+			++lineCount;
 		}
 	}
 

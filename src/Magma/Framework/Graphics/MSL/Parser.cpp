@@ -137,7 +137,8 @@ void Expect(TokenSymbol symbol, ParserInfo& info)
 	ss << "Failed to compile MSL code:" << std::endl;
 	ss << "Parser stage failed:" << std::endl;
 	ss << "Unexpected token '" << (int)info.it->symbol << "' \"" << info.it->attribute << "\" on line " << info.it->line << std::endl;
-	ss << "Expected token symbol '" << (int)symbol << "'";
+	ss << "Expected token symbol '" << (int)symbol << "'" << std::endl;
+	ss << "Line: " << info.it->line;
 	throw std::runtime_error(ss.str());
 }
 
@@ -149,7 +150,8 @@ void ExpectType(TokenType type, ParserInfo& info)
 	ss << "Failed to compile MSL code:" << std::endl;
 	ss << "Parser stage failed:" << std::endl;
 	ss << "Unexpected token type '" << (int)info.it->type << "' \"" << info.it->attribute << "\" on line " << info.it->line << std::endl;
-	ss << "Expected token type '" << (int)type << "'";
+	ss << "Expected token type '" << (int)type << "'" << std::endl;
+	ss << "Line: " << info.it->line;
 	throw std::runtime_error(ss.str());
 }
 

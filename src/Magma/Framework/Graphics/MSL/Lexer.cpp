@@ -75,7 +75,7 @@ void Magma::Framework::Graphics::MSL::Compiler::RunLexer()
 					token.symbol = r.second;
 					token.type = GetTokenType(token.symbol);
 					token.attribute = match.size() > 1 ? match.str(1) : "";
-					token.line = line;
+					token.line = m_realCodeLines[line];
 					m_tokens.push_back(token);
 					it += match.length();
 					break;

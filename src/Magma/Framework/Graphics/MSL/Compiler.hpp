@@ -226,6 +226,7 @@ namespace Magma
 					void RunPreprocessor();
 					void RunLexer();
 					void RunParser();
+					void ExtractInfo();
 
 					inline const std::string& GetOutput() const { return m_output; }
 
@@ -234,6 +235,7 @@ namespace Magma
 
 					std::string m_code;
 					std::string m_output;
+					std::vector<int> m_realCodeLines;
 
 					std::vector<Token> m_tokens;
 
