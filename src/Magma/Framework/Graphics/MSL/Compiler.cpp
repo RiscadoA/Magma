@@ -28,6 +28,8 @@ void Magma::Framework::Graphics::MSL::Compiler::Compile()
 	this->RunPreprocessor();
 	this->RunLexer();
 	this->RunParser();
+	this->ExtractInfo();
+	this->GenerateCode();
 }
 
 TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
@@ -84,6 +86,63 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		// Unknown
 		default:
 			return TokenType::Invalid;
+	}
+}
+
+ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
+{
+	switch (symbol)
+	{
+		// Object
+		case ASTNodeSymbol::Program:
+		case ASTNodeSymbol::Params:
+		case ASTNodeSymbol::Scope:
+		case ASTNodeSymbol::Function:
+		case ASTNodeSymbol::Statement:
+		case ASTNodeSymbol::Constructor:
+		case ASTNodeSymbol::VertexOutput:
+			return ASTNodeType::Object;
+
+		// Identifier
+		case ASTNodeSymbol::Identifier:
+			return ASTNodeType::Identifier;
+
+		// Literals
+		case ASTNodeSymbol::IntLiteral:
+		case ASTNodeSymbol::FloatLiteral:
+			return ASTNodeType::Literal;
+
+		// Types
+		case ASTNodeSymbol::Int:
+		case ASTNodeSymbol::Float:
+		case ASTNodeSymbol::Vec2:
+		case ASTNodeSymbol::Vec3:
+		case ASTNodeSymbol::Vec4:
+		case ASTNodeSymbol::IVec2:
+		case ASTNodeSymbol::IVec3:
+		case ASTNodeSymbol::IVec4:
+		case ASTNodeSymbol::Mat2:
+		case ASTNodeSymbol::Mat3:
+		case ASTNodeSymbol::Mat4:
+			return ASTNodeType::Type;
+
+		// Operators
+		case ASTNodeSymbol::Add:
+		case ASTNodeSymbol::Sub:
+		case ASTNodeSymbol::Mul:
+		case ASTNodeSymbol::Div:
+		case ASTNodeSymbol::Mod:
+		case ASTNodeSymbol::Member:
+		case ASTNodeSymbol::Assignment:
+			return ASTNodeType::Operator;
+
+		// Reserved keywords
+		case ASTNodeSymbol::Return:
+			return ASTNodeType::Reserved;
+
+		// Unknown
+		default:
+			return ASTNodeType::Invalid;
 	}
 }
 

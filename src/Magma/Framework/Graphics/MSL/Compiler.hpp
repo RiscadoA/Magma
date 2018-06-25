@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 namespace Magma
 {
@@ -118,7 +120,7 @@ namespace Magma
 				{
 					Invalid = -1,
 
-					//	Program
+					//	Objects
 					Program				= 0x00,
 					Params				= 0x01,
 					Scope				= 0x02,
@@ -163,11 +165,29 @@ namespace Magma
 				};
 
 				/// <summary>
+				///		AST node types
+				/// </summary>
+				enum class ASTNodeType
+				{
+					Invalid				= -1,
+
+					Object				= 0x00,
+					Identifier			= 0x01,
+					Literal				= 0x02,
+					Type				= 0x03,
+					Operator			= 0x04,
+					Reserved			= 0x05,
+
+					Count
+				};
+
+				/// <summary>
 				///		Represents a node on the abstract syntax tree
 				/// </summary>
 				struct ASTNode
 				{
 					ASTNodeSymbol symbol;
+					ASTNodeType type;
 					std::string attribute;
 					ASTNode* firstChild;
 					ASTNode* lastChild;
@@ -181,6 +201,13 @@ namespace Magma
 				/// <param name="symbol">Token symbol</param>
 				/// <returns>Token type</returns>
 				TokenType GetTokenType(TokenSymbol symbol);
+
+				/// <summary>
+				///		Gets the type of a AST node symbol
+				/// </summary>
+				/// <param name="symbol">AST node symbol</param>
+				/// <returns>AST node type</returns>
+				ASTNodeType GetNodeType(ASTNodeSymbol symbol);
 
 				/// <summary>
 				///		Creates an abstract syntax tree node
@@ -212,6 +239,44 @@ namespace Magma
 				void DestroyTree(ASTNode* node);
 
 				/// <summary>
+				///		Stores info about an identifier declaration
+				/// </summary>
+				struct Identifier
+				{
+					enum class Type
+					{
+						Invalid = -1,
+
+						VertexOutput,
+						Function,
+						Parameter,
+						Variable,
+
+						Count
+					} type;
+					ASTNode* node;
+				};
+
+				/// <summary>
+				///		Holds data about a variable declaration
+				/// </summary>
+				struct VariableDeclaration
+				{
+					ASTNodeSymbol type;
+					std::string name;
+				};
+
+				/// <summary>
+				///		Function declaration data
+				/// </summary>
+				struct FunctionDeclaration
+				{
+					ASTNodeSymbol returnType;
+					std::vector<VariableDeclaration> params;
+					ASTNode* scope;
+				};
+
+				/// <summary>
 				///		Abstract class for compiling MSL
 				/// </summary>
 				class Compiler
@@ -227,6 +292,7 @@ namespace Magma
 					void RunLexer();
 					void RunParser();
 					void ExtractInfo();
+					virtual void GenerateCode() = 0;
 
 					inline const std::string& GetOutput() const { return m_output; }
 
@@ -236,8 +302,12 @@ namespace Magma
 					std::string m_code;
 					std::string m_output;
 					std::vector<int> m_realCodeLines;
-
 					std::vector<Token> m_tokens;
+
+				protected:
+					std::string m_vertexOutID;
+					std::vector<VariableDeclaration> m_vertexOut;
+					std::unordered_map<std::string, FunctionDeclaration> m_functions;
 
 					ASTNode* m_astTree;
 				};

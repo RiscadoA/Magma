@@ -5,3 +5,8 @@ Magma::Framework::Graphics::MSL::HLSLCompiler::HLSLCompiler()
 {
 
 }
+
+void Magma::Framework::Graphics::MSL::HLSLCompiler::GenerateCode()
+{
+
+}

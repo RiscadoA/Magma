@@ -217,7 +217,7 @@ ASTNode* Constructor(ASTNodeSymbol type, ParserInfo& info)
 	return constructorNode;
 }
 
-ASTNode* Identifier(ParserInfo& info)
+ASTNode* IdentifierFunc(ParserInfo& info)
 {
 	// Get identifier
 	Expect(TokenSymbol::Identifier, info);
@@ -248,7 +248,7 @@ ASTNode* Factor(ParserInfo& info)
 {
 	// <identifier>
 	if (Peek(info) == TokenSymbol::Identifier)
-		return Identifier(info); // Get identifier
+		return IdentifierFunc(info); // Get identifier
 
 	// ( <exp> )
 	else if (Accept(TokenSymbol::OpenParenthesis, info))
@@ -487,6 +487,18 @@ void PrintTree(ASTNode* node, int depth = 0)
 	}
 }
 
+void FixTree(ASTNode* n)
+{
+	n->type = GetNodeType(n->symbol);
+	ASTNode* c = n->firstChild;
+	while (c != nullptr)
+	{
+		FixTree(c);
+		c->parent = n;
+		c = c->next;
+	}
+}
+
 void Magma::Framework::Graphics::MSL::Compiler::RunParser()
 {
 	if (m_astTree != nullptr)
@@ -495,6 +507,6 @@ void Magma::Framework::Graphics::MSL::Compiler::RunParser()
 
 	ParserInfo info = { m_tokens.begin(), m_tokens, m_astTree, {} };
 	Program(info);
+	FixTree(m_astTree);
 	PrintTree(m_astTree);
-	getchar();
 }

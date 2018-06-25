@@ -19,6 +19,8 @@ namespace Magma
 				public:
 					GLSLCompiler();
 
+					virtual void GenerateCode() final;
+
 					/// <summary>
 					///		Sets the shader type to be compiled
 					/// </summary>

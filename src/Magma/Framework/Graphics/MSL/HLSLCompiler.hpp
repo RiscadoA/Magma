@@ -14,6 +14,8 @@ namespace Magma
 				{
 				public:
 					HLSLCompiler();
+
+					virtual void GenerateCode() final;
 				};
 			}
 		}

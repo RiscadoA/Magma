@@ -32,12 +32,13 @@ void Main(int argc, char** argv) try
 
 		VertexOutput vertexOut
 		{
-			
+			int test;
+			vec3 ok;
 		}
 
 		vec4 VertexShader(vec3 position)
 		{
-			return vec4)(position.x, position.y, position.z, 1.0);
+			return vec4(position.x, position.y, position.z, 1.0);
 		}
 
 		vec4 PixelShader()
