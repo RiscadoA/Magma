@@ -3,8 +3,6 @@
 #include <Config.hpp>
 
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-#include "MFXToHLSL.hpp"
-
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d11.h>

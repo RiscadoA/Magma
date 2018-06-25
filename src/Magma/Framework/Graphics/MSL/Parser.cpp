@@ -263,22 +263,52 @@ ASTNode* IdentifierFunc(ParserInfo& info)
 	Expect(TokenSymbol::Identifier, info);
 	auto id1 = CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute);
 
-	// While there are member access operations
-	while (true)
+	// Function call
+	if (Accept(TokenSymbol::OpenParenthesis, info))
 	{
-		if (Accept(TokenSymbol::Member, info))
-		{
-			// Create member operator
-			auto op = CreateTree(ASTNodeSymbol::Member, "");
+		id1->symbol = ASTNodeSymbol::Call;
+		AddToTree(ASTNodeSymbol::Identifier, id1->attribute, id1);
+		id1->attribute = "";
 
-			// Get second term
-			// Add identifiers to member operator
-			AddToTree(id1, op);
-			Expect(TokenSymbol::Identifier, info);
-			AddToTree(CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute), op);
-			id1 = op;
+		auto paramsNode = CreateTree(ASTNodeSymbol::Params, "");
+
+		if (Peek(info) != TokenSymbol::CloseParenthesis)
+		{
+			while (true)
+			{
+				// Add expressions as arguments
+				AddToTree(Expression(info), paramsNode);
+
+				// Stop getting arguments if next token isn't a comma
+				if (!Accept(TokenSymbol::Comma, info))
+					break;
+			}
 		}
-		else break;
+
+		Expect(TokenSymbol::CloseParenthesis, info);
+
+		AddToTree(paramsNode, id1);
+	}
+	// Simple identifier
+	else
+	{
+		// While there are member access operations
+		while (true)
+		{
+			if (Accept(TokenSymbol::Member, info))
+			{
+				// Create member operator
+				auto op = CreateTree(ASTNodeSymbol::Member, "");
+
+				// Get second term
+				// Add identifiers to member operator
+				AddToTree(id1, op);
+				Expect(TokenSymbol::Identifier, info);
+				AddToTree(CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute), op);
+				id1 = op;
+			}
+			else break;
+		}
 	}
 
 	return id1;

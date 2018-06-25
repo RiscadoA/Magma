@@ -116,10 +116,7 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 
 					// Access constant buffer
 					if (foundConstantBuffer)
-					{
 						generateExpression(f, expressionNode->firstChild->next, type, indentation, true);
-						//out << expressionNode->firstChild->next->attribute;
-					}
 					// Normal access
 					else
 					{
@@ -194,6 +191,63 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 				out << ") = (";
 				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
 				out << ")";
+			} break;
+			case ASTNodeSymbol::Call:
+			{
+				auto id = expressionNode->firstChild->attribute;
+				auto paramsNode = expressionNode->firstChild->next;
+
+				if (id == "Sample2D")
+				{
+					auto texNode = paramsNode->firstChild;
+					if (texNode == nullptr || texNode->symbol != ASTNodeSymbol::Identifier)
+					{
+						std::stringstream ss;
+						ss << "Failed to compile MSL code:" << std::endl;
+						ss << "Code generation stage failed:" << std::endl;
+						ss << "Couldn't call built in function \"Sample2D\":" << std::endl;
+						ss << "First parameter must be a 2D texture identfier";
+						throw std::runtime_error(ss.str());
+					}
+
+					if (m_2dtextures.find(texNode->attribute) == m_2dtextures.end())
+					{
+						std::stringstream ss;
+						ss << "Failed to compile MSL code:" << std::endl;
+						ss << "Code generation stage failed:" << std::endl;
+						ss << "Couldn't call built in function \"Sample2D\":" << std::endl;
+						ss << "No 2D texture \"" << texNode->attribute << "\" defined";
+						throw std::runtime_error(ss.str());
+					}
+
+					auto uvsNode = texNode->next;
+					if (uvsNode == nullptr)
+					{
+						std::stringstream ss;
+						ss << "Failed to compile MSL code:" << std::endl;
+						ss << "Code generation stage failed:" << std::endl;
+						ss << "Couldn't call built in function \"Sample2D\":" << std::endl;
+						ss << "Second parameter must be a vector containing the coordinates to sample the texture from";
+						throw std::runtime_error(ss.str());
+					}
+
+					out << "texture(" << texNode->attribute << ", (";
+					generateExpression(f, uvsNode, type, indentation, false);
+					out << "))";
+				}
+				else
+				{
+					out << "function_" << id << "(";
+					auto param = paramsNode->firstChild;
+					while (param != nullptr)
+					{
+						generateExpression(f, param, type, indentation, false);
+						if (param != paramsNode->lastChild)
+							out << ", ";
+						param = paramsNode->next;
+					}
+					out << ")";
+				}
 			} break;
 		}
 	};

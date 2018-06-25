@@ -87,6 +87,15 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 			throw std::runtime_error(ss.str());
 		}
 
+		if (id == "texture")
+		{
+			std::stringstream ss;
+			ss << "Failed to compile MSL code:" << std::endl;
+			ss << "Info extraction stage failed:" << std::endl;
+			ss << "A 2D texture cannot be named as \"texture\", since it is a reserved keyword" << std::endl;
+			throw std::runtime_error(ss.str());
+		}
+
 		m_2dtextures.insert(id);
 	};
 

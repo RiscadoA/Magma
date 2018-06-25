@@ -7,16 +7,16 @@
 
 using namespace Magma;
 
-void Main(int argc, char** argv) try
+void Main(int argc, char** argv)// try
 {
 	/*Framework::Graphics::MSL::GLSLCompiler compiler;
 
 	compiler.Load(R"msl(
-		#version 1.0.0
+		#version 1.2.0
 		
 		#define COLOR_R 1.0
 
-		Texture2D texture;
+		Texture2D difTexture;
 
 		ConstantBuffer cBuffer
 		{
@@ -25,6 +25,7 @@ void Main(int argc, char** argv) try
 
 		VertexOutput vertexOut
 		{
+			vec2 uvs;
 			vec4 color;
 		}
 		
@@ -33,15 +34,16 @@ void Main(int argc, char** argv) try
 			return x;
 		}
 
-		vec4 VertexShader(vec3 position, vec4 color)
+		vec4 VertexShader(vec3 position, vec2 uvs, vec4 color)
 		{
+			vertexOut.uvs = uvs;
 			vertexOut.color = color;
 			return cBuffer.mvp * vec4(position.xyz, 1.0);
 		}
 		
 		vec4 PixelShader()
 		{
-			return vertexOut.color;
+			return Sample2D(difTexture, vertexOut.uvs) * vertexOut.color;
 		}
 		
 		)msl"
@@ -79,6 +81,10 @@ void Main(int argc, char** argv) try
 		std::string source = R"msl(
 		#version 1.2.0
 		
+		#define COLOR_R 1.0
+
+		Texture2D texture0;
+
 		ConstantBuffer transform
 		{
 			mat4 mvp;
@@ -86,23 +92,25 @@ void Main(int argc, char** argv) try
 
 		VertexOutput vertexOut
 		{
+			vec2 uvs;
 			vec4 color;
 		}
 		
-		float test(float x)
+		int test(int x)
 		{
 			return x;
 		}
 
-		vec4 VertexShader(vec3 position, vec4 color)
+		vec4 VertexShader(vec3 position, vec2 uvs, vec4 color)
 		{
+			vertexOut.uvs = uvs;
 			vertexOut.color = color;
 			return transform.mvp * vec4(position.xyz, 1.0);
 		}
 		
 		vec4 PixelShader()
 		{
-			return vertexOut.color;
+			return Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
 		}
 		
 		)msl";
@@ -121,10 +129,10 @@ void Main(int argc, char** argv) try
 	{
 		float data[] =
 		{
-			-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
-			-0.5f, +0.5f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
-			+0.5f, +0.5f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
-			+0.5f, -0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			-0.5f, -0.5f, 0.0f,		0.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			-0.5f, +0.5f, 0.0f,		0.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+0.5f, +0.5f, 0.0f,		1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			+0.5f, -0.5f, 0.0f,		1.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
 		Framework::Graphics::VertexLayout layout;
@@ -134,11 +142,16 @@ void Main(int argc, char** argv) try
 		layout.elements.back().offset = 0;
 
 		layout.elements.emplace_back();
-		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float4;
-		layout.elements.back().name = "color";
+		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float2;
+		layout.elements.back().name = "uvs";
 		layout.elements.back().offset = sizeof(float) * 3;
 
-		layout.size = sizeof(float) * 3 + sizeof(float) * 4;
+		layout.elements.emplace_back();
+		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float4;
+		layout.elements.back().name = "color";
+		layout.elements.back().offset = sizeof(float) * 3 + sizeof(float) * 2;
+
+		layout.size = sizeof(float) * 3 + sizeof(float) * 2 + sizeof(float) * 4;
 
 		vb = context->CreateVertexBuffer(data, sizeof(data), layout, program);
 	}
@@ -161,6 +174,34 @@ void Main(int argc, char** argv) try
 		transformcb = context->CreateConstantBuffer(nullptr, sizeof(glm::mat4));
 	}
 
+	// Create texture
+	void* texture = nullptr;
+	{
+		float data[] =
+		{
+			1.0f, 0.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+		};
+
+		texture = context->CreateTexture2D(data, 2, 2, Framework::Graphics::TextureFormat::RGBA32Float);
+	}
+
+	// Create sampler
+	void* sampler = nullptr;
+	{
+		Framework::Graphics::SamplerSettings settings;
+
+		settings.adressU = Framework::Graphics::TextureAdressMode::Border;
+		settings.adressV = Framework::Graphics::TextureAdressMode::Border;
+		settings.minFilter = Framework::Graphics::TextureFilter::Nearest;
+		settings.magFilter = Framework::Graphics::TextureFilter::Nearest;
+		settings.borderColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		sampler = context->CreateSampler(settings);
+	}
+
 	glm::mat4 model, view, proj;
 	glm::mat4 mvp;
 
@@ -171,6 +212,7 @@ void Main(int argc, char** argv) try
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	auto transformbp = context->GetConstantBindingPoint(program, "transform");
+	auto texturebp = context->GetTextureBindingPoint(program, "texture0");
 
 	while (running)
 	{
@@ -187,6 +229,8 @@ void Main(int argc, char** argv) try
 		context->BindVertexBuffer(vb);
 		context->BindIndexBuffer(ib);
 		context->BindConstantBuffer(transformcb, transformbp);
+		context->BindTexture2D(texture, texturebp);
+		context->BindSampler(sampler, texturebp);
 		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
 
 		context->SwapBuffers();
@@ -202,9 +246,9 @@ void Main(int argc, char** argv) try
 	delete context;
 	delete window;
 }
-catch (std::exception& e)
+/*catch (std::exception& e)
 {
 	std::cout << e.what() << std::endl;
 	getchar();
 	return;
-}
+}*/

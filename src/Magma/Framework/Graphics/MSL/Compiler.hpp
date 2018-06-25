@@ -165,6 +165,7 @@ namespace Magma
 					VertexOutput		= 0x1D,
 					Texture2D			= 0x1E,
 					ConstantBuffer		= 0x1F,
+					Call				= 0x20,
 				
 					Count
 				};
