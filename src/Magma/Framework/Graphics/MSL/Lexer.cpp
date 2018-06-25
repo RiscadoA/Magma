@@ -37,6 +37,8 @@ static const std::unordered_map<std::string, TokenSymbol> tokenRegexStrings
 
 	std::make_pair<std::string, TokenSymbol>("\\breturn\\b", TokenSymbol::Return),
 	std::make_pair<std::string, TokenSymbol>("\\bVertexOutput\\b", TokenSymbol::VertexOutput),
+	std::make_pair<std::string, TokenSymbol>("\\bTexture2D\\b", TokenSymbol::Texture2D),
+	std::make_pair<std::string, TokenSymbol>("\\bConstantBuffer\\b", TokenSymbol::ConstantBuffer),
 
 	std::make_pair<std::string, TokenSymbol>("\\b(\\d+)\\b", TokenSymbol::IntLiteral),
 	std::make_pair<std::string, TokenSymbol>("\\b(\\d+\\.\\d+)f?\\b", TokenSymbol::FloatLiteral),

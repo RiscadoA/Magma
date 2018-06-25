@@ -16,6 +16,13 @@ void Main(int argc, char** argv) try
 		
 		#define COLOR_R 1.0
 
+		Texture2D texture;
+
+		ConstantBuffer cBuffer
+		{
+			mat4 mvp;
+		}
+
 		VertexOutput vertexOut
 		{
 			vec4 color;
@@ -29,7 +36,7 @@ void Main(int argc, char** argv) try
 		vec4 VertexShader(vec3 position, vec4 color)
 		{
 			vertexOut.color = color;
-			return vec4(position.xyz, 1.0);
+			return cBuffer.mvp * vec4(position.xyz, 1.0);
 		}
 		
 		vec4 PixelShader()
@@ -72,12 +79,17 @@ void Main(int argc, char** argv) try
 		std::string source = R"msl(
 		#version 1.2.0
 		
+		ConstantBuffer transform
+		{
+			mat4 mvp;
+		}
+
 		VertexOutput vertexOut
 		{
 			vec4 color;
 		}
 		
-		int test(int x)
+		float test(float x)
 		{
 			return x;
 		}
@@ -85,7 +97,7 @@ void Main(int argc, char** argv) try
 		vec4 VertexShader(vec3 position, vec4 color)
 		{
 			vertexOut.color = color;
-			return vec4(position.xyz, 1.0);
+			return transform.mvp * vec4(position.xyz, 1.0);
 		}
 		
 		vec4 PixelShader()
@@ -143,18 +155,29 @@ void Main(int argc, char** argv) try
 		ib = context->CreateIndexBuffer(data, sizeof(data), Framework::Graphics::IndexFormat::UInt32);
 	}
 
+	// Create constant buffer
+	void* transformcb = nullptr;
+	{
+		transformcb = context->CreateConstantBuffer(nullptr, sizeof(glm::mat4));
+	}
+
 	glm::mat4 model, view, proj;
 	glm::mat4 mvp;
 
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(2.0f, 0.0f, -2.0f));
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 	view = glm::mat4(1.0f);
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
+	auto transformbp = context->GetConstantBindingPoint(program, "transform");
+
 	while (running)
 	{
 		window->PollEvents();
+
+		mvp = proj * view * model;
+		context->UpdateConstantBuffer(transformcb, &mvp[0][0]);
 
 		context->SetRenderTarget(nullptr);
 		context->SetClearColor(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
@@ -163,6 +186,7 @@ void Main(int argc, char** argv) try
 		context->BindProgram(program);
 		context->BindVertexBuffer(vb);
 		context->BindIndexBuffer(ib);
+		context->BindConstantBuffer(transformcb, transformbp);
 		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
 
 		context->SwapBuffers();

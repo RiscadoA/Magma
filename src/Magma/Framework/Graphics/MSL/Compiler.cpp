@@ -5,7 +5,7 @@
 using namespace Magma::Framework::Graphics::MSL;
 
 const int Major = 1;
-const int Minor = 2;
+const int Minor = 3;
 const int Patch = 0;
 
 Magma::Framework::Graphics::MSL::Compiler::Compiler(int major, int minor, int patch)
@@ -103,6 +103,8 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		// Reserved keywords
 		case TokenSymbol::Return:
 		case TokenSymbol::VertexOutput:
+		case TokenSymbol::Texture2D:
+		case TokenSymbol::ConstantBuffer:
 			return TokenType::Reserved;
 
 		// Unknown
@@ -123,6 +125,9 @@ ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
 		case ASTNodeSymbol::Statement:
 		case ASTNodeSymbol::Constructor:
 		case ASTNodeSymbol::VertexOutput:
+		case ASTNodeSymbol::Declaration:
+		case ASTNodeSymbol::Texture2D:
+		case ASTNodeSymbol::ConstantBuffer:
 			return ASTNodeType::Object;
 
 		// Identifier

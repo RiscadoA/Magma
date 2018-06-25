@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <map>
 #include <unordered_map>
+#include <set>
 
 namespace Magma
 {
@@ -81,6 +81,8 @@ namespace Magma
 					// Reserved keywords
 					Return				= 0x1B,
 					VertexOutput		= 0x1C,
+					Texture2D			= 0x1D,
+					ConstantBuffer		= 0x1E,
 
 					Count
 				};
@@ -127,41 +129,42 @@ namespace Magma
 					Function			= 0x03,
 					Statement			= 0x04,
 					Constructor			= 0x05,
+					Declaration			= 0x06,
 
 					// Identifier (variable names, function names, etc)
-					Identifier			= 0x06,
+					Identifier			= 0x07,
 
 					// Literals
-					IntLiteral			= 0x07,
-					FloatLiteral		= 0x08,
+					IntLiteral			= 0x08,
+					FloatLiteral		= 0x09,
 
 					// Type keywords
-					Int					= 0x09,
-					Float				= 0x0A,
-					Vec2				= 0x0B,
-					Vec3				= 0x0C,
-					Vec4				= 0x0D,
-					IVec2				= 0x0E,
-					IVec3				= 0x0F,
-					IVec4				= 0x10,
-					Mat2				= 0x11,
-					Mat3				= 0x12,
-					Mat4				= 0x13,
+					Int					= 0x0A,
+					Float				= 0x0B,
+					Vec2				= 0x0C,
+					Vec3				= 0x0D,
+					Vec4				= 0x0E,
+					IVec2				= 0x0F,
+					IVec3				= 0x10,
+					IVec4				= 0x11,
+					Mat2				= 0x12,
+					Mat3				= 0x13,
+					Mat4				= 0x14,
 
 					// Operators
-					Add					= 0x14,
-					Sub					= 0x15,
-					Mul					= 0x16,
-					Div					= 0x17,
-					Mod					= 0x18,
-					Member				= 0x19,
-					Assignment			= 0x1A,
+					Add					= 0x15,
+					Sub					= 0x16,
+					Mul					= 0x17,
+					Div					= 0x18,
+					Mod					= 0x19,
+					Member				= 0x1A,
+					Assignment			= 0x1B,
 					
 					// Reserved keywords
-					Return				= 0x1B,
-					VertexOutput		= 0x1C,
-
-					Declaration			= 0x1D,
+					Return				= 0x1C,
+					VertexOutput		= 0x1D,
+					Texture2D			= 0x1E,
+					ConstantBuffer		= 0x1F,
 				
 					Count
 				};
@@ -308,6 +311,8 @@ namespace Magma
 				protected:
 					std::string m_output;
 					std::string m_vertexOutID;
+					std::set<std::string> m_2dtextures;
+					std::unordered_map<std::string, std::vector<VariableDeclaration>> m_constantBuffers;
 					std::vector<VariableDeclaration> m_vertexOut;
 					std::unordered_map<std::string, FunctionDeclaration> m_functions;
 

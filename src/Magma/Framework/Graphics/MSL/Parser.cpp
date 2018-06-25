@@ -183,6 +183,46 @@ ASTNode* VertexOutput(ParserInfo& info)
 	return vertexOutputNode;
 }
 
+ASTNode* Texture2D(ParserInfo& info)
+{
+	auto textureNode = CreateTree(ASTNodeSymbol::Texture2D, "");
+
+	// Get vertex output identifier
+	Expect(TokenSymbol::Identifier, info);
+	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, textureNode);
+	Expect(TokenSymbol::Semicolon, info);
+
+	return textureNode;
+}
+
+ASTNode* ConstantBuffer(ParserInfo& info)
+{
+	auto constantBufferNode = CreateTree(ASTNodeSymbol::ConstantBuffer, "");
+
+	// Get vertex output identifier
+	Expect(TokenSymbol::Identifier, info);
+	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, constantBufferNode);
+
+	Expect(TokenSymbol::OpenBrace, info);
+
+	// Get declarations
+	auto declarationsNode = AddToTree(ASTNodeSymbol::Scope, "", constantBufferNode);
+	while (AcceptType(TokenType::Type, info))
+	{
+		// Add declaration type
+		auto declarationNode = AddToTree(TypeTokenToAST(info.lastToken.symbol), "", declarationsNode);
+
+		Expect(TokenSymbol::Identifier, info);
+		AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, declarationNode);
+
+		Expect(TokenSymbol::Semicolon, info);
+	}
+
+	Expect(TokenSymbol::CloseBrace, info);
+
+	return constantBufferNode;
+}
+
 ASTNode* Expression(ParserInfo& info);
 
 ASTNode* Constructor(ASTNodeSymbol type, ParserInfo& info)
@@ -275,6 +315,8 @@ ASTNode* Factor(ParserInfo& info)
 	// <literal>
 	else if (AcceptType(TokenType::Literal, info))
 		return CreateTree(LiteralTokenToAST(info.lastToken.symbol), info.lastToken.attribute);
+
+	throw std::runtime_error("INVALID FACTOR");
 }
 
 ASTNode* Term(ParserInfo& info)
@@ -474,8 +516,20 @@ void Program(ParserInfo& info)
 		if (Ended(info))
 			break;
 
+		// Texture 2D
+		if (Accept(TokenSymbol::Texture2D, info))
+		{
+			auto node = Texture2D(info);
+			AddToTree(node, info.tree);
+		}
 		// Vertex output data struct
-		if (Accept(TokenSymbol::VertexOutput, info))
+		else if (Accept(TokenSymbol::ConstantBuffer, info))
+		{
+			auto node = ConstantBuffer(info);
+			AddToTree(node, info.tree);
+		}
+		// Vertex output data struct
+		else if (Accept(TokenSymbol::VertexOutput, info))
 		{
 			auto node = VertexOutput(info);
 			AddToTree(node, info.tree);
