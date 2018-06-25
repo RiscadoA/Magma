@@ -56,6 +56,7 @@ void Magma::Framework::Graphics::MSL::Compiler::RunLexer()
 	} ();
 	
 	// Match token regexes to get the tokens
+	m_tokens.clear();
 	int line = 1;
 	std::match_results<std::string::iterator> match;
 	auto it = m_code.begin();

@@ -1,12 +1,34 @@
 #include "Compiler.hpp"
 
+#include <sstream>
+
 using namespace Magma::Framework::Graphics::MSL;
+
+const int Major = 1;
+const int Minor = 2;
+const int Patch = 0;
 
 Magma::Framework::Graphics::MSL::Compiler::Compiler(int major, int minor, int patch)
 {
 	m_major = major;
 	m_minor = minor;
 	m_patch = patch;
+
+	if (Major != m_major)
+	{
+		std::stringstream ss;
+		ss << "Failed to create MSL compiler:" << std::endl;
+		ss << "Unsupported major version '" << m_major << "." << m_minor << "." << m_patch << "'; current version is '" << Major << "." << Minor << "." << Patch << "'" << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
+	if (Minor != m_minor)
+	{
+		std::stringstream ss;
+		ss << "Failed to create MSL compiler:" << std::endl;
+		ss << "Unsupported minor version '" << m_major << "." << m_minor << "." << m_patch << "'; current version is '" << Major << "." << Minor << "." << Patch << "'" << std::endl;
+		throw std::runtime_error(ss.str());
+	}
 
 	m_astTree = nullptr;
 }
@@ -186,8 +208,9 @@ void Magma::Framework::Graphics::MSL::DestroyTree(ASTNode * node)
 	ASTNode* c = node->firstChild;
 	while (c != nullptr)
 	{
+		auto n = c->next;
 		DestroyTree(c);
-		c = c->next;
+		c = n;
 	}
 
 	delete node;

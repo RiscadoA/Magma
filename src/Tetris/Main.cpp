@@ -1,5 +1,6 @@
 #include <Magma/Framework/Graphics/D3D11Context.hpp>
 #include <Magma/Framework/Graphics/GLContext.hpp>
+#include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,6 +9,49 @@ using namespace Magma;
 
 void Main(int argc, char** argv) try
 {
+	/*Framework::Graphics::MSL::GLSLCompiler compiler;
+
+	compiler.Load(R"msl(
+		#version 1.0.0
+		
+		#define COLOR_R 1.0
+
+		VertexOutput vertexOut
+		{
+			vec4 color;
+		}
+		
+		int test(int x)
+		{
+			return x;
+		}
+
+		vec4 VertexShader(vec3 position, vec4 color)
+		{
+			vertexOut.color = color;
+			return vec4(position.xyz, 1.0);
+		}
+		
+		vec4 PixelShader()
+		{
+			return vertexOut.color;
+		}
+		
+		)msl"
+	);
+
+	compiler.SetShaderType(Framework::Graphics::ShaderType::Vertex);
+	compiler.Compile();
+	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
+	compiler.SetShaderType(Framework::Graphics::ShaderType::Pixel);
+	compiler.Compile();
+	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
+	getchar();
+
+	return;*/
+
+	// end test
+
 	bool running = true;
 
 	Framework::Input::Window* window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
@@ -26,24 +70,27 @@ void Main(int argc, char** argv) try
 	void* pixelShader = nullptr;
 	{
 		std::string source = R"msl(
-		#version 1.0.0
+		#version 1.2.0
 		
-		#define COLOR_R 1.0
-
 		VertexOutput vertexOut
 		{
-			int test;
-			vec3 ok;
+			vec4 color;
 		}
-
-		vec4 VertexShader(vec3 position)
+		
+		int test(int x)
 		{
-			return vec4(position.x, position.y, position.z, 1.0);
+			return x;
 		}
 
+		vec4 VertexShader(vec3 position, vec4 color)
+		{
+			vertexOut.color = color;
+			return vec4(position.xyz, 1.0);
+		}
+		
 		vec4 PixelShader()
 		{
-			return vec4(COLOR_R, COLOR_R, 0.0, 1.0);
+			return vertexOut.color;
 		}
 		
 		)msl";
@@ -62,10 +109,10 @@ void Main(int argc, char** argv) try
 	{
 		float data[] =
 		{
-			-1.0f, -1.0f, 0.0f,
-			-1.0f, +1.0f, 0.0f,
-			+1.0f, +1.0f, 0.0f,
-			+1.0f, -1.0f, 0.0f,
+			-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+			-0.5f, +0.5f, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+			+0.5f, +0.5f, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+			+0.5f, -0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
 		Framework::Graphics::VertexLayout layout;
@@ -74,7 +121,12 @@ void Main(int argc, char** argv) try
 		layout.elements.back().name = "position";
 		layout.elements.back().offset = 0;
 
-		layout.size = sizeof(float) * 3;
+		layout.elements.emplace_back();
+		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float4;
+		layout.elements.back().name = "color";
+		layout.elements.back().offset = sizeof(float) * 3;
+
+		layout.size = sizeof(float) * 3 + sizeof(float) * 4;
 
 		vb = context->CreateVertexBuffer(data, sizeof(data), layout, program);
 	}

@@ -375,6 +375,23 @@ ASTNode* Statement(ParserInfo& info)
 		// Expression
 		AddToTree(Expression(info), statementNode);
 	}
+	// If declaration
+	else if (AcceptType(TokenType::Type, info))
+	{
+		AddToTree(ASTNodeSymbol::Declaration, "", statementNode);
+		AddToTree(TypeTokenToAST(info.lastToken.symbol), "", statementNode);
+		// Get identifier
+		Expect(TokenSymbol::Identifier, info);
+		AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, statementNode);
+
+		if (Accept(TokenSymbol::Assignment, info))
+			AddToTree(Expression(info), statementNode);
+	}
+	// Else expression
+	else
+	{
+		AddToTree(Expression(info), statementNode);
+	}
 
 	// End statement
 	Expect(TokenSymbol::Semicolon, info);
@@ -508,5 +525,5 @@ void Magma::Framework::Graphics::MSL::Compiler::RunParser()
 	ParserInfo info = { m_tokens.begin(), m_tokens, m_astTree, {} };
 	Program(info);
 	FixTree(m_astTree);
-	PrintTree(m_astTree);
+	//PrintTree(m_astTree);
 }

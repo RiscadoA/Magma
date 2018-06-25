@@ -6,7 +6,8 @@ using namespace Magma::Framework::Graphics::MSL;
 
 void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 {
-	m_vertexOutID = "";
+	m_vertexOutID.clear();
+	m_vertexOutID = std::string();
 	m_vertexOut.clear();
 	m_functions.clear();
 
@@ -77,7 +78,7 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 		switch (n->symbol)
 		{
 			case ASTNodeSymbol::VertexOutput:
-				if (m_vertexOutID != "")
+				if (!m_vertexOutID.empty())
 				{
 					std::stringstream ss;
 					ss << "Failed to compile MSL code:" << std::endl;

@@ -160,6 +160,8 @@ namespace Magma
 					// Reserved keywords
 					Return				= 0x1B,
 					VertexOutput		= 0x1C,
+
+					Declaration			= 0x1D,
 				
 					Count
 				};
@@ -299,12 +301,12 @@ namespace Magma
 				private:
 					int m_major, m_minor, m_patch;
 
-					std::string m_code;
-					std::string m_output;
+					std::string m_code;				
 					std::vector<int> m_realCodeLines;
 					std::vector<Token> m_tokens;
 
 				protected:
+					std::string m_output;
 					std::string m_vertexOutID;
 					std::vector<VariableDeclaration> m_vertexOut;
 					std::unordered_map<std::string, FunctionDeclaration> m_functions;

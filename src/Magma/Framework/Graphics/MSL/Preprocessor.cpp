@@ -17,6 +17,7 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 
 	// Remove comments
 	std::stringstream in(m_code);
+	m_realCodeLines.clear();
 	
 	{
 		std::string line;
