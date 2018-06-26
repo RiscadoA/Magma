@@ -13,6 +13,9 @@ static std::pair<std::string, TokenSymbol> tokenRegexStrings[] =
 	std::make_pair<std::string, TokenSymbol>("\\b(\\d+)\\b", TokenSymbol::IntLiteral),
 	std::make_pair<std::string, TokenSymbol>("\\btrue\\b", TokenSymbol::True),
 	std::make_pair<std::string, TokenSymbol>("\\bfalse\\b", TokenSymbol::False),
+	std::make_pair<std::string, TokenSymbol>("\\bwhile\\b", TokenSymbol::While),
+	std::make_pair<std::string, TokenSymbol>("\\bdo\\b", TokenSymbol::Do),
+	std::make_pair<std::string, TokenSymbol>("\\bfor\\b", TokenSymbol::For),
 
 	std::make_pair<std::string, TokenSymbol>("\\{", TokenSymbol::OpenBrace),
 	std::make_pair<std::string, TokenSymbol>("\\}", TokenSymbol::CloseBrace),

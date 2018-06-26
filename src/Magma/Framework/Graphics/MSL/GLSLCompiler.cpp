@@ -190,9 +190,9 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 			} break;
 			case ASTNodeSymbol::Mod:
 			{
-				out << "(";
+				out << "mod(";
 				generateExpression(f, expressionNode->firstChild, type, indentation, false);
-				out << ") % (";
+				out << ", ";
 				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
 				out << ")";
 			} break;
@@ -246,6 +246,149 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 					out << "texture(" << texNode->attribute << ", (";
 					generateExpression(f, uvsNode, type, indentation, false);
 					out << "))";
+				}
+				else if (id == "cos")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "cos(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "sin")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "sin(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "tan")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "tan(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "acos")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "acos(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "asin")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "asin(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "atan")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "atan(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "radians")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "radians(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "degrees")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "degrees(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "pow")
+				{
+					auto expNode = paramsNode->firstChild;
+					auto exp2Node = expNode->next;
+					out << "pow(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ", ";
+					generateExpression(f, exp2Node, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "exp")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "exp(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "log")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "log(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "exp2")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "exp2(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "log2")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "log2(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "sqrt")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "sqrt(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "inversesqrt")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "inversesqrt(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "abs")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "abs(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "sign")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "sign(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "floor")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "floor(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "ceil")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "ceil(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "fract")
+				{
+					auto expNode = paramsNode->firstChild;
+					out << "fract(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ")";
 				}
 				else
 				{
@@ -337,6 +480,14 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 	std::function<void(const std::pair<std::string, FunctionDeclaration>&, ASTNode*, ShaderType, int)> generateStatement = [&, this](const std::pair<std::string, FunctionDeclaration>& f, ASTNode* statementNode, ShaderType type, int indentation) -> void
 	{
 		auto typeNode = statementNode->firstChild;
+		if (typeNode == nullptr)
+		{
+			for (int i = 0; i < indentation; ++i)
+				out << "\t";
+			out << ";" << std::endl;
+			return;
+		}
+
 		switch (typeNode->symbol)
 		{
 			case ASTNodeSymbol::Return:
@@ -422,6 +573,63 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 					else
 						generateScope(f, elseBody, type, indentation);
 				}
+			} break;
+			case ASTNodeSymbol::While:
+			{
+				auto exp = typeNode->next;
+				auto body = exp->next;
+
+				for (int i = 0; i < indentation; ++i)
+					out << "\t";
+				out << "while (";
+				generateExpression(f, exp, type, indentation, false);
+				out << ")" << std::endl;
+
+				if (body->symbol == ASTNodeSymbol::Statement)
+					generateStatement(f, body, type, indentation + 1);
+				else
+					generateScope(f, body, type, indentation);
+			} break;
+			case ASTNodeSymbol::Do:
+			{
+				auto body = typeNode->next;
+				auto exp = body->next;
+
+				for (int i = 0; i < indentation; ++i)
+					out << "\t";
+				out << "do" << std::endl;
+				if (body->symbol == ASTNodeSymbol::Statement)
+					generateStatement(f, body, type, indentation + 1);
+				else
+					generateScope(f, body, type, indentation);
+
+				for (int i = 0; i < indentation; ++i)
+					out << "\t";
+				out << "while (";
+				generateExpression(f, exp, type, indentation, false);
+				out << ");" << std::endl;
+				
+			} break;
+			case ASTNodeSymbol::For:
+			{
+				auto decl = typeNode->next;
+				auto cExp = decl->next;
+				auto iExp = cExp->next;
+				auto body = iExp->next;
+
+				for (int i = 0; i < indentation; ++i)
+					out << "\t";
+				out << "for (";
+				generateStatement(f, decl, type, indentation);
+				generateExpression(f, cExp, type, indentation, false);
+				out << "; ";
+				generateExpression(f, iExp, type, indentation, false);
+				out << ")" << std::endl;
+
+				if (body->symbol == ASTNodeSymbol::Statement)
+					generateStatement(f, body, type, indentation + 1);
+				else
+					generateScope(f, body, type, indentation);
 			} break;
 			default:
 				for (int i = 0; i < indentation; ++i)

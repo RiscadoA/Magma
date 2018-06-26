@@ -361,7 +361,12 @@ ASTNode* Factor(ParserInfo& info)
 	else if (AcceptType(TokenType::Literal, info))
 		return CreateTree(LiteralTokenToAST(info.lastToken.symbol), info.lastToken.attribute);
 
-	throw std::runtime_error("INVALID FACTOR - THIS SHOULD NOT HAPPEN");
+	std::stringstream ss;
+	ss << "Failed to compile MSL code:" << std::endl;
+	ss << "Parser stage failed:" << std::endl;
+	ss << "Couldn't parse factor:" << std::endl;
+	ss << "Line: " << info.it->line;
+	throw std::runtime_error(ss.str());
 }
 
 ASTNode* Term(ParserInfo& info)
@@ -514,6 +519,21 @@ ASTNode* Expression(ParserInfo& info)
 	return term1;
 }
 
+void AddDeclaration(ASTNode* statementNode, ParserInfo& info)
+{
+	ExpectType(TokenType::Type, info);
+	AddToTree(ASTNodeSymbol::Declaration, "", statementNode);
+	AddToTree(TypeTokenToAST(info.lastToken.symbol), "", statementNode);
+	// Get identifier
+	Expect(TokenSymbol::Identifier, info);
+	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, statementNode);
+
+	if (Accept(TokenSymbol::Assignment, info))
+		AddToTree(Expression(info), statementNode);
+	// End statement
+	Expect(TokenSymbol::Semicolon, info);
+}
+
 ASTNode* Statement(ParserInfo& info)
 {
 	// Start statement
@@ -536,19 +556,8 @@ ASTNode* Statement(ParserInfo& info)
 		Expect(TokenSymbol::Semicolon, info);
 	}
 	// If declaration
-	else if (AcceptType(TokenType::Type, info))
-	{
-		AddToTree(ASTNodeSymbol::Declaration, "", statementNode);
-		AddToTree(TypeTokenToAST(info.lastToken.symbol), "", statementNode);
-		// Get identifier
-		Expect(TokenSymbol::Identifier, info);
-		AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, statementNode);
-
-		if (Accept(TokenSymbol::Assignment, info))
-			AddToTree(Expression(info), statementNode);
-		// End statement
-		Expect(TokenSymbol::Semicolon, info);
-	}
+	else if (PeekType(info) == TokenType::Type)
+		AddDeclaration(statementNode, info);
 	// If "if" statement
 	else if (Accept(TokenSymbol::If, info))
 	{
@@ -575,12 +584,95 @@ ASTNode* Statement(ParserInfo& info)
 		}
 
 		/*
-			If
+			Statement
+				If
 				Expression
 				If Body
 				Else Body
 		*/
 	}
+	else if (Accept(TokenSymbol::While, info))
+	{
+		AddToTree(ASTNodeSymbol::While, "", statementNode);
+
+		// Add condition
+		Expect(TokenSymbol::OpenParenthesis, info);
+		AddToTree(Expression(info), statementNode);
+		Expect(TokenSymbol::CloseParenthesis, info);
+
+		// Add body
+		if (Peek(info) == TokenSymbol::OpenBrace)
+			AddToTree(Scope(info), statementNode);
+		else
+			AddToTree(Statement(info), statementNode);
+
+		/*
+			Statement
+				While
+				Expression
+				Body
+		*/
+	}
+	else if (Accept(TokenSymbol::Do, info))
+	{
+		AddToTree(ASTNodeSymbol::Do, "", statementNode);
+
+		// Add body
+		if (Peek(info) == TokenSymbol::OpenBrace)
+			AddToTree(Scope(info), statementNode);
+		else
+			AddToTree(Statement(info), statementNode);
+
+		// Add condition
+		Expect(TokenSymbol::While, info);
+		Expect(TokenSymbol::OpenParenthesis, info);
+		AddToTree(Expression(info), statementNode);
+		Expect(TokenSymbol::CloseParenthesis, info);
+		Expect(TokenSymbol::Semicolon, info);
+
+		/*
+		Statement
+			Do
+			Body
+			Expression
+		*/
+	}
+	else if (Accept(TokenSymbol::For, info))
+	{
+		AddToTree(ASTNodeSymbol::For, "", statementNode);
+		Expect(TokenSymbol::OpenParenthesis, info);
+
+		// Add declaration
+		auto declarationNode = AddToTree(ASTNodeSymbol::Statement, "", statementNode);
+		AddDeclaration(declarationNode, info);
+
+		// Add condition expression
+		AddToTree(Expression(info), statementNode);
+		
+		// Add expression
+		Expect(TokenSymbol::Semicolon, info);
+		AddToTree(Expression(info), statementNode);
+
+		Expect(TokenSymbol::CloseParenthesis, info);
+
+		// Add body
+		if (Peek(info) == TokenSymbol::OpenBrace)
+			AddToTree(Scope(info), statementNode);
+		else
+			AddToTree(Statement(info), statementNode);
+
+		/*
+		Statement
+			For
+			Declaration Statement
+			Expression
+			Expression
+			Body
+		*/
+	}
+	// If empty statement
+	else if(Accept(TokenSymbol::Semicolon, info))
+		;
 	// Else expression
 	else
 	{
@@ -588,8 +680,6 @@ ASTNode* Statement(ParserInfo& info)
 		// End statement
 		Expect(TokenSymbol::Semicolon, info);
 	}
-
-	
 
 	return statementNode;
 }

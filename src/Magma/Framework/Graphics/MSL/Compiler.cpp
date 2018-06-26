@@ -114,6 +114,9 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		case TokenSymbol::If:
 		case TokenSymbol::Else:
 		case TokenSymbol::Discard:
+		case TokenSymbol::While:
+		case TokenSymbol::Do:
+		case TokenSymbol::For:
 			return TokenType::Reserved;
 
 		// Conditional operators
@@ -198,6 +201,9 @@ ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
 		case ASTNodeSymbol::Return:
 		case ASTNodeSymbol::If:
 		case ASTNodeSymbol::Discard:
+		case ASTNodeSymbol::While:
+		case ASTNodeSymbol::Do:
+		case ASTNodeSymbol::For:
 			return ASTNodeType::Reserved;
 
 		// Unknown

@@ -6,18 +6,66 @@
 #include <unordered_map>
 #include <set>
 
+
+/*
+FEATURES:
+- C like syntax
+- Vector components swizzling (like GLSL)
+- Custom functions
+
+- DEFAULT FUNCTIONS:
+	- 'vec4 VertexShader(<vertex_attributes>)': Must be implemented by the shader, returns the vertex position in screen coordinates.
+	- '<type> PixelShader()': Must be implemented by the shader, returns the value to write to the buffer.
+	- 'vec4 Sample2D(Texture2D texture, vec2 uvs)': Samples a pixel on the coordinates 'uvs' from a 2D 'texture'.
+	- '<type> cos(<type> radians): Calculates the cosine of an angle in radians.
+	- '<type> sin(<type> radians): Calculates the sine of an angle in radians.
+	- '<type> tan(<type> radians): Calculates the tangent of an angle in radians.
+	- '<type> acos(<type> x): Calculates the arccosine of an angle in radians.
+	- '<type> asin(<type> x): Calculates the arcsine of an angle in radians.
+	- '<type> atan(<type> x): Calculates the arctangent of an angle in radians.
+	- '<type> radians(<type> degrees): Converts degrees to radians.
+	- '<type> degrees(<type> radians): Converts radians to degrees.
+	- '<type> pow(<type> x, <type> y): Returns x raised to the power of y.
+	- '<type> exp(<type> x): Returns the constant e raised to the power of x.
+	- '<type> log(<type> x): Returns the power to which the constant e has to be raised to produce x.
+	- '<type> exp2(<type> x): Returns 2 raised to the power of x.
+	- '<type> log2(<type> x): Returns the power to which 2 has to be raised to produce x.
+	- '<type> sqrt(<type> x): Returns the square root of x.
+	- '<type> inversesqrt(<type> x): Returns the inverse square root of x.
+	- '<type> abs(<type> x): Returns the absolute value of x.
+	- '<type> sign(<type> x): Returns the sign of x (1.0 when positive, -1.0 when negative and 0.0 when zero).
+	- '<type> floor(<type> x): Floors the value of x.
+	- '<type> ceil(<type> x): Ceils the value of x.
+	- '<type> fract(<type> x): Returns the fractional part of x (x - floor(x)).
+
+- OPERATIONS:
+	- '+';
+	- '-';
+	- '*';
+	- '/';
+	- '%';
+	- '=';
+	- '==';
+	- '!=';
+	- '>';
+	- '<';
+	- '>=';
+	- '<=';
+	- '&&';
+	- '||';
+	- '!';
+
+- FLOW CONTROL:
+	- 'return <expression>;': Sets the current function return value to the expression value and exits froom it.
+	- 'discard;': Discards the current pixel.
+	- 'while (<expression>) ...': Repeats a statement/scope as long as <expression> evaluates to true.
+	- 'do ... while (<expression>);': Repeats a statement/scope as long as <expression> evaluates to true.
+	- 'for (<declaration>;<expression_1>;<expression_2>) ...': Repeats a statement/scope as long as <expression_1> evaluates to 'true'.
+*/
+
 /*
 
 TO DO:
-
-- Update token conversion funcs
-- Add new tokens to lexer
-
-- Add if, else and discard to parser
-- Add not operator to parser
-- Add conditional operators to parser
-
-- Update GLSL compiler
 
 - Create HLSL compiler
 
@@ -109,14 +157,17 @@ namespace Magma
 					Discard					= 0x25,
 					True					= 0x26,
 					False					= 0x27,
+					While					= 0x28,
+					Do						= 0x29,
+					For						= 0x2A,
 
 					// Conditional operators
-					EqualTo					= 0x28,
-					NotEqualTo				= 0x29,
-					LessThan				= 0x2A,
-					GreaterThan				= 0x2B,
-					LessThanOrEqualTo		= 0x2C,
-					GreaterThanOrEqualTo	= 0x2D,
+					EqualTo					= 0x2B,
+					NotEqualTo				= 0x2C,
+					LessThan				= 0x2D,
+					GreaterThan				= 0x2E,
+					LessThanOrEqualTo		= 0x2F,
+					GreaterThanOrEqualTo	= 0x30,
 
 					Count
 				};
@@ -209,14 +260,17 @@ namespace Magma
 					Discard					= 0x26,
 					True					= 0x27,
 					False					= 0x28,
+					While					= 0x29,
+					Do						= 0x2A,
+					For						= 0x2B,
 
 					// Conditional operators
-					EqualTo					= 0x29,
-					NotEqualTo				= 0x2A,
-					LessThan				= 0x2B,
-					GreaterThan				= 0x2C,
-					LessThanOrEqualTo		= 0x2D,
-					GreaterThanOrEqualTo	= 0x2E,
+					EqualTo					= 0x2C,
+					NotEqualTo				= 0x2D,
+					LessThan				= 0x2E,
+					GreaterThan				= 0x2F,
+					LessThanOrEqualTo		= 0x30,
+					GreaterThanOrEqualTo	= 0x31,
 
 					Count
 				};

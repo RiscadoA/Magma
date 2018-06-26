@@ -1,5 +1,6 @@
 #include <Magma/Framework/Graphics/D3D11Context.hpp>
 #include <Magma/Framework/Graphics/GLContext.hpp>
+#include <Magma/Framework/Graphics/MSL/HLSLCompiler.hpp>
 #include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
 #include <iostream>
 
@@ -9,7 +10,8 @@ using namespace Magma;
 
 void Main(int argc, char** argv)// try
 {
-	/*Framework::Graphics::MSL::GLSLCompiler compiler;
+	//Framework::Graphics::MSL::GLSLCompiler compiler;
+	/*Framework::Graphics::MSL::HLSLCompiler compiler;
 
 	compiler.Load(R"msl(
 		#version 1.2.0
@@ -28,11 +30,6 @@ void Main(int argc, char** argv)// try
 			vec2 uvs;
 			vec4 color;
 		}
-		
-		int test(int x)
-		{
-			return x;
-		}
 
 		vec4 VertexShader(vec3 position, vec2 uvs, vec4 color)
 		{
@@ -43,27 +40,19 @@ void Main(int argc, char** argv)// try
 		
 		vec4 PixelShader()
 		{
+			float test = fract(sin(cos(tan(degrees(radians(exp2(pow(3, 2))))))));
 			vec4 color = Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
-			bool shouldDiscard = color.r == 1.0;
-			if (shouldDiscard == false)
-			{
-				discard;
-			}
-			else
-			{
-				color.r = 1.0;
-			}
 			return color;
 		}
 		
 		)msl"
 	);
 
-	compiler.SetShaderType(Framework::Graphics::ShaderType::Vertex);
+	//compiler.SetShaderType(Framework::Graphics::ShaderType::Vertex);
 	compiler.Compile();
 	compiler.PrintTree();
 	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
-	compiler.SetShaderType(Framework::Graphics::ShaderType::Pixel);
+	//compiler.SetShaderType(Framework::Graphics::ShaderType::Pixel);
 	compiler.Compile();
 	compiler.PrintTree();
 	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
