@@ -31,6 +31,7 @@ std::string TypeToGLType(ASTNodeSymbol type)
 		case ASTNodeSymbol::Mat2: return "mat2";
 		case ASTNodeSymbol::Mat3: return "mat3";
 		case ASTNodeSymbol::Mat4: return "mat4";
+		case ASTNodeSymbol::Bool: return "bool";
 		default:
 		{
 			std::stringstream ss;
@@ -46,12 +47,16 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 {
 	std::stringstream out;
 
+	std::function<void(const std::pair<std::string, FunctionDeclaration>&, ASTNode*, ShaderType, int)> generateScope;
+
 	std::function<void(const std::pair<std::string, FunctionDeclaration>&, ASTNode*, ShaderType, int, bool)> generateExpression = [&, this](const std::pair<std::string, FunctionDeclaration>& f, ASTNode* expressionNode, ShaderType type, int indentation, bool isMemberOp) -> void
 	{
 		switch (expressionNode->symbol)
 		{
 			case ASTNodeSymbol::IntLiteral: out << expressionNode->attribute; break;
 			case ASTNodeSymbol::FloatLiteral: out << expressionNode->attribute; break;
+			case ASTNodeSymbol::True: out << "true"; break;
+			case ASTNodeSymbol::False: out << "false"; break;
 			case ASTNodeSymbol::Identifier:
 			{
 				if (isMemberOp)
@@ -76,24 +81,9 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 						out << "param_" << expressionNode->attribute;
 					break;
 				}
-
-				is = false;
-				for (auto& v : m_vertexOut)
-					if (v.name == expressionNode->attribute)
-					{
-						is = true;
-						break;
-					}
-
-				if (is) // Is vertex output param
-				{
-					out << "vertexOut_" << expressionNode->attribute;
-					break;
-				}
-				else // Is local variable
-				{
-					out << "local_" << expressionNode->attribute;
-				}
+				
+				// Is local variable
+				out << "local_" << expressionNode->attribute;
 			} break;
 			case ASTNodeSymbol::Member:
 			{
@@ -146,19 +136,41 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 			} break;
 			case ASTNodeSymbol::Add:
 			{
-				out << "(";
-				generateExpression(f, expressionNode->firstChild, type, indentation, false);
-				out << ") + (";
-				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
-				out << ")";
+				// Is unary
+				if (expressionNode->firstChild->next == nullptr)
+				{
+					out << "+(";
+					generateExpression(f, expressionNode->firstChild, type, indentation, false);
+					out << ")";
+				}
+				// If is binary
+				else
+				{
+					out << "(";
+					generateExpression(f, expressionNode->firstChild, type, indentation, false);
+					out << ") + (";
+					generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+					out << ")";
+				}
 			} break;
 			case ASTNodeSymbol::Sub:
 			{
-				out << "(";
-				generateExpression(f, expressionNode->firstChild, type, indentation, false);
-				out << ") - (";
-				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
-				out << ")";
+				// Is unary
+				if (expressionNode->firstChild->next == nullptr)
+				{
+					out << "-(";
+					generateExpression(f, expressionNode->firstChild, type, indentation, false);
+					out << ")";
+				}
+				// If is binary
+				else
+				{
+					out << "(";
+					generateExpression(f, expressionNode->firstChild, type, indentation, false);
+					out << ") - (";
+					generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+					out << ")";
+				}
 			} break;
 			case ASTNodeSymbol::Mul:
 			{
@@ -249,10 +261,80 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 					out << ")";
 				}
 			} break;
+			case ASTNodeSymbol::Not:
+			{
+				out << "!(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::And:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") && (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::Or:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") || (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::EqualTo:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") == (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::NotEqualTo:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") != (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::LessThan:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") < (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::GreaterThan:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") > (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::LessThanOrEqualTo:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") <= (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
+			case ASTNodeSymbol::GreaterThanOrEqualTo:
+			{
+				out << "(";
+				generateExpression(f, expressionNode->firstChild, type, indentation, false);
+				out << ") >= (";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, false);
+				out << ")";
+			} break;
 		}
 	};
 
-	auto generateStatement = [&, this](const std::pair<std::string, FunctionDeclaration>& f, ASTNode* statementNode, ShaderType type, int indentation) -> void
+	std::function<void(const std::pair<std::string, FunctionDeclaration>&, ASTNode*, ShaderType, int)> generateStatement = [&, this](const std::pair<std::string, FunctionDeclaration>& f, ASTNode* statementNode, ShaderType type, int indentation) -> void
 	{
 		auto typeNode = statementNode->firstChild;
 		switch (typeNode->symbol)
@@ -290,6 +372,12 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 					out << ";" << std::endl;
 				}
 			} break;
+			case ASTNodeSymbol::Discard:
+			{
+				for (int i = 0; i < indentation; ++i)
+					out << "\t";
+				out << "discard;" << std::endl;
+			} break;
 			case ASTNodeSymbol::Declaration:
 			{
 				if (typeNode->next->next->next == nullptr)
@@ -307,6 +395,34 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 					out << ");" << std::endl;
 				}
 			} break;
+			case ASTNodeSymbol::If:
+			{
+				auto exp = typeNode->next;
+
+				for (int i = 0; i < indentation; ++i)
+					out << "\t";
+				out << "if (";
+				generateExpression(f, exp, type, indentation, false);
+				out << ")" << std::endl;
+
+				auto ifBody = exp->next;
+				if (ifBody->symbol == ASTNodeSymbol::Statement)
+					generateStatement(f, ifBody, type, indentation + 1);
+				else
+					generateScope(f, ifBody, type, indentation);
+
+				auto elseBody = ifBody->next;
+				if (elseBody != nullptr)
+				{
+					for (int i = 0; i < indentation; ++i)
+						out << "\t";
+					out << "else" << std::endl;
+					if (elseBody->symbol == ASTNodeSymbol::Statement)
+						generateStatement(f, elseBody, type, indentation + 1);
+					else
+						generateScope(f, elseBody, type, indentation);
+				}
+			} break;
 			default:
 				for (int i = 0; i < indentation; ++i)
 					out << "\t";
@@ -316,7 +432,7 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 		}
 	};
 	
-	std::function<void(const std::pair<std::string, FunctionDeclaration>&, ASTNode*, ShaderType, int)> generateScope = [&, this](const std::pair<std::string, FunctionDeclaration>& f, ASTNode* scopeNode, ShaderType type, int indentation) -> void
+	generateScope = [&, this](const std::pair<std::string, FunctionDeclaration>& f, ASTNode* scopeNode, ShaderType type, int indentation) -> void
 	{
 		for (int i = 0; i < indentation; ++i)
 			out << "\t";
@@ -420,5 +536,5 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 
 	m_output = out.str();
 
-	//std::cout << m_output << std::endl;
+	std::cout << m_output << std::endl;
 }

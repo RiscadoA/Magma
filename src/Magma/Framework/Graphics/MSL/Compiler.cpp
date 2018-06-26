@@ -74,6 +74,8 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		// Literals
 		case TokenSymbol::IntLiteral:
 		case TokenSymbol::FloatLiteral:
+		case TokenSymbol::True:
+		case TokenSymbol::False:
 			return TokenType::Literal;
 
 		// Types
@@ -88,6 +90,7 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		case TokenSymbol::Mat2:
 		case TokenSymbol::Mat3:
 		case TokenSymbol::Mat4:
+		case TokenSymbol::Bool:
 			return TokenType::Type;
 
 		// Operators
@@ -98,6 +101,9 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		case TokenSymbol::Mod:
 		case TokenSymbol::Member:
 		case TokenSymbol::Assignment:
+		case TokenSymbol::Not:
+		case TokenSymbol::And:
+		case TokenSymbol::Or:
 			return TokenType::Operator;
 
 		// Reserved keywords
@@ -105,7 +111,19 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		case TokenSymbol::VertexOutput:
 		case TokenSymbol::Texture2D:
 		case TokenSymbol::ConstantBuffer:
+		case TokenSymbol::If:
+		case TokenSymbol::Else:
+		case TokenSymbol::Discard:
 			return TokenType::Reserved;
+
+		// Conditional operators
+		case TokenSymbol::EqualTo:
+		case TokenSymbol::NotEqualTo:
+		case TokenSymbol::LessThan:
+		case TokenSymbol::GreaterThan:
+		case TokenSymbol::LessThanOrEqualTo:
+		case TokenSymbol::GreaterThanOrEqualTo:
+			return TokenType::ConditionalOperator;
 
 		// Unknown
 		default:
@@ -137,6 +155,8 @@ ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
 		// Literals
 		case ASTNodeSymbol::IntLiteral:
 		case ASTNodeSymbol::FloatLiteral:
+		case ASTNodeSymbol::True:
+		case ASTNodeSymbol::False:
 			return ASTNodeType::Literal;
 
 		// Types
@@ -151,6 +171,7 @@ ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
 		case ASTNodeSymbol::Mat2:
 		case ASTNodeSymbol::Mat3:
 		case ASTNodeSymbol::Mat4:
+		case ASTNodeSymbol::Bool:
 			return ASTNodeType::Type;
 
 		// Operators
@@ -161,10 +182,22 @@ ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
 		case ASTNodeSymbol::Mod:
 		case ASTNodeSymbol::Member:
 		case ASTNodeSymbol::Assignment:
+		case ASTNodeSymbol::Not:
 			return ASTNodeType::Operator;
+
+		// Conditional operators
+		case ASTNodeSymbol::EqualTo:
+		case ASTNodeSymbol::NotEqualTo:
+		case ASTNodeSymbol::GreaterThan:
+		case ASTNodeSymbol::LessThan:
+		case ASTNodeSymbol::GreaterThanOrEqualTo:
+		case ASTNodeSymbol::LessThanOrEqualTo:
+			return ASTNodeType::ConditionalOperator;
 
 		// Reserved keywords
 		case ASTNodeSymbol::Return:
+		case ASTNodeSymbol::If:
+		case ASTNodeSymbol::Discard:
 			return ASTNodeType::Reserved;
 
 		// Unknown

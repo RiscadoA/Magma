@@ -13,12 +13,12 @@ void Main(int argc, char** argv)// try
 
 	compiler.Load(R"msl(
 		#version 1.2.0
-		
+
 		#define COLOR_R 1.0
 
-		Texture2D difTexture;
+		Texture2D texture0;
 
-		ConstantBuffer cBuffer
+		ConstantBuffer transform
 		{
 			mat4 mvp;
 		}
@@ -36,14 +36,24 @@ void Main(int argc, char** argv)// try
 
 		vec4 VertexShader(vec3 position, vec2 uvs, vec4 color)
 		{
-			vertexOut.uvs = uvs;
-			vertexOut.color = color;
-			return cBuffer.mvp * vec4(position.xyz, 1.0);
+			//vertexOut.uvs = uvs;
+			//vertexOut.color = color;
+			return transform.mvp * vec4(position.xyz, 1.0);
 		}
 		
 		vec4 PixelShader()
 		{
-			return Sample2D(difTexture, vertexOut.uvs) * vertexOut.color;
+			vec4 color = Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
+			bool shouldDiscard = color.r == 1.0;
+			if (shouldDiscard == false)
+			{
+				discard;
+			}
+			else
+			{
+				color.r = 1.0;
+			}
+			return color;
 		}
 		
 		)msl"
@@ -51,9 +61,11 @@ void Main(int argc, char** argv)// try
 
 	compiler.SetShaderType(Framework::Graphics::ShaderType::Vertex);
 	compiler.Compile();
+	compiler.PrintTree();
 	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
 	compiler.SetShaderType(Framework::Graphics::ShaderType::Pixel);
 	compiler.Compile();
+	compiler.PrintTree();
 	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
 	getchar();
 
@@ -110,7 +122,10 @@ void Main(int argc, char** argv)// try
 		
 		vec4 PixelShader()
 		{
-			return Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
+			vec4 color = Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
+			if (color.r == 1.0)
+				discard;
+			return color;
 		}
 		
 		)msl";

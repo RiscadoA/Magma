@@ -28,6 +28,7 @@ ASTNodeSymbol TypeTokenToAST(TokenSymbol symbol)
 		case TokenSymbol::Mat2: return ASTNodeSymbol::Mat2;
 		case TokenSymbol::Mat3: return ASTNodeSymbol::Mat3;
 		case TokenSymbol::Mat4: return ASTNodeSymbol::Mat4;
+		case TokenSymbol::Bool: return ASTNodeSymbol::Bool;
 
 		default:
 		{
@@ -52,6 +53,16 @@ ASTNodeSymbol OperatorTokenToAST(TokenSymbol symbol)
 		case TokenSymbol::Mod: return ASTNodeSymbol::Mod;
 		case TokenSymbol::Member: return ASTNodeSymbol::Member;
 		case TokenSymbol::Assignment: return ASTNodeSymbol::Assignment;
+		case TokenSymbol::Not: return ASTNodeSymbol::Not;
+		case TokenSymbol::And: return ASTNodeSymbol::And;
+		case TokenSymbol::Or: return ASTNodeSymbol::Or;
+
+		case TokenSymbol::EqualTo: return ASTNodeSymbol::EqualTo;
+		case TokenSymbol::NotEqualTo: return ASTNodeSymbol::NotEqualTo;
+		case TokenSymbol::GreaterThan: return ASTNodeSymbol::GreaterThan;
+		case TokenSymbol::LessThan: return ASTNodeSymbol::LessThan;
+		case TokenSymbol::GreaterThanOrEqualTo: return ASTNodeSymbol::GreaterThanOrEqualTo;
+		case TokenSymbol::LessThanOrEqualTo: return ASTNodeSymbol::LessThanOrEqualTo;
 
 		default:
 		{
@@ -71,6 +82,8 @@ ASTNodeSymbol LiteralTokenToAST(TokenSymbol symbol)
 	{
 		case TokenSymbol::IntLiteral: return ASTNodeSymbol::IntLiteral;
 		case TokenSymbol::FloatLiteral: return ASTNodeSymbol::FloatLiteral;
+		case TokenSymbol::True: return ASTNodeSymbol::True;
+		case TokenSymbol::False: return ASTNodeSymbol::False;
 
 		default:
 		{
@@ -224,6 +237,7 @@ ASTNode* ConstantBuffer(ParserInfo& info)
 }
 
 ASTNode* Expression(ParserInfo& info);
+ASTNode* Scope(ParserInfo& info);
 
 ASTNode* Constructor(ASTNodeSymbol type, ParserInfo& info)
 {
@@ -330,7 +344,8 @@ ASTNode* Factor(ParserInfo& info)
 
 	// <unary_op> <factor>
 	else if (Accept(TokenSymbol::Add, info) ||
-		Accept(TokenSymbol::Sub, info))
+			 Accept(TokenSymbol::Sub, info) ||
+			 Accept(TokenSymbol::Not, info))
 	{
 		auto op = CreateTree(OperatorTokenToAST(info.lastToken.symbol), "");
 		auto f = Factor(info);
@@ -346,7 +361,7 @@ ASTNode* Factor(ParserInfo& info)
 	else if (AcceptType(TokenType::Literal, info))
 		return CreateTree(LiteralTokenToAST(info.lastToken.symbol), info.lastToken.attribute);
 
-	throw std::runtime_error("INVALID FACTOR");
+	throw std::runtime_error("INVALID FACTOR - THIS SHOULD NOT HAPPEN");
 }
 
 ASTNode* Term(ParserInfo& info)
@@ -376,7 +391,7 @@ ASTNode* Term(ParserInfo& info)
 	return factor1;
 }
 
-ASTNode* Assignment(ParserInfo& info)
+ASTNode* Condition(ParserInfo& info)
 {
 	// Get term
 	auto term1 = Term(info);
@@ -393,6 +408,70 @@ ASTNode* Assignment(ParserInfo& info)
 
 			// Get second term
 			term2 = Term(info);
+
+			// Add terms to operator
+			AddToTree(term1, op);
+			AddToTree(term2, op);
+			term1 = op;
+		}
+		else break;
+	}
+
+	// Return tree
+	return term1;
+}
+
+ASTNode* Logic(ParserInfo& info)
+{
+	// Get term
+	auto term1 = Condition(info);
+	ASTNode* term2 = nullptr;
+
+	// While there are conditional operations
+	while (true)
+	{
+		if (Accept(TokenSymbol::EqualTo, info) ||
+			Accept(TokenSymbol::NotEqualTo, info) ||
+			Accept(TokenSymbol::LessThan, info) ||
+			Accept(TokenSymbol::GreaterThan, info) ||
+			Accept(TokenSymbol::LessThanOrEqualTo, info) ||
+			Accept(TokenSymbol::GreaterThanOrEqualTo, info))
+		{
+			// Create operator
+			auto op = CreateTree(OperatorTokenToAST(info.lastToken.symbol), "");
+
+			// Get second term
+			term2 = Condition(info);
+
+			// Add terms to operator
+			AddToTree(term1, op);
+			AddToTree(term2, op);
+			term1 = op;
+		}
+		else break;
+	}
+
+	// Return tree
+	return term1;
+}
+
+ASTNode* Assignment(ParserInfo& info)
+{
+	// Get term
+	auto term1 = Logic(info);
+	ASTNode* term2 = nullptr;
+
+	// While there are 'and' and 'or' operations
+	while (true)
+	{
+		if (Accept(TokenSymbol::And, info) ||
+			Accept(TokenSymbol::Or, info))
+		{
+			// Create operator
+			auto op = CreateTree(OperatorTokenToAST(info.lastToken.symbol), "");
+
+			// Get second term
+			term2 = Logic(info);
 
 			// Add terms to operator
 			AddToTree(term1, op);
@@ -446,6 +525,15 @@ ASTNode* Statement(ParserInfo& info)
 		AddToTree(ASTNodeSymbol::Return, "", statementNode);
 		// Expression
 		AddToTree(Expression(info), statementNode);
+		// End statement
+		Expect(TokenSymbol::Semicolon, info);
+	}
+	// If Discard statement
+	else if (Accept(TokenSymbol::Discard, info))
+	{
+		AddToTree(ASTNodeSymbol::Discard, "", statementNode);
+		// End statement
+		Expect(TokenSymbol::Semicolon, info);
 	}
 	// If declaration
 	else if (AcceptType(TokenType::Type, info))
@@ -458,15 +546,50 @@ ASTNode* Statement(ParserInfo& info)
 
 		if (Accept(TokenSymbol::Assignment, info))
 			AddToTree(Expression(info), statementNode);
+		// End statement
+		Expect(TokenSymbol::Semicolon, info);
+	}
+	// If "if" statement
+	else if (Accept(TokenSymbol::If, info))
+	{
+		AddToTree(ASTNodeSymbol::If, "", statementNode);
+		
+		// Add condition
+		Expect(TokenSymbol::OpenParenthesis, info);
+		AddToTree(Expression(info), statementNode);
+		Expect(TokenSymbol::CloseParenthesis, info);
+
+		// Add if body
+		if (Peek(info) == TokenSymbol::OpenBrace)
+			AddToTree(Scope(info), statementNode);
+		else
+			AddToTree(Statement(info), statementNode);
+
+		// Add else body
+		if (Accept(TokenSymbol::Else, info))
+		{
+			if (Peek(info) == TokenSymbol::OpenBrace)
+				AddToTree(Scope(info), statementNode);
+			else
+				AddToTree(Statement(info), statementNode);
+		}
+
+		/*
+			If
+				Expression
+				If Body
+				Else Body
+		*/
 	}
 	// Else expression
 	else
 	{
 		AddToTree(Expression(info), statementNode);
+		// End statement
+		Expect(TokenSymbol::Semicolon, info);
 	}
 
-	// End statement
-	Expect(TokenSymbol::Semicolon, info);
+	
 
 	return statementNode;
 }
@@ -588,6 +711,11 @@ void PrintTree(ASTNode* node, int depth = 0)
 	}
 }
 
+void Magma::Framework::Graphics::MSL::Compiler::PrintTree()
+{
+	::PrintTree(m_astTree);
+}
+
 void FixTree(ASTNode* n)
 {
 	n->type = GetNodeType(n->symbol);
@@ -609,5 +737,4 @@ void Magma::Framework::Graphics::MSL::Compiler::RunParser()
 	ParserInfo info = { m_tokens.begin(), m_tokens, m_astTree, {} };
 	Program(info);
 	FixTree(m_astTree);
-	//PrintTree(m_astTree);
 }
