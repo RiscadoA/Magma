@@ -459,9 +459,10 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 				std::stringstream ss;
 				ss << "Failed to create shader on D3D11Context:\nFailed to compile vertex shader:\n";
 				if (errorMessages)
-					ss << (char*)errorMessages->GetBufferPointer();
+					ss << (char*)errorMessages->GetBufferPointer() << std::endl;
 				else
 					ss << "Error: " << hr << " - no error messages";
+				ss << "Compiled shader source:" << std::endl << compiledSrc;
 				throw std::runtime_error(ss.str());
 			}
 			auto vertShader = (ID3D11VertexShader**)&shader->shader;
@@ -487,6 +488,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateShader(ShaderType type, c
 					ss << (char*)errorMessages->GetBufferPointer();
 				else
 					ss << "Error (" << hr << ") - no error messages";
+				ss << "Compiled shader source:" << std::endl << compiledSrc;
 				throw std::runtime_error(ss.str());
 			}
 			auto pixelShader = (ID3D11PixelShader**)&shader->shader;
@@ -703,10 +705,10 @@ void * Magma::Framework::Graphics::D3D11Context::CreateConstantBuffer(void * dat
 
 	D3D11_BUFFER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.ByteWidth = size;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.ByteWidth = ceil(float(size) / 16) * 16;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = 0;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	desc.MiscFlags = 0;
 
 	if (data != nullptr)
@@ -747,10 +749,22 @@ void Magma::Framework::Graphics::D3D11Context::DestroyConstantBuffer(void * cons
 	delete buffer;
 }
 
-void Magma::Framework::Graphics::D3D11Context::UpdateConstantBuffer(void * constantBuffer, void * data)
+void Magma::Framework::Graphics::D3D11Context::UpdateConstantBuffer(void * constantBuffer, void * data, size_t offset, size_t size)
 {
 	auto buffer = (ConstantBuffer*)constantBuffer;
-	((ID3D11DeviceContext*)m_deviceContext)->UpdateSubresource(buffer->buffer, 0, NULL, data, 0, 0);
+
+	D3D11_MAPPED_SUBRESOURCE map;
+	HRESULT hr = ((ID3D11DeviceContext*)m_deviceContext)->Map(buffer->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+	if (FAILED(hr))
+	{
+		delete buffer;
+		std::stringstream ss;
+		ss << "Failed to update constant buffer on D3D11Context:\nD3D11 failed to map buffer:\n";
+		ss << _com_error(hr).ErrorMessage();
+		throw std::runtime_error(ss.str());
+	}
+	memcpy((char*)map.pData + offset, data, size);
+	((ID3D11DeviceContext*)m_deviceContext)->Unmap(buffer->buffer, 0);
 }
 
 void Magma::Framework::Graphics::D3D11Context::BindConstantBuffer(void * constantBuffer, void * bindingPoint)

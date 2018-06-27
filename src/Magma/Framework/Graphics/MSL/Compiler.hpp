@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <unordered_map>
 #include <set>
-
+#include <map>
+#include <unordered_map>
 
 /*
 FEATURES:
@@ -37,6 +37,7 @@ FEATURES:
 	- '<type> floor(<type> x): Floors the value of x.
 	- '<type> ceil(<type> x): Ceils the value of x.
 	- '<type> fract(<type> x): Returns the fractional part of x (x - floor(x)).
+	- '<type> mul(<type> x, <type> y): Performs matrix multiplication (x must be a matrix and y must be a vector).
 
 - OPERATIONS:
 	- '+';
@@ -394,7 +395,7 @@ namespace Magma
 				class Compiler
 				{
 				public:
-					Compiler(int major, int minor, int patch);
+					Compiler();
 					virtual ~Compiler();
 
 					void Load(const std::string& code);
@@ -422,7 +423,7 @@ namespace Magma
 					std::set<std::string> m_2dtextures;
 					std::unordered_map<std::string, std::vector<VariableDeclaration>> m_constantBuffers;
 					std::vector<VariableDeclaration> m_vertexOut;
-					std::unordered_map<std::string, FunctionDeclaration> m_functions;
+					std::vector<std::pair<std::string, FunctionDeclaration>> m_functions;
 
 					ASTNode* m_astTree;
 				};

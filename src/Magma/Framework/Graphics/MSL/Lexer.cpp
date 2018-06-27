@@ -39,10 +39,10 @@ static std::pair<std::string, TokenSymbol> tokenRegexStrings[] =
 
 	std::make_pair<std::string, TokenSymbol>("\\=\\=", TokenSymbol::EqualTo),
 	std::make_pair<std::string, TokenSymbol>("\\!\\=", TokenSymbol::NotEqualTo),
-	std::make_pair<std::string, TokenSymbol>("\\<", TokenSymbol::LessThan),
-	std::make_pair<std::string, TokenSymbol>("\\>", TokenSymbol::GreaterThan),
 	std::make_pair<std::string, TokenSymbol>("\\<\\=", TokenSymbol::LessThanOrEqualTo),
 	std::make_pair<std::string, TokenSymbol>("\\>\\=", TokenSymbol::GreaterThanOrEqualTo),
+	std::make_pair<std::string, TokenSymbol>("\\<", TokenSymbol::LessThan),
+	std::make_pair<std::string, TokenSymbol>("\\>", TokenSymbol::GreaterThan),
 
 	std::make_pair<std::string, TokenSymbol>("\\+", TokenSymbol::Add),
 	std::make_pair<std::string, TokenSymbol>("\\-", TokenSymbol::Sub),

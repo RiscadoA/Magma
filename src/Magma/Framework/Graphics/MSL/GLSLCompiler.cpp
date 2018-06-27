@@ -6,17 +6,12 @@ using namespace Magma::Framework::Graphics::MSL;
 #include <iostream>
 #include <functional>
 
-const int MajorVersion = 1;
-const int MinorVersion = 3;
-const int PatchVersion = 6;
-
 Magma::Framework::Graphics::MSL::GLSLCompiler::GLSLCompiler()
-	: Compiler(MajorVersion, MinorVersion, PatchVersion)
 {
 
 }
 
-std::string TypeToGLType(ASTNodeSymbol type)
+std::string TypeToGLSLType(ASTNodeSymbol type)
 {
 	switch (type)
 	{
@@ -121,7 +116,7 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 			}
 			case ASTNodeSymbol::Constructor:
 			{
-				out << TypeToGLType(expressionNode->firstChild->symbol) << "(";
+				out << TypeToGLSLType(expressionNode->firstChild->symbol) << "(";
 				// Get params
 				auto c = expressionNode->firstChild->next->firstChild;
 				while (c != nullptr)
@@ -310,6 +305,16 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 					out << "pow(";
 					generateExpression(f, expNode, type, indentation, false);
 					out << ", ";
+					generateExpression(f, exp2Node, type, indentation, false);
+					out << ")";
+				}
+				else if (id == "mul")
+				{
+					auto expNode = paramsNode->firstChild;
+					auto exp2Node = expNode->next;
+					out << "(";
+					generateExpression(f, expNode, type, indentation, false);
+					out << ") * (";
 					generateExpression(f, exp2Node, type, indentation, false);
 					out << ")";
 				}
@@ -525,6 +530,15 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 			} break;
 			case ASTNodeSymbol::Discard:
 			{
+				if (type != ShaderType::Pixel)
+				{
+					std::stringstream ss;
+					ss << "Failed to compile MSL code:" << std::endl;
+					ss << "Code generation stage failed:" << std::endl;
+					ss << "Discard statements can only be inside pixel shader functions";
+					throw std::runtime_error(ss.str());
+				}
+
 				for (int i = 0; i < indentation; ++i)
 					out << "\t";
 				out << "discard;" << std::endl;
@@ -535,13 +549,13 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 				{
 					for (int i = 0; i < indentation; ++i)
 						out << "\t";
-					out << TypeToGLType(typeNode->next->symbol) << " local_" << typeNode->next->next->attribute << ";" << std::endl;
+					out << TypeToGLSLType(typeNode->next->symbol) << " local_" << typeNode->next->next->attribute << ";" << std::endl;
 				}
 				else
 				{
 					for (int i = 0; i < indentation; ++i)
 						out << "\t";
-					out << TypeToGLType(typeNode->next->symbol) << " local_" << typeNode->next->next->attribute << " = " << "(";
+					out << TypeToGLSLType(typeNode->next->symbol) << " local_" << typeNode->next->next->attribute << " = " << "(";
 					generateExpression(f, typeNode->next->next->next, type, indentation, false);
 					out << ");" << std::endl;
 				}
@@ -665,9 +679,9 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 	{
 		if (type == ShaderType::Invalid)
 		{
-			out << TypeToGLType(f.second.returnType) << " function_" << f.first << "(";
+			out << TypeToGLSLType(f.second.returnType) << " function_" << f.first << "(";
 			for (size_t i = 0; i < f.second.params.size(); ++i)
-				out << TypeToGLType(f.second.params[i].type) << " param_" << f.second.params[i].name << (i == f.second.params.size() - 1 ? ")" : ", ");
+				out << TypeToGLSLType(f.second.params[i].type) << " param_" << f.second.params[i].name << (i == f.second.params.size() - 1 ? ")" : ", ");
 		}
 		else out << "void main()";
 		out << std::endl;
@@ -690,7 +704,7 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 	{
 		out << "layout (std140) uniform " << c.first << std::endl << "{" << std::endl;
 		for (auto& d : c.second)
-			out << "\t" << TypeToGLType(d.type) << " " << d.name << ";" << std::endl;
+			out << "\t" << TypeToGLSLType(d.type) << " " << d.name << ";" << std::endl;
 		out << "};" << std::endl;
 	}
 
@@ -701,21 +715,33 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 	{
 		case ShaderType::Vertex:
 		{
-			const auto& params = m_functions["VertexShader"].params;
+			auto it = m_functions.begin();
+			for (; it != m_functions.end(); ++it)
+				if (it->first == "VertexShader")
+					break;
+
+			const auto& params = it->second.params;
 			for (const auto& p : params)
-				out << "in " << TypeToGLType(p.type) << " " << p.name << ";" << std::endl;
+				out << "in " << TypeToGLSLType(p.type) << " " << p.name << ";" << std::endl;
 			out << std::endl;
 			for (auto& v : m_vertexOut)
-				out << "out " << TypeToGLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
+				out << "out " << TypeToGLSLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
 			out << std::endl;
 		} break;
 		case ShaderType::Pixel:
+		{
+			auto it = m_functions.begin();
+			for (; it != m_functions.end(); ++it)
+				if (it->first == "PixelShader")
+					break;
+
 			for (auto& v : m_vertexOut)
-				out << "in " << TypeToGLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
+				out << "in " << TypeToGLSLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
 			out << std::endl;
-			out << "out " << TypeToGLType(m_functions["PixelShader"].returnType) << " fragOut;" << std::endl;
+			out << "out " << TypeToGLSLType(it->second.returnType) << " fragOut;" << std::endl;
 			out << std::endl;
 			break;
+		}
 	}
 
 	for (auto& f : m_functions)
@@ -743,6 +769,4 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 	}
 
 	m_output = out.str();
-
-	std::cout << m_output << std::endl;
 }

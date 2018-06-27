@@ -301,6 +301,8 @@ void * Magma::Framework::Graphics::GLContext::CreateShader(ShaderType type, cons
 		std::stringstream ss;
 		ss << "Failed to create shader on GLContext:" << std::endl << "Shader compilation failed:" << std::endl;
 		ss << infoLog;
+		ss << "Compiled shader source:" << std::endl;
+		ss << compiledSrc;
 		delete[] infoLog;
 
 		throw std::runtime_error(ss.str());
@@ -502,11 +504,11 @@ void Magma::Framework::Graphics::GLContext::DestroyConstantBuffer(void * constan
 	GL_CHECK_ERROR("Failed to destroy constant buffer");
 }
 
-void Magma::Framework::Graphics::GLContext::UpdateConstantBuffer(void * constantBuffer, void * data)
+void Magma::Framework::Graphics::GLContext::UpdateConstantBuffer(void * constantBuffer, void * data, size_t offset, size_t size)
 {
 	auto buffer = (ConstantBuffer*)constantBuffer;
 	glBindBuffer(GL_UNIFORM_BUFFER, buffer->ubo);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, buffer->size, data);
+	glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 	GL_CHECK_ERROR("Failed to update constant buffer");
 }
 

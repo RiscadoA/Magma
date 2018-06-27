@@ -119,7 +119,10 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 		// Get ID
 		n = n->next;
 		auto id = n->attribute;
-		m_functions[id] = { returnType, {}, nullptr };
+		FunctionDeclaration funcDecl;
+		funcDecl.returnType = returnType;
+		funcDecl.params = {};
+		funcDecl.scope = nullptr;
 
 		// Get params
 		n = n->next;
@@ -128,13 +131,15 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 		{
 			auto t = c->symbol;
 			auto i = c->firstChild->attribute;
-			m_functions[id].params.push_back({ t, i });
+			funcDecl.params.push_back({ t, i });
 			c = c->next;
 		}
 
 		// Get scope
 		n = n->next;
-		m_functions[id].scope = n;
+		funcDecl.scope = n;
+
+		m_functions.push_back(std::make_pair(id, funcDecl));
 	};
 
 	auto n = m_astTree->firstChild;
@@ -167,7 +172,11 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 	}
 
 	// Check vertex and pixel shader functions
-	if (m_functions.find("VertexShader") == m_functions.end())
+	auto it = m_functions.begin();
+	for (; it != m_functions.end(); ++it)
+		if (it->first == "VertexShader")
+			break;
+	if (it == m_functions.end())
 	{
 		std::stringstream ss;
 		ss << "Failed to compile MSL code:" << std::endl;
@@ -176,7 +185,11 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 		throw std::runtime_error(ss.str());
 	}
 
-	if (m_functions.find("PixelShader") == m_functions.end())
+	it = m_functions.begin();
+	for (; it != m_functions.end(); ++it)
+		if (it->first == "PixelShader")
+			break;
+	if (it == m_functions.end())
 	{
 		std::stringstream ss;
 		ss << "Failed to compile MSL code:" << std::endl;

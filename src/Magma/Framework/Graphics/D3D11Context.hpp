@@ -41,7 +41,7 @@ namespace Magma
 				virtual void DrawIndexed(size_t indexCount, size_t offset, DrawMode mode) final;
 				virtual void * CreateConstantBuffer(void * data, size_t size) final;
 				virtual void DestroyConstantBuffer(void * constantBuffer) final;
-				virtual void UpdateConstantBuffer(void * constantBuffer, void * data) final;
+				virtual void UpdateConstantBuffer(void * constantBuffer, void * data, size_t offset, size_t size) final;
 				virtual void BindConstantBuffer(void * constantBuffer, void * bindingPoint) final;
 				virtual void * GetConstantBindingPoint(void * program, const std::string & name) final;
 				virtual void * CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format) final;

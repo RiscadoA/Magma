@@ -3,6 +3,60 @@
 #include <sstream>
 #include <iostream>
 
+/*
+
+Tree generated:
+
+2D Textures:
+
+	Texture2D
+		Identifier
+
+Constant Buffers:
+
+	ConstantBuffer
+		Identifier
+		Scope
+			Type
+				Identifier
+			...
+
+Vertex Output:
+
+	VertexOutput
+		Identifier
+		Scope
+			Type
+				Identifier
+			...
+
+Functions:
+
+	Function
+		Return Type
+		Identifier
+		Params
+			Type
+				Identifier
+			...
+		Scope
+			Statement
+			Statement
+			...
+
+Statements:
+	Statement
+		Statement Type
+		... (params)
+
+	Statement
+		Return
+		Expression
+
+	Statement
+		Discard
+*/
+
 using namespace Magma::Framework::Graphics::MSL;
 
 struct ParserInfo
@@ -12,6 +66,75 @@ struct ParserInfo
 	ASTNode* tree;
 	Token lastToken;
 };
+
+std::string TokenSymbolToString(TokenSymbol token)
+{
+	switch (token)
+	{
+		case TokenSymbol::Add: return "+";
+		case TokenSymbol::Sub: return "-";
+		case TokenSymbol::Mul: return "*";
+		case TokenSymbol::Div: return "/";
+		case TokenSymbol::Mod: return "%";
+		case TokenSymbol::And: return "&&";
+		case TokenSymbol::Or: return "||";
+		case TokenSymbol::Member: return ".";
+		case TokenSymbol::Assignment: return "=";
+		case TokenSymbol::Not: return "!";
+		case TokenSymbol::Int: return "int";
+		case TokenSymbol::Float: return "float";
+		case TokenSymbol::Vec2: return "vec2";
+		case TokenSymbol::Vec3: return "vec3";
+		case TokenSymbol::Vec4: return "vec4";
+		case TokenSymbol::IVec2: return "ivec2";
+		case TokenSymbol::IVec3: return "ivec3";
+		case TokenSymbol::IVec4: return "ivec4";
+		case TokenSymbol::Mat2: return "mat2";
+		case TokenSymbol::Mat3: return "mat3";
+		case TokenSymbol::Mat4: return "mat4";
+		case TokenSymbol::Bool: return "bool";
+		case TokenSymbol::IntLiteral: return "int literal";
+		case TokenSymbol::FloatLiteral: return "float literal";
+		case TokenSymbol::Identifier: return "identifier";
+		case TokenSymbol::OpenBrace: return "{";
+		case TokenSymbol::CloseBrace: return "}";
+		case TokenSymbol::OpenParenthesis: return "(";
+		case TokenSymbol::CloseParenthesis: return ")";
+		case TokenSymbol::Semicolon: return ";";
+		case TokenSymbol::Comma: return ",";	
+		case TokenSymbol::Return: return "return";
+		case TokenSymbol::VertexOutput: return "VertexOutput";
+		case TokenSymbol::Texture2D: return "Texture2D";
+		case TokenSymbol::ConstantBuffer: return "ConstantBuffer";
+		case TokenSymbol::If: return "if";
+		case TokenSymbol::Else: return "else";
+		case TokenSymbol::Discard: return "discard";
+		case TokenSymbol::True: return "true";
+		case TokenSymbol::False: return "false";
+		case TokenSymbol::While: return "while";
+		case TokenSymbol::Do: return "do";
+		case TokenSymbol::For: return "for";
+
+		case TokenSymbol::Invalid: return "???INVALID TOKEN SYMBOL???";
+		default: return "???UNKNOWN TOKEN SYMBOL???";
+	}
+}
+
+std::string TokenTypeToString(TokenType type)
+{
+	switch (type)
+	{
+		case TokenType::Punctuation: return "punctuation";
+		case TokenType::Identifier: return "identifier";
+		case TokenType::Literal: return "literal";
+		case TokenType::Type: return "type";
+		case TokenType::Operator: return "operator";
+		case TokenType::Reserved: return "reserved";
+		case TokenType::ConditionalOperator: return "conditional operator";
+		case TokenType::Invalid: return "???INVALID TOKEN TYPE???";
+		default: return "???UNKNOWN TOKEN TYPE???";
+	}
+}
 
 ASTNodeSymbol TypeTokenToAST(TokenSymbol symbol)
 {
@@ -149,8 +272,8 @@ void Expect(TokenSymbol symbol, ParserInfo& info)
 	std::stringstream ss;
 	ss << "Failed to compile MSL code:" << std::endl;
 	ss << "Parser stage failed:" << std::endl;
-	ss << "Unexpected token '" << (int)info.it->symbol << "' \"" << info.it->attribute << "\" on line " << info.it->line << std::endl;
-	ss << "Expected token symbol '" << (int)symbol << "'" << std::endl;
+	ss << "Unexpected token '" << TokenSymbolToString(info.it->symbol) << "' \"" << info.it->attribute << "\" on line " << info.it->line << std::endl;
+	ss << "Expected token symbol '" << TokenSymbolToString(symbol) << "'" << std::endl;
 	ss << "Line: " << info.it->line;
 	throw std::runtime_error(ss.str());
 }
@@ -162,8 +285,8 @@ void ExpectType(TokenType type, ParserInfo& info)
 	std::stringstream ss;
 	ss << "Failed to compile MSL code:" << std::endl;
 	ss << "Parser stage failed:" << std::endl;
-	ss << "Unexpected token type '" << (int)info.it->type << "' \"" << info.it->attribute << "\" on line " << info.it->line << std::endl;
-	ss << "Expected token type '" << (int)type << "'" << std::endl;
+	ss << "Unexpected token type '" << TokenTypeToString(info.it->type) << "' \"" << info.it->attribute << "\" on line " << info.it->line << std::endl;
+	ss << "Expected token type '" << TokenTypeToString(type) << "'" << std::endl;
 	ss << "Line: " << info.it->line;
 	throw std::runtime_error(ss.str());
 }
@@ -361,18 +484,15 @@ ASTNode* Factor(ParserInfo& info)
 	else if (AcceptType(TokenType::Literal, info))
 		return CreateTree(LiteralTokenToAST(info.lastToken.symbol), info.lastToken.attribute);
 
-	std::stringstream ss;
-	ss << "Failed to compile MSL code:" << std::endl;
-	ss << "Parser stage failed:" << std::endl;
-	ss << "Couldn't parse factor:" << std::endl;
-	ss << "Line: " << info.it->line;
-	throw std::runtime_error(ss.str());
+	return nullptr;
 }
 
 ASTNode* Term(ParserInfo& info)
 {
 	// Get factor
 	auto factor1 = Factor(info);
+	if (factor1 == nullptr)
+		return nullptr;
 	ASTNode* factor2 = nullptr;
 
 	// While there are multiplication, division and module operations
@@ -400,6 +520,8 @@ ASTNode* Condition(ParserInfo& info)
 {
 	// Get term
 	auto term1 = Term(info);
+	if (term1 == nullptr)
+		return nullptr;
 	ASTNode* term2 = nullptr;
 
 	// While there are addition and subtraction operations
@@ -430,6 +552,8 @@ ASTNode* Logic(ParserInfo& info)
 {
 	// Get term
 	auto term1 = Condition(info);
+	if (term1 == nullptr)
+		return nullptr;
 	ASTNode* term2 = nullptr;
 
 	// While there are conditional operations
@@ -464,6 +588,8 @@ ASTNode* Assignment(ParserInfo& info)
 {
 	// Get term
 	auto term1 = Logic(info);
+	if (term1 == nullptr)
+		return nullptr;
 	ASTNode* term2 = nullptr;
 
 	// While there are 'and' and 'or' operations
@@ -494,6 +620,15 @@ ASTNode* Expression(ParserInfo& info)
 {
 	// Get term
 	auto term1 = Assignment(info);
+	if (term1 == nullptr)
+	{
+		std::stringstream ss;
+		ss << "Failed to compile MSL code:" << std::endl;
+		ss << "Parser stage failed:" << std::endl;
+		ss << "Couldn't parse expression, unexpected token '" << TokenSymbolToString(Peek(info)) << "':" << std::endl;
+		ss << "Line: " << info.it->line;
+		throw std::runtime_error(ss.str());
+	}
 	ASTNode* term2 = nullptr;
 
 	// While there are addition and subtraction operations

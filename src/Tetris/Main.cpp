@@ -8,7 +8,7 @@
 
 using namespace Magma;
 
-void Main(int argc, char** argv)// try
+void Main(int argc, char** argv) try
 {
 	//Framework::Graphics::MSL::GLSLCompiler compiler;
 	/*Framework::Graphics::MSL::HLSLCompiler compiler;
@@ -53,20 +53,20 @@ void Main(int argc, char** argv)// try
 	compiler.PrintTree();
 	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
 	//compiler.SetShaderType(Framework::Graphics::ShaderType::Pixel);
-	compiler.Compile();
+	/*compiler.Compile();
 	compiler.PrintTree();
 	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
 	getchar();
 
-	return;*/
-
+	return;
+	*/
 	// end test
 
 	bool running = true;
 
-	Framework::Input::Window* window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+	Framework::Input::Window* window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
 
-	Framework::Graphics::Context* context = new Framework::Graphics::GLContext();
+	Framework::Graphics::Context* context = new Framework::Graphics::D3D11Context();
 	Framework::Graphics::ContextSettings contextSettings;
 	contextSettings.multisampleCount = 4;
 	contextSettings.enableVsync = true;
@@ -80,7 +80,7 @@ void Main(int argc, char** argv)// try
 	void* pixelShader = nullptr;
 	{
 		std::string source = R"msl(
-		#version 1.2.0
+		#version 1.4.0
 		
 		#define COLOR_R 1.0
 
@@ -89,6 +89,7 @@ void Main(int argc, char** argv)// try
 		ConstantBuffer transform
 		{
 			mat4 mvp;
+			float time;
 		}
 
 		VertexOutput vertexOut
@@ -96,23 +97,18 @@ void Main(int argc, char** argv)// try
 			vec2 uvs;
 			vec4 color;
 		}
-		
-		int test(int x)
-		{
-			return x;
-		}
 
 		vec4 VertexShader(vec3 position, vec2 uvs, vec4 color)
 		{
 			vertexOut.uvs = uvs;
 			vertexOut.color = color;
-			return transform.mvp * vec4(position.xyz, 1.0);
+			return mul(transform.mvp, vec4(position.xyz, 1.0));
 		}
 		
 		vec4 PixelShader()
 		{
 			vec4 color = Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
-			if (color.r == 1.0)
+			if (color.r <= abs(cos(transform.time)))
 				discard;
 			return color;
 		}
@@ -175,7 +171,7 @@ void Main(int argc, char** argv)// try
 	// Create constant buffer
 	void* transformcb = nullptr;
 	{
-		transformcb = context->CreateConstantBuffer(nullptr, sizeof(glm::mat4));
+		transformcb = context->CreateConstantBuffer(nullptr, sizeof(glm::mat4) + sizeof(float));
 	}
 
 	// Create texture
@@ -199,15 +195,14 @@ void Main(int argc, char** argv)// try
 
 		settings.adressU = Framework::Graphics::TextureAdressMode::Border;
 		settings.adressV = Framework::Graphics::TextureAdressMode::Border;
-		settings.minFilter = Framework::Graphics::TextureFilter::Nearest;
-		settings.magFilter = Framework::Graphics::TextureFilter::Nearest;
+		settings.minFilter = Framework::Graphics::TextureFilter::Linear;
+		settings.magFilter = Framework::Graphics::TextureFilter::Linear;
 		settings.borderColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 		sampler = context->CreateSampler(settings);
 	}
 
 	glm::mat4 model, view, proj;
-	glm::mat4 mvp;
 
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -218,12 +213,22 @@ void Main(int argc, char** argv)// try
 	auto transformbp = context->GetConstantBindingPoint(program, "transform");
 	auto texturebp = context->GetTextureBindingPoint(program, "texture0");
 
+	struct
+	{
+		glm::mat4 mvp;
+		float time;
+	} cbData;
+
+	cbData.time = 0.0f;
+
 	while (running)
 	{
 		window->PollEvents();
 
-		mvp = proj * view * model;
-		context->UpdateConstantBuffer(transformcb, &mvp[0][0]);
+		cbData.mvp = proj * view * model;
+		cbData.time += 0.02f;
+
+		context->UpdateConstantBuffer(transformcb, &cbData, 0, sizeof(cbData));
 
 		context->SetRenderTarget(nullptr);
 		context->SetClearColor(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
@@ -250,9 +255,9 @@ void Main(int argc, char** argv)// try
 	delete context;
 	delete window;
 }
-/*catch (std::exception& e)
+catch (std::exception& e)
 {
 	std::cout << e.what() << std::endl;
 	getchar();
 	return;
-}*/
+}

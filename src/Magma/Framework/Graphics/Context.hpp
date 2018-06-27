@@ -359,7 +359,9 @@ namespace Magma
 				/// </summary>
 				/// <param name="constantBuffer">Constant buffer handle</param>
 				/// <param name="data">New data pointer</param>
-				virtual void UpdateConstantBuffer(void* constantBuffer, void* data) = 0;
+				/// <param name="offset">Offset to set the data</param>
+				/// <param name="size">Data size</param>
+				virtual void UpdateConstantBuffer(void* constantBuffer, void* data, size_t offset, size_t size) = 0;
 
 				/// <summary>
 				///		Binds a constant buffer to the the currently bound program

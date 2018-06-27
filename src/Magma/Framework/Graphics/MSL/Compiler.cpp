@@ -5,30 +5,14 @@
 using namespace Magma::Framework::Graphics::MSL;
 
 const int Major = 1;
-const int Minor = 3;
-const int Patch = 0;
+const int Minor = 4;
+const int Patch = 1;
 
-Magma::Framework::Graphics::MSL::Compiler::Compiler(int major, int minor, int patch)
+Magma::Framework::Graphics::MSL::Compiler::Compiler()
 {
-	m_major = major;
-	m_minor = minor;
-	m_patch = patch;
-
-	if (Major != m_major)
-	{
-		std::stringstream ss;
-		ss << "Failed to create MSL compiler:" << std::endl;
-		ss << "Unsupported major version '" << m_major << "." << m_minor << "." << m_patch << "'; current version is '" << Major << "." << Minor << "." << Patch << "'" << std::endl;
-		throw std::runtime_error(ss.str());
-	}
-
-	if (Minor != m_minor)
-	{
-		std::stringstream ss;
-		ss << "Failed to create MSL compiler:" << std::endl;
-		ss << "Unsupported minor version '" << m_major << "." << m_minor << "." << m_patch << "'; current version is '" << Major << "." << Minor << "." << Patch << "'" << std::endl;
-		throw std::runtime_error(ss.str());
-	}
+	m_major = Major;
+	m_minor = Minor;
+	m_patch = Patch;
 
 	m_astTree = nullptr;
 }
