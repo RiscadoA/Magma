@@ -10,58 +10,6 @@ using namespace Magma;
 
 void Main(int argc, char** argv) try
 {
-	//Framework::Graphics::MSL::GLSLCompiler compiler;
-	/*Framework::Graphics::MSL::HLSLCompiler compiler;
-
-	compiler.Load(R"msl(
-		#version 1.2.0
-
-		#define COLOR_R 1.0
-
-		Texture2D texture0;
-
-		ConstantBuffer transform
-		{
-			mat4 mvp;
-		}
-
-		VertexOutput vertexOut
-		{
-			vec2 uvs;
-			vec4 color;
-		}
-
-		vec4 VertexShader(vec3 position, vec2 uvs, vec4 color)
-		{
-			//vertexOut.uvs = uvs;
-			//vertexOut.color = color;
-			return transform.mvp * vec4(position.xyz, 1.0);
-		}
-		
-		vec4 PixelShader()
-		{
-			float test = fract(sin(cos(tan(degrees(radians(exp2(pow(3, 2))))))));
-			vec4 color = Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
-			return color;
-		}
-		
-		)msl"
-	);
-
-	//compiler.SetShaderType(Framework::Graphics::ShaderType::Vertex);
-	compiler.Compile();
-	compiler.PrintTree();
-	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
-	//compiler.SetShaderType(Framework::Graphics::ShaderType::Pixel);
-	/*compiler.Compile();
-	compiler.PrintTree();
-	std::cout << compiler.GetOutput() << std::endl << std::endl << std::endl;
-	getchar();
-
-	return;
-	*/
-	// end test
-
 	bool running = true;
 
 	Framework::Input::Window* window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
