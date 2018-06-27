@@ -1,80 +1,32 @@
 // Raw code
-#version 1.0.0
+#version 1.4.0
+
+/*
+	Simple shader for basic texture rendering.
+*/
 
 #define COLOR_R 1.0
 
-VertexOutput vertexOut
+Texture2D myTexture;
+
+ConstantBuffer transform
 {
-	
+	mat4 mvp;
 }
 
-vec4 VertexShader(vec3 position)
+VertexOutput vertexOut
 {
-	return vec4(position.x, position.y, position.z, 1.0);
+	vec2 uvs;
+}
+
+vec4 VertexShader(vec3 position, vec2 uvs)
+{
+	vertexOut.uvs = uvs;
+	return mul(mvp, vec4(position.x, position.y, position.z, 1.0));
 }
 
 vec4 PixelShader()
 {
-	return vec4(COLOR_R, 0.0, 0.0, 1.0);
+	vec4 sample = Sample2D(myTexture, vertexOut.uvs);
+	return vec4(COLOR_R, 0.0, 0.0, 1.0) * sample;
 }
-
-// Tokens
-VertexOutput Identifier(vertexOut)
-BeginScope
-
-EndScope
-
-Vec4 Identifier(VertexShader) BeginParams Vec3 Identifier(position) EndParams
-BeginScope
-	Return Vec4 BeginParams Identifier(position) Member Identifier(x) NextParam Identifier(position) Member Identifier(y) NextParam Identifier(position) Member Identifier(z) NextParam FloatLiteral(1.0) EndInstruction
-EndScope
-
-Vec4 Identifier(PixelShader) BeginParams EndParams
-BeginScope
-	Return Vec4 BeginParams FloatLiteral(1.0) NextParam FloatLiteral(0.0) NextParam FloatLiteral(0.0) NextParam FloatLiteral(1.0) EndInstruction
-EndScope
-
-// Abstract syntax tree
-Shader
-	VertexOutput
-		Identifier(vertexOut)
-		Scope
-			-- EMPTY --
-
-	Function
-		Vec4
-		Identifier(VertexShader)
-		Params
-			Vec3
-				Identifier(position)
-		Scope
-			Return
-				Vec4
-					Params
-						Expression
-							Identifier(position)
-							Member
-							Identifier(x)
-						Expression
-							Identifier(position)
-							Member
-							Identifier(y)
-						Expression
-							Identifier(position)
-							Member
-							Identifier(z)
-						FloatLiteral(1.0)
-
-	Function
-		Vec4
-		Identifier(PixelShader)
-		Params
-			-- EMPTY --
-		Scope
-			Return
-				Vec4
-					Params
-						FloatLiteral(1.0)
-						FloatLiteral(0.0)
-						FloatLiteral(0.0)
-						FloatLiteral(1.0)

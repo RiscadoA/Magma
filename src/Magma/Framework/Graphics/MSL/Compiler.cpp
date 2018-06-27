@@ -5,8 +5,8 @@
 using namespace Magma::Framework::Graphics::MSL;
 
 const int Major = 1;
-const int Minor = 4;
-const int Patch = 1;
+const int Minor = 5;
+const int Patch = 0;
 
 Magma::Framework::Graphics::MSL::Compiler::Compiler()
 {
@@ -47,6 +47,8 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 		case TokenSymbol::CloseBrace:
 		case TokenSymbol::OpenParenthesis:
 		case TokenSymbol::CloseParenthesis:
+		case TokenSymbol::OpenBrackets:
+		case TokenSymbol::CloseBrackets:
 		case TokenSymbol::Semicolon:
 		case TokenSymbol::Comma:
 			return TokenType::Punctuation;
@@ -159,6 +161,7 @@ ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
 		case ASTNodeSymbol::Mat3:
 		case ASTNodeSymbol::Mat4:
 		case ASTNodeSymbol::Bool:
+		case ASTNodeSymbol::Array:
 			return ASTNodeType::Type;
 
 		// Operators
@@ -168,6 +171,7 @@ ASTNodeType Magma::Framework::Graphics::MSL::GetNodeType(ASTNodeSymbol symbol)
 		case ASTNodeSymbol::Div:
 		case ASTNodeSymbol::Mod:
 		case ASTNodeSymbol::Member:
+		case ASTNodeSymbol::ArrayAccess:
 		case ASTNodeSymbol::Assignment:
 		case ASTNodeSymbol::Not:
 			return ASTNodeType::Operator;

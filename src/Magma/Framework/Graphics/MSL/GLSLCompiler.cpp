@@ -101,7 +101,10 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 
 					// Access constant buffer
 					if (foundConstantBuffer)
+					{
+						out << expressionNode->firstChild->attribute << "_";
 						generateExpression(f, expressionNode->firstChild->next, type, indentation, true);
+					}
 					// Normal access
 					else
 					{
@@ -114,6 +117,13 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 
 				break;
 			}
+			case ASTNodeSymbol::ArrayAccess:
+			{
+				generateExpression(f, expressionNode->firstChild, type, indentation, isMemberOp);
+				out << "[";
+				generateExpression(f, expressionNode->firstChild->next, type, indentation, true);
+				out << "]";
+			} break;
 			case ASTNodeSymbol::Constructor:
 			{
 				out << TypeToGLSLType(expressionNode->firstChild->symbol) << "(";
@@ -704,7 +714,12 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 	{
 		out << "layout (std140) uniform " << c.first << std::endl << "{" << std::endl;
 		for (auto& d : c.second)
-			out << "\t" << TypeToGLSLType(d.type) << " " << d.name << ";" << std::endl;
+		{
+			if (d.isArray)
+				out << "\t" << TypeToGLSLType(d.type) << " " << c.first << "_" << d.name << "[" << d.arraySize << "];" << std::endl;
+			else
+				out << "\t" << TypeToGLSLType(d.type) << " " << c.first << "_" << d.name << ";" << std::endl;
+		}
 		out << "};" << std::endl;
 	}
 
@@ -725,7 +740,20 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 				out << "in " << TypeToGLSLType(p.type) << " " << p.name << ";" << std::endl;
 			out << std::endl;
 			for (auto& v : m_vertexOut)
-				out << "out " << TypeToGLSLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
+			{
+				if (v.type == ASTNodeSymbol::Int ||
+					v.type == ASTNodeSymbol::IVec2 ||
+					v.type == ASTNodeSymbol::IVec3 ||
+					v.type == ASTNodeSymbol::IVec4)
+					out << "flat ";
+
+				out << "out ";
+
+				if (v.isArray)
+					out << TypeToGLSLType(v.type) << " vertexOut_" << v.name << "[" << v.arraySize << "];" << std::endl;
+				else
+					out << TypeToGLSLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
+			}
 			out << std::endl;
 		} break;
 		case ShaderType::Pixel:
@@ -736,7 +764,20 @@ void Magma::Framework::Graphics::MSL::GLSLCompiler::GenerateCode()
 					break;
 
 			for (auto& v : m_vertexOut)
-				out << "in " << TypeToGLSLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
+			{
+				if (v.type == ASTNodeSymbol::Int ||
+					v.type == ASTNodeSymbol::IVec2 ||
+					v.type == ASTNodeSymbol::IVec3 ||
+					v.type == ASTNodeSymbol::IVec4 )
+					out << "flat ";
+
+				out << "in ";
+
+				if (v.isArray)
+					out << TypeToGLSLType(v.type) << " vertexOut_" << v.name << "[" << v.arraySize << "];" << std::endl;
+				else
+					out << TypeToGLSLType(v.type) << " vertexOut_" << v.name << ";" << std::endl;
+			}
 			out << std::endl;
 			out << "out " << TypeToGLSLType(it->second.returnType) << " fragOut;" << std::endl;
 			out << std::endl;

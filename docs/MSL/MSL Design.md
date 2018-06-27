@@ -60,7 +60,7 @@ Texture2D textureName;
 ### Methods
 
 ```
-texture.Sample(vec2 textureCoords);
+Sample2D(Texture2D tex, vec2 textureCoords);
 ```
 
 Samples a pixel from the texture on the UV coordinates `vec2 textureCoords`.
@@ -74,7 +74,7 @@ They are defined in the global scope as:
 ```
 Constant constantBufferName
 {
-	mat4x4 matrix;
+	mat4 matrix;
 	vec4 vector;
 }
 ```
@@ -87,7 +87,22 @@ float4 x = constantBufferName.vector;
 
 ## Functions
 
-Not yet implemented.
+They are defined in the global scope as:
+
+```
+<return-type> <function-name> (<param-1>, <param-2>, ..., <param-x>)
+{
+	<statement-1>;
+	<statement-2>;
+	...
+	<statement-x>;
+}
+```
+
+They can be called as:
+```
+<return-type> retValue = <function-name> (<param-1>, ..., <param-x>);
+```
 
 ## Vertex Output
 
@@ -179,7 +194,7 @@ vec4 PixelShader()
 
 
 
-This preprocessor directive is obligatory in every Magma shader header.
+This preprocessor directive is obligatory in every Magma Shader header.
 
 It is used to check if the shader version is compatible with the program compiling it.
 

@@ -100,6 +100,8 @@ std::string TokenSymbolToString(TokenSymbol token)
 		case TokenSymbol::CloseBrace: return "}";
 		case TokenSymbol::OpenParenthesis: return "(";
 		case TokenSymbol::CloseParenthesis: return ")";
+		case TokenSymbol::OpenBrackets: return "[";
+		case TokenSymbol::CloseBrackets: return "]";
 		case TokenSymbol::Semicolon: return ";";
 		case TokenSymbol::Comma: return ",";	
 		case TokenSymbol::Return: return "return";
@@ -291,6 +293,43 @@ void ExpectType(TokenType type, ParserInfo& info)
 	throw std::runtime_error(ss.str());
 }
 
+ASTNode* Expression(ParserInfo& info);
+ASTNode* Scope(ParserInfo& info);
+
+ASTNode* Declaration(ParserInfo& info)
+{
+	/*
+		Type
+			Identifier
+		
+		Array
+			Identifier
+			Type
+			Int Literal (array size)
+	*/
+
+	// Add declaration type
+	ExpectType(TokenType::Type, info);
+	auto declarationNode = CreateTree(TypeTokenToAST(info.lastToken.symbol), "");
+
+	Expect(TokenSymbol::Identifier, info);
+	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, declarationNode);
+
+	// If array
+	if (Accept(TokenSymbol::OpenBrackets, info))
+	{
+		AddToTree(declarationNode->symbol, "", declarationNode);
+		declarationNode->symbol = ASTNodeSymbol::Array;
+		
+		Expect(TokenSymbol::IntLiteral, info);
+		AddToTree(ASTNodeSymbol::IntLiteral, info.lastToken.attribute, declarationNode);
+
+		Expect(TokenSymbol::CloseBrackets, info);
+	}
+
+	return declarationNode;
+}
+
 ASTNode* VertexOutput(ParserInfo& info)
 {
 	auto vertexOutputNode = CreateTree(ASTNodeSymbol::VertexOutput, "");
@@ -303,14 +342,9 @@ ASTNode* VertexOutput(ParserInfo& info)
 
 	// Get declarations
 	auto declarationsNode = AddToTree(ASTNodeSymbol::Scope, "", vertexOutputNode);
-	while (AcceptType(TokenType::Type, info))
+	while (Peek(info) != TokenSymbol::CloseBrace)
 	{
-		// Add declaration type
-		auto declarationNode = AddToTree(TypeTokenToAST(info.lastToken.symbol), "", declarationsNode);
-
-		Expect(TokenSymbol::Identifier, info);
-		AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, declarationNode);
-
+		AddToTree(Declaration(info), declarationsNode);
 		Expect(TokenSymbol::Semicolon, info);
 	}
 
@@ -343,14 +377,9 @@ ASTNode* ConstantBuffer(ParserInfo& info)
 
 	// Get declarations
 	auto declarationsNode = AddToTree(ASTNodeSymbol::Scope, "", constantBufferNode);
-	while (AcceptType(TokenType::Type, info))
+	while (Peek(info) != TokenSymbol::CloseBrace)
 	{
-		// Add declaration type
-		auto declarationNode = AddToTree(TypeTokenToAST(info.lastToken.symbol), "", declarationsNode);
-
-		Expect(TokenSymbol::Identifier, info);
-		AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, declarationNode);
-
+		AddToTree(Declaration(info), declarationsNode);
 		Expect(TokenSymbol::Semicolon, info);
 	}
 
@@ -358,9 +387,6 @@ ASTNode* ConstantBuffer(ParserInfo& info)
 
 	return constantBufferNode;
 }
-
-ASTNode* Expression(ParserInfo& info);
-ASTNode* Scope(ParserInfo& info);
 
 ASTNode* Constructor(ASTNodeSymbol type, ParserInfo& info)
 {
@@ -426,6 +452,18 @@ ASTNode* IdentifierFunc(ParserInfo& info)
 
 		AddToTree(paramsNode, id1);
 	}
+	// Array access
+	else if (Accept(TokenSymbol::OpenBrackets, info))
+	{
+		// Add array identifier
+		id1->symbol = ASTNodeSymbol::ArrayAccess;
+		AddToTree(ASTNodeSymbol::Identifier, id1->attribute, id1);
+		id1->attribute = "";
+
+		// Add index expression
+		AddToTree(Expression(info), id1);
+		Expect(TokenSymbol::CloseBrackets, info);
+	}
 	// Simple identifier
 	else
 	{
@@ -440,8 +478,9 @@ ASTNode* IdentifierFunc(ParserInfo& info)
 				// Get second term
 				// Add identifiers to member operator
 				AddToTree(id1, op);
-				Expect(TokenSymbol::Identifier, info);
-				AddToTree(CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute), op);
+				//Expect(TokenSymbol::Identifier, info);
+				//AddToTree(CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute), op);
+				AddToTree(IdentifierFunc(info), op);
 				id1 = op;
 			}
 			else break;
@@ -658,13 +697,23 @@ void AddDeclaration(ASTNode* statementNode, ParserInfo& info)
 {
 	ExpectType(TokenType::Type, info);
 	AddToTree(ASTNodeSymbol::Declaration, "", statementNode);
-	AddToTree(TypeTokenToAST(info.lastToken.symbol), "", statementNode);
+	auto typeNode = AddToTree(TypeTokenToAST(info.lastToken.symbol), "", statementNode);
 	// Get identifier
 	Expect(TokenSymbol::Identifier, info);
 	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, statementNode);
 
+	// If has initialization
 	if (Accept(TokenSymbol::Assignment, info))
 		AddToTree(Expression(info), statementNode);
+	// Else if array
+	else if (Accept(TokenSymbol::OpenBrackets, info))
+	{
+		AddToTree(typeNode->symbol, "", typeNode);
+		typeNode->symbol = ASTNodeSymbol::Array;
+		Expect(TokenSymbol::IntLiteral, info);
+		AddToTree(ASTNodeSymbol::IntLiteral, info.lastToken.attribute, typeNode);
+		Expect(TokenSymbol::CloseBrackets, info);
+	}
 	// End statement
 	Expect(TokenSymbol::Semicolon, info);
 }
@@ -863,18 +912,14 @@ ASTNode* Function(ASTNodeSymbol type, ParserInfo& info)
 	auto paramsNode = AddToTree(ASTNodeSymbol::Params, "", functionNode);
 
 	// Get params
-	if (AcceptType(TokenType::Type, info))
+	if (PeekType(info) == TokenType::Type)
 	{
 		while (true)
 		{
-			auto paramNode = AddToTree(TypeTokenToAST(info.lastToken.symbol), "", paramsNode);
-
-			Expect(TokenSymbol::Identifier, info);
-			AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, paramNode);
+			AddToTree(Declaration(info), paramsNode);
 
 			if (!Accept(TokenSymbol::Comma, info))
 				break;
-			ExpectType(TokenType::Type, info);
 		}
 	}
 

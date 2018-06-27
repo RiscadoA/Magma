@@ -28,36 +28,32 @@ void Main(int argc, char** argv) try
 	void* pixelShader = nullptr;
 	{
 		std::string source = R"msl(
-		#version 1.4.0
+		#version 1.5.0
 		
 		#define COLOR_R 1.0
-
-		Texture2D texture0;
 
 		ConstantBuffer transform
 		{
 			mat4 mvp;
-			float time;
+			vec4 color[4];
 		}
 
 		VertexOutput vertexOut
 		{
-			vec2 uvs;
 			vec4 color;
+			int index;
 		}
 
-		vec4 VertexShader(vec3 position, vec2 uvs, vec4 color)
+		vec4 VertexShader(vec3 position, vec4 color, int index)
 		{
-			vertexOut.uvs = uvs;
 			vertexOut.color = color;
+			vertexOut.index = index;
 			return mul(transform.mvp, vec4(position.xyz, 1.0));
 		}
 		
 		vec4 PixelShader()
 		{
-			vec4 color = Sample2D(texture0, vertexOut.uvs) * vertexOut.color;
-			if (color.r <= abs(cos(transform.time)))
-				discard;
+			vec4 color = vertexOut.color * transform.color[vertexOut.index];
 			return color;
 		}
 		
@@ -75,31 +71,43 @@ void Main(int argc, char** argv) try
 	// Create vertex buffer
 	void* vb = nullptr;
 	{
-		float data[] =
+		struct Vertex
 		{
-			-0.5f, -0.5f, 0.0f,		0.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
-			-0.5f, +0.5f, 0.0f,		0.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
-			+0.5f, +0.5f, 0.0f,		1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
-			+0.5f, -0.5f, 0.0f,		1.0f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			float x, y, z;
+			float r, g, b, a;
+			int i;
+		};
+
+		Vertex data[] =
+		{
+			{ -0.5f, -0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		2 },
+			{ -0.5f, +0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		2 },
+			{  0.0f, -0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		2 },
+			{  0.0f, +0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		2 },
+
+			{ +0.5f, -0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		1 },
+			{ +0.5f, +0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		1 },
+			{  0.0f, -0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		1 },
+			{  0.0f, +0.5f, 0.0f,		1.0f, 1.0f, 1.0f, 1.0f,		1 },
 		};
 
 		Framework::Graphics::VertexLayout layout;
 		layout.elements.emplace_back();
 		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float3;
 		layout.elements.back().name = "position";
-		layout.elements.back().offset = 0;
-
-		layout.elements.emplace_back();
-		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float2;
-		layout.elements.back().name = "uvs";
-		layout.elements.back().offset = sizeof(float) * 3;
+		layout.elements.back().offset = offsetof(Vertex, x);
 
 		layout.elements.emplace_back();
 		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float4;
 		layout.elements.back().name = "color";
-		layout.elements.back().offset = sizeof(float) * 3 + sizeof(float) * 2;
+		layout.elements.back().offset = offsetof(Vertex, r);
 
-		layout.size = sizeof(float) * 3 + sizeof(float) * 2 + sizeof(float) * 4;
+		layout.elements.emplace_back();
+		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Int1;
+		layout.elements.back().name = "index";
+		layout.elements.back().offset = offsetof(Vertex, i);
+
+		layout.size = sizeof(Vertex);
 
 		vb = context->CreateVertexBuffer(data, sizeof(data), layout, program);
 	}
@@ -110,16 +118,30 @@ void Main(int argc, char** argv) try
 		unsigned int data[] =
 		{
 			0, 1, 2,
-			2, 3, 0,
+			1, 3, 2,
+
+			6, 5, 4,
+			6, 7, 5,
 		};
 
 		ib = context->CreateIndexBuffer(data, sizeof(data), Framework::Graphics::IndexFormat::UInt32);
 	}
 
 	// Create constant buffer
+	struct
+	{
+		glm::mat4 mvp;
+		glm::vec4 color[4];
+	} cbData;
+
+	cbData.color[0] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	cbData.color[1] = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	cbData.color[2] = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	cbData.color[3] = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
 	void* transformcb = nullptr;
 	{
-		transformcb = context->CreateConstantBuffer(nullptr, sizeof(glm::mat4) + sizeof(float));
+		transformcb = context->CreateConstantBuffer(nullptr, sizeof(cbData));
 	}
 
 	// Create texture
@@ -159,22 +181,13 @@ void Main(int argc, char** argv) try
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	auto transformbp = context->GetConstantBindingPoint(program, "transform");
-	auto texturebp = context->GetTextureBindingPoint(program, "texture0");
-
-	struct
-	{
-		glm::mat4 mvp;
-		float time;
-	} cbData;
-
-	cbData.time = 0.0f;
+	//auto texturebp = context->GetTextureBindingPoint(program, "texture0");
 
 	while (running)
 	{
 		window->PollEvents();
 
 		cbData.mvp = proj * view * model;
-		cbData.time += 0.02f;
 
 		context->UpdateConstantBuffer(transformcb, &cbData, 0, sizeof(cbData));
 
@@ -186,9 +199,9 @@ void Main(int argc, char** argv) try
 		context->BindVertexBuffer(vb);
 		context->BindIndexBuffer(ib);
 		context->BindConstantBuffer(transformcb, transformbp);
-		context->BindTexture2D(texture, texturebp);
-		context->BindSampler(sampler, texturebp);
-		context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
+		//context->BindTexture2D(texture, texturebp);
+		//context->BindSampler(sampler, texturebp);
+		context->DrawIndexed(12, 0, Framework::Graphics::DrawMode::Triangles);
 
 		context->SwapBuffers();
 	}
@@ -207,5 +220,4 @@ catch (std::exception& e)
 {
 	std::cout << e.what() << std::endl;
 	getchar();
-	return;
 }

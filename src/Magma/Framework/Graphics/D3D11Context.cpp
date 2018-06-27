@@ -326,7 +326,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data,
 	{
 		delete buffer;
 		std::stringstream ss;
-		ss << "Failed to create vertex buffer on D3D11Context:\nCouldn't create buffer:\nError: " << hr;
+		ss << "Failed to create vertex buffer on D3D11Context:\nCouldn't create buffer:\nError: " << _com_error(hr).ErrorMessage();
 		throw std::runtime_error(ss.str());
 	}
 	buffer->vertexSize = layout.size;
@@ -373,7 +373,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data,
 		if (FAILED(hr))
 		{
 			std::stringstream ss;
-			ss << "Failed to create vertex buffer on D3D11Context:\nCouldn't create buffer:\nError: " << hr;
+			ss << "Failed to create vertex buffer on D3D11Context:\nCouldn't create input layout:\nError: " << _com_error(hr).ErrorMessage();
 			throw std::runtime_error(ss.str());
 		}
 
@@ -816,7 +816,7 @@ void * Magma::Framework::Graphics::D3D11Context::GetConstantBindingPoint(void * 
 
 		if (!FAILED(hr))
 		{
-			if (desc.Type != D3D_SHADER_INPUT_TYPE::D3D10_SIT_CBUFFER)
+			if (desc.Type != D3D10_SIT_CBUFFER)
 				throw std::runtime_error("Failed to get constant buffer binding point from D3D11Context:\nBinding point doesn't point to a constant buffer");
 
 			bind->exists[s] = true;

@@ -21,6 +21,8 @@ static std::pair<std::string, TokenSymbol> tokenRegexStrings[] =
 	std::make_pair<std::string, TokenSymbol>("\\}", TokenSymbol::CloseBrace),
 	std::make_pair<std::string, TokenSymbol>("\\(", TokenSymbol::OpenParenthesis),
 	std::make_pair<std::string, TokenSymbol>("\\)", TokenSymbol::CloseParenthesis),
+	std::make_pair<std::string, TokenSymbol>("\\[", TokenSymbol::OpenBrackets),
+	std::make_pair<std::string, TokenSymbol>("\\]", TokenSymbol::CloseBrackets),
 	std::make_pair<std::string, TokenSymbol>("\\;", TokenSymbol::Semicolon),
 	std::make_pair<std::string, TokenSymbol>("\\,", TokenSymbol::Comma),
 

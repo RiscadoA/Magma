@@ -117,9 +117,15 @@ void GenerateExpression(Info& info, ASTNode* expressionNode, int indentation = 0
 					GenerateExpression(info, expressionNode->firstChild->next, indentation, true);
 				}
 			}
+		} break;
+		case ASTNodeSymbol::ArrayAccess:
+		{
+			GenerateExpression(info, expressionNode->firstChild, indentation, isMemberOp);
+			info.out << "[";
+			GenerateExpression(info, expressionNode->firstChild->next, indentation, true);
+			info.out << "]";
+		} break;
 
-			break;
-		}
 		case ASTNodeSymbol::Constructor:
 		{
 			info.out << TypeToHLSLType(expressionNode->firstChild->symbol) << "(";
@@ -749,7 +755,12 @@ void Magma::Framework::Graphics::MSL::HLSLCompiler::GenerateCode()
 		info.out << "cbuffer " << c.first << std::endl;
 		info.out << "{" << std::endl;
 		for (auto& d : c.second)
-			info.out << "\t" << TypeToHLSLType(d.type) << " " << c.first << "_" << d.name << ";" << std::endl; 
+		{
+			if (d.isArray)
+				info.out << "\t" << TypeToHLSLType(d.type) << " " << c.first << "_" << d.name << "[" << d.arraySize << "];" << std::endl;
+			else
+				info.out << "\t" << TypeToHLSLType(d.type) << " " << c.first << "_" << d.name << ";" << std::endl; 
+		}
 		info.out << "};" << std::endl;
 	}
 	if (!m_constantBuffers.empty())
@@ -760,7 +771,12 @@ void Magma::Framework::Graphics::MSL::HLSLCompiler::GenerateCode()
 	info.out << "{" << std::endl;
 	info.out << "\tfloat4 vertexResult : SV_POSITION;" << std::endl;
 	for (auto& d : m_vertexOut)
-		info.out << "\t" << TypeToHLSLType(d.type) << " vertexOut_" << d.name << " : " << d.name << ";" << std::endl;
+	{
+		if (d.isArray)
+			info.out << "\t" << TypeToHLSLType(d.type) << " vertexOut_" << d.name << "[" << d.arraySize << "];" << std::endl;
+		else
+			info.out << "\t" << TypeToHLSLType(d.type) << " vertexOut_" << d.name << " : " << d.name << ";" << std::endl;
+	}
 	info.out << "};" << std::endl;
 	info.out << std::endl;
 
