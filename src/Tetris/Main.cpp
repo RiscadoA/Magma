@@ -2,6 +2,7 @@
 #include <Magma/Framework/Graphics/GLContext.hpp>
 #include <Magma/Framework/Graphics/MSL/HLSLCompiler.hpp>
 #include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
+#include <Magma/Framework/Files/FileSystem.hpp>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -10,7 +11,9 @@ using namespace Magma;
 
 void Main(int argc, char** argv) try
 {
-	bool running = true;
+
+
+	/*bool running = true;
 
 	Framework::Input::Window* window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
 
@@ -214,7 +217,7 @@ void Main(int argc, char** argv) try
 
 	context->Terminate();
 	delete context;
-	delete window;
+	delete window;*/
 }
 catch (std::exception& e)
 {

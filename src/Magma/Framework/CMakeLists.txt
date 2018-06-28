@@ -33,6 +33,15 @@ else()
 	message("Magma-Framework Context Debug deactivated")
 endif()
 
+option (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM "Will the framework enable the use of standard library for the file system class?" ON)
+if (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM)
+	set (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM 1)
+	message("Magma-Framework with STD FileSystem enabled")
+else()
+	set (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM 0)
+	message("Magma-Framework with STD FileSystem disabled")
+endif()
+
 configure_file(Config.hpp.in Config.hpp)
 
 # Add files as library
