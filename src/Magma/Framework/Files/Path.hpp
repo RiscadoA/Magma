@@ -32,6 +32,13 @@ namespace Magma
 				Path(const std::string& path);
 
 				/// <summary>
+				///		Creates a new path
+				/// </summary>
+				/// <param name="path">Absolute path (must start with '/')</param>
+				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the path is invalid</exception>
+				inline Path(const char*path) : Path(std::string(path)) {}
+
+				/// <summary>
 				///		Creates a new path from another one
 				/// </summary>
 				/// <param name="path">Path to copy from</param>
@@ -109,6 +116,12 @@ namespace Magma
 				/// </summary>
 				/// <returns>This path's string</returns>
 				inline operator std::string() const { return this->ToString(); }
+
+				/// <summary>
+				///		Checks if this path points to the file system root
+				/// </summary>
+				/// <returns>True if points to root, otherwise false</returns>
+				inline bool IsRoot() const { return m_path.empty(); }
 
 			private:
 				void Parse(const std::string& str);

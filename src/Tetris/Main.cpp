@@ -2,7 +2,7 @@
 #include <Magma/Framework/Graphics/GLContext.hpp>
 #include <Magma/Framework/Graphics/MSL/HLSLCompiler.hpp>
 #include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
-#include <Magma/Framework/Files/FileSystem.hpp>
+#include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,13 +11,23 @@ using namespace Magma;
 
 void Main(int argc, char** argv) try
 {
+	Framework::Files::STDFileSystem fileSystem("../../../resources");
 
+	std::vector<Framework::Files::Path> contents;
+	fileSystem.GetDirectoryContents("/", contents);
+
+	for (auto& c : contents)
+		std::cout << c.ToString() << std::endl;
+
+	getchar();
+
+	//fileSystem.Create("/config/config.ini");
 
 	/*bool running = true;
 
-	Framework::Input::Window* window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+	Framework::Input::Window* window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
 
-	Framework::Graphics::Context* context = new Framework::Graphics::D3D11Context();
+	Framework::Graphics::Context* context = new Framework::Graphics::GLContext();
 	Framework::Graphics::ContextSettings contextSettings;
 	contextSettings.multisampleCount = 4;
 	contextSettings.enableVsync = true;

@@ -135,7 +135,7 @@ void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, si
 {
 	VertexBuffer* vertexBuffer = new VertexBuffer();
 
-	glCreateVertexArrays(1, &vertexBuffer->vao);
+	glGenVertexArrays(1, &vertexBuffer->vao);
 	glBindVertexArray(vertexBuffer->vao);
 
 	GL_CHECK_ERROR("Failed to create vertex buffer on GLContext {1}");
@@ -148,7 +148,7 @@ void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, si
 		throw;
 	}
 
-	glCreateBuffers(1, &vertexBuffer->vbo);
+	glGenBuffers(1, &vertexBuffer->vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->vbo);
 	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 
@@ -402,7 +402,7 @@ void * Magma::Framework::Graphics::GLContext::CreateIndexBuffer(void * data, siz
 {
 	auto buffer = new IndexBuffer();
 
-	glCreateBuffers(1, &buffer->ibo);
+	glGenBuffers(1, &buffer->ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 

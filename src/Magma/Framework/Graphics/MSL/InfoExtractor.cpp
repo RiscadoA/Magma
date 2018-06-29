@@ -32,7 +32,7 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 			auto t = c->symbol;
 			auto i = c->firstChild->attribute;
 			if (t == ASTNodeSymbol::Array)
-				m_vertexOut.push_back({ c->firstChild->next->symbol, i, true, std::stoull(c->firstChild->next->next->attribute) });
+				m_vertexOut.push_back({ c->firstChild->next->symbol, i, true, (size_t)std::stoull(c->firstChild->next->next->attribute) });
 			else
 				m_vertexOut.push_back({ t, i, false, 0 });
 			c = c->next;
@@ -70,7 +70,7 @@ void Magma::Framework::Graphics::MSL::Compiler::ExtractInfo()
 			auto t = c->symbol;
 			auto i = c->firstChild->attribute;
 			if (t == ASTNodeSymbol::Array)
-				m_constantBuffers[id].push_back({ c->firstChild->next->symbol, i, true, std::stoull(c->firstChild->next->next->attribute) });
+				m_constantBuffers[id].push_back({ c->firstChild->next->symbol, i, true, (size_t)std::stoll(c->firstChild->next->next->attribute) });
 			else
 				m_constantBuffers[id].push_back({ t, i, false, 0 });
 			c = c->next;

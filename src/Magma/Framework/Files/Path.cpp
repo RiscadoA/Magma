@@ -191,7 +191,7 @@ void Magma::Framework::Files::Path::Parse(const std::string& str)
 		switch (c)
 		{
 			case '/':
-				if (m_path.empty())
+				if (name.empty() && m_path.empty())
 					continue;
 				if (name.empty())
 				{
@@ -212,6 +212,11 @@ void Magma::Framework::Files::Path::Parse(const std::string& str)
 				else lastWasPeriod = true;
 				break;
 			default:
+				if (lastWasPeriod)
+				{
+					lastWasPeriod = false;
+					name += '.';
+				}
 				name += c;
 				break;
 		}
