@@ -3,6 +3,7 @@
 #include <Magma/Framework/Graphics/MSL/HLSLCompiler.hpp>
 #include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
+#include <Magma/Framework/String/UTF8.hpp>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,17 +12,17 @@ using namespace Magma;
 
 void Main(int argc, char** argv) try
 {
-	Framework::Files::STDFileSystem fileSystem("../../../resources");
+	/*
+	const Framework::String::U32Char* src = U"test";
+	Framework::String::U32Char dst[256];
+	Framework::String::Copy(src, dst, 256);
+	*/
 
-	std::vector<Framework::Files::Path> contents;
-	fileSystem.GetDirectoryContents("/", contents);
+	const Framework::String::U8Char* chr = u8"á";
 
-	for (auto& c : contents)
-		std::cout << c.ToString() << std::endl;
+	std::cout << Framework::String::GetU8Char(chr) << std::endl;
 
 	getchar();
-
-	//fileSystem.Create("/config/config.ini");
 
 	/*bool running = true;
 

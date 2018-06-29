@@ -1,3 +1,5 @@
+#pragma once
+
 #include "FileSystem.hpp"
 
 namespace Magma
