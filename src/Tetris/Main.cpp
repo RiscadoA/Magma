@@ -1,4 +1,4 @@
-#include <Magma/Framework/Graphics/D3D11Context.hpp>
+﻿#include <Magma/Framework/Graphics/D3D11Context.hpp>
 #include <Magma/Framework/Graphics/GLContext.hpp>
 #include <Magma/Framework/Graphics/MSL/HLSLCompiler.hpp>
 #include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
@@ -8,7 +8,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-using namespace Magma;
+using namespace Magma::Framework;
 
 void Main(int argc, char** argv) try
 {
@@ -18,9 +18,27 @@ void Main(int argc, char** argv) try
 	Framework::String::Copy(src, dst, 256);
 	*/
 
-	const Framework::String::U8Char* chr = u8"�";
+	const String::U8Char* str1 = u8"áidjkgd";
+	String::U8Char str2[256];
 
-	std::cout << Framework::String::GetU8Char(chr) << std::endl;
+	auto it = str1;
+	while (String::GetU8Char(it) != 0)
+	{
+		std::cout << std::hex << String::GetU8Char(it) << " ";
+		it += String::GetU8CharSize(it);
+	}
+	std::cout << std::endl;
+
+	std::cout << String::CopyU8(str1, str2, 3);
+	std::cout << std::endl;
+
+	it = str2;
+	while (String::GetU8Char(it) != 0)
+	{
+		std::cout << std::hex << String::GetU8Char(it) << " ";
+		it += String::GetU8CharSize(it);
+	}
+	std::cout << std::endl;
 
 	getchar();
 
