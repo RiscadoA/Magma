@@ -7,12 +7,12 @@ using namespace Magma::Framework::String;
 bool Magma::Framework::String::IsValidU8Char(const U8Char * src)
 {
 	if ((*src & 0b1000'0000) == 0b0000'0000)
-		return IsValidU32(GetU8Char(src));
+		return IsValidU32Char(GetU8Char(src));
 	else if ((*src & 0b1110'0000) == 0b1100'0000)
 	{
 		if ((*(src + 1) & 0b1100'0000) != 0b1000'0000)
 			return false;
-		return IsValidU32(GetU8Char(src));
+		return IsValidU32Char(GetU8Char(src));
 	}
 	else if ((*src & 0b1111'0000) == 0b1110'0000)
 	{
@@ -20,7 +20,7 @@ bool Magma::Framework::String::IsValidU8Char(const U8Char * src)
 			return false;
 		if ((*(src + 2) & 0b1100'0000) != 0b1000'0000)
 			return false;
-		return IsValidU32(GetU8Char(src));
+		return IsValidU32Char(GetU8Char(src));
 	}
 	else if ((*src & 0b1111'1000) == 0b1111'0000)
 	{
@@ -30,7 +30,7 @@ bool Magma::Framework::String::IsValidU8Char(const U8Char * src)
 			return false;
 		if ((*(src + 3) & 0b1100'0000) != 0b1000'0000)
 			return false;
-		return IsValidU32(GetU8Char(src));
+		return IsValidU32Char(GetU8Char(src));
 	}
 	else return false;
 }
@@ -63,8 +63,6 @@ size_t Magma::Framework::String::GetU8CharSize(U32Char up)
 
 U32Char Magma::Framework::String::GetU8Char(const U8Char * src)
 {
-	/*if (!IsValidU8Char(src))
-		throw StringError("Failed to get UTF-8 character unicode point:\nInvalid UTF-8");*/
 	auto s = GetU8CharSize(src);
 	U32Char up = 0;
 	switch (s)

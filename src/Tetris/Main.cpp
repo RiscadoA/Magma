@@ -4,6 +4,7 @@
 #include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/UTF8.hpp>
+#include <Magma/Framework/String/Conversion.hpp>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,45 +13,6 @@ using namespace Magma::Framework;
 
 void Main(int argc, char** argv) try
 {
-	/*
-	const Framework::String::U32Char* src = U"test";
-	Framework::String::U32Char dst[256];
-	Framework::String::Copy(src, dst, 256);
-	*/
-
-	const String::U8Char* str1 = u8"áidjkgd";
-	String::U8Char str2[256];
-
-
-
-	/*auto it = str1;
-	while (String::GetU8Char(it) != 0)
-	{
-		std::cout << std::hex << String::GetU8Char(it) << " ";
-		it += String::GetU8CharSize(it);
-	}
-	std::cout << std::endl;
-
-	std::cout << String::CopyU8(str1, str2, 3);
-	std::cout << std::endl;*/
-
-	auto it = str2;
-
-	it += String::SetU8Char(it, 0xFFFF);
-	it += String::SetU8Char(it, 0x0AD0);
-	it += String::SetU8Char(it, U'\0');
-
-	std::cout << String::GetU8StringSize(str2) << std::endl;
-	std::cout << String::GetU8StringLength(str2) << std::endl;
-
-	it = str2;
-	while (String::GetU8Char(it) != 0)
-	{
-		std::cout << std::hex << String::GetU8Char(it) << " ";
-		it += String::GetU8CharSize(it);
-	}
-	std::cout << std::endl;
-
 	getchar();
 
 	/*bool running = true;
