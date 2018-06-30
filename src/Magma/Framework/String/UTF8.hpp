@@ -26,12 +26,28 @@ namespace Magma
 			size_t GetU8CharSize(const U8Char* src);
 
 			/// <summary>
+			///		Gets the size in bytes of a unicode point value stored as a UTF-8 character.
+			/// </summary>
+			/// <param name="up">Unicode point value</param>
+			/// <returns>The UTF-8 character size in bytes</returns>
+			size_t GetU8CharSize(U32Char up);
+
+			/// <summary>
 			///		Gets the unicode point of a UTF-8 character
 			/// </summary>
 			/// <param name="src">UTF-8 char pointer</param>
 			/// <returns>UTF-8 character unicode point value</returns>
 			/// <exception cref="Magma::Framework::String::StringError">Thrown if the character is invalid UTF-8</exception>
 			U32Char GetU8Char(const U8Char* src);
+
+			/// <summary>
+			///		Sets a UTF-8 character value
+			/// </summary>
+			/// <param name="dst">UTF-8 character destination pointer</param>
+			/// <param name="up">Unicode point value</param>
+			/// <param name="maxSize">Maximum UTF-8 character size</param>
+			/// <returns>The size of the character</returns>
+			size_t SetU8Char(U8Char* dst, U32Char up, size_t maxSize = 4);
 
 			/// <summary>
 			///		Gets the next UTF-8 character pointer in a string

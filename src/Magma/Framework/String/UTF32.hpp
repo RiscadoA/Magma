@@ -13,7 +13,27 @@ namespace Magma
 			typedef char32_t U32Char;
 
 			/// <summary>
-			///		Copies a string into another string
+			///		Used to represent the different byte orders
+			/// </summary>
+			enum class ByteOrder
+			{
+				Invalid = -1,
+
+				BigEndian,
+				LittleEndian,
+
+				Count,
+			};
+
+			/// <summary>
+			///		Checks if a unicode point value is valid unicode.
+			/// </summary>
+			/// <param name="up">Unicode point value</param>
+			/// <returns>True if valid, otherwise false</returns>
+			bool IsValidU32(U32Char up);
+
+			/// <summary>
+			///		Copies a string into another string.
 			/// </summary>
 			/// <param name="src">Source string</param>
 			/// <param name="dst">Destination string</param>

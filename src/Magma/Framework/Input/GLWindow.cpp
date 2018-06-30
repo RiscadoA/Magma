@@ -238,7 +238,7 @@ void Magma::Framework::Input::GLWindow::SwapBuffers()
 	glfwSwapBuffers((GLFWwindow*)m_glfwWindow);
 }
 
-#if not defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
+#if !defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
 int main(int argc, char** argv)
 {
 	Main(argc, argv);

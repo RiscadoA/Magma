@@ -1452,7 +1452,7 @@ void Magma::Framework::Graphics::D3D11Context::DestroyConstantBuffer(void * cons
 	throw std::runtime_error("Failed to destroy constant buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void Magma::Framework::Graphics::D3D11Context::UpdateConstantBuffer(void * constantBuffer, void * data)
+void Magma::Framework::Graphics::D3D11Context::UpdateConstantBuffer(void * constantBuffer, void * data, size_t offset, size_t size)
 {
 	throw std::runtime_error("Failed to update constant buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
@@ -1502,7 +1502,7 @@ void Magma::Framework::Graphics::D3D11Context::BindSampler(void * sampler, void 
 	throw std::runtime_error("Failed to bind sampler on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateRenderTexture(size_t width, size_t height, TextureFormat format)
+void * Magma::Framework::Graphics::D3D11Context::CreateRenderTexture(size_t width, size_t height, TextureFormat format, bool depthBuffer)
 {
 	throw std::runtime_error("Failed to create render texture on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }

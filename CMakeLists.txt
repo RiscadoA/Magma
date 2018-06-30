@@ -7,6 +7,7 @@ add_subdirectory(extern/)
 
 # Add games and framework
 project (Simple-Game)
+include(CTest)
 
 set(CMAKE_CXX_STANDARD 17)
 if(MSVC)

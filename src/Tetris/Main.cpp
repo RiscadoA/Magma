@@ -21,7 +21,9 @@ void Main(int argc, char** argv) try
 	const String::U8Char* str1 = u8"áidjkgd";
 	String::U8Char str2[256];
 
-	auto it = str1;
+
+
+	/*auto it = str1;
 	while (String::GetU8Char(it) != 0)
 	{
 		std::cout << std::hex << String::GetU8Char(it) << " ";
@@ -30,7 +32,16 @@ void Main(int argc, char** argv) try
 	std::cout << std::endl;
 
 	std::cout << String::CopyU8(str1, str2, 3);
-	std::cout << std::endl;
+	std::cout << std::endl;*/
+
+	auto it = str2;
+
+	it += String::SetU8Char(it, 0xFFFF);
+	it += String::SetU8Char(it, 0x0AD0);
+	it += String::SetU8Char(it, U'\0');
+
+	std::cout << String::GetU8StringSize(str2) << std::endl;
+	std::cout << String::GetU8StringLength(str2) << std::endl;
 
 	it = str2;
 	while (String::GetU8Char(it) != 0)
