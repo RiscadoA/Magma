@@ -17,6 +17,31 @@ namespace Magma
 		namespace Graphics
 		{
 			/// <summary>
+			///		Resource usage types.
+			/// </summary>
+			enum class Usage
+			{
+				Invalid = -1,
+
+				/// <summary>
+				///		Requires read and write access by the GPU.
+				/// </summary>
+				Default,
+
+				/// <summary>
+				///		Can only be read by the GPU and cannot be written to by any means.
+				/// </summary>
+				Immutable,
+
+				/// <summary>
+				///		Read only to the GPU and write only to the CPU.
+				/// </summary>
+				Dynamic,
+
+				Count
+			};
+
+			/// <summary>
 			///		Draw mode
 			/// </summary>
 			enum class DrawMode
@@ -230,14 +255,15 @@ namespace Magma
 				virtual void Clear(BufferBit mask) = 0;
 
 				/// <summary>
-				///		Creates a vertex buffer
+				///		Creates a vertex buffer.
 				/// </summary>
 				/// <param name="data">Data to fill buffer</param>
 				/// <param name="size">Data size</param>
 				/// <param name="layout">Data layout</param>
 				/// <param name="program">Program handle</param>
+				/// <param name="usage">Usage type</param>
 				/// <returns>Vertex buffer handle</returns>
-				virtual void* CreateVertexBuffer(void* data, size_t size, const VertexLayout& layout, void* program) = 0;
+				virtual void* CreateVertexBuffer(void* data, size_t size, const VertexLayout& layout, void* program, Usage usage = Usage::Default) = 0;
 
 				/// <summary>
 				///		Destroys a vertex buffer
@@ -246,13 +272,22 @@ namespace Magma
 				virtual void DestroyVertexBuffer(void* vertexBuffer) = 0;
 
 				/// <summary>
-				///		Sets a vertex buffer as active
+				///		Updates a vertex buffer data.
+				/// </summary>
+				/// <param name="vertexBuffer">Vertex buffer handle</param>
+				/// <param name="data">Data pointer</param>
+				/// <param name="size">Data size in bytes</param>
+				/// <param name="offset">Data offset relative to the beginning of the vertex buffer</param>
+				virtual void UpdateVertexBuffer(void* vertexBuffer, void* data, size_t size, size_t offset) = 0;
+
+				/// <summary>
+				///		Sets a vertex buffer as active.
 				/// </summary>
 				/// <param name="vertexBuffer">Vertex buffer handle to set as active</param>
 				virtual void BindVertexBuffer(void* vertexBuffer) = 0;
 
 				/// <summary>
-				///		Draws the current active vertex buffer
+				///		Draws the current active vertex buffer.
 				/// </summary>
 				/// <param name="vertexCount">Number of vertexes to be drawn</param>
 				/// <param name="offset">Starting vertex ID</param>
@@ -381,18 +416,30 @@ namespace Magma
 				/// <summary>
 				///		Creates a new 2D texture
 				/// </summary>
-				/// <param name="data">Texture pixel data</param>
+				/// <param name="data">Texture pixel data (can be set to null to create an empty texture)</param>
 				/// <param name="width">Texture width</param>
 				/// <param name="height">Texture height</param>
 				/// <param name="format">Texture data format</param>
 				/// <returns>2D Texture handle</returns>
-				virtual void* CreateTexture2D(void* data, size_t width, size_t height, TextureFormat format) = 0;
+				virtual void* CreateTexture2D(const void* data, size_t width, size_t height, TextureFormat format) = 0;
 
 				/// <summary>
 				///		Destroys a 2D texture
 				/// </summary>
 				/// <param name="texture">2D Texture handle</param>
 				virtual void DestroyTexture2D(void* texture) = 0;
+
+				/// <summary>
+				///		Updates a texture data
+				/// </summary>
+				/// <param name="texture">Texture handle</param>
+				/// <param name="data">New data</param>
+				/// <param name="width">Data width</param>
+				/// <param name="height">Data height</param>
+				/// <param name="dstX">Destination X coordinate</param>
+				/// <param name="dstY">Destination Y coordinate</param>
+				/// <param name="format">Texture format</param>
+				virtual void UpdateTexture2D(void* texture, const void* data, size_t width, size_t height, size_t dstX, size_t dstY, TextureFormat format) = 0;
 
 				/// <summary>
 				///		Gets a program texture binding point.

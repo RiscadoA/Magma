@@ -87,7 +87,7 @@ void Magma::Framework::Graphics::MSL::Compiler::RunPreprocessor()
 					throw std::runtime_error(ss.str());
 				}
 
-				m_realCodeLines.erase(m_realCodeLines.begin() + (lineCount - 1));
+				m_realCodeLines.erase(m_realCodeLines.begin() + (lineCount));
 				--lineCount;
 			}
 			else if (std::regex_match(line, regMatch, defineRegex))

@@ -11,22 +11,22 @@ void * Magma::Framework::Files::STDFileSystem::OpenFile(FileMode mode, const Pat
 	FILE* file = nullptr;
 	errno_t err;
 	if (mode == FileMode::Read)
-		err = fopen_s(&file, (this->GetRoot() + path.ToString()).c_str(), "r");
+		err = fopen_s(&file, (this->GetRoot() + path.ToString()).c_str(), "rb");
 	else if (mode == FileMode::Write)
-		err = fopen_s(&file, (this->GetRoot() + path.ToString()).c_str(), "w");
+		err = fopen_s(&file, (this->GetRoot() + path.ToString()).c_str(), "wb");
 	else if (mode == FileMode::ReadWrite)
-		err = fopen_s(&file, (this->GetRoot() + path.ToString()).c_str(), "rw");
+		err = fopen_s(&file, (this->GetRoot() + path.ToString()).c_str(), "rwb");
 	else if (mode == FileMode::Invalid)
 	{
 		std::stringstream ss;
-		ss << "Failed to open file on STDFileSystem:" << std::endl;
+		ss << "Failed to open file \"" << path.ToString() << "\" on STDFileSystem:" << std::endl;
 		ss << "Invalid file mode";
 		throw FileError(ss.str());
 	}
 	else
 	{
 		std::stringstream ss;
-		ss << "Failed to open file on STDFileSystem:" << std::endl;
+		ss << "Failed to open file \"" << path.ToString() << "\" on STDFileSystem:" << std::endl;
 		ss << "Unsupported file mode";
 		throw FileError(ss.str());
 	}
@@ -34,7 +34,7 @@ void * Magma::Framework::Files::STDFileSystem::OpenFile(FileMode mode, const Pat
 	if (err != 0 || file == nullptr)
 	{
 		std::stringstream ss;
-		ss << "Failed to open file on STDFileSystem:" << std::endl;
+		ss << "Failed to open file \"" << path.ToString() << "\" on STDFileSystem:" << std::endl;
 		ss << "STD error " << err << ":" << std::endl;
 		ss << strerror(err);
 		throw FileError(ss.str());
@@ -72,7 +72,7 @@ void Magma::Framework::Files::STDFileSystem::Read(void * file, void * buffer, si
 		throw FileError(ss.str());
 	}
 
-	auto readSize = fread_s(buffer, size, 1, size, (FILE*)file);
+	auto readSize = fread(buffer, 1, size, (FILE*)file);
 	if (readSize == 0)
 	{
 		std::stringstream ss;
@@ -214,4 +214,48 @@ void Magma::Framework::Files::STDFileSystem::GetDirectoryContents(const Path & p
 bool Magma::Framework::Files::STDFileSystem::Exists(const Path & path)
 {
 	return std::experimental::filesystem::exists(this->GetRoot() + path.ToString());;
+}
+
+size_t Magma::Framework::Files::STDFileSystem::GetSize(void * file)
+{
+	errno = 0;
+
+	if (file == nullptr)
+	{
+		std::stringstream ss;
+		ss << "Failed to get file size on STDFileSystem:" << std::endl;
+		ss << "File handle is null";
+		throw FileError(ss.str());
+	}
+
+	int err = 0;
+	auto pos = ftell((FILE*)file);
+	if (pos == -1)
+	{
+		std::stringstream ss;
+		ss << "Failed to get file size on STDFileSystem:" << std::endl;
+		ss << "ftell returned -1, error " << errno << ":" << std::endl;
+		ss << strerror(errno);
+		errno = 0;
+		throw FileError(ss.str());
+	}
+
+	err = fseek((FILE*)file, 0, SEEK_END);
+	if (err != 0)
+	{
+		std::stringstream ss;
+		ss << "Failed to get file size on STDFileSystem:" << std::endl;
+		ss << "fseek returned non zero, error " << ferror((FILE*)file);
+		throw FileError(ss.str());
+	}
+	auto size = ftell((FILE*)file);
+	err = fseek((FILE*)file, pos, SEEK_SET);
+	if (err != 0)
+	{
+		std::stringstream ss;
+		ss << "Failed to get file size on STDFileSystem:" << std::endl;
+		ss << "fseek returned non zero, error " << ferror((FILE*)file);
+		throw FileError(ss.str());
+	}
+	return size;
 }

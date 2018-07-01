@@ -81,7 +81,7 @@ void Magma::Framework::Graphics::MSL::Compiler::RunLexer()
 	
 	// Match token regexes to get the tokens
 	m_tokens.clear();
-	int line = 1;
+	int line = 0;
 	std::match_results<std::string::iterator> match;
 	auto it = m_code.begin();
 	while (it != m_code.end())
@@ -110,7 +110,7 @@ void Magma::Framework::Graphics::MSL::Compiler::RunLexer()
 				}
 			}
 
-			if (did == false)
+			/*if (did == false)
 			{
 				std::stringstream ss;
 				ss << "Failed to compile MSL code:" << std::endl;
@@ -118,7 +118,9 @@ void Magma::Framework::Graphics::MSL::Compiler::RunLexer()
 				ss << "Unknown character '" << *it << "', no token matches this character:" << std::endl;
 				ss << "Line: " << m_realCodeLines[line];
 				throw std::runtime_error(ss.str());
-			}
+			}*/
+			if (did == false)
+				++it;
 		}
 		else ++it;
 

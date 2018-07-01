@@ -99,6 +99,9 @@ void Magma::Framework::Graphics::GLContext::Init(Input::Window * window, const C
 	else
 		glfwSwapInterval(0);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
@@ -131,7 +134,7 @@ void Magma::Framework::Graphics::GLContext::Clear(BufferBit mask)
 	GL_CHECK_ERROR("Failed to clear on GLContext");
 }
 
-void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void * program)
+void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void * program, Usage usage)
 {
 	VertexBuffer* vertexBuffer = new VertexBuffer();
 
@@ -148,9 +151,19 @@ void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, si
 		throw;
 	}
 
+	GLenum gl_usage;
+	switch (usage)
+	{
+		case Usage::Default: // Default and immutable are the same thing in OpenGL
+		case Usage::Immutable: gl_usage = GL_STATIC_DRAW; break;
+		case Usage::Dynamic: gl_usage = GL_DYNAMIC_DRAW; break;
+		case Usage::Invalid: throw std::runtime_error("Failed to create vertex buffer on GLContext:\Invalid usage type"); break;
+		default: throw std::runtime_error("Failed to create vertex buffer on GLContext:\nUnsupported usage type"); break;
+	}
+
 	glGenBuffers(1, &vertexBuffer->vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->vbo);
-	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size, data, gl_usage);
 
 	try { GL_CHECK_ERROR("Failed to create vertex buffer on GLContext {2}"); }
 	catch (...)
@@ -211,6 +224,14 @@ void Magma::Framework::Graphics::GLContext::DestroyVertexBuffer(void * vertexBuf
 	delete buffer;
 
 	GL_CHECK_ERROR("Failed to destroy vertex buffer on GLContext");
+}
+
+void Magma::Framework::Graphics::GLContext::UpdateVertexBuffer(void* vertexBuffer, void * data, size_t size, size_t offset)
+{
+	auto buffer = (VertexBuffer*)vertexBuffer;
+	glBindBuffer(GL_ARRAY_BUFFER, buffer->vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+	GL_CHECK_ERROR("Failed to update vertex buffer on GLContext");
 }
 
 void Magma::Framework::Graphics::GLContext::BindVertexBuffer(void * vertexBuffer)
@@ -576,7 +597,7 @@ void Magma::Framework::Graphics::GLContext::SwapBuffers()
 	m_window->SwapBuffers();
 }
 
-void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format)
+void * Magma::Framework::Graphics::GLContext::CreateTexture2D(const void * data, size_t width, size_t height, TextureFormat format)
 {
 	auto texture = new Texture2D();
 
@@ -594,16 +615,16 @@ void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_
 
 			switch (format)
 			{
-				case TextureFormat::R8UInt: gl_internalFormat = GL_R8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_R; break;
-				case TextureFormat::R16UInt: gl_internalFormat = GL_R16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
-				case TextureFormat::RG8UInt: gl_internalFormat = GL_RG8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RG; break;
-				case TextureFormat::RG16UInt: gl_internalFormat = GL_RG16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; break;
-				case TextureFormat::RGBA8UInt: gl_internalFormat = GL_RGBA8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RGBA; break;
-				case TextureFormat::RGBA16UInt: gl_internalFormat = GL_RGBA16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RGBA; break;
-				case TextureFormat::R32Float: gl_internalFormat = GL_R; gl_type = GL_FLOAT; gl_format = GL_R; break;
-				case TextureFormat::RG32Float: gl_internalFormat = GL_RG; gl_type = GL_FLOAT; gl_format = GL_RG; break;
-				case TextureFormat::RGB32Float: gl_internalFormat = GL_RGB; gl_type = GL_FLOAT; gl_format = GL_RGB; break;
-				case TextureFormat::RGBA32Float: gl_internalFormat = GL_RGBA; gl_type = GL_FLOAT; gl_format = GL_RGBA;  break;
+				case TextureFormat::R8UInt: gl_internalFormat = GL_R8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RED; glPixelStorei(GL_UNPACK_ALIGNMENT, 1); break;
+				case TextureFormat::R16UInt: gl_internalFormat = GL_R16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 2); break;
+				case TextureFormat::RG8UInt: gl_internalFormat = GL_RG8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 2); break;
+				case TextureFormat::RG16UInt: gl_internalFormat = GL_RG16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+				case TextureFormat::RGBA8UInt: gl_internalFormat = GL_RGBA8; gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RGBA; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+				case TextureFormat::RGBA16UInt: gl_internalFormat = GL_RGBA16; gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RGBA; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+				case TextureFormat::R32Float: gl_internalFormat = GL_R32F; gl_type = GL_FLOAT; gl_format = GL_RED; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+				case TextureFormat::RG32Float: gl_internalFormat = GL_RG32F; gl_type = GL_FLOAT; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+				case TextureFormat::RGB32Float: gl_internalFormat = GL_RGB32F; gl_type = GL_FLOAT; gl_format = GL_RGB; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+				case TextureFormat::RGBA32Float: gl_internalFormat = GL_RGBA32F; gl_type = GL_FLOAT; gl_format = GL_RGBA; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
 				case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on GLContext:\nInvalid format"); break;
 				default: throw std::runtime_error("Failed to create 2D texture on GLContext:\nUnsupported format"); break;
 			}
@@ -613,10 +634,13 @@ void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-			glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, width, height, 0, gl_format, gl_type, data);
-			glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps
-
 			GL_CHECK_ERROR("Failed to create 2D texture on GL context {2}");
+
+			glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, width, height, 0, gl_format, gl_type, data);
+			if (data != nullptr)
+				glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps
+			
+			GL_CHECK_ERROR("Failed to create 2D texture on GL context {3}");
 		}
 		catch (...)
 		{
@@ -644,6 +668,34 @@ void Magma::Framework::Graphics::GLContext::DestroyTexture2D(void * texture)
 	glDeleteTextures(1, &tex->texture);
 	delete tex;
 	GL_CHECK_ERROR("Failed to destroy 2D texture on GLContext");
+}
+
+void Magma::Framework::Graphics::GLContext::UpdateTexture2D(void* texture, const void * data, size_t width, size_t height, size_t dstX, size_t dstY, TextureFormat format)
+{
+	auto tex = (Texture2D*)texture;
+	glBindTexture(GL_TEXTURE_2D, tex->texture);
+
+	GLenum gl_type;
+	GLenum gl_format;
+
+	switch (format)
+	{
+		case TextureFormat::R8UInt: gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RED; glPixelStorei(GL_UNPACK_ALIGNMENT, 1); break;
+		case TextureFormat::R16UInt: gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 2); break;
+		case TextureFormat::RG8UInt: gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 2); break;
+		case TextureFormat::RG16UInt: gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+		case TextureFormat::RGBA8UInt: gl_type = GL_UNSIGNED_BYTE; gl_format = GL_RGBA; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+		case TextureFormat::RGBA16UInt: gl_type = GL_UNSIGNED_SHORT; gl_format = GL_RGBA; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+		case TextureFormat::R32Float: gl_type = GL_FLOAT; gl_format = GL_RED; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+		case TextureFormat::RG32Float:  gl_type = GL_FLOAT; gl_format = GL_RG; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+		case TextureFormat::RGB32Float: gl_type = GL_FLOAT; gl_format = GL_RGB; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+		case TextureFormat::RGBA32Float: gl_type = GL_FLOAT; gl_format = GL_RGBA; glPixelStorei(GL_UNPACK_ALIGNMENT, 4); break;
+		case TextureFormat::Invalid: throw std::runtime_error("Failed to update 2D texture on GLContext:\nInvalid format"); break;
+		default: throw std::runtime_error("Failed to update 2D texture on GLContext:\nUnsupported format"); break;
+	}
+
+	glTexSubImage2D(GL_TEXTURE_2D, 0, dstX, dstY, width, height, gl_format, gl_type, data);
+	GL_CHECK_ERROR("Failed to update 2D texture on GLContext");
 }
 
 void * Magma::Framework::Graphics::GLContext::GetTextureBindingPoint(void * program, const std::string & name)
@@ -937,6 +989,11 @@ void Magma::Framework::Graphics::GLContext::DestroyVertexBuffer(void * vertexBuf
 	throw std::runtime_error("Failed to destroy vertex buffer on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 
+void Magma::Framework::Graphics::GLContext::UpdateVertexBuffer(void* vertexBuffer, void * data, size_t size, size_t offset)
+{
+	throw std::runtime_error("Failed to update vertex buffer on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
 void Magma::Framework::Graphics::GLContext::BindVertexBuffer(void * vertexBuffer)
 {
 	throw std::runtime_error("Failed to bind vertex buffer on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
@@ -1037,7 +1094,7 @@ void * Magma::Framework::Graphics::GLContext::GetConstantBindingPoint(void * pro
 	throw std::runtime_error("Failed to get constant buffer binding point on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 
-void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_t width, size_t height, const Texture2DSettings & settings)
+void * Magma::Framework::Graphics::GLContext::CreateTexture2D(const void * data, size_t width, size_t height, const Texture2DSettings & settings)
 {
 	throw std::runtime_error("Failed to create 2D texture on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
@@ -1045,6 +1102,11 @@ void * Magma::Framework::Graphics::GLContext::CreateTexture2D(void * data, size_
 void Magma::Framework::Graphics::GLContext::DestroyTexture2D(void * texture)
 {
 	throw std::runtime_error("Failed to destroy 2D texture on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
+}
+
+void Magma::Framework::Graphics::GLContext::UpdateTexture2D(const void * data, size_t width, size_t height, size_t dstX, size_t dstY, TextureFormat format)
+{
+	throw std::runtime_error("Failed to update 2D texture on GLContext: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 
 void * Magma::Framework::Graphics::GLContext::GetTextureBindingPoint(void * program, const std::string & name)

@@ -1,0 +1,30 @@
+#version 1.5.0
+
+Texture2D fontTexture;
+
+ConstantBuffer transform
+{
+	mat4 mvp;
+}
+
+ConstantBuffer material
+{
+	vec4 diffuse;
+}
+
+VertexOutput vertexOut
+{
+	vec2 uvs;
+}
+
+vec4 VertexShader(vec2 position, vec2 uvs)
+{
+	vertexOut.uvs = uvs;
+	return mul(transform.mvp, vec4(position.xy, 0.0, 1.0));
+}
+
+vec4 PixelShader()
+{
+	float mask = Sample2D(fontTexture, vertexOut.uvs).r;
+	return material.diffuse * vec4(1.0f, 1.0f, 1.0f, mask);
+}

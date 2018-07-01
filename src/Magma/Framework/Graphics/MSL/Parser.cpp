@@ -464,27 +464,24 @@ ASTNode* IdentifierFunc(ParserInfo& info)
 		AddToTree(Expression(info), id1);
 		Expect(TokenSymbol::CloseBrackets, info);
 	}
-	// Simple identifier
-	else
-	{
-		// While there are member access operations
-		while (true)
-		{
-			if (Accept(TokenSymbol::Member, info))
-			{
-				// Create member operator
-				auto op = CreateTree(ASTNodeSymbol::Member, "");
 
-				// Get second term
-				// Add identifiers to member operator
-				AddToTree(id1, op);
-				//Expect(TokenSymbol::Identifier, info);
-				//AddToTree(CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute), op);
-				AddToTree(IdentifierFunc(info), op);
-				id1 = op;
-			}
-			else break;
+	// While there are member access operations
+	while (true)
+	{
+		if (Accept(TokenSymbol::Member, info))
+		{
+			// Create member operator
+			auto op = CreateTree(ASTNodeSymbol::Member, "");
+
+			// Get second term
+			// Add identifiers to member operator
+			AddToTree(id1, op);
+			//Expect(TokenSymbol::Identifier, info);
+			//AddToTree(CreateTree(ASTNodeSymbol::Identifier, info.lastToken.attribute), op);
+			AddToTree(IdentifierFunc(info), op);
+			id1 = op;
 		}
+		else break;
 	}
 
 	return id1;

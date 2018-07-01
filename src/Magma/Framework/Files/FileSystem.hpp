@@ -98,6 +98,14 @@ namespace Magma
 				virtual bool Exists(const Path& path) = 0;
 
 				/// <summary>
+				///		Gets the size of a opened file
+				/// </summary>
+				/// <param name="file">File handle</param>
+				/// <returns>File size</returns>
+				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the file wasn't open</exception>
+				virtual size_t GetSize(void* file) = 0;
+
+				/// <summary>
 				///		Gets this filesystem's root path
 				/// </summary>
 				/// <returns>Root path</returns>

@@ -23,7 +23,8 @@ namespace Magma
 				virtual void SetClearColor(glm::vec4 color) final;
 				virtual void Clear(BufferBit mask) final;
 				virtual void SwapBuffers() final;
-				virtual void * CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program) final;
+				virtual void * CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program, Usage usage) final;
+				virtual void UpdateVertexBuffer(void* vertexBuffer, void* data, size_t size, size_t offset) final;
 				virtual void DestroyVertexBuffer(void * vertexBuffer) final;
 				virtual void BindVertexBuffer(void * vertexBuffer) final;
 				virtual void Draw(size_t vertexCount, size_t offset, DrawMode mode) final;
@@ -44,8 +45,9 @@ namespace Magma
 				virtual void UpdateConstantBuffer(void * constantBuffer, void * data, size_t offset, size_t size) final;
 				virtual void BindConstantBuffer(void * constantBuffer, void * bindingPoint) final;
 				virtual void * GetConstantBindingPoint(void * program, const std::string & name) final;
-				virtual void * CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format) final;
+				virtual void * CreateTexture2D(const void * data, size_t width, size_t height, TextureFormat format) final;
 				virtual void DestroyTexture2D(void * texture) final;
+				virtual void UpdateTexture2D(void* texture, const void* data, size_t width, size_t height, size_t dstX, size_t dstY, TextureFormat format) final;
 				virtual void * GetTextureBindingPoint(void * program, const std::string & name) final;
 				virtual void BindTexture2D(void * texture, void * bindPoint) final;
 				virtual void * CreateSampler(const SamplerSettings & settings) final;

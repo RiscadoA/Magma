@@ -25,6 +25,7 @@ namespace Magma
 				virtual void Delete(const Path & path) final;
 				virtual void GetDirectoryContents(const Path & path, std::vector<Path>& out) final;
 				virtual bool Exists(const Path & path) final;
+				virtual size_t GetSize(void* file) final;
 			};
 		}
 	}

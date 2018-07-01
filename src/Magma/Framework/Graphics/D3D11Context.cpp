@@ -301,7 +301,7 @@ void Magma::Framework::Graphics::D3D11Context::SwapBuffers()
 	((IDXGISwapChain*)m_swapChain)->Present(m_settings.enableVsync ? 1 : 0, 0);
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program)
+void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program, Usage usage)
 {
 	HRESULT hr = 0;
 
@@ -311,10 +311,17 @@ void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data,
 	D3D11_BUFFER_DESC vbDesc;
 	ZeroMemory(&vbDesc, sizeof(vbDesc));
 
-	vbDesc.Usage = D3D11_USAGE_DEFAULT;
+	switch (usage)
+	{
+		case Usage::Default: vbDesc.Usage = D3D11_USAGE_DEFAULT; vbDesc.CPUAccessFlags = 0; break;
+		case Usage::Immutable: vbDesc.Usage = D3D11_USAGE_IMMUTABLE; vbDesc.CPUAccessFlags = 0; break;
+		case Usage::Dynamic: vbDesc.Usage = D3D11_USAGE_DYNAMIC; vbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+		case Usage::Invalid: throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\Invalid usage type"); break;
+		default: throw std::runtime_error("Failed to create vertex buffer on D3D11Context:\nUnsupported usage type"); break;
+	}
+
 	vbDesc.ByteWidth = size;
 	vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbDesc.CPUAccessFlags = 0;
 	vbDesc.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA vbData;
@@ -387,6 +394,16 @@ void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data,
 	}
 
 	return buffer;
+}
+
+void Magma::Framework::Graphics::D3D11Context::UpdateVertexBuffer(void * vertexBuffer, void * data, size_t size, size_t offset)
+{
+	auto buffer = (VertexBuffer*)vertexBuffer;
+
+	D3D11_MAPPED_SUBRESOURCE map;
+	((ID3D11DeviceContext*)m_deviceContext)->Map(buffer->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+	memcpy((char*)map.pData + offset, data, size);
+	((ID3D11DeviceContext*)m_deviceContext)->Unmap(buffer->buffer, 0);
 }
 
 void Magma::Framework::Graphics::D3D11Context::DestroyVertexBuffer(void * vertexBuffer)
@@ -837,7 +854,7 @@ void * Magma::Framework::Graphics::D3D11Context::GetConstantBindingPoint(void * 
 	return bind;
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format)
+void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(const void * data, size_t width, size_t height, TextureFormat format)
 {
 	auto texture = new Texture2D();
 	HRESULT hr;
@@ -858,38 +875,82 @@ void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(void * data, si
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		desc.MiscFlags = 0;
 
-		// Initial texture data
-		D3D11_SUBRESOURCE_DATA initData;
-		ZeroMemory(&initData, sizeof(initData));
-		initData.pSysMem = data;
-
-		// Get format
-		switch (format)
+		if (data != nullptr)
 		{
-			case TextureFormat::R8UInt: desc.Format = DXGI_FORMAT_R8_UNORM; initData.SysMemPitch = 1 * height; break;
-			case TextureFormat::R16UInt: desc.Format = DXGI_FORMAT_R16_UNORM; initData.SysMemPitch = 2 * height; break;
-			case TextureFormat::RG8UInt: desc.Format = DXGI_FORMAT_R8G8_UNORM; initData.SysMemPitch = 2 * height; break;
-			case TextureFormat::RG16UInt: desc.Format = DXGI_FORMAT_R16G16_UNORM; initData.SysMemPitch = 4 * height; break;
-			case TextureFormat::RGBA8UInt: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; initData.SysMemPitch = 4 * height; break;
-			case TextureFormat::RGBA16UInt: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; initData.SysMemPitch = 8 * height; break;
-			case TextureFormat::R32Float: desc.Format = DXGI_FORMAT_R32_FLOAT; initData.SysMemPitch = 4 * height; break;
-			case TextureFormat::RG32Float: desc.Format = DXGI_FORMAT_R32G32_FLOAT; initData.SysMemPitch = 8 * height; break;
-			case TextureFormat::RGB32Float: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; initData.SysMemPitch = 12 * height; break;
-			case TextureFormat::RGBA32Float: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; initData.SysMemPitch = 16 * height; break;
-			case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nInvalid format"); break;
-			default: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nUnsupported format"); break;
+			// Initial texture data
+			D3D11_SUBRESOURCE_DATA initData;
+			ZeroMemory(&initData, sizeof(initData));
+			initData.pSysMem = data;
+
+			// Get format
+			switch (format)
+			{
+				case TextureFormat::R8UInt: desc.Format = DXGI_FORMAT_R8_UNORM; initData.SysMemPitch = 1 * width; break;
+				case TextureFormat::R16UInt: desc.Format = DXGI_FORMAT_R16_UNORM; initData.SysMemPitch = 2 * width; break;
+				case TextureFormat::RG8UInt: desc.Format = DXGI_FORMAT_R8G8_UNORM; initData.SysMemPitch = 2 * width; break;
+				case TextureFormat::RG16UInt: desc.Format = DXGI_FORMAT_R16G16_UNORM; initData.SysMemPitch = 4 * width; break;
+				case TextureFormat::RGBA8UInt: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; initData.SysMemPitch = 4 * width; break;
+				case TextureFormat::RGBA16UInt: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; initData.SysMemPitch = 8 * width; break;
+				case TextureFormat::R32Float: desc.Format = DXGI_FORMAT_R32_FLOAT; initData.SysMemPitch = 4 * width; break;
+				case TextureFormat::RG32Float: desc.Format = DXGI_FORMAT_R32G32_FLOAT; initData.SysMemPitch = 8 * width; break;
+				case TextureFormat::RGB32Float: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; initData.SysMemPitch = 12 * width; break;
+				case TextureFormat::RGBA32Float: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; initData.SysMemPitch = 16 * width; break;
+				case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nInvalid format"); break;
+				default: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nUnsupported format"); break;
+			}
+
+			if (((ID3D11Device*)m_device)->CreateTexture2D(&desc, &initData, NULL) != S_FALSE)
+			{
+				std::stringstream ss;
+				ss << "Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D, invalid description or initial data:\n" << std::endl;
+				ss << _com_error(hr).ErrorMessage();
+				throw std::runtime_error(ss.str());
+			}
+
+			hr = ((ID3D11Device*)m_device)->CreateTexture2D(&desc, &initData, &texture->texture);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D:\n";
+				ss << _com_error(hr).ErrorMessage();
+				throw std::runtime_error(ss.str());
+			}
 		}
-
-		if (((ID3D11Device*)m_device)->CreateTexture2D(&desc, &initData, NULL) != S_FALSE)
-			throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D, invalid description or initial data:\n");
-
-		hr = ((ID3D11Device*)m_device)->CreateTexture2D(&desc, &initData, &texture->texture);
-		if (FAILED(hr))
+		else
 		{
-			std::stringstream ss;
-			ss << "Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D:\n";
-			ss << _com_error(hr).ErrorMessage();
-			throw std::runtime_error(ss.str());
+			// Get format
+			switch (format)
+			{
+				case TextureFormat::R8UInt: desc.Format = DXGI_FORMAT_R8_UNORM; break;
+				case TextureFormat::R16UInt: desc.Format = DXGI_FORMAT_R16_UNORM; break;
+				case TextureFormat::RG8UInt: desc.Format = DXGI_FORMAT_R8G8_UNORM; break;
+				case TextureFormat::RG16UInt: desc.Format = DXGI_FORMAT_R16G16_UNORM; break;
+				case TextureFormat::RGBA8UInt: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; break;
+				case TextureFormat::RGBA16UInt: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; break;
+				case TextureFormat::R32Float: desc.Format = DXGI_FORMAT_R32_FLOAT; break;
+				case TextureFormat::RG32Float: desc.Format = DXGI_FORMAT_R32G32_FLOAT; break;
+				case TextureFormat::RGB32Float: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
+				case TextureFormat::RGBA32Float: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
+				case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nInvalid format"); break;
+				default: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nUnsupported format"); break;
+			}
+
+			if ((hr = ((ID3D11Device*)m_device)->CreateTexture2D(&desc, NULL, NULL)) != S_FALSE)
+			{
+				std::stringstream ss;
+				ss << "Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D, invalid description:\n" << std::endl;
+				ss << _com_error(hr).ErrorMessage();
+				throw std::runtime_error(ss.str());
+			}
+
+			hr = ((ID3D11Device*)m_device)->CreateTexture2D(&desc, NULL, &texture->texture);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create 2D texture on D3D11Context:\nD3D11 failed to create texture 2D:\n";
+				ss << _com_error(hr).ErrorMessage();
+				throw std::runtime_error(ss.str());
+			}
 		}
 	}
 	catch (...)
@@ -936,10 +997,45 @@ void Magma::Framework::Graphics::D3D11Context::DestroyTexture2D(void * texture)
 	delete text;
 }
 
+void Magma::Framework::Graphics::D3D11Context::UpdateTexture2D(void* texture, const void * data, size_t width, size_t height, size_t dstX, size_t dstY, TextureFormat format)
+{
+	if (width == 0 || height == 0)
+		return;
+
+	auto text = (Texture2D*)texture;
+	
+	UINT rowPitch = 0;
+	switch (format)
+	{
+		case TextureFormat::R8UInt: rowPitch = 1 * width; break;
+		case TextureFormat::R16UInt: rowPitch = 2 * width; break;
+		case TextureFormat::RG8UInt: rowPitch = 2 * width; break;
+		case TextureFormat::RG16UInt: rowPitch = 4 * width; break;
+		case TextureFormat::RGBA8UInt: rowPitch = 4 * width; break;
+		case TextureFormat::RGBA16UInt: rowPitch = 8 * width; break;
+		case TextureFormat::R32Float: rowPitch = 4 * width; break;
+		case TextureFormat::RG32Float: rowPitch = 8 * width; break;
+		case TextureFormat::RGB32Float: rowPitch = 12 * width; break;
+		case TextureFormat::RGBA32Float: rowPitch = 16 * width; break;
+		case TextureFormat::Invalid: throw std::runtime_error("Failed to update 2D texture on D3D11Context:\nInvalid format"); break;
+		default: throw std::runtime_error("Failed to update 2D texture on D3D11Context:\nUnsupported format"); break;
+	}
+
+
+	D3D11_BOX dstBox;
+	ZeroMemory(&dstBox, sizeof(dstBox));
+	dstBox.back = 1;
+	dstBox.front = 0;
+	dstBox.left = dstX;
+	dstBox.top = dstY;
+	dstBox.right = dstX + width;
+	dstBox.bottom = dstY + height;
+	
+	((ID3D11DeviceContext*)m_deviceContext)->UpdateSubresource(text->texture, 0, &dstBox, data, rowPitch, 0);
+}
+
 void * Magma::Framework::Graphics::D3D11Context::GetTextureBindingPoint(void * program, const std::string & name)
 {
-	// TO DO
-
 	if (name == "")
 		throw std::runtime_error("Failed to get texture binding point from D3D11Context:\nName cannot be empty");
 
@@ -1362,7 +1458,7 @@ void Magma::Framework::Graphics::D3D11Context::SwapBuffers()
 	throw std::runtime_error("Failed to swap buffers on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* vertexShader)
+void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* vertexShader, Usage usage)
 {
 	throw std::runtime_error("Failed to create vertex buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
@@ -1467,7 +1563,7 @@ void * Magma::Framework::Graphics::D3D11Context::GetConstantBindingPoint(void * 
 	throw std::runtime_error("Failed to get constant binding point on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(void * data, size_t width, size_t height, TextureFormat format)
+void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(const void * data, size_t width, size_t height, TextureFormat format)
 {
 	throw std::runtime_error("Failed to create 2D texture on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
@@ -1475,6 +1571,11 @@ void * Magma::Framework::Graphics::D3D11Context::CreateTexture2D(void * data, si
 void Magma::Framework::Graphics::D3D11Context::DestroyTexture2D(void * texture)
 {
 	throw std::runtime_error("Failed to destroy 2D texture on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
+}
+
+void Magma::Framework::Graphics::D3D11Context::UpdateTexture2D(void* texture, const void * data, size_t width, size_t height, size_t dstX, size_t dstY, TextureFormat format)
+{
+	throw std::runtime_error("Failed to update 2D texture on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
 void * Magma::Framework::Graphics::D3D11Context::GetTextureBindingPoint(void * program, const std::string & name)
