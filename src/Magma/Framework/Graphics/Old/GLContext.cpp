@@ -134,7 +134,7 @@ void Magma::Framework::Graphics::GLContext::Clear(BufferBit mask)
 	GL_CHECK_ERROR("Failed to clear on GLContext");
 }
 
-void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void * program, Usage usage)
+void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, size_t size, const VertexLayoutDesc & layout, void * program, Usage usage)
 {
 	VertexBuffer* vertexBuffer = new VertexBuffer();
 
@@ -979,7 +979,7 @@ void Magma::Framework::Graphics::GLContext::Clear(BufferBit mask)
 	throw std::runtime_error("Failed to clear GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 
-void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void * vertexShader)
+void * Magma::Framework::Graphics::GLContext::CreateVertexBuffer(void * data, size_t size, const VertexLayoutDesc & layout, void * vertexShader)
 {
 	throw std::runtime_error("Failed to create vertex buffer on GLContext:\nThe project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }

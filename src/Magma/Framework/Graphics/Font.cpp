@@ -146,7 +146,7 @@ void Magma::Framework::Graphics::RenderU32Text(Context& context, void* program, 
 			{ 1.0f, 1.0f,		1.0f, 1.0f },
 		};
 
-		Graphics::VertexLayout layout;
+		Graphics::VertexLayoutDesc layout;
 		
 		layout.elements.emplace_back();
 		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float2;
@@ -164,54 +164,47 @@ void Magma::Framework::Graphics::RenderU32Text(Context& context, void* program, 
 	}
 
 	if (length == 0)
+		length = SIZE_MAX;
+
+	float x = 0.0f;
+	float y = 0.0f;
+
+	auto it = string;
+	for (size_t i = 0; i < length; ++i, ++it)
 	{
-		float x = 0.0f;
-		float y = 0.0f;
-
-		auto it = string;
-		while (*it != 0)
+		if (*it == '\n')
 		{
-			if (*it == '\n')
-			{
-				x = 0.0f;
-				y -= font.GetHeight() * scale;
-				++it;
-				continue;
-			}
+			x = 0.0f;
+			y -= font.GetHeight() * scale;
+			continue;
+		}
+		else if (*it == 0)
+			break;
 
-			auto chr = font.Get(*it);
+		auto chr = font.Get(*it);
 			
-			float xpos = x + chr.bearing.x * scale;
-			float ypos = -y - chr.bearing.y * scale;
+		float xpos = x + chr.bearing.x * scale;
+		float ypos = -y - chr.bearing.y * scale;
 
-			float w = chr.size.x * scale;
-			float h = chr.size.y * scale;
+		float w = chr.size.x * scale;
+		float h = chr.size.y * scale;
 
-			Vertex data[] =
-			{
-				{ xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y, },
-				{ xpos + w,	-ypos,		chr.endUVs.x,	chr.startUVs.y },
-				{ xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y },
-
-				{ xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y },
-				{ xpos,		-ypos - h,	chr.startUVs.x,	chr.endUVs.y },
-				{ xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y },
-			};
-
-			x += (chr.advance.x / 64.0f) * scale;
-			y += (chr.advance.y / 64.0f) * scale;
-
-			context.UpdateVertexBuffer(vertexBuffer, data, sizeof(data), 0);
-			context.BindVertexBuffer(vertexBuffer);
-			context.Draw(6, 0, DrawMode::Triangles);
-			++it;
-		}
-	}
-	else
-	{
-		for (size_t i = 0; i < length; ++i)
+		Vertex data[] =
 		{
-			// TO DO
-		}
+			{ xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y, },
+			{ xpos + w,	-ypos,		chr.endUVs.x,	chr.startUVs.y },
+			{ xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y },
+
+			{ xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y },
+			{ xpos,		-ypos - h,	chr.startUVs.x,	chr.endUVs.y },
+			{ xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y },
+		};
+
+		x += (chr.advance.x / 64.0f) * scale;
+		y += (chr.advance.y / 64.0f) * scale;
+
+		context.UpdateVertexBuffer(vertexBuffer, data, sizeof(data), 0);
+		context.BindVertexBuffer(vertexBuffer);
+		context.Draw(6, 0, DrawMode::Triangles);
 	}
 }

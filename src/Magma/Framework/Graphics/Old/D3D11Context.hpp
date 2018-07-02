@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Context.hpp"
-#include "../Input/GLWindow.hpp"
+#include "../Input/D3DWindow.hpp"
 
 namespace Magma
 {
@@ -10,20 +10,22 @@ namespace Magma
 		namespace Graphics
 		{
 			/// <summary>
-			///		OpenGL implementation of the rendering context
+			///		Direct3D 11 implementation of the rendering context
 			/// </summary>
-			class GLContext final : public Context
+			class D3D11Context final : public Context
 			{
 			public:
+				D3D11Context();
+
 				// Inherited via Context
 				virtual void Init(Input::Window * window, const ContextSettings& settings) final;
 				virtual void Terminate() final;
-				virtual void SwapBuffers() final;
 				virtual void SetClearColor(glm::vec4 color) final;
 				virtual void Clear(BufferBit mask) final;
-				virtual void * CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void * program, Usage usage) final;
-				virtual void DestroyVertexBuffer(void * vertexBuffer) final;
+				virtual void SwapBuffers() final;
+				virtual void * CreateVertexBuffer(void * data, size_t size, const VertexLayoutDesc & layout, void* program, Usage usage) final;
 				virtual void UpdateVertexBuffer(void* vertexBuffer, void* data, size_t size, size_t offset) final;
+				virtual void DestroyVertexBuffer(void * vertexBuffer) final;
 				virtual void BindVertexBuffer(void * vertexBuffer) final;
 				virtual void Draw(size_t vertexCount, size_t offset, DrawMode mode) final;
 				virtual void * CreateShader(ShaderType type, const std::string & src) final;
@@ -56,8 +58,26 @@ namespace Magma
 				virtual void SetRenderTarget(void * renderTexture) final;
 
 			private:
-				Input::GLWindow* m_window;
+				Input::D3DWindow* m_window;
+				ContextSettings m_settings;
+
+				void* m_swapChain;
+				void* m_device;
+				void* m_deviceContext;
+				void* m_defaultRenderTargetView;
+				void* m_renderTargetView;
+				void* m_depthStencilBuffer;
+				void* m_depthStencilState;
+				void* m_defaultDepthStencilView;
+				void* m_depthStencilView;
+				void* m_rasterState;
+
 				void* m_compiler;
+
+				glm::vec4 m_clearColor;
+
+				void* m_boundProgram;
+				void* m_boundVertexBuffer;
 				void* m_boundIndexBuffer;
 			};
 		}

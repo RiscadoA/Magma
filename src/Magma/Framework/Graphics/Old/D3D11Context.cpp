@@ -301,7 +301,7 @@ void Magma::Framework::Graphics::D3D11Context::SwapBuffers()
 	((IDXGISwapChain*)m_swapChain)->Present(m_settings.enableVsync ? 1 : 0, 0);
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* program, Usage usage)
+void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayoutDesc & layout, void* program, Usage usage)
 {
 	HRESULT hr = 0;
 
@@ -1458,7 +1458,7 @@ void Magma::Framework::Graphics::D3D11Context::SwapBuffers()
 	throw std::runtime_error("Failed to swap buffers on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }
 
-void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayout & layout, void* vertexShader, Usage usage)
+void * Magma::Framework::Graphics::D3D11Context::CreateVertexBuffer(void * data, size_t size, const VertexLayoutDesc & layout, void* vertexShader, Usage usage)
 {
 	throw std::runtime_error("Failed to create vertex buffer on D3D11Context: the project wasn't built for DirectX (MAGMA_FRAMEWORK_USE_DIRECTX must be defined)");
 }

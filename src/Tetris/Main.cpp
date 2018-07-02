@@ -1,7 +1,7 @@
-﻿#include <Magma/Framework/Graphics/D3D11Context.hpp>
-#include <Magma/Framework/Graphics/GLContext.hpp>
-#include <Magma/Framework/Graphics/MSL/HLSLCompiler.hpp>
-#include <Magma/Framework/Graphics/MSL/GLSLCompiler.hpp>
+﻿//#include <Magma/Framework/Graphics/D3D11Context.hpp>
+//#include <Magma/Framework/Graphics/GLContext.hpp>
+#include <Magma/Framework/Input/D3DWindow.hpp>
+#include <Magma/Framework/Input/GLWindow.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -59,17 +59,17 @@ void LoadScene(Scene& scene)
 
 	// Create window
 	{
-		scene.window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
 
 	// Create context
-	{
+	/*{
 		Graphics::ContextSettings contextSettings;
 		contextSettings.multisampleCount = 4;
 		contextSettings.enableVsync = true;
-		scene.context = new Framework::Graphics::GLContext();
+		scene.context = new Framework::Graphics::D3D11Context();
 		scene.context->Init(scene.window, contextSettings);
 	}
 
@@ -190,12 +190,18 @@ void LoadScene(Scene& scene)
 		scene.materialCBuffer = scene.context->CreateConstantBuffer(&mat, sizeof(Material));
 		scene.materialBP = scene.context->GetConstantBindingPoint(scene.program, "material");
 	}
+
+	{
+		scene.context->CreateVertexLayout(desc, program);
+		scene.context->CreateVertexBuffer(nullptr, 1, Graphics::Usage::Default);
+		scene.context->BindVertexBuffer(buffer, layout);
+	}*/
 }
 
 void CleanScene(Scene& scene)
 {
 	// Destroy constant buffers
-	scene.context->DestroyConstantBuffer(scene.materialCBuffer);
+	/*scene.context->DestroyConstantBuffer(scene.materialCBuffer);
 	scene.context->DestroyConstantBuffer(scene.transformCBuffer);
 
 	// Destroy texture and sampler
@@ -212,7 +218,7 @@ void CleanScene(Scene& scene)
 	// Destroy program and shaders
 	scene.context->DestroyProgram(scene.program);
 	scene.context->DestroyShader(scene.vertexShader);
-	scene.context->DestroyShader(scene.pixelShader);
+	scene.context->DestroyShader(scene.pixelShader);*/
 
 	// Destroy context, window and filesytem
 	delete scene.context;
@@ -222,7 +228,7 @@ void CleanScene(Scene& scene)
 
 void Main(int argc, char** argv) try
 {
-	Scene scene;
+	/*Scene scene;
 
 	LoadScene(scene);
 
@@ -232,7 +238,7 @@ void Main(int argc, char** argv) try
 	model = glm::translate(model, glm::vec3(-10.0f, 0.0f, 0.0f));
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 20.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-	Transform transform;
+	Transform transform;*
 
 	// Main loop
 	while (scene.running)
@@ -255,7 +261,7 @@ void Main(int argc, char** argv) try
 		scene.context->BindProgram(scene.program);			
 
 		// Bind texture and sampler
-		scene.context->BindTexture2D(scene.font->GetAtlas(0)/*scene.texture*/, scene.textureBP);
+		scene.context->BindTexture2D(scene.font->GetAtlas(0), scene.textureBP);
 		scene.context->BindSampler(scene.sampler, scene.textureBP);
 
 		// Bind transform and material
@@ -263,16 +269,16 @@ void Main(int argc, char** argv) try
 		scene.context->BindConstantBuffer(scene.materialCBuffer, scene.materialBP);
 
 		// Bind vertex and index buffers and draw
-		/*scene.context->BindVertexBuffer(scene.vertexBuffer);
+		scene.context->BindVertexBuffer(scene.vertexBuffer);
 		scene.context->BindIndexBuffer(scene.indexBuffer);
-		scene.context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);*/
-		Graphics::RenderU32Text(*scene.context, scene.program, *scene.font, 0.02f, U"Sample text\nMulti-line text");
-
+		scene.context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
+		Graphics::RenderU32Text(*scene.context, scene.program, *scene.font, 0.04f, U"Sample text\nMulti-line text\nÁâÂãõóàçÇ,.!?");
+		
 		// Swap screen back and front buffers
 		scene.context->SwapBuffers();
 	}
 
-	CleanScene(scene);
+	CleanScene(scene);*/
 }
 catch (std::exception& e)
 {
