@@ -6,25 +6,30 @@ stores attribute names, constant buffer names, textures names, and others.
 MSLBC instructions have a 8bit op code which dictate the instructions types.
 Certain instructions may have params following them.
 
+MSLBC shaders and their respective meta data files are translated into the specific
+API shading language (GLSL, HLSL, etc...) by the abstract MSLBCAssembler class.
+Each API implements its own MSLBCAssembler.
+
 { param 1x1 } means that the first param occupies one byte
 { param 3x4 } means that the third param occupies four bytes
 Parameters are stored in big endian format
 
 Instructions:
-	DECLINT ; 0x00 ; Declares a local integer { variable index stored on param 1x1 }
-	DECLFLT ; 0x01 ; Declares a local float { variable index stored on param 1x1 }
-	DECLFV2 ; 0x02 ; Declares a local two component floating point vector { variable index stored on param 1x1 }
-	DECLFV3 ; 0x03 ; Declares a local three component floating point vector { variable index stored on param 1x1 }
-	DECLFV4 ; 0x04 ; Declares a local four component floating point vector { variable index stored on param 1x1 }
-	DECLIV2 ; 0x05 ; Declares a local two component integer vector { variable index stored on param 1x1 }
-	DECLIV3 ; 0x06 ; Declares a local three component integer vector { variable index stored on param 1x1 }
-	DECLIV4 ; 0x07 ; Declares a local four component integer vector { variable index stored on param 1x1 }
-	DECLF22 ; 0x08 ; Declares a local 2x2 floating point matrix { variable index stored on param 1x1 }
-	DECLF33 ; 0x09 ; Declares a local 3x3 floating point matrix { variable index stored on param 1x1 }
-	DECLF44 ; 0x0A ; Declares a local 4x4 floating point matrix { variable index stored on param 1x1 }
-	DECLI22 ; 0x0B ; Declares a local 2x2 integer matrix { variable index stored on param 1x1 }
-	DECLI33 ; 0x0C ; Declares a local 3x3 integer matrix { variable index stored on param 1x1 }
-	DECLI44 ; 0x0D ; Declares a local 4x4 integer matrix { variable index stored on param 1x1 }
+	DECLI1	; 0x00 ; Declares a local integer { variable index stored on param 1x1 }
+	DECLI2	; 0x01 ; Declares a local two component integer vector { variable index stored on param 1x1 }
+	DECLI3	; 0x02 ; Declares a local three component integer vector { variable index stored on param 1x1 }
+	DECLI4	; 0x03 ; Declares a local four component integer vector { variable index stored on param 1x1 }
+	DECLI22 ; 0x04 ; Declares a local 2x2 integer matrix { variable index stored on param 1x1 }
+	DECLI33 ; 0x05 ; Declares a local 3x3 integer matrix { variable index stored on param 1x1 }
+	DECLI44 ; 0x06 ; Declares a local 4x4 integer matrix { variable index stored on param 1x1 }
+
+	DECLF1	; 0x07 ; Declares a local float { variable index stored on param 1x1 }
+	DECLF2	; 0x08 ; Declares a local two component floating point vector { variable index stored on param 1x1 }
+	DECLF3	; 0x09 ; Declares a local three component floating point vector { variable index stored on param 1x1 }
+	DECLF4	; 0x0A ; Declares a local four component floating point vector { variable index stored on param 1x1 }
+	DECLF22 ; 0x0B ; Declares a local 2x2 floating point matrix { variable index stored on param 1x1 }
+	DECLF33 ; 0x0C ; Declares a local 3x3 floating point matrix { variable index stored on param 1x1 }
+	DECLF44 ; 0x0D ; Declares a local 4x4 floating point matrix { variable index stored on param 1x1 }
 
 	VARIN0	; 0x0E ; Sets a variable index { param 1x1} as the one storing input 0 for operations
 	VARIN1	; 0x0F ; Sets a variable index { param 1x1} as the one storing input 1 for operations
@@ -35,6 +40,7 @@ Instructions:
 	SUB		; 0x13 ; Sets the output variable to the subtraction of input variable 0 and input variable 1
 	MUL		; 0x14 ; Sets the output variable to the multiplication of input variable 0 and input variable 1
 	DIV		; 0x15 ; Sets the output variable to the division of input variable 0 and input variable 1
+	MOD		; 0x16 ; Sets the output variable to the modulus of input variable 0 and input variable 1
 	AND		; 0x16 ; Sets the output variable to the && of input variable 0 and input variable 1
 	OR		; 0x17 ; Sets the output variable to the || of input variable 0 and input variable 1
 	NOT		; 0x18 ; Sets the output variable to the ! of input variable 0
@@ -81,6 +87,7 @@ Vertex shader MSLBC Example:
 	(on vertex shaders, the index 0x00 is reserved for the output vertex screen coordinates variable)
 
 	Meta data:
+		Vertex Shader;
 		Input:
 			- FV3 position: index 0x01;
 			- FV4 color: index 0x02;
@@ -103,6 +110,7 @@ Vertex shader MSLBC Example:
 
 Pixel shader MSLBC Example:
 	Meta data:
+		Pixel shader;
 		Input:
 			- FV4 color: index 0x00;
 		Output:
@@ -115,3 +123,42 @@ Pixel shader MSLBC Example:
 		VARIN1	0x02	// Set as input var 1 the material diffuse color
 		VAROUT	0x01	// Set as output var the output pixel color
 		MUL				// Multiplies VARIN0 and VARIN1 and stores the result on VAROUT
+
+Meta data structure: 
+	{ 32bit uint containing the major version }
+	{ 32bit uint containing the minor version }
+	{ 32bit uint specifying the shader type (0x00 = vertex, 0x01 = pixel) }
+
+	{ 32bit uint containing the number of input variables (n) }
+		Input variable 0:
+			...
+		Input variable n:
+			{ 32bit uint containing the variable index }
+			{ 32bit uint containing the size of the variable name string in bytes }
+			{ (variable name) }
+
+	{ 32bit uint containing the number of output variables (n) }
+		Output variable 0:
+			...
+		Output variable n:
+			{ 32bit uint containing the variable index }
+			{ 32bit uint containing the size of the variable name string in bytes }
+			{ (variable name) }
+
+	{ 32bit uint containing the number of 2D texture variables (n) }
+		Texture 0:
+			...
+		Texture n:
+			{ 32bit uint containing the texture variable index }
+			{ 32bit uint containing the size of the texture name string in bytes }
+			{ (texture name) }
+
+	{ 32bit uint containing the number of constant buffer variables (n) }
+		Constant buffer variable 0:
+			...
+		Constant buffer variable n:
+			{ 32bit uint containing the buffer index }
+			{ 32bit uint containing the variable offset in the buffer }
+			{ 32bit uint containing the variable index }
+			{ 32bit uint containing the size of the variable name string in bytes }
+			{ (variable name) }

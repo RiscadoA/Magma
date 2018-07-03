@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RenderDevice.hpp"
+#include "../Input/GLWindow.hpp"
 
 namespace Magma
 {
@@ -13,12 +14,13 @@ namespace Magma
 			/// </summary>
 			class OGL400RenderDevice final : public RenderDevice
 			{
+			private:
 				// Inherited via RenderDevice
 				virtual void Init(Input::Window * window, const RenderDeviceSettings & settings) override;
 				virtual void Terminate() override;
-				virtual VertexShader * CreateVertexShader(const char * code) override;
+				virtual VertexShader * CreateVertexShader(const ShaderData& shaderData) override;
 				virtual void DestroyVertexShader(VertexShader * vertexShader) override;
-				virtual PixelShader * CreatePixelShader(const char * code) override;
+				virtual PixelShader * CreatePixelShader(const ShaderData& data) override;
 				virtual void DestroyPixelShader(PixelShader * pixelShader) override;
 				virtual Pipeline * CreatePipeline(VertexShader * vertexShader, PixelShader * pixelShader) override;
 				virtual void DestroyPipeline(Pipeline * pipeline) override;
@@ -45,6 +47,9 @@ namespace Magma
 				virtual void DrawTriangles(size_t offset, size_t count) override;
 				virtual void DrawTrianglesIndexed(size_t offset, size_t count) override;
 				virtual void SetRenderTargets(Texture2D ** textures, size_t count) override;
+				virtual void SwapBuffers() override;
+
+				Input::GLWindow* m_window;
 			};
 		}
 	}

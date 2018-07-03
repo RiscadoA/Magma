@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Context.hpp"
-#include "../Input/GLWindow.hpp"
+#include "../../Input/GLWindow.hpp"
 
 namespace Magma
 {

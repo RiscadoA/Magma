@@ -10,6 +10,9 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <Magma/Framework/Graphics/ShaderData.hpp>
+#include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
+
 using namespace Magma;
 using namespace Magma::Framework;
 
@@ -44,12 +47,12 @@ void LoadScene(Scene& scene)
 {
 	// Create filesystem
 	{
-		scene.fileSystem = new Framework::Files::STDFileSystem("../../../../resources/");
+		scene.fileSystem = new Framework::Files::STDFileSystem("../../../../../resources/");
 	}
 
 	// Create window
 	{
-		scene.window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
@@ -61,19 +64,88 @@ void LoadScene(Scene& scene)
 		scene.device->Init(scene.window, settings);
 	}
 
-	// Load pipeline and shaders
+	// Test shader data
 	{
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Mask.msl");
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
 		auto size = scene.fileSystem->GetSize(file);
-		auto data = new char[size + 1];
+		auto code = new char[size + 1];
+		scene.fileSystem->Read(file, code, size);
+		scene.fileSystem->CloseFile(file);
+		code[size] = '\0';
+
+		char metaData[] =
+		{
+			0x00, 0x00, 0x00, 0x01, // Major version 1
+			0x00, 0x00, 0x00, 0x08, // Minor version 8
+			0x00, 0x00, 0x00, 0x01, // Pixel shader
+
+			0x00, 0x00, 0x00, 0x01, // 1 input var
+			0x00, 0x00, 0x00, 0x01, // Var index 1
+			0x00, 0x00, 0x00, 0x05, // Var name size is 5
+			'c', 'o', 'l', 'o', 'r',
+
+			0x00, 0x00, 0x00, 0x01, // 1 output var
+			0x00, 0x00, 0x00, 0x00, // Var index 0
+			0x00, 0x00, 0x00, 0x05, // Var name size is 5
+			'c', 'o', 'l', 'o', 'r',
+
+			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
+
+			0x00, 0x00, 0x00, 0x01, // 1 constant buffer var
+			0x00, 0x00, 0x00, 0x02, // Buffer 2
+			0x00, 0x00, 0x00, 0x08, // Var offset 8
+			0x00, 0x00, 0x00, 0x02, // Var index 2
+			0x00, 0x00, 0x00, 0x07, // Var name size is 7
+			'd', 'i', 'f', 'f', 'u', 's', 'e',
+		};
+
+		char bytecode[2048];
+		size_t bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+
+		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, sizeof(metaData));
+		//printf("%d\n", shaderData.GetShaderType());
+
+		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/vertex1.bc");
+		scene.fileSystem->Write(file, bytecode, bytecodeSize);
+		scene.fileSystem->CloseFile(file);
+	}
+
+	// Load vertex shader
+	/*{
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
+		auto size = scene.fileSystem->GetSize(file) - 1;
+		auto data = new char[size];
+
+		unsigned long metaDataSize = 0;
+		scene.fileSystem->Read(file, &metaDataSize, sizeof(unsigned long));
+		metaDataSize = String::U32FromBE(metaDataSize);
 		scene.fileSystem->Read(file, data, size);
 		scene.fileSystem->CloseFile(file);
-		data[size] = '\0';
 
-		scene.vertexShader = scene.device->CreateVertexShader(data);
-		scene.pixelShader = scene.device->CreatePixelShader(data);
-		scene.pipeline = scene.device->CreatePipeline(scene.vertexShader, scene.pixelShader);
+		Graphics::ShaderData shaderData(data + metaDataSize, size - metaDataSize, data, metaDataSize);
+		scene.vertexShader = scene.device->CreateVertexShader(shaderData);
 	}
+
+	// Load pixel shader
+	{
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/pixel1.mslbc");
+		auto size = scene.fileSystem->GetSize(file) - 1;
+		auto data = new char[size];
+
+		unsigned long metaDataSize = 0;
+		scene.fileSystem->Read(file, &metaDataSize, sizeof(unsigned long));
+		metaDataSize = String::U32FromBE(metaDataSize);
+		scene.fileSystem->Read(file, data, size);
+		scene.fileSystem->CloseFile(file);
+
+		Graphics::ShaderData shaderData(data + metaDataSize, size - metaDataSize, data, metaDataSize);
+		scene.pixelShader = scene.device->CreatePixelShader(shaderData);
+	}
+
+	// Create pipeline
+	{
+		scene.pipeline = scene.device->CreatePipeline(scene.vertexShader, scene.pixelShader);
+	}*/
 
 	// Load font
 	/*{
@@ -209,14 +281,14 @@ void CleanScene(Scene& scene)
 	scene.context->DestroyShader(scene.pixelShader);*/
 
 	// Destroy context, window and filesytem
-	delete scene.context;
+	delete scene.device;
 	delete scene.window;
 	delete scene.fileSystem;
 }
 
 void Main(int argc, char** argv) try
 {
-	/*Scene scene;
+	Scene scene;
 
 	LoadScene(scene);
 
@@ -226,7 +298,7 @@ void Main(int argc, char** argv) try
 	model = glm::translate(model, glm::vec3(-10.0f, 0.0f, 0.0f));
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 20.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-	Transform transform;*
+	Transform transform;
 
 	// Main loop
 	while (scene.running)
@@ -238,35 +310,33 @@ void Main(int argc, char** argv) try
 
 		// Update transform
 		transform.mvp = proj * view * model;
-		scene.context->UpdateConstantBuffer(scene.transformCBuffer, &transform, 0, sizeof(transform));
+		//scene.device->UpdateConstantBuffer(scene.transformCBuffer, &transform, 0, sizeof(transform));
 
 		// Clear screen
-		scene.context->SetRenderTarget(nullptr);
-		scene.context->SetClearColor(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
-		scene.context->Clear(Framework::Graphics::BufferBit::Color | Framework::Graphics::BufferBit::Depth);
+		//scene.device->SetRenderTargets(nullptr, 0);
+		scene.device->Clear(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
 
-		// Bind shader program
-		scene.context->BindProgram(scene.program);			
+		// Set shader pipeline
+		scene.device->SetPipeline(scene.pipeline);
 
 		// Bind texture and sampler
-		scene.context->BindTexture2D(scene.font->GetAtlas(0), scene.textureBP);
-		scene.context->BindSampler(scene.sampler, scene.textureBP);
+		/*scene.context->BindTexture2D(scene.font->GetAtlas(0), scene.textureBP);
+		scene.context->BindSampler(scene.sampler, scene.textureBP);*/
 
 		// Bind transform and material
-		scene.context->BindConstantBuffer(scene.transformCBuffer, scene.transformBP);
-		scene.context->BindConstantBuffer(scene.materialCBuffer, scene.materialBP);
+		/*scene.context->BindConstantBuffer(scene.transformCBuffer, scene.transformBP);
+		scene.context->BindConstantBuffer(scene.materialCBuffer, scene.materialBP);*/
 
-		// Bind vertex and index buffers and draw
-		scene.context->BindVertexBuffer(scene.vertexBuffer);
-		scene.context->BindIndexBuffer(scene.indexBuffer);
-		scene.context->DrawIndexed(6, 0, Framework::Graphics::DrawMode::Triangles);
-		Graphics::RenderU32Text(*scene.context, scene.program, *scene.font, 0.04f, U"Sample text\nMulti-line text\nÁâÂãõóàçÇ,.!?");
+		// Bind vertex array and the index buffer and draw
+		scene.device->SetVertexArray(scene.vertexArray);
+		scene.device->SetIndexBuffer(scene.indexBuffer);
+		scene.device->DrawTrianglesIndexed(0, 6);
 		
 		// Swap screen back and front buffers
-		scene.context->SwapBuffers();
+		scene.device->SwapBuffers();
 	}
 
-	CleanScene(scene);*/
+	CleanScene(scene);
 }
 catch (std::exception& e)
 {

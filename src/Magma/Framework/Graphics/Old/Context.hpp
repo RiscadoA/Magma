@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Input/Window.hpp"
+#include "../../Input/Window.hpp"
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -272,20 +272,6 @@ namespace Magma
 				virtual void DestroyVertexBuffer(void* vertexBuffer) = 0;
 
 				/// <summary>
-				///		Creates a vertex layout
-				/// </summary>
-				/// <param name="desc">Vertex layout description</param>
-				/// <param name="program">Vertex layout shader program</param>
-				/// <returns>Vertex layout handle</returns>
-				virtual void* CreateVertexLayout(const VertexLayoutDesc& desc, void* program) = 0;
-
-				/// <summary>
-				///		Destroys a vertex layout
-				/// </summary>
-				/// <param name="vertexLayout">Vertex layout handle</param>
-				virtual void DestroyVertexLayout(void* vertexLayout) = 0;
-
-				/// <summary>
 				///		Updates a vertex buffer data.
 				/// </summary>
 				/// <param name="vertexBuffer">Vertex buffer handle</param>
@@ -298,7 +284,7 @@ namespace Magma
 				///		Sets a vertex buffer as active.
 				/// </summary>
 				/// <param name="vertexBuffer">Vertex buffer handle to set as active</param>
-				virtual void BindVertexBuffer(void* vertexBuffer, void* layout) = 0;
+				virtual void BindVertexBuffer(void* vertexBuffer) = 0;
 
 				/// <summary>
 				///		Draws the current active vertex buffer.

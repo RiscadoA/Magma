@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <glm/glm.hpp>
 
+#include "ShaderData.hpp"
+
 #include "../Input/Window.hpp"
 
 namespace Magma
@@ -633,7 +635,10 @@ namespace Magma
 			/// </summary>
 			struct RenderDeviceSettings
 			{
-				// No settings yet
+				/// <summary>
+				///		Should VSync be enabled?
+				/// </summary>
+				bool enableVSync = false;
 			};
 
 			/// <summary>
@@ -668,9 +673,9 @@ namespace Magma
 				/// <summary>
 				///		Creates a vertex shader
 				/// </summary>
-				/// <param name="code">Source code (MSL)</param>
+				/// <param name="data">Shader data</param>
 				/// <returns>Vertex shader handle</returns>
-				virtual VertexShader* CreateVertexShader(const char* code) = 0;
+				virtual VertexShader* CreateVertexShader(const ShaderData& data) = 0;
 
 				/// <summary>
 				///		Destroys a vertex shader
@@ -681,9 +686,9 @@ namespace Magma
 				/// <summary>
 				///		Creates a pixel shader
 				/// </summary>
-				/// <param name="code">Source code (MSL)</param>
+				/// <param name="code">Shader data</param>
 				/// <returns>Pixel shader handle</returns>
-				virtual PixelShader* CreatePixelShader(const char* code) = 0;
+				virtual PixelShader* CreatePixelShader(const ShaderData& data) = 0;
 
 				/// <summary>
 				///		Destroys a pixel shader
@@ -865,6 +870,11 @@ namespace Magma
 				/// <param name="textures">Textures array (set textures to nullptr to set the default render target)</param>
 				/// <param name="count">Render target count</param>
 				virtual void SetRenderTargets(Texture2D** textures, size_t count) = 0;
+
+				/// <summary>
+				///		Swaps the front and back buffers
+				/// </summary>
+				virtual void SwapBuffers() = 0;
 			};
 		}
 	}

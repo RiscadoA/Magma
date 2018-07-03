@@ -1,9 +1,9 @@
 #version 1.5.0
-
 VertexOutput vertexOut
 {
 	vec2 uvs;
 }
+
 
 ConstantBuffer transform
 {
