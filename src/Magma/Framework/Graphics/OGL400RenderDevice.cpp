@@ -371,6 +371,148 @@ public:
 	GLenum type;
 };
 
+class OGL400RasterState final : public RasterState
+{
+public:
+	OGL400RasterState(const RasterStateDesc& desc)
+	{
+		cullEnabled = desc.cullEnabled;
+
+		switch (desc.frontFace)
+		{
+			case Winding::CW: frontFace = GL_CW; break;
+			case Winding::CCW: frontFace = GL_CCW; break;
+			case Winding::Invalid: throw RenderDeviceError("Failed to create OGL400RasterState:\nInvalid front face"); break;
+			default: throw RenderDeviceError("Failed to create OGL400RasterState:\nUnsupported front face"); break;
+		}
+
+		switch (desc.cullFace)
+		{
+			case Face::Front: cullFace = GL_FRONT; break;
+			case Face::Back: cullFace = GL_BACK; break;
+			case Face::FrontAndBack: cullFace = GL_FRONT_AND_BACK; break;
+			case Face::Invalid: throw RenderDeviceError("Failed to create OGL400RasterState:\nInvalid cull face"); break;
+			default: throw RenderDeviceError("Failed to create OGL400RasterState:\nUnsupported cull face"); break;
+		}
+
+		switch (desc.rasterMode)
+		{
+			case RasterMode::Point: polygonMode = GL_POINT; break;
+			case RasterMode::Line: polygonMode = GL_LINE; break;
+			case RasterMode::Fill: polygonMode = GL_FILL; break;
+			case RasterMode::Invalid: throw RenderDeviceError("Failed to create OGL400RasterState:\nInvalid raster mode"); break;
+			default: throw RenderDeviceError("Failed to create OGL400RasterState:\nUnsupported raster mode"); break;
+		}
+	}
+
+	virtual ~OGL400RasterState() final
+	{
+
+	}
+
+	GLboolean cullEnabled;
+	GLenum frontFace;
+	GLenum cullFace;
+	GLenum polygonMode;
+};
+
+class OGL400DepthStencilState final : public DepthStencilState
+{
+public:
+	OGL400DepthStencilState(const DepthStencilStateDesc& desc)
+	{
+		const static auto GetCompare = [](Compare compare) -> GLenum
+		{
+			switch (compare)
+			{
+				case Compare::Never: return GL_NEVER; break;
+				case Compare::Less: return GL_LESS; break;
+				case Compare::LEqual: return GL_LEQUAL; break;
+				case Compare::Greater: return GL_GREATER; break;
+				case Compare::GEqual: return GL_GEQUAL; break;
+				case Compare::Equal: return GL_EQUAL; break;
+				case Compare::NotEqual: return GL_NOTEQUAL; break;
+				case Compare::Always: return GL_ALWAYS; break;
+				case Compare::Invalid: throw RenderDeviceError("Failed to create OGL400DepthStencilState:\nInvalid compare mode"); break;
+				default: throw RenderDeviceError("Failed to create OGL400DepthStencilState:\nUnsupported compare mode"); break;
+			}
+		};
+
+		const static auto GetAction = [](StencilAction action) ->  GLenum
+		{
+			switch (action)
+			{
+				case StencilAction::Keep: return GL_KEEP; break;
+				case StencilAction::Zero: return GL_ZERO; break;
+				case StencilAction::Replace: return GL_REPLACE; break;
+				case StencilAction::Increment: return GL_INCR; break;
+				case StencilAction::IncrementWrap: return GL_INCR_WRAP; break;
+				case StencilAction::Decrement: return GL_DECR; break;
+				case StencilAction::DecrementWrap: return GL_DECR_WRAP; break;
+				case StencilAction::Invert: return GL_INVERT; break;
+				case StencilAction::Invalid: throw RenderDeviceError("Failed to create OGL400DepthStencilState:\nInvalid stencil action"); break;
+				default: throw RenderDeviceError("Failed to create OGL400DepthStencilState:\nUnsupported stencil action"); break;
+			}
+		};
+
+		// Depth
+		depthEnabled = desc.depthEnabled;
+		depthWriteEnabled = desc.depthWriteEnabled;
+		depthNear = desc.depthNear;
+		depthFar = desc.depthFar;
+		depthFunc = GetCompare(desc.depthCompare);
+
+		// Front stencil
+		frontFaceStencilEnabled = desc.frontFaceStencilEnabled;
+		frontStencilFunc = GetCompare(desc.frontFaceStencilCompare);
+		frontFaceStencilFail = GetAction(desc.frontFaceStencilFail);
+		frontFaceStencilPass = GetAction(desc.frontFaceStencilPass);
+		frontFaceDepthFail = GetAction(desc.frontFaceDepthFail);
+		frontFaceRef = desc.frontFaceRef;
+		frontFaceReadMask = desc.frontFaceReadMask;
+		frontFaceWriteMask = desc.frontFaceWriteMask;
+
+		// Back stencil
+		backFaceStencilEnabled = desc.backFaceStencilEnabled;
+		backStencilFunc = GetCompare(desc.backFaceStencilCompare);
+		backFaceStencilFail = GetAction(desc.backFaceStencilFail);
+		backFaceStencilPass = GetAction(desc.backFaceStencilPass);
+		backFaceDepthFail = GetAction(desc.backFaceDepthFail);
+		backFaceRef = desc.backFaceRef;
+		backFaceReadMask = desc.backFaceReadMask;
+		backFaceWriteMask = desc.backFaceWriteMask;
+	}
+
+	virtual ~OGL400DepthStencilState() final
+	{
+
+	}
+
+	GLboolean depthEnabled;
+	GLboolean depthWriteEnabled;
+	GLfloat depthNear;
+	GLfloat depthFar;
+	GLenum depthFunc;
+
+	GLboolean frontFaceStencilEnabled;
+	GLenum	frontStencilFunc;
+	GLenum frontFaceStencilFail;
+	GLenum frontFaceStencilPass;
+	GLenum frontFaceDepthFail;
+	GLint frontFaceRef;
+	GLuint frontFaceReadMask;
+	GLuint frontFaceWriteMask;
+
+	GLboolean backFaceStencilEnabled;
+	GLenum backStencilFunc;
+	GLenum backFaceStencilFail;
+	GLenum backFaceStencilPass;
+	GLenum backFaceDepthFail;
+	GLint backFaceRef;
+	GLuint backFaceReadMask;
+	GLuint backFaceWriteMask;
+};
+
 void Magma::Framework::Graphics::OGL400RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
@@ -395,6 +537,20 @@ void Magma::Framework::Graphics::OGL400RenderDevice::Init(Input::Window * window
 		glfwSwapInterval(1);
 	else
 		glfwSwapInterval(0);
+
+	// Get and set the default raster state
+	{
+		RasterStateDesc desc; // Default description
+		m_defaultRasterState = this->CreateRasterState(desc);
+		this->SetRasterState(m_defaultRasterState);
+	}
+
+	// Get and set the default depth stencil state
+	{
+		DepthStencilStateDesc desc; // Default description
+		m_defaultDepthStencilState = this->CreateDepthStencilState(desc);
+		this->SetDepthStencilState(m_defaultDepthStencilState);
+	}
 #else
 	throw RenderDeviceError("Failed to call OGL400RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif
@@ -609,8 +765,7 @@ void Magma::Framework::Graphics::OGL400RenderDevice::DestroyTexture2D(Texture2D 
 RasterState * Magma::Framework::Graphics::OGL400RenderDevice::CreateRasterState(const RasterStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
-	return nullptr;
+	return new OGL400RasterState(desc);
 #else
 	throw RenderDeviceError("Failed to call OGL400RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 	return nullptr;
@@ -620,7 +775,7 @@ RasterState * Magma::Framework::Graphics::OGL400RenderDevice::CreateRasterState(
 void Magma::Framework::Graphics::OGL400RenderDevice::DestroyRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
+	delete rasterState;
 #else
 	throw RenderDeviceError("Failed to call OGL400RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif	
@@ -629,7 +784,25 @@ void Magma::Framework::Graphics::OGL400RenderDevice::DestroyRasterState(RasterSt
 void Magma::Framework::Graphics::OGL400RenderDevice::SetRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
+	auto old = m_currentRasterState;
+	if (rasterState == nullptr)
+		m_currentRasterState = m_defaultRasterState;
+	else
+		m_currentRasterState = rasterState;
+
+	// If the raster state changed
+	if (old != m_currentRasterState)
+	{
+		if (static_cast<OGL400RasterState*>(m_currentRasterState)->cullEnabled)
+			glEnable(GL_CULL_FACE);
+		else
+			glDisable(GL_CULL_FACE);
+		glFrontFace(static_cast<OGL400RasterState*>(m_currentRasterState)->frontFace);
+		glCullFace(static_cast<OGL400RasterState*>(m_currentRasterState)->cullFace);
+		glPolygonMode(GL_FRONT_AND_BACK, static_cast<OGL400RasterState*>(m_currentRasterState)->polygonMode);
+	}
+
+	GL_CHECK_ERROR("Failed to set raster state on OGL400RenderDevice");
 #else
 	throw RenderDeviceError("Failed to call OGL400RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif
@@ -638,8 +811,7 @@ void Magma::Framework::Graphics::OGL400RenderDevice::SetRasterState(RasterState 
 DepthStencilState * Magma::Framework::Graphics::OGL400RenderDevice::CreateDepthStencilState(const DepthStencilStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
-	return nullptr;
+	return new OGL400DepthStencilState(desc);
 #else
 	throw RenderDeviceError("Failed to call OGL400RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 	return nullptr;
@@ -649,7 +821,7 @@ DepthStencilState * Magma::Framework::Graphics::OGL400RenderDevice::CreateDepthS
 void Magma::Framework::Graphics::OGL400RenderDevice::DestroyDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
+	delete depthStencilState;
 #else
 	throw RenderDeviceError("Failed to call OGL400RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif	
@@ -658,7 +830,43 @@ void Magma::Framework::Graphics::OGL400RenderDevice::DestroyDepthStencilState(De
 void Magma::Framework::Graphics::OGL400RenderDevice::SetDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
+	auto old = m_currentDepthStencilState;
+	if (depthStencilState == nullptr)
+		m_currentDepthStencilState = m_defaultDepthStencilState;
+	else
+		m_currentDepthStencilState = depthStencilState;
+
+	// If the depth stencil state changed
+	if (old != m_currentDepthStencilState)
+	{
+		// Depth
+		if (static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->depthEnabled)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+
+		glDepthFunc(static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->depthFunc);
+		glDepthMask(static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->depthWriteEnabled ? GL_TRUE : GL_FALSE);
+		glDepthRange(static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->depthNear, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->depthFar);
+
+		// Stencil
+		if (static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontFaceStencilEnabled || static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backFaceStencilEnabled)
+			glEnable(GL_STENCIL_TEST);
+		else
+			glDisable(GL_STENCIL_TEST);
+
+		// Front face
+		glStencilFuncSeparate(GL_FRONT, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontStencilFunc, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontFaceRef, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontFaceReadMask);
+		glStencilMaskSeparate(GL_FRONT, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontFaceWriteMask);
+		glStencilOpSeparate(GL_FRONT, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontFaceStencilFail, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontFaceDepthFail, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->frontFaceStencilPass);
+		
+		// Back face
+		glStencilFuncSeparate(GL_BACK, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backStencilFunc, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backFaceRef, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backFaceReadMask);
+		glStencilMaskSeparate(GL_BACK, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backFaceWriteMask);
+		glStencilOpSeparate(GL_BACK, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backFaceStencilFail, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backFaceDepthFail, static_cast<OGL400DepthStencilState*>(m_currentDepthStencilState)->backFaceStencilPass);
+	}
+
+	GL_CHECK_ERROR("Failed to set depth stencil state on OGL400RenderDevice");
 #else
 	throw RenderDeviceError("Failed to call OGL400RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif

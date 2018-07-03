@@ -32,6 +32,9 @@ struct Scene
 	Graphics::VertexBuffer* vertexBuffer;
 	Graphics::VertexLayout* vertexLayout;
 	Graphics::IndexBuffer* indexBuffer;
+
+	Graphics::RasterState* rasterState;
+	Graphics::DepthStencilState* depthStencilState;
 };
 
 struct Transform
@@ -201,11 +204,27 @@ void LoadScene(Scene& scene)
 	{
 		unsigned int data[] =
 		{
-			0, 1, 2,
-			1, 3, 2,
+			2, 1, 0,
+			2, 3, 1,
 		};
 
 		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics::IndexType::UInt, sizeof(data), data);
+	}
+
+	// Create raster state
+	{
+		Graphics::RasterStateDesc desc;
+
+		desc.rasterMode = Graphics::RasterMode::Line;
+
+		scene.rasterState = scene.device->CreateRasterState(desc);
+	}
+
+	// Create depth stencil state
+	{
+		Graphics::DepthStencilStateDesc desc;
+		
+		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
 	}
 
 	// Create sampler
@@ -271,17 +290,20 @@ void CleanScene(Scene& scene)
 	scene.context->DestroyTexture2D(scene.texture);
 	scene.context->DestroySampler(scene.sampler);
 
-	// Destroy index and vertex buffers
-	scene.context->DestroyIndexBuffer(scene.indexBuffer);
-	scene.context->DestroyVertexBuffer(scene.vertexBuffer);
-
 	// Destroy font
-	delete scene.font;
+	delete scene.font;*/
 
-	// Destroy program and shaders
-	scene.context->DestroyProgram(scene.program);
-	scene.context->DestroyShader(scene.vertexShader);
-	scene.context->DestroyShader(scene.pixelShader);*/
+	scene.device->DestroyDepthStencilState(scene.depthStencilState);
+	scene.device->DestroyRasterState(scene.rasterState);
+
+	scene.device->DestroyIndexBuffer(scene.indexBuffer);
+	scene.device->DestroyVertexArray(scene.vertexArray);
+	scene.device->DestroyVertexLayout(scene.vertexLayout);
+	scene.device->DestroyVertexBuffer(scene.vertexBuffer);
+
+	scene.device->DestroyPipeline(scene.pipeline);
+	scene.device->DestroyPixelShader(scene.pixelShader);
+	scene.device->DestroyVertexShader(scene.vertexShader);
 
 	// Destroy context, window and filesytem
 	delete scene.device;
@@ -318,6 +340,10 @@ void Main(int argc, char** argv) try
 		// Clear screen
 		//scene.device->SetRenderTargets(nullptr, 0);
 		scene.device->Clear(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
+
+		// Set raster and depth stencil states
+		scene.device->SetRasterState(scene.rasterState);
+		scene.device->SetDepthStencilState(scene.depthStencilState);
 
 		// Set shader pipeline
 		scene.device->SetPipeline(scene.pipeline);

@@ -51,6 +51,10 @@ namespace Magma
 
 				Input::GLWindow* m_window;
 				Graphics::IndexBuffer* m_currentIndexBuffer;
+				Graphics::RasterState* m_defaultRasterState;
+				Graphics::RasterState* m_currentRasterState;
+				Graphics::DepthStencilState* m_defaultDepthStencilState;
+				Graphics::DepthStencilState* m_currentDepthStencilState;
 			};
 		}
 	}
