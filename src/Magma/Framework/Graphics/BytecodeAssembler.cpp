@@ -116,6 +116,8 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 		{
 			if (c == ' ' || c == '\t')
 				continue;
+			if (c == '#')
+				break;
 			if (c == ',')
 			{
 				if (name.empty())
@@ -138,7 +140,7 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 				}
 				else
 				{
-					if (name[0] == 'x' && name.size() > 1) // Hexadecimal int
+					if (name[0] == 'x' && name.size() > 2 && name[1] == 'i') // Hexadecimal int
 					{
 						if (size + 4 > maxSize)
 						{
@@ -149,12 +151,26 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 							throw ShaderError(ss.str());
 						}
 
-						auto value = std::stol(name.substr(1), 0, 16);
+						auto value = std::stol(name.substr(2), 0, 16);
 						value = String::U32ToBE(value);
 						memcpy(out + size, &value, 4);
 						size += 4;
 					}
-					else if(name[0] == 'd' && name.size() > 1) // Decimal int
+					else if (name[0] == 'x' && name.size() > 2 && name[1] == 'b') // Hexadecimal byte
+					{
+						if (size + 1 > maxSize)
+						{
+							std::stringstream ss;
+							ss << "Failed to assemble binary bytecode from bytecode string:" << std::endl;
+							ss << "Not enough memory to assembly binary bytecode:" << std::endl;
+							ss << "Stopped at line \"" << line << "\"";
+							throw ShaderError(ss.str());
+						}
+
+						out[size] = std::stol(name.substr(2), 0, 16);
+						size++;
+					}
+					else if(name[0] == 'd' && name.size() > 2 && name[1] == 'i') // Decimal int
 					{
 						if (size + 4 > maxSize)
 						{
@@ -165,10 +181,24 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 							throw ShaderError(ss.str());
 						}
 
-						auto value = std::stol(name.substr(1), 0, 10);
+						auto value = std::stol(name.substr(2), 0, 10);
 						value = String::U32ToBE(value);
 						memcpy(out + size, &value, 4);
 						size += 4;
+					}
+					else if (name[0] == 'd' && name.size() > 2 && name[1] == 'b') // Decimal byte
+					{
+						if (size + 1 > maxSize)
+						{
+							std::stringstream ss;
+							ss << "Failed to assemble binary bytecode from bytecode string:" << std::endl;
+							ss << "Not enough memory to assembly binary bytecode:" << std::endl;
+							ss << "Stopped at line \"" << line << "\"";
+							throw ShaderError(ss.str());
+						}
+
+						out[size] = std::stol(name.substr(2), 0, 10);
+						size++;
 					}
 					else if (name[0] == 'f' && name.size() > 1) // Float
 					{

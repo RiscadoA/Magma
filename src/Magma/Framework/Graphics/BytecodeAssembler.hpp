@@ -16,8 +16,8 @@ namespace Magma
 			enum class BytecodeOpCode : unsigned char
 			{
 				// Declarations
-				DeclI1	= 0x00,
-				DeclI2	= 0x01,
+				DeclI1	= 0x00, // Declares a local integer { variable index stored on param 1x1 }
+				DeclI2	= 0x01, // Declares a local two component integer vector { variable index stored on param 1x1 }
 				DeclI3	= 0x02,
 				DeclI4	= 0x03,
 				DeclI22	= 0x04,
@@ -55,14 +55,14 @@ namespace Magma
 				NEqual	= 0x1F,
 
 				// Literals
-				SetI1	= 0x20,
-				SetI2	= 0x21,
-				SetI3	= 0x22,
-				SetI4	= 0x23,
-				SetF1	= 0x24,
-				SetF2	= 0x25,
-				SetF3	= 0x26,
-				SetF4	= 0x27,
+				SetI1	= 0x20, // Sets a int variable { index on param 1x1 } to an int literal { param 2x4 }
+				SetI2	= 0x21, // Sets a two component integer vector variable { index on param 1x1 } to a two component integer literal { param 2x8 }
+				SetI3	= 0x22, // Sets a three component integer vector variable { index on param 1x1 } to a three component integer literal { param 2x8 }
+				SetI4	= 0x23, // Sets a four component integer vector variable { index on param 1x1 } to a four component integer literal { param 2x8 }
+				SetF1	= 0x24, // Sets a float variable { index on param 1x1 } to a float literal { param 2x4 }
+				SetF2	= 0x25, // Sets a two component floating point vector variable { index on param 1x1 } to a two component floating point literal { param 2x8 }
+				SetF3	= 0x26, // Sets a three component floating point vector variable { index on param 1x1 } to a three component floating point literal { param 2x8 }
+				SetF4	= 0x27, // Sets a four component floating point vector variable { index on param 1x1 } to a four component floating point literal { param 2x8 }
 
 				// Vector component operations
 				AsF2Cmp	= 0x28, // Assigns { VarOut } F2 component { index on param 1x1 } to { VarIn0 } F1
@@ -107,6 +107,7 @@ namespace Magma
 				/// <param name="out">Binary bytecode</param>
 				/// <param name="maxSize">Max bytecode size</param>
 				/// <returns>Binary bytecode size in bytes</returns>
+				/// <exception cref="Magma::Framework::Graphics::ShaderError">Thrown if there is an error in the assembly</exception>
 				static size_t Assemble(const std::string& code, char* out, size_t maxSize);
 			};
 		}

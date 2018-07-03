@@ -3,6 +3,7 @@
 #include <Magma/Framework/Input/D3DWindow.hpp>
 #include <Magma/Framework/Input/GLWindow.hpp>
 #include <Magma/Framework/Graphics/OGL400RenderDevice.hpp>
+#include <Magma/Framework/Graphics/OGL400Assembler.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -75,39 +76,37 @@ void LoadScene(Scene& scene)
 
 		char metaData[] =
 		{
-			0x00, 0x00, 0x00, 0x01, // Major version 1
-			0x00, 0x00, 0x00, 0x08, // Minor version 8
-			0x00, 0x00, 0x00, 0x01, // Pixel shader
+			0x00, 0x00, 0x00, 0x00, // Major version 0
+			0x00, 0x00, 0x00, 0x01, // Minor version 1
+			0x00, 0x00, 0x00, 0x00, // Vertex shader
 
 			0x00, 0x00, 0x00, 0x01, // 1 input var
 			0x00, 0x00, 0x00, 0x01, // Var index 1
-			0x00, 0x00, 0x00, 0x05, // Var name size is 5
-			'c', 'o', 'l', 'o', 'r',
+			0x00, 0x00, 0x00, 0x08, // Var name size is 8
+			'p', 'o', 's', 'i', 't', 'i', 'o', 'n',
+			0x00, 0x00, 0x00, 0x09, // Var type is float3 (0x9)
 
-			0x00, 0x00, 0x00, 0x01, // 1 output var
-			0x00, 0x00, 0x00, 0x00, // Var index 0
-			0x00, 0x00, 0x00, 0x05, // Var name size is 5
-			'c', 'o', 'l', 'o', 'r',
+			0x00, 0x00, 0x00, 0x00, // 0 output var
 
 			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
 
-			0x00, 0x00, 0x00, 0x01, // 1 constant buffer var
-			0x00, 0x00, 0x00, 0x02, // Buffer 2
-			0x00, 0x00, 0x00, 0x08, // Var offset 8
-			0x00, 0x00, 0x00, 0x02, // Var index 2
-			0x00, 0x00, 0x00, 0x07, // Var name size is 7
-			'd', 'i', 'f', 'f', 'u', 's', 'e',
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
 		};
 
 		char bytecode[2048];
 		size_t bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 
 		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, sizeof(metaData));
-		//printf("%d\n", shaderData.GetShaderType());
 
 		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/vertex1.bc");
 		scene.fileSystem->Write(file, bytecode, bytecodeSize);
 		scene.fileSystem->CloseFile(file);
+
+		std::string out;
+		Graphics::OGL400Assembler::Assemble(shaderData, out);
+		std::cout << out << std::endl;
+		getchar();
+		exit(EXIT_SUCCESS);
 	}
 
 	// Load vertex shader

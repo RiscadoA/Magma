@@ -87,7 +87,7 @@ void Magma::Framework::Graphics::ShaderData::Load()
 	ss.read((char*)&m_shaderType, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read shader type:\nStream read EOF (invalid meta data?)");
-	m_shaderType = (ShaderType)String::U32FromBE((char32_t)m_shaderType); // Convert from big endian to native format
+	m_shaderType = (ShaderType)String::U32FromBE((String::U32Char)m_shaderType); // Convert from big endian to native format
 
 	// Get input vars
 	size_t inputVarCount = 0;
@@ -102,7 +102,7 @@ void Magma::Framework::Graphics::ShaderData::Load()
 		m_inputVars[i].index = String::U32FromBE(m_inputVars[i].index);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read input var index:\nStream read EOF (invalid meta data?)");
-	
+
 		unsigned long nameSize = 0;
 		ss.read((char*)&nameSize, sizeof(unsigned long));
 		nameSize = String::U32FromBE(nameSize);
@@ -110,6 +110,11 @@ void Magma::Framework::Graphics::ShaderData::Load()
 		ss.read(&m_inputVars[i].name[0], nameSize);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read input var name:\nStream read EOF (invalid meta data?)");
+
+		ss.read((char*)&m_inputVars[i].type, sizeof(unsigned long));
+		m_inputVars[i].type = (ShaderVariableType)String::U32FromBE((String::U32Char)m_inputVars[i].type);
+		if (ss.eof())
+			throw ShaderError("Failed to load shader data:\nFailed to read input var type:\nStream read EOF (invalid meta data?)");
 	}
 
 	// Get output vars
@@ -133,6 +138,11 @@ void Magma::Framework::Graphics::ShaderData::Load()
 		ss.read(&m_outputVars[i].name[0], nameSize);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read output var name:\nStream read EOF (invalid meta data?)");
+	
+		ss.read((char*)&m_outputVars[i].type, sizeof(unsigned long));
+		m_outputVars[i].type = (ShaderVariableType)String::U32FromBE((String::U32Char)m_outputVars[i].type);
+		if (ss.eof())
+			throw ShaderError("Failed to load shader data:\nFailed to read output var type:\nStream read EOF (invalid meta data?)");
 	}
 
 	// Get 2D texture vars
@@ -189,5 +199,10 @@ void Magma::Framework::Graphics::ShaderData::Load()
 		ss.read(&m_constantBufferVars[i].name[0], nameSize);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var name:\nStream read EOF (invalid meta data?)");
+		
+		ss.read((char*)&m_constantBufferVars[i].type, sizeof(unsigned long));
+		m_constantBufferVars[i].type = (ShaderVariableType)String::U32FromBE((String::U32Char)m_constantBufferVars[i].type);
+		if (ss.eof())
+			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var type:\nStream read EOF (invalid meta data?)");
 	}
 }

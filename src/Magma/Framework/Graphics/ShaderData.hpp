@@ -13,6 +13,92 @@ namespace Magma
 		namespace Graphics
 		{
 			/// <summary>
+			///		Describes a shader variable type
+			/// </summary>
+			enum class ShaderVariableType : unsigned long
+			{
+				/// <summary>
+				///		Invalid variable type
+				/// </summary>
+				Invalid = -1,
+
+				/// <summary>
+				///		Integer type
+				/// </summary>
+				Int1 = 0,
+
+				/// <summary>
+				///		Two component integer vector type
+				/// </summary>
+				Int2 = 1,
+
+				/// <summary>
+				///		Three component integer vector type
+				/// </summary>
+				Int3 = 2,
+
+				/// <summary>
+				///		Four component integer vector type
+				/// </summary>
+				Int4 = 3,
+
+				/// <summary>
+				///		2x2 integer matrix type
+				/// </summary>
+				Int22 = 4,
+				
+				/// <summary>
+				///		3x3 integer matrix type
+				/// </summary>
+				Int33 = 5,
+
+				/// <summary>
+				///		4x4 integer matrix type
+				/// </summary>
+				Int44 = 6,
+
+				/// <summary>
+				///		Floating point type
+				/// </summary>
+				Float1 = 7,
+
+				/// <summary>
+				///		Two component floating point vector type
+				/// </summary>
+				Float2 = 8,
+
+				/// <summary>
+				///		Three component floating point vector type
+				/// </summary>
+				Float3 = 9,
+
+				/// <summary>
+				///		Four component floating point vector type
+				/// </summary>
+				Float4 = 10,
+
+				/// <summary>
+				///		2x2 floating point matrix type
+				/// </summary>
+				Float22 = 11,
+
+				/// <summary>
+				///		3x3 floating point matrix type
+				/// </summary>
+				Float33 = 12,
+
+				/// <summary>
+				///		4x4 floating point matrix type
+				/// </summary>
+				Float44 = 13,
+
+				/// <summary>
+				///		Variable type count
+				/// </summary>
+				Count
+			};
+
+			/// <summary>
 			///		Describes a shader type
 			/// </summary>
 			enum class ShaderType : unsigned long
@@ -25,12 +111,12 @@ namespace Magma
 				/// <summary>
 				///		Vertex shaders
 				/// </summary>
-				Vertex,
+				Vertex = 0,
 
 				/// <summary>
 				///		Pixel shaders
 				/// </summary>
-				Pixel,
+				Pixel = 1,
 
 				/// <summary>
 				///		Shader type count
@@ -52,6 +138,11 @@ namespace Magma
 				///		Shader input variable index
 				/// </summary>
 				unsigned long index;
+
+				/// <summary>
+				///		Shader variable type
+				/// </summary>
+				ShaderVariableType type;
 			};
 
 			/// <summary>
@@ -68,6 +159,11 @@ namespace Magma
 				///		Shader output variable index
 				/// </summary>
 				unsigned long index;
+
+				/// <summary>
+				///		Shader variable type
+				/// </summary>
+				ShaderVariableType type;
 			};
 
 			/// <summary>
@@ -110,6 +206,11 @@ namespace Magma
 				///		Shader constant buffer index
 				/// </summary>
 				unsigned long bufferIndex;
+
+				/// <summary>
+				///		Shader variable type
+				/// </summary>
+				ShaderVariableType type;
 			};
 
 			/// <summary>
