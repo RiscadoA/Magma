@@ -16,6 +16,15 @@ namespace Magma
 			public:
 				using std::runtime_error::runtime_error;
 			};
+
+			/// <summary>
+			///		Thrown when a render device encounters an exception
+			/// </summary>
+			class RenderDeviceError : public std::runtime_error
+			{
+			public:
+				using std::runtime_error::runtime_error;
+			};
 		}
 	}
 }

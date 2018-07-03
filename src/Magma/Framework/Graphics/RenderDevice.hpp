@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "ShaderData.hpp"
+#include "Exception.hpp"
 
 #include "../Input/Window.hpp"
 
@@ -241,6 +242,36 @@ namespace Magma
 				///		Unsigned int (32 bits)
 				/// </summary>
 				UInt,
+
+				/// <summary>
+				///		Signed byte (8 bits) that gets casted into the nearest floating point value
+				/// </summary>
+				FByte,
+
+				/// <summary>
+				///		Signed short (16 bits) that gets casted into the nearest floating point value
+				/// </summary>
+				FShort,
+
+				/// <summary>
+				///		Signed int (32 bits) that gets casted into the nearest floating point value
+				/// </summary>
+				FInt,
+
+				/// <summary>
+				///		Unsigned byte (8 bits) that gets casted into the nearest floating point value
+				/// </summary>
+				FUByte,
+
+				/// <summary>
+				///		Unsigned short (16 bits) that gets casted into the nearest floating point value
+				/// </summary>
+				FUShort,
+
+				/// <summary>
+				///		Unsigned int (32 bits) that gets casted into the nearest floating point value
+				/// </summary>
+				FUInt,
 
 				/// <summary>
 				///		Normalized signed byte (8 bits)
@@ -639,15 +670,6 @@ namespace Magma
 				///		Should VSync be enabled?
 				/// </summary>
 				bool enableVSync = false;
-			};
-
-			/// <summary>
-			///		Thrown when a render device encounters an exception
-			/// </summary>
-			class RenderDeviceError : public std::runtime_error
-			{
-			public:
-				using std::runtime_error::runtime_error;
 			};
 
 			/// <summary>

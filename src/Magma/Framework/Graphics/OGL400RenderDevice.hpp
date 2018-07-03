@@ -50,6 +50,7 @@ namespace Magma
 				virtual void SwapBuffers() override;
 
 				Input::GLWindow* m_window;
+				Graphics::IndexBuffer* m_currentIndexBuffer;
 			};
 		}
 	}

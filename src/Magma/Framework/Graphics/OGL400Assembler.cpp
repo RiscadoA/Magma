@@ -501,9 +501,9 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 				break;
 			}
 
+
 			default:
-				ss << std::endl << "// UNSUPPORTED OPERATION";
-				// TO DO: THROW ERROR
+				throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nUnsupported/unknown operation code");
 				break;
 		}
 	}

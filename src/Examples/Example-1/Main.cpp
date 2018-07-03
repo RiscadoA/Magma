@@ -65,15 +65,8 @@ void LoadScene(Scene& scene)
 		scene.device->Init(scene.window, settings);
 	}
 
-	// Test shader data
+	// Load vertex shader
 	{
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
-		auto size = scene.fileSystem->GetSize(file);
-		auto code = new char[size + 1];
-		scene.fileSystem->Read(file, code, size);
-		scene.fileSystem->CloseFile(file);
-		code[size] = '\0';
-
 		char metaData[] =
 		{
 			0x00, 0x00, 0x00, 0x00, // Major version 0
@@ -93,6 +86,13 @@ void LoadScene(Scene& scene)
 			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
 		};
 
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
+		auto size = scene.fileSystem->GetSize(file);
+		auto code = new char[size + 1];
+		scene.fileSystem->Read(file, code, size);
+		scene.fileSystem->CloseFile(file);
+		code[size] = '\0';
+
 		char bytecode[2048];
 		size_t bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 
@@ -101,50 +101,54 @@ void LoadScene(Scene& scene)
 		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/vertex1.bc");
 		scene.fileSystem->Write(file, bytecode, bytecodeSize);
 		scene.fileSystem->CloseFile(file);
-
-		std::string out;
-		Graphics::OGL400Assembler::Assemble(shaderData, out);
-		std::cout << out << std::endl;
-		getchar();
-		exit(EXIT_SUCCESS);
-	}
-
-	// Load vertex shader
-	/*{
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
-		auto size = scene.fileSystem->GetSize(file) - 1;
-		auto data = new char[size];
-
-		unsigned long metaDataSize = 0;
-		scene.fileSystem->Read(file, &metaDataSize, sizeof(unsigned long));
-		metaDataSize = String::U32FromBE(metaDataSize);
-		scene.fileSystem->Read(file, data, size);
-		scene.fileSystem->CloseFile(file);
-
-		Graphics::ShaderData shaderData(data + metaDataSize, size - metaDataSize, data, metaDataSize);
+		
 		scene.vertexShader = scene.device->CreateVertexShader(shaderData);
 	}
 
 	// Load pixel shader
 	{
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/pixel1.mslbc");
-		auto size = scene.fileSystem->GetSize(file) - 1;
-		auto data = new char[size];
+		char metaData[] =
+		{
+			0x00, 0x00, 0x00, 0x00, // Major version 0
+			0x00, 0x00, 0x00, 0x01, // Minor version 1
+			0x00, 0x00, 0x00, 0x01, // Pixel shader
 
-		unsigned long metaDataSize = 0;
-		scene.fileSystem->Read(file, &metaDataSize, sizeof(unsigned long));
-		metaDataSize = String::U32FromBE(metaDataSize);
-		scene.fileSystem->Read(file, data, size);
+			0x00, 0x00, 0x00, 0x00, // 0 input var
+
+			0x00, 0x00, 0x00, 0x01, // 1 output var
+			0x00, 0x00, 0x00, 0x00, // Var index 0
+			0x00, 0x00, 0x00, 0x05, // Var name size is 5
+			'c', 'o', 'l', 'o', 'r',
+			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
+
+			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
+
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
+		};
+
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/pixel1.mslbc");
+		auto size = scene.fileSystem->GetSize(file);
+		auto code = new char[size + 1];
+		scene.fileSystem->Read(file, code, size);
+		scene.fileSystem->CloseFile(file);
+		code[size] = '\0';
+
+		char bytecode[2048];
+		size_t bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+
+		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, sizeof(metaData));
+
+		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/pixel1.bc");
+		scene.fileSystem->Write(file, bytecode, bytecodeSize);
 		scene.fileSystem->CloseFile(file);
 
-		Graphics::ShaderData shaderData(data + metaDataSize, size - metaDataSize, data, metaDataSize);
 		scene.pixelShader = scene.device->CreatePixelShader(shaderData);
 	}
 
 	// Create pipeline
 	{
 		scene.pipeline = scene.device->CreatePipeline(scene.vertexShader, scene.pixelShader);
-	}*/
+	}
 
 	// Load font
 	/*{
@@ -337,8 +341,15 @@ void Main(int argc, char** argv) try
 
 	CleanScene(scene);
 }
-catch (std::exception& e)
+catch (Graphics::ShaderError& e)
 {
+	std::cout << "Shader error caught:" << std::endl;
+	std::cout << e.what() << std::endl;
+	getchar();
+}
+catch (Graphics::RenderDeviceError& e)
+{
+	std::cout << "Render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }
