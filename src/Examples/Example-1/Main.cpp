@@ -2,10 +2,10 @@
 //#include <Magma/Framework/Graphics/GLContext.hpp>
 #include <Magma/Framework/Input/D3DWindow.hpp>
 #include <Magma/Framework/Input/GLWindow.hpp>
+#include <Magma/Framework/Graphics/OGLRenderDevice.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
-#include <Magma/Framework/Graphics/Font.hpp>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,28 +16,18 @@ using namespace Magma::Framework;
 struct Scene
 {
 	Input::Window* window;
-	Graphics::Context* context;
+	Graphics::RenderDevice* device;
 	Files::FileSystem* fileSystem;
 	bool running;
 
-	void* program;
-	void* vertexShader;
-	void* pixelShader;
+	Graphics::VertexShader* vertexShader;
+	Graphics::PixelShader* pixelShader;
+	Graphics::Pipeline* pipeline;
 
-	Graphics::Font* font;
-
-	void* vertexBuffer;
-	void* indexBuffer;
-
-	void* transformCBuffer;
-	void* materialCBuffer;
-
-	void* texture;
-	void* sampler;
-
-	void* textureBP;
-	void* transformBP;
-	void* materialBP;
+	Graphics::VertexArray* vertexArray;
+	Graphics::VertexBuffer* vertexBuffer;
+	Graphics::VertexLayout* vertexLayout;
+	Graphics::IndexBuffer* indexBuffer;
 };
 
 struct Transform
@@ -71,9 +61,9 @@ void LoadScene(Scene& scene)
 		contextSettings.enableVsync = true;
 		scene.context = new Framework::Graphics::D3D11Context();
 		scene.context->Init(scene.window, contextSettings);
-	}
+	}*/
 
-	// Load program and shaders
+	// Load pipeline and shaders
 	{
 		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Mask.msl");
 		auto size = scene.fileSystem->GetSize(file);
@@ -82,56 +72,56 @@ void LoadScene(Scene& scene)
 		scene.fileSystem->CloseFile(file);
 		data[size] = '\0';
 
-		scene.vertexShader = scene.context->CreateShader(Graphics::ShaderType::Vertex, data);
-		scene.pixelShader = scene.context->CreateShader(Graphics::ShaderType::Pixel, data);
-		scene.program = scene.context->CreateProgram();
-		scene.context->AttachShader(scene.program, scene.vertexShader);
-		scene.context->AttachShader(scene.program, scene.pixelShader);
-		scene.context->LinkProgram(scene.program);
+		scene.vertexShader = scene.device->CreateVertexShader(data);
+		scene.pixelShader = scene.device->CreatePixelShader(data);
+		scene.pipeline = scene.device->CreatePipeline(scene.vertexShader, scene.pixelShader);
 	}
 
 	// Load font
-	{
+	/*{
 		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Consolas.ttf");
 		auto size = scene.fileSystem->GetSize(file);
 		auto data = new unsigned char[size];
 		scene.fileSystem->Read(file, data, size);
 		scene.fileSystem->CloseFile(file);
 		scene.font = new Graphics::Font(*scene.context, data, size, 0, 60, 1024, 1024);
-	}
+	}*/
+
+	struct Vertex
+	{
+		float x, y, z;
+	};
 
 	// Load vertex buffer
 	{
-		struct Vertex
-		{
-			float x, y, z;
-			float u, v;
-		};
-
-		Graphics::Character chr = scene.font->Get(U'á');
-
 		Vertex data[] =
 		{
-			{ -0.5f, -0.5f, 0.0f,		chr.endUVs.x, chr.endUVs.y },
-			{ -0.5f, +0.5f, 0.0f,		chr.endUVs.x, chr.startUVs.y },
-			{ +0.5f, -0.5f, 0.0f,		chr.startUVs.x, chr.endUVs.y },
-			{ +0.5f, +0.5f, 0.0f,		chr.startUVs.x, chr.startUVs.y },
+			{ -0.5f, -0.5f, 0.0f, },
+			{ -0.5f, +0.5f, 0.0f, },
+			{ +0.5f, -0.5f, 0.0f, },
+			{ +0.5f, +0.5f, 0.0f, },
 		};
 
-		Framework::Graphics::VertexLayout layout;
-		layout.elements.emplace_back();
-		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float3;
-		layout.elements.back().name = "position";
-		layout.elements.back().offset = offsetof(Vertex, x);
+		scene.vertexBuffer = scene.device->CreateVertexBuffer(sizeof(data), data);
+	}
 
-		layout.elements.emplace_back();
-		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float2;
-		layout.elements.back().name = "uvs";
-		layout.elements.back().offset = offsetof(Vertex, u);
+	// Create vertex layout
+	{
+		Graphics::VertexElement elements[1];
 
-		layout.size = sizeof(Vertex);
+		elements[0].bufferIndex = 0;
+		elements[0].name = "position";
+		elements[0].offset = offsetof(Vertex, x);
+		elements[0].size = 3;
+		elements[0].stride = sizeof(Vertex);
+		elements[0].type = Graphics::VertexElementType::Float;
 
-		scene.vertexBuffer = scene.context->CreateVertexBuffer(data, sizeof(data), layout, scene.program);
+		scene.vertexLayout = scene.device->CreateVertexLayout(1, elements, scene.vertexShader);
+	}
+
+	// Create vertex array
+	{
+		scene.vertexArray = scene.device->CreateVertexArray(1, &scene.vertexBuffer, scene.vertexLayout);
 	}
 
 	// Create index buffer
@@ -142,11 +132,11 @@ void LoadScene(Scene& scene)
 			1, 3, 2,
 		};
 
-		scene.indexBuffer = scene.context->CreateIndexBuffer(data, sizeof(data), Framework::Graphics::IndexFormat::UInt32);
+		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics::IndexType::UInt, sizeof(data), data);
 	}
 
 	// Create sampler
-	{
+	/*{
 		Framework::Graphics::SamplerSettings settings;
 
 		settings.adressU = Framework::Graphics::TextureAdressMode::Border;
