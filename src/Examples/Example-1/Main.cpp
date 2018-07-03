@@ -2,7 +2,7 @@
 //#include <Magma/Framework/Graphics/GLContext.hpp>
 #include <Magma/Framework/Input/D3DWindow.hpp>
 #include <Magma/Framework/Input/GLWindow.hpp>
-#include <Magma/Framework/Graphics/OGLRenderDevice.hpp>
+#include <Magma/Framework/Graphics/OGL400RenderDevice.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -55,13 +55,11 @@ void LoadScene(Scene& scene)
 	}
 
 	// Create context
-	/*{
-		Graphics::ContextSettings contextSettings;
-		contextSettings.multisampleCount = 4;
-		contextSettings.enableVsync = true;
-		scene.context = new Framework::Graphics::D3D11Context();
-		scene.context->Init(scene.window, contextSettings);
-	}*/
+	{
+		Graphics::RenderDeviceSettings settings;
+		scene.device = new Framework::Graphics::OGL400RenderDevice();
+		scene.device->Init(scene.window, settings);
+	}
 
 	// Load pipeline and shaders
 	{
