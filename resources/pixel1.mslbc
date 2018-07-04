@@ -1,1 +1,5 @@
-SETF4, xb00, f1.0, f0.0, f0.0, f1.0, # Set output to literal float4 (red)
+VARIN0,		xb03,
+VAROUT,		xb00,
+ASSIGN,
+
+#SETF4, xb00, f1.0, f0.0, f0.0, f1.0, # Set output to literal float4 (red)

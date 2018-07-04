@@ -17,6 +17,11 @@
 using namespace Magma;
 using namespace Magma::Framework;
 
+struct Vertex
+{
+	float x, y, z;
+};
+
 struct Scene
 {
 	Input::Window* window;
@@ -30,6 +35,7 @@ struct Scene
 
 	Graphics::VertexArray* vertexArray;
 	Graphics::VertexBuffer* vertexBuffer;
+	Graphics::VertexBuffer* vertexBuffer2;
 	Graphics::VertexLayout* vertexLayout;
 	Graphics::IndexBuffer* indexBuffer;
 
@@ -76,13 +82,21 @@ void LoadScene(Scene& scene)
 			0x00, 0x00, 0x00, 0x01, // Minor version 1
 			0x00, 0x00, 0x00, 0x00, // Vertex shader
 
-			0x00, 0x00, 0x00, 0x01, // 1 input var
+			0x00, 0x00, 0x00, 0x02, // 2 input var
 			0x00, 0x00, 0x00, 0x01, // Var index 1
 			0x00, 0x00, 0x00, 0x08, // Var name size is 8
 			'p', 'o', 's', 'i', 't', 'i', 'o', 'n',
 			0x00, 0x00, 0x00, 0x09, // Var type is float3 (0x9)
+			0x00, 0x00, 0x00, 0x02, // Var index 2
+			0x00, 0x00, 0x00, 0x05, // Var name size is 5
+			'c', 'o', 'l', 'o', 'r',
+			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
 
-			0x00, 0x00, 0x00, 0x00, // 0 output var
+			0x00, 0x00, 0x00, 0x01, // 1 output var
+			0x00, 0x00, 0x00, 0x03, // Var index 3
+			0x00, 0x00, 0x00, 0x05, // Var name size is 5
+			'c', 'o', 'l', 'o', 'r',
+			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
 
 			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
 
@@ -105,7 +119,16 @@ void LoadScene(Scene& scene)
 		scene.fileSystem->Write(file, bytecode, bytecodeSize);
 		scene.fileSystem->CloseFile(file);
 		
-		scene.vertexShader = scene.device->CreateVertexShader(shaderData);
+		try
+		{
+			scene.vertexShader = scene.device->CreateVertexShader(shaderData);
+		}
+		catch (Graphics::RenderDeviceError& err)
+		{
+			std::cout << err.what() << std::endl;
+			getchar();
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	// Load pixel shader
@@ -116,7 +139,11 @@ void LoadScene(Scene& scene)
 			0x00, 0x00, 0x00, 0x01, // Minor version 1
 			0x00, 0x00, 0x00, 0x01, // Pixel shader
 
-			0x00, 0x00, 0x00, 0x00, // 0 input var
+			0x00, 0x00, 0x00, 0x01, // 1 input var
+			0x00, 0x00, 0x00, 0x03, // Var index 3
+			0x00, 0x00, 0x00, 0x05, // Var name size is 5
+			'c', 'o', 'l', 'o', 'r',
+			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
 
 			0x00, 0x00, 0x00, 0x01, // 1 output var
 			0x00, 0x00, 0x00, 0x00, // Var index 0
@@ -145,7 +172,16 @@ void LoadScene(Scene& scene)
 		scene.fileSystem->Write(file, bytecode, bytecodeSize);
 		scene.fileSystem->CloseFile(file);
 
-		scene.pixelShader = scene.device->CreatePixelShader(shaderData);
+		try
+		{
+			scene.pixelShader = scene.device->CreatePixelShader(shaderData);
+		}
+		catch (Graphics::RenderDeviceError& err)
+		{
+			std::cout << err.what() << std::endl;
+			getchar();
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	// Create pipeline
@@ -163,27 +199,27 @@ void LoadScene(Scene& scene)
 		scene.font = new Graphics::Font(*scene.context, data, size, 0, 60, 1024, 1024);
 	}*/
 
-	struct Vertex
-	{
-		float x, y, z;
-	};
-
 	// Load vertex buffer
 	{
-		Vertex data[] =
+		scene.vertexBuffer = scene.device->CreateVertexBuffer(48, nullptr, Graphics::BufferUsage::Dynamic);
+	}
+
+	// Load vertex buffer 2
+	{
+		glm::vec4 data[] =
 		{
-			{ -0.5f, -0.5f, 0.0f, },
-			{ -0.5f, +0.5f, 0.0f, },
-			{ +0.5f, -0.5f, 0.0f, },
-			{ +0.5f, +0.5f, 0.0f, },
+			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+			glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 		};
 
-		scene.vertexBuffer = scene.device->CreateVertexBuffer(sizeof(data), data);
+		scene.vertexBuffer2 = scene.device->CreateVertexBuffer(sizeof(data), data);
 	}
 
 	// Create vertex layout
 	{
-		Graphics::VertexElement elements[1];
+		Graphics::VertexElement elements[2];
 
 		elements[0].bufferIndex = 0;
 		elements[0].name = "position";
@@ -192,12 +228,24 @@ void LoadScene(Scene& scene)
 		elements[0].stride = sizeof(Vertex);
 		elements[0].type = Graphics::VertexElementType::Float;
 
-		scene.vertexLayout = scene.device->CreateVertexLayout(1, elements, scene.vertexShader);
+		elements[1].bufferIndex = 1;
+		elements[1].name = "color";
+		elements[1].offset = 0;
+		elements[1].size = 4;
+		elements[1].stride = sizeof(glm::vec4);
+		elements[1].type = Graphics::VertexElementType::Float;
+
+		scene.vertexLayout = scene.device->CreateVertexLayout(2, elements, scene.vertexShader);
 	}
 
 	// Create vertex array
 	{
-		scene.vertexArray = scene.device->CreateVertexArray(1, &scene.vertexBuffer, scene.vertexLayout);
+		Graphics::VertexBuffer* buffers[] =
+		{
+			scene.vertexBuffer,
+			scene.vertexBuffer2,
+		};
+		scene.vertexArray = scene.device->CreateVertexArray(2, buffers, scene.vertexLayout);
 	}
 
 	// Create index buffer
@@ -215,7 +263,7 @@ void LoadScene(Scene& scene)
 	{
 		Graphics::RasterStateDesc desc;
 
-		desc.rasterMode = Graphics::RasterMode::Line;
+		//desc.rasterMode = Graphics::RasterMode::Line;
 
 		scene.rasterState = scene.device->CreateRasterState(desc);
 	}
@@ -324,6 +372,8 @@ void Main(int argc, char** argv) try
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 20.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 	Transform transform;
+	
+	float x = 0.0f;
 
 	// Main loop
 	while (scene.running)
@@ -344,6 +394,20 @@ void Main(int argc, char** argv) try
 		// Set raster and depth stencil states
 		scene.device->SetRasterState(scene.rasterState);
 		scene.device->SetDepthStencilState(scene.depthStencilState);
+
+		x += 0.00001f;
+
+		// Update vertex buffer
+		{
+			Vertex data[] =
+			{
+				{ -0.5f + x, -0.5f, 0.0f, },
+				{ -0.5f + x, +0.5f, 0.0f, },
+				{ +0.5f + x, -0.5f, 0.0f, },
+				{ +0.5f + x, +0.5f, 0.0f, },
+			};
+			scene.vertexBuffer->Update(0, sizeof(data), data);
+		}
 
 		// Set shader pipeline
 		scene.device->SetPipeline(scene.pipeline);

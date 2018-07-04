@@ -43,7 +43,7 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 {
 	std::stringstream ss;
 	
-	ss << "#version 400 core" << std::endl << std::endl;
+	ss << "#version 410 core" << std::endl << std::endl;
 	ss << "// This shader was automatically generated from binary bytecode by the OGL400Assembler::Assemble function" << std::endl;
 	switch (data.GetShaderType())
 	{

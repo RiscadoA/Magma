@@ -105,6 +105,14 @@ namespace Magma
 			public:
 				virtual ~VertexBuffer() = default;
 
+				/// <summary>
+				///		Updates part of the vertex buffer data
+				/// </summary>
+				/// <param name="offset">Offset to update</param>
+				/// <param name="size">New data size</param>
+				/// <param name="data">Data pointer</param>
+				virtual void Update(size_t offset, size_t size, void* data) = 0;
+
 			protected:
 				/// <summary>
 				///		Used to ensure that these are never created directly

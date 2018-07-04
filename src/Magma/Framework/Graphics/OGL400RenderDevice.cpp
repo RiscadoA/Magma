@@ -50,8 +50,10 @@ public:
 			std::stringstream ss;
 			ss << "Failed to create OGL400VertexShader:" << std::endl;
 			ss << "Compilation failed:" << std::endl;
-			ss << infoLog;
-			throw std::runtime_error(ss.str());
+			ss << infoLog << std::endl;
+			ss << "Source:" << std::endl;
+			ss << source;
+			throw RenderDeviceError(ss.str());
 		}
 
 		GL_CHECK_ERROR("Failed to create OGL400VertexShader");
@@ -86,7 +88,7 @@ public:
 			ss << "Failed to create OGL400PixelShader:" << std::endl;
 			ss << "Compilation failed:" << std::endl;
 			ss << infoLog;
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 
 		GL_CHECK_ERROR("Failed to create OGL400PixelShader");
@@ -123,7 +125,7 @@ public:
 			ss << "Failed to create OGL400Pipeline:" << std::endl;
 			ss << "Shader program linking failed:" << std::endl;
 			ss << infoLog;
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 
 		GL_CHECK_ERROR("Failed to create OGL400Pipeline");
@@ -204,6 +206,12 @@ public:
 		glDeleteBuffers(1, &vbo);
 	}
 	
+	virtual void Update(size_t offset, size_t size, void* data) final
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+	}
+
 	GLuint vbo;
 };
 
