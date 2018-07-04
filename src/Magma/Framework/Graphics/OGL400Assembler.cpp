@@ -501,6 +501,16 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 				break;
 			}
 
+			// Other functions
+			case BytecodeOpCode::Smple2D:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = texture(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
 
 			default:
 				throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nUnsupported/unknown operation code");
