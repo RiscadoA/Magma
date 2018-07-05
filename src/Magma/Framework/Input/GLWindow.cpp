@@ -182,6 +182,8 @@ Magma::Framework::Input::GLWindow::GLWindow(unsigned int width, unsigned int hei
 	GLFWwindow* win;
 
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
 	switch (mode)
 	{

@@ -12,7 +12,7 @@ namespace Magma
 			/// <summary>
 			///		OpenGL 4.0.0 render device implementation
 			/// </summary>
-			class OGL400RenderDevice final : public RenderDevice
+			class OGL410RenderDevice final : public RenderDevice
 			{
 			private:
 				// Inherited via RenderDevice

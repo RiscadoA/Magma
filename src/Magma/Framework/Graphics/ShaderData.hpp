@@ -214,6 +214,22 @@ namespace Magma
 			};
 
 			/// <summary>
+			///		Describes a shader constant buffer
+			/// </summary>
+			struct ShaderConstantBuffer
+			{
+				/// <summary>
+				///		Shader constant buffer name
+				/// </summary>
+				std::string name;
+
+				/// <summary>
+				///		Shader constant buffer index
+				/// </summary>
+				unsigned long index;
+			};
+
+			/// <summary>
 			///		Holds data for shader creation
 			/// </summary>
 			class ShaderData final
@@ -306,6 +322,12 @@ namespace Magma
 				/// <returns>Shader's constant buffer variables</returns>
 				inline const std::vector<ShaderConstantBufferVariable>& GetShaderConstantVariables() const { return m_constantBufferVars; }
 
+				/// <summary>
+				///		Gets the shader's constant buffers
+				/// </summary>
+				/// <returns>Shader's constant buffers</returns>
+				inline const std::vector<ShaderConstantBuffer>& GetShaderConstantBuffers() const { return m_constantBuffers; }
+
 			private:
 				void Load();
 
@@ -322,6 +344,7 @@ namespace Magma
 				std::vector<ShaderOutputVariable> m_outputVars;
 				std::vector<ShaderTexture2DVariable> m_texture2DVars;
 				std::vector<ShaderConstantBufferVariable> m_constantBufferVars;
+				std::vector<ShaderConstantBuffer> m_constantBuffers;
 			};
 		}
 	}

@@ -168,6 +168,29 @@ void Magma::Framework::Graphics::ShaderData::Load()
 			throw ShaderError("Failed to load shader data:\nFailed to read 2D texture var name:\nStream read EOF (invalid meta data?)");
 	}
 
+	// Get constant buffers
+	size_t constantBufferCount = 0;
+	ss.read((char*)&constantBufferCount, sizeof(unsigned long));
+	if (ss.eof())
+		throw ShaderError("Failed to load shader data:\nFailed to read constant buffer count:\nStream read EOF (invalid meta data?)");
+	constantBufferCount = String::U32FromBE(constantBufferCount); // Convert from big endian to native format
+	m_constantBuffers.resize(constantBufferCount);
+	for (size_t i = 0; i < constantBufferCount; ++i)
+	{
+		ss.read((char*)&m_constantBuffers[i].index, sizeof(unsigned long));
+		m_constantBuffers[i].index = String::U32FromBE(m_constantBuffers[i].index);
+		if (ss.eof())
+			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer index:\nStream read EOF (invalid meta data?)");
+
+		unsigned long nameSize = 0;
+		ss.read((char*)&nameSize, sizeof(unsigned long));
+		nameSize = String::U32FromBE(nameSize);
+		m_constantBuffers[i].name.resize(nameSize);
+		ss.read(&m_constantBuffers[i].name[0], nameSize);
+		if (ss.eof())
+			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var name:\nStream read EOF (invalid meta data?)");
+	}
+
 	// Get constant buffer vars
 	size_t constantBufferVarCount = 0;
 	ss.read((char*)&constantBufferVarCount, sizeof(unsigned long));

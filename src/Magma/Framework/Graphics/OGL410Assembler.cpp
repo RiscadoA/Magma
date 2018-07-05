@@ -1,4 +1,4 @@
-#include "OGL400Assembler.hpp"
+#include "OGL410Assembler.hpp"
 #include "BytecodeAssembler.hpp"
 
 #include "../String/Conversion.hpp"
@@ -10,7 +10,7 @@
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
-void ToGL400(ShaderVariableType type, std::stringstream& out)
+void TOGL410(ShaderVariableType type, std::stringstream& out)
 {
 	switch (type)
 	{
@@ -31,20 +31,20 @@ void ToGL400(ShaderVariableType type, std::stringstream& out)
 		case ShaderVariableType::Float44: out << "mat4"; break;
 
 		case ShaderVariableType::Invalid:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nInvalid shader variable type");
+			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nInvalid shader variable type");
 			break;
 		default:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nUnsupported shader variable type");
+			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nUnsupported shader variable type");
 			break;
 	}
 }
 
-void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & data, std::string & out)
+void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & data, std::string & out)
 {
 	std::stringstream ss;
 	
 	ss << "#version 410 core" << std::endl << std::endl;
-	ss << "// This shader was automatically generated from binary bytecode by the OGL400Assembler::Assemble function" << std::endl;
+	ss << "// This shader was automatically generated from binary bytecode by the OGL410Assembler::Assemble function" << std::endl;
 	switch (data.GetShaderType())
 	{
 		case ShaderType::Vertex:
@@ -54,10 +54,10 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 			ss << "// Pixel shader" << std::endl;
 			break;
 		case ShaderType::Invalid:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nInvalid shader type");
+			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nInvalid shader type");
 			break;
 		default:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nUnsupported shader type");
+			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nUnsupported shader type");
 			break;
 	}
 	ss << "// DO NOT MODIFY THIS FILE BY HAND" << std::endl;
@@ -67,7 +67,7 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 	for (auto& in : data.GetInputVariables())
 	{
 		ss << "layout (location = " << in.index << ") in ";
-		ToGL400(in.type, ss);
+		TOGL410(in.type, ss);
 		ss << " in_" << in.index << "; // Input variable \"" << in.name << "\"; index " << in.index;
 		ss << std::endl;
 	}
@@ -78,7 +78,7 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 	for (auto& out : data.GetOutputVariables())
 	{
 		ss << "layout (location = " << out.index << ") out ";
-		ToGL400(out.type, ss);
+		TOGL410(out.type, ss);
 		ss << " out_" << out.index << "; // Output variable \"" << out.name << "\"; index " << out.index;
 		ss << std::endl;
 	}
@@ -95,7 +95,7 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 	auto GetComponent = [&](size_t count, size_t index) -> void
 	{
 		if (index >= count)
-			throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nFailed to get vector component, out of bounds");
+			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nFailed to get vector component, out of bounds");
 		switch (index)
 		{
 			case 0: ss << "x"; break;
@@ -513,7 +513,7 @@ void Magma::Framework::Graphics::OGL400Assembler::Assemble(const ShaderData & da
 				break;
 
 			default:
-				throw ShaderError("Failed to assemble from binary bytecode on OGL400Assembler:\nUnsupported/unknown operation code");
+				throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nUnsupported/unknown operation code");
 				break;
 		}
 	}

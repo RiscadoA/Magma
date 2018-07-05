@@ -15,8 +15,328 @@ namespace Magma
 	{
 		namespace Graphics
 		{
-			class Texture2D;
-			class ConstantBuffer;
+			/// <summary>
+			///		Encapsulates a 2D texture
+			/// </summary>
+			class Texture2D
+			{
+			public:
+				virtual ~Texture2D() = default;
+
+				/// <summary>
+				///		Updates the texture data or part of it
+				/// </summary>
+				/// <param name="dstX">Destination X</param>
+				/// <param name="dstY">Destination Y</param>
+				/// <param name="width">New data width</param>
+				/// <param name="height">New data height</param>
+				/// <param name="data">New data pointer</param>
+				virtual void Update(size_t dstX, size_t dstY, size_t width, size_t height, void* data) = 0;
+
+				/// <summary>
+				///		Generates mipmaps for this texture
+				/// </summary>
+				virtual void GenerateMipmaps() = 0;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				Texture2D() = default;
+			};
+
+			/// <summary>
+			///		Describes a texture format
+			/// </summary>
+			enum class TextureFormat
+			{
+				/// <summary>
+				///		Invalid texture format
+				/// </summary>
+				Invalid = -1,
+
+				/// <summary>
+				///		Signed char that gets normalized into a [-1; 1] floating point
+				/// </summary>
+				R8SNorm,
+
+				/// <summary>
+				///		Signed short that gets normalized into a [-1; 1] floating point
+				/// </summary>
+				R16SNorm,
+
+				/// <summary>
+				///		Signed chars that get normalized into a [-1; 1] floating point
+				/// </summary>
+				RG8SNorm,
+
+				/// <summary>
+				///		Signed shorts that get normalized into a [-1; 1] floating point
+				/// </summary>
+				RG16SNorm,
+
+				/// <summary>
+				///		Signed chars that get normalized into a [-1; 1] floating point
+				/// </summary>
+				RGBA8SNorm,
+
+				/// <summary>
+				///		Signed shorts that get normalized into a [-1; 1] floating point
+				/// </summary>
+				RGBA16SNorm,
+
+				/// <summary>
+				///		Signed char
+				/// </summary>
+				R8Int,
+
+				/// <summary>
+				///		Signed short
+				/// </summary>
+				R16Int,
+
+				/// <summary>
+				///		Signed chars
+				/// </summary>
+				RG8Int,
+
+				/// <summary>
+				///		Signed shorts
+				/// </summary>
+				RG16Int,
+
+				/// <summary>
+				///		Signed chars
+				/// </summary>
+				RGBA8Int,
+
+				/// <summary>
+				///		Signed shorts
+				/// </summary>
+				RGBA16Int,
+
+				/// <summary>
+				///		Unsigned char
+				/// </summary>
+				R8UInt,
+
+				/// <summary>
+				///		Unsigned short
+				/// </summary>
+				R16UInt,
+
+				/// <summary>
+				///		Unsigned chars
+				/// </summary>
+				RG8UInt,
+
+				/// <summary>
+				///		Unsigned shorts
+				/// </summary>
+				RG16UInt,
+
+				/// <summary>
+				///		Unsigned chars
+				/// </summary>
+				RGBA8UInt,
+
+				/// <summary>
+				///		Unsigned shorts
+				/// </summary>
+				RGBA16UInt,
+
+				/// <summary>
+				///		4 byte floating point
+				/// </summary>
+				R32Float,
+
+				/// <summary>
+				///		4 byte floating points
+				/// </summary>
+				RG32Float,
+
+				/// <summary>
+				///		4 byte floating points
+				/// </summary>
+				RGB32Float,
+
+				/// <summary>
+				///		4 byte floating points
+				/// </summary>
+				RGBA32Float,
+
+				/// <summary>
+				///		Texture format type count
+				/// </summary>
+				Count
+			};
+
+			/// <summary>
+			///		Encapsulates a texture sampler
+			/// </summary>
+			class Sampler
+			{
+			public:
+				virtual ~Sampler() = default;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				Sampler() = default;
+			};
+
+			/// <summary>
+			///		Describes a texture adress mode
+			/// </summary>
+			enum class TextureAdressMode
+			{
+				/// <summary>
+				///		Invalid texture adress mode
+				/// </summary>
+				Invalid = -1,
+
+				/// <summary>
+				///		Repeats the coordinates when out of bounds
+				/// </summary>
+				Repeat,
+
+				/// <summary>
+				///		Mirrors the coordinates when out of bounds
+				/// </summary>
+				Mirror,
+
+				/// <summary>
+				///		Clamps the coordinates when out of bounds
+				/// </summary>
+				Clamp,
+
+				/// <summary>
+				///		Sets a border color when out of bounds
+				/// </summary>
+				Border,
+
+				/// <summary>
+				///		Texture adress mode count
+				/// </summary>
+				Count
+			};
+
+			/// <summary>
+			///		Describes a texture filter type
+			/// </summary>
+			enum class TextureFilter
+			{
+				/// <summary>
+				///		Invalid texture filter type
+				/// </summary>
+				Invalid = -1,
+
+				/// <summary>
+				///		No filter
+				/// </summary>
+				Nearest,
+
+				/// <summary>
+				///		Linear filtering
+				/// </summary>
+				Linear,
+
+				/// <summary>
+				///		Texture filter type count
+				/// </summary>
+				Count
+			};
+
+			/// <summary>
+			///		Describes a texture sampler
+			/// </summary>
+			struct SamplerDesc
+			{
+				/// <summary>
+				///		Minifying filter
+				/// </summary>
+				TextureFilter minFilter = TextureFilter::Nearest;
+
+				/// <summary>
+				///		Magnifying filter
+				/// </summary>
+				TextureFilter magFilter = TextureFilter::Nearest;
+
+				/// <summary>
+				///		Mipmap filter (set to invalid to don't use mipmaps)
+				/// </summary>
+				TextureFilter mipmapFilter = TextureFilter::Invalid;
+
+				/// <summary>
+				///		Texture adress mode on coordinate U
+				/// </summary>
+				TextureAdressMode adressU = TextureAdressMode::Repeat;
+
+				/// <summary>
+				///		Texture adress mode on coordinate V
+				/// </summary>
+				TextureAdressMode adressV = TextureAdressMode::Repeat;
+
+				/// <summary>
+				///		Border color (when using TextureAdressMode::Border)
+				/// </summary>
+				glm::vec4 border = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			};
+
+			/// <summary>
+			///		Encapsulates a constant buffer
+			/// </summary>
+			class ConstantBuffer
+			{
+			public:
+				virtual ~ConstantBuffer() = default;
+
+				/// <summary>
+				///		Maps the constant buffer to a location in memory to update it
+				/// </summary>
+				/// <returns>Pointer to the constant buffer data</returns>
+				virtual void* Map() = 0;
+
+				/// <summary>
+				///		Unmaps the constant buffer and sends the data to the GPU
+				/// </summary>
+				virtual void Unmap() = 0;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				ConstantBuffer() = default;
+			};
+
+
+			/// <summary>
+			///		Encapsulates a vertex shader binding point
+			/// </summary>
+			class VertexBindingPoint
+			{
+			public:
+				virtual ~VertexBindingPoint() = default;
+
+				/// <summary>
+				///		Binds a 2D texture to this vertex shader binding point
+				/// </summary>
+				/// <param name="texture">Texture handle</param>
+				virtual void Bind(Texture2D* texture) = 0;
+
+				/// <summary>
+				///		Binds a constant buffer to this vertex shader binding point
+				/// </summary>
+				/// <param name="buffer">Constant buffer handle</param>
+				virtual void Bind(ConstantBuffer* buffer) = 0;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				VertexBindingPoint() = default;
+			};
 
 			/// <summary>
 			///		Encapsulates a vertex shader
@@ -26,11 +346,45 @@ namespace Magma
 			public:
 				virtual ~VertexShader() = default;
 
+				/// <summary>
+				///		Gets a binding point from this shader
+				/// </summary>
+				/// <param name="name">Binding point name</param>
+				/// <returns>A binding point handle</returns>
+				virtual VertexBindingPoint* GetBindingPoint(const char* name) = 0;
+
 			protected:
 				/// <summary>
 				///		Used to ensure that these are never created directly
 				/// </summary>
 				VertexShader() = default;
+			};
+
+			/// <summary>
+			///		Encapsulates a pixel shader binding point
+			/// </summary>
+			class PixelBindingPoint
+			{
+			public:
+				virtual ~PixelBindingPoint() = default;
+
+				/// <summary>
+				///		Binds a 2D texture to this pixel shader binding point
+				/// </summary>
+				/// <param name="texture">Texture handle</param>
+				virtual void Bind(Texture2D* texture) = 0;
+
+				/// <summary>
+				///		Binds a constant buffer to this pixel shader binding point
+				/// </summary>
+				/// <param name="buffer">Constant buffer handle</param>
+				virtual void Bind(ConstantBuffer* buffer) = 0;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				PixelBindingPoint() = default;
 			};
 
 			/// <summary>
@@ -41,38 +395,18 @@ namespace Magma
 			public:
 				virtual ~PixelShader() = default;
 
+				/// <summary>
+				///		Gets a binding point from this shader
+				/// </summary>
+				/// <param name="name">Binding point name</param>
+				/// <returns>A binding point handle</returns>
+				virtual PixelBindingPoint* GetBindingPoint(const char* name) = 0;
+
 			protected:
 				/// <summary>
 				///		Used to ensure that these are never created directly
 				/// </summary>
 				PixelShader() = default;
-			};
-
-			/// <summary>
-			///		Encapsulaes a shader pipeline binding point
-			/// </summary>
-			class PipelineBindingPoint
-			{
-			public:
-				virtual ~PipelineBindingPoint() = default;
-
-				/// <summary>
-				///		Binds a 2D texture to this pipeline binding point
-				/// </summary>
-				/// <param name="texture">Texture handle</param>
-				virtual void Bind(Texture2D* texture) = 0;
-
-				/// <summary>
-				///		Binds a constant buffer to this pipeline binding point
-				/// </summary>
-				/// <param name="buffer">Constant buffer handle</param>
-				virtual void Bind(ConstantBuffer* buffer) = 0;
-
-			protected:
-				/// <summary>
-				///		Used to ensure that these are never created directly
-				/// </summary>
-				PipelineBindingPoint() = default;
 			};
 
 			/// <summary>
@@ -82,13 +416,6 @@ namespace Magma
 			{
 			public:
 				virtual ~Pipeline() = default;
-
-				/// <summary>
-				///		Gets a pipeline binding point from this pipeline
-				/// </summary>
-				/// <param name="name">Binding point name</param>
-				/// <returns>A pipeline binding point handle</returns>
-				virtual PipelineBindingPoint* GetBindingPoint(const char* name) = 0;
 
 			protected:
 				/// <summary>
@@ -106,12 +433,15 @@ namespace Magma
 				virtual ~VertexBuffer() = default;
 
 				/// <summary>
-				///		Updates part of the vertex buffer data
+				///		Maps the vertex buffer to a location in memory to update it
 				/// </summary>
-				/// <param name="offset">Offset to update</param>
-				/// <param name="size">New data size</param>
-				/// <param name="data">Data pointer</param>
-				virtual void Update(size_t offset, size_t size, void* data) = 0;
+				/// <returns>Pointer to the vertex buffer data</returns>
+				virtual void* Map() = 0;
+
+				/// <summary>
+				///		Unmaps the vertex buffer and sends the data to the GPU
+				/// </summary>
+				virtual void Unmap() = 0;
 
 			protected:
 				/// <summary>
@@ -194,21 +524,6 @@ namespace Magma
 				///		Index type count
 				/// </summary>
 				Count
-			};
-
-			/// <summary>
-			///		Encapsulates a 2D texture
-			/// </summary>
-			class Texture2D
-			{
-			public:
-				virtual ~Texture2D() = default;
-
-			protected:
-				/// <summary>
-				///		Used to ensure that these are never created directly
-				/// </summary>
-				Texture2D() = default;
 			};
 
 			/// <summary>
@@ -824,10 +1139,11 @@ namespace Magma
 				/// </summary>
 				/// <param name="width">Texture width</param>
 				/// <param name="height">Texture height</param>
+				/// <param name="format">Texture format</param>
 				/// <param name="data">Texture initial data (set to nullptr to create empty texture)</param>
 				/// <param name="usage">Texture usage mode</param>
 				/// <returns>2D texture handle</returns>
-				virtual Texture2D* CreateTexture2D(size_t width, size_t height, const void* data = nullptr, BufferUsage usage = BufferUsage::Default) = 0;
+				virtual Texture2D* CreateTexture2D(size_t width, size_t height, TextureFormat format, const void* data = nullptr, BufferUsage usage = BufferUsage::Default) = 0;
 				
 				/// <summary>
 				///		Destroys a 2D texture

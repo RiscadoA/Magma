@@ -2,8 +2,8 @@
 //#include <Magma/Framework/Graphics/GLContext.hpp>
 #include <Magma/Framework/Input/D3DWindow.hpp>
 #include <Magma/Framework/Input/GLWindow.hpp>
-#include <Magma/Framework/Graphics/OGL400RenderDevice.hpp>
-#include <Magma/Framework/Graphics/OGL400Assembler.hpp>
+#include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
+#include <Magma/Framework/Graphics/OGL410Assembler.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -20,6 +20,7 @@ using namespace Magma::Framework;
 struct Vertex
 {
 	float x, y, z;
+	float u, v;
 };
 
 struct Scene
@@ -38,6 +39,9 @@ struct Scene
 	Graphics::VertexBuffer* vertexBuffer2;
 	Graphics::VertexLayout* vertexLayout;
 	Graphics::IndexBuffer* indexBuffer;
+
+	Graphics::Texture2D* texture;
+	Graphics::PixelBindingPoint* textureBP;
 
 	Graphics::RasterState* rasterState;
 	Graphics::DepthStencilState* depthStencilState;
@@ -70,7 +74,7 @@ void LoadScene(Scene& scene)
 	// Create context
 	{
 		Graphics::RenderDeviceSettings settings;
-		scene.device = new Framework::Graphics::OGL400RenderDevice();
+		scene.device = new Framework::Graphics::OGL410RenderDevice();
 		scene.device->Init(scene.window, settings);
 	}
 
@@ -153,7 +157,7 @@ void LoadScene(Scene& scene)
 
 			0x00, 0x00, 0x00, 0x01, // 1 2D texture var
 			0x00, 0x00, 0x00, 0x01, // Var index 1
-			0x00, 0x00, 0x00, 0x03, // Var name size is 7
+			0x00, 0x00, 0x00, 0x07, // Var name size is 7
 			't', 'e', 'x', 't', 'u', 'r', 'e',
 
 			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
@@ -231,11 +235,11 @@ void LoadScene(Scene& scene)
 		elements[0].stride = sizeof(Vertex);
 		elements[0].type = Graphics::VertexElementType::Float;
 
-		elements[1].bufferIndex = 1;
-		elements[1].name = "color";
-		elements[1].offset = 0;
-		elements[1].size = 4;
-		elements[1].stride = sizeof(glm::vec4);
+		elements[1].bufferIndex = 0;
+		elements[1].name = "uvs";
+		elements[1].offset = offsetof(Vertex, u);
+		elements[1].size = 2;
+		elements[1].stride = sizeof(Vertex);
 		elements[1].type = Graphics::VertexElementType::Float;
 
 		scene.vertexLayout = scene.device->CreateVertexLayout(2, elements, scene.vertexShader);
@@ -276,6 +280,17 @@ void LoadScene(Scene& scene)
 		Graphics::DepthStencilStateDesc desc;
 		
 		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
+	}
+
+	{
+		float data[] =
+		{
+			0.0f, 0.0f,
+			0.0f, 0.0f,
+		};
+
+		scene.texture = scene.device->CreateTexture2D(2, 2, data);
+		scene.textureBP = scene.pixelShader->GetBindingPoint("texture");
 	}
 
 	// Create sampler
@@ -347,6 +362,8 @@ void CleanScene(Scene& scene)
 	scene.device->DestroyDepthStencilState(scene.depthStencilState);
 	scene.device->DestroyRasterState(scene.rasterState);
 
+	scene.device->DestroyTexture2D(scene.texture);
+
 	scene.device->DestroyIndexBuffer(scene.indexBuffer);
 	scene.device->DestroyVertexArray(scene.vertexArray);
 	scene.device->DestroyVertexLayout(scene.vertexLayout);
@@ -404,10 +421,10 @@ void Main(int argc, char** argv) try
 		{
 			Vertex data[] =
 			{
-				{ -0.5f + x, -0.5f, 0.0f, },
-				{ -0.5f + x, +0.5f, 0.0f, },
-				{ +0.5f + x, -0.5f, 0.0f, },
-				{ +0.5f + x, +0.5f, 0.0f, },
+				{ -0.5f + x, -0.5f, 0.0f, 0.0f, 0.0f, },
+				{ -0.5f + x, +0.5f, 0.0f, 0.0f, 1.0f, },
+				{ +0.5f + x, -0.5f, 0.0f, 1.0f, 0.0f, },
+				{ +0.5f + x, +0.5f, 0.0f, 1.0f, 1.0f, },
 			};
 			scene.vertexBuffer->Update(0, sizeof(data), data);
 		}
@@ -416,6 +433,7 @@ void Main(int argc, char** argv) try
 		scene.device->SetPipeline(scene.pipeline);
 
 		// Bind texture and sampler
+		
 		/*scene.context->BindTexture2D(scene.font->GetAtlas(0), scene.textureBP);
 		scene.context->BindSampler(scene.sampler, scene.textureBP);*/
 

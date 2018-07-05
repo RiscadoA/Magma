@@ -2,8 +2,8 @@
 //#include <Magma/Framework/Graphics/GLContext.hpp>
 #include <Magma/Framework/Input/D3DWindow.hpp>
 #include <Magma/Framework/Input/GLWindow.hpp>
-#include <Magma/Framework/Graphics/OGL400RenderDevice.hpp>
-#include <Magma/Framework/Graphics/OGL400Assembler.hpp>
+#include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
+#include <Magma/Framework/Graphics/OGL410Assembler.hpp>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -70,7 +70,7 @@ void LoadScene(Scene& scene)
 	// Create context
 	{
 		Graphics::RenderDeviceSettings settings;
-		scene.device = new Framework::Graphics::OGL400RenderDevice();
+		scene.device = new Framework::Graphics::OGL410RenderDevice();
 		scene.device->Init(scene.window, settings);
 	}
 
