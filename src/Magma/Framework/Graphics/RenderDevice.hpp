@@ -1315,6 +1315,21 @@ namespace Magma
 				///		Swaps the front and back buffers
 				/// </summary>
 				virtual void SwapBuffers() = 0;
+
+				/// <summary>
+				///		Creates a constant buffer
+				/// </summary>
+				/// <param name="size">Constant buffer size</param>
+				/// <param name="data">Constant buffer initial data (set to nullptr to create an empty constant buffer)</param>
+				/// <param name="usage">Constant buffer usage mode</param>
+				/// <returns>Constant buffer handle</returns>
+				virtual ConstantBuffer* CreateConstantBuffer(size_t size, const void* data = nullptr, BufferUsage usage = BufferUsage::Dynamic) = 0;
+
+				/// <summary>
+				///		Destroys a constant buffer
+				/// </summary>
+				/// <param name="constantBuffer">Constant buffer handle</param>
+				virtual void DestroyConstantBuffer(ConstantBuffer* constantBuffer) = 0;
 			};
 		}
 	}

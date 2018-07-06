@@ -200,6 +200,52 @@ public:
 	GLuint sampler;
 };
 
+class OGL410ConstantBuffer final : public ConstantBuffer
+{
+public:
+	OGL410ConstantBuffer(GLsizei size, const GLvoid* data, BufferUsage _usage)
+	{
+		GLenum usage;
+
+		switch (_usage)
+		{
+			case BufferUsage::Default: usage = GL_STATIC_DRAW; break; // Default and static are the same in OGL410
+			case BufferUsage::Static: usage = GL_STATIC_DRAW; break;
+			case BufferUsage::Dynamic: usage = GL_DYNAMIC_DRAW; break;
+			case BufferUsage::Invalid: throw RenderDeviceError("Failed to create OGL410ConstantBuffer:\nInvalid buffer usage mode"); break;
+			default: throw RenderDeviceError("Failed to create OGL410ConstantBuffer:\nUnsupported buffer usage mode"); break;
+		}
+
+		glGenBuffers(1, &ubo);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		glBufferData(GL_UNIFORM_BUFFER, size, data, usage);
+
+		GL_CHECK_ERROR("Failed to create OGL410ConstantBuffer");
+	}
+
+	virtual ~OGL410ConstantBuffer() final
+	{
+		glDeleteBuffers(1, &ubo);
+	}
+
+	virtual void* Map() final
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		void* map = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+		GL_CHECK_ERROR("Failed to map OGL410ConstantBuffer");
+		return map;
+	}
+
+	virtual void Unmap() final
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		glUnmapBuffer(GL_UNIFORM_BUFFER);
+		GL_CHECK_ERROR("Failed to unmap OGL410ConstantBuffer");
+	}
+
+	GLuint ubo;
+};
+
 class OGL410VertexBindingPoint;
 
 class OGL410VertexShader final : public VertexShader
@@ -273,7 +319,7 @@ public:
 
 	virtual void Bind(ConstantBuffer* buffer) final
 	{
-		// TO DO
+		glBindBufferBase(GL_UNIFORM_BUFFER, location, static_cast<OGL410ConstantBuffer*>(buffer)->ubo);
 	}
 
 	OGL410VertexShader* shader;
@@ -289,7 +335,7 @@ VertexBindingPoint * OGL410VertexShader::GetBindingPoint(const char * name)
 	for (auto& cv : data.GetShaderConstantBuffers())
 		if (cv.name == name)
 		{
-			auto index = glGetUniformBlockIndex(vertexShader, name);
+			auto index = glGetUniformBlockIndex(vertexShader, ("buf_" + std::to_string(cv.index)).c_str());
 			if (index == -1)
 			{
 				std::stringstream ss;
@@ -398,8 +444,8 @@ public:
 	}
 
 	virtual void Bind(ConstantBuffer* buffer) final
-	{
-		// TO DO
+	{		
+		glBindBufferBase(GL_UNIFORM_BUFFER, location, static_cast<OGL410ConstantBuffer*>(buffer)->ubo);
 	}
 
 	OGL410PixelShader* shader;
@@ -501,13 +547,16 @@ public:
 	virtual void* Map() final
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		return glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		void* map = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		GL_CHECK_ERROR("Failed to map OGL410VertexBuffer");
+		return map;
 	}
 
 	virtual void Unmap() final
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glUnmapBuffer(GL_ARRAY_BUFFER);
+		GL_CHECK_ERROR("Failed to unmap OGL410VertexBuffer");
 	}
 
 	GLuint vbo;
@@ -1255,6 +1304,25 @@ void Magma::Framework::Graphics::OGL410RenderDevice::SwapBuffers()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	m_window->SwapBuffers();
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+ConstantBuffer * Magma::Framework::Graphics::OGL410RenderDevice::CreateConstantBuffer(size_t size, const void * data, BufferUsage usage)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	return new OGL410ConstantBuffer(size, data, usage);
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+	return nullptr;
+#endif
+}
+
+void Magma::Framework::Graphics::OGL410RenderDevice::DestroyConstantBuffer(ConstantBuffer* constantBuffer)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	delete constantBuffer;
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif

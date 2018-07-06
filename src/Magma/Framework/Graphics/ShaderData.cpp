@@ -44,6 +44,7 @@ Magma::Framework::Graphics::ShaderData::ShaderData(ShaderData && rhs)
 	m_inputVars = std::move(rhs.m_inputVars);
 	m_outputVars = std::move(rhs.m_outputVars);
 	m_texture2DVars = std::move(rhs.m_texture2DVars);
+	m_constantBuffers = std::move(rhs.m_constantBuffers);
 	m_constantBufferVars = std::move(rhs.m_constantBufferVars);
 }
 
@@ -63,6 +64,7 @@ Magma::Framework::Graphics::ShaderData::ShaderData(const ShaderData & rhs)
 	m_inputVars = rhs.m_inputVars;
 	m_outputVars = rhs.m_outputVars;
 	m_texture2DVars = rhs.m_texture2DVars;
+	m_constantBuffers = rhs.m_constantBuffers;
 	m_constantBufferVars = rhs.m_constantBufferVars;
 }
 

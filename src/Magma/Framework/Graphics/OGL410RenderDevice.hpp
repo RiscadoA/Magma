@@ -50,6 +50,8 @@ namespace Magma
 				virtual void DrawTrianglesIndexed(size_t offset, size_t count) override;
 				virtual void SetRenderTargets(Texture2D ** textures, size_t count) override;
 				virtual void SwapBuffers() override;
+				virtual ConstantBuffer* CreateConstantBuffer(size_t size, const void* data = nullptr, BufferUsage usage = BufferUsage::Dynamic) override;
+				virtual void DestroyConstantBuffer(ConstantBuffer* constantBuffer) override;
 
 				Input::GLWindow* m_window;
 				Graphics::IndexBuffer* m_currentIndexBuffer;

@@ -63,7 +63,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	ss << "// DO NOT MODIFY THIS FILE BY HAND" << std::endl;
 	ss << std::endl;
 
-	// Add  texture 2D variables
+	// Add texture 2D variables
 	for (auto& tex : data.GetTexture2DVariables())
 	{
 		ss << "uniform sampler2D ";
@@ -72,6 +72,23 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	}
 	if (data.GetTexture2DVariables().size() > 0)
 		ss << std::endl;
+
+	// Add constant buffers
+	for (auto& buf : data.GetShaderConstantBuffers())
+	{
+		ss << "layout (std140) uniform buf_" << buf.index << std::endl;
+		ss << "{" << std::endl;
+		for (auto& v : data.GetShaderConstantVariables())
+		{
+			if (v.bufferIndex != buf.index)
+				continue;
+			ss << "\t";
+			TOGL410(v.type, ss);
+			ss << " buf_" << buf.index << "_" << v.index << "; // Constant buffer variable \"" << v.name << "\"; index " << v.index << "; buffer index " << v.bufferIndex;
+			ss << std::endl;
+		}
+		ss << "};" << std::endl << std::endl;
+	}
 
 	// Add input variables
 	for (auto& in : data.GetInputVariables())
@@ -520,15 +537,27 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			}
 
 			// Other functions
-			case BytecodeOpCode::Smple2D:
-				ss << "\t";
-				PutIndex(varOut);
-				ss << " = texture(";
-				PutIndex(varIn0);
-				ss << " , ";
-				PutIndex(varIn1);
-				ss << ");" << std::endl;
-				break;
+			{
+				case BytecodeOpCode::MulMat:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = ";
+					PutIndex(varIn0);
+					ss << " * ";
+					PutIndex(varIn1);
+					ss << ";" << std::endl;
+					break;
+
+				case BytecodeOpCode::Smple2D:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = texture(";
+					PutIndex(varIn0);
+					ss << " , ";
+					PutIndex(varIn1);
+					ss << ");" << std::endl;
+					break;
+			}
 
 			default:
 				throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nUnsupported/unknown operation code");
