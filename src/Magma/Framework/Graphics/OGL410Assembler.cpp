@@ -63,6 +63,16 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	ss << "// DO NOT MODIFY THIS FILE BY HAND" << std::endl;
 	ss << std::endl;
 
+	// Add  texture 2D variables
+	for (auto& tex : data.GetTexture2DVariables())
+	{
+		ss << "uniform sampler2D ";
+		ss << " tex_" << tex.index << "; // Texture2D variable \"" << tex.name << "\"; index " << tex.index;
+		ss << std::endl;
+	}
+	if (data.GetTexture2DVariables().size() > 0)
+		ss << std::endl;
+
 	// Add input variables
 	for (auto& in : data.GetInputVariables())
 	{
@@ -85,6 +95,14 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	if (data.GetOutputVariables().size() > 0)
 		ss << std::endl;
 	
+	if (data.GetShaderType() == ShaderType::Vertex)
+	{
+		ss << "out gl_PerVertex" << std::endl;
+		ss << "{" << std::endl;
+		ss << "\tvec4 gl_Position;" << std::endl;
+		ss << "};" << std::endl;
+		ss << std::endl;
+	}
 
 	/*
 		TO DO:

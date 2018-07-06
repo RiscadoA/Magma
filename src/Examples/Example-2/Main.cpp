@@ -36,11 +36,11 @@ struct Scene
 
 	Graphics::VertexArray* vertexArray;
 	Graphics::VertexBuffer* vertexBuffer;
-	Graphics::VertexBuffer* vertexBuffer2;
 	Graphics::VertexLayout* vertexLayout;
 	Graphics::IndexBuffer* indexBuffer;
 
 	Graphics::Texture2D* texture;
+	Graphics::Sampler2D* sampler;
 	Graphics::PixelBindingPoint* textureBP;
 
 	Graphics::RasterState* rasterState;
@@ -61,12 +61,12 @@ void LoadScene(Scene& scene)
 {
 	// Create filesystem
 	{
-		scene.fileSystem = new Framework::Files::STDFileSystem("../../../../../resources/");
+		scene.fileSystem = new Files::STDFileSystem("../../../../../resources/");
 	}
 
 	// Create window
 	{
-		scene.window = new Framework::Input::GLWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Input::GLWindow(800, 600, "Tetris", Input::Window::Mode::Windowed);
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
@@ -74,7 +74,7 @@ void LoadScene(Scene& scene)
 	// Create context
 	{
 		Graphics::RenderDeviceSettings settings;
-		scene.device = new Framework::Graphics::OGL410RenderDevice();
+		scene.device = new Graphics::OGL410RenderDevice();
 		scene.device->Init(scene.window, settings);
 	}
 
@@ -104,10 +104,12 @@ void LoadScene(Scene& scene)
 
 			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
 
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
+			0x00, 0x00, 0x00, 0x00,	// 0 constant buffers
+
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffer vars
 		};
 
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex2.mslbc");
 		auto size = scene.fileSystem->GetSize(file);
 		auto code = new char[size + 1];
 		scene.fileSystem->Read(file, code, size);
@@ -119,7 +121,7 @@ void LoadScene(Scene& scene)
 
 		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, sizeof(metaData));
 
-		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/vertex1.bc");
+		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/vertex2.bc");
 		scene.fileSystem->Write(file, bytecode, bytecodeSize);
 		scene.fileSystem->CloseFile(file);
 		
@@ -160,10 +162,12 @@ void LoadScene(Scene& scene)
 			0x00, 0x00, 0x00, 0x07, // Var name size is 7
 			't', 'e', 'x', 't', 'u', 'r', 'e',
 
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
+			0x00, 0x00, 0x00, 0x00,	// 0 constant buffers
+
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffer vars
 		};
 
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/pixel1.mslbc");
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/pixel2.mslbc");
 		auto size = scene.fileSystem->GetSize(file);
 		auto code = new char[size + 1];
 		scene.fileSystem->Read(file, code, size);
@@ -175,7 +179,7 @@ void LoadScene(Scene& scene)
 
 		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, sizeof(metaData));
 
-		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/pixel1.bc");
+		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/pixel2.bc");
 		scene.fileSystem->Write(file, bytecode, bytecodeSize);
 		scene.fileSystem->CloseFile(file);
 
@@ -208,20 +212,7 @@ void LoadScene(Scene& scene)
 
 	// Load vertex buffer
 	{
-		scene.vertexBuffer = scene.device->CreateVertexBuffer(48, nullptr, Graphics::BufferUsage::Dynamic);
-	}
-
-	// Load vertex buffer 2
-	{
-		glm::vec4 data[] =
-		{
-			glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
-			glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
-			glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
-			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		};
-
-		scene.vertexBuffer2 = scene.device->CreateVertexBuffer(sizeof(data), data);
+		scene.vertexBuffer = scene.device->CreateVertexBuffer(sizeof(Vertex) * 4, nullptr, Graphics::BufferUsage::Dynamic);
 	}
 
 	// Create vertex layout
@@ -250,9 +241,8 @@ void LoadScene(Scene& scene)
 		Graphics::VertexBuffer* buffers[] =
 		{
 			scene.vertexBuffer,
-			scene.vertexBuffer2,
 		};
-		scene.vertexArray = scene.device->CreateVertexArray(2, buffers, scene.vertexLayout);
+		scene.vertexArray = scene.device->CreateVertexArray(1, buffers, scene.vertexLayout);
 	}
 
 	// Create index buffer
@@ -285,29 +275,31 @@ void LoadScene(Scene& scene)
 	{
 		float data[] =
 		{
-			0.0f, 0.0f,
-			0.0f, 0.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
-		scene.texture = scene.device->CreateTexture2D(2, 2, data);
+		scene.texture = scene.device->CreateTexture2D(2, 2, Graphics::TextureFormat::RGBA32Float, data);
+		scene.texture->GenerateMipmaps();
 		scene.textureBP = scene.pixelShader->GetBindingPoint("texture");
 	}
 
 	// Create sampler
-	/*{
-		Framework::Graphics::SamplerSettings settings;
+	{
+		Graphics::Sampler2DDesc desc;
 
-		settings.adressU = Framework::Graphics::TextureAdressMode::Border;
-		settings.adressV = Framework::Graphics::TextureAdressMode::Border;
-		settings.minFilter = Framework::Graphics::TextureFilter::Linear;
-		settings.magFilter = Framework::Graphics::TextureFilter::Linear;
-		settings.borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		desc.adressU = Graphics::TextureAdressMode::Border;
+		desc.adressV = Graphics::TextureAdressMode::Border;
+		desc.minFilter = Graphics::TextureFilter::Linear;
+		desc.magFilter = Graphics::TextureFilter::Linear;
+		desc.mipmapFilter = Graphics::TextureFilter::Nearest;
+		desc.border = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
-		scene.sampler = scene.context->CreateSampler(settings);
+		scene.sampler = scene.device->CreateSampler2D(desc);
 	}
 
 	// Create mask texture
-	{
+	/*{
 		unsigned char data[] =
 		{
 			0,
@@ -362,6 +354,7 @@ void CleanScene(Scene& scene)
 	scene.device->DestroyDepthStencilState(scene.depthStencilState);
 	scene.device->DestroyRasterState(scene.rasterState);
 
+	scene.device->DestroySampler2D(scene.sampler);
 	scene.device->DestroyTexture2D(scene.texture);
 
 	scene.device->DestroyIndexBuffer(scene.indexBuffer);
@@ -419,23 +412,20 @@ void Main(int argc, char** argv) try
 
 		// Update vertex buffer
 		{
-			Vertex data[] =
-			{
-				{ -0.5f + x, -0.5f, 0.0f, 0.0f, 0.0f, },
-				{ -0.5f + x, +0.5f, 0.0f, 0.0f, 1.0f, },
-				{ +0.5f + x, -0.5f, 0.0f, 1.0f, 0.0f, },
-				{ +0.5f + x, +0.5f, 0.0f, 1.0f, 1.0f, },
-			};
-			scene.vertexBuffer->Update(0, sizeof(data), data);
+			auto data = (Vertex*)scene.vertexBuffer->Map();
+			data[0].x = -0.5f + x; data[0].y = -0.5f; data[0].z = 0.0f; data[0].u = 0.0f; data[0].v = 0.0f;
+			data[1].x = -0.5f + x; data[1].y = +0.5f; data[1].z = 0.0f; data[1].u = 0.0f; data[1].v = 1.0f;
+			data[2].x = +0.5f + x; data[2].y = -0.5f; data[2].z = 0.0f; data[2].u = 1.0f; data[2].v = 0.0f;
+			data[3].x = +0.5f + x; data[3].y = +0.5f; data[3].z = 0.0f; data[3].u = 1.0f; data[3].v = 1.0f;
+			scene.vertexBuffer->Unmap();
 		}
 
 		// Set shader pipeline
 		scene.device->SetPipeline(scene.pipeline);
 
-		// Bind texture and sampler
-		
-		/*scene.context->BindTexture2D(scene.font->GetAtlas(0), scene.textureBP);
-		scene.context->BindSampler(scene.sampler, scene.textureBP);*/
+		// Bind texture and set sampler
+		scene.textureBP->Bind(scene.texture);
+		scene.textureBP->Bind(scene.sampler);
 
 		// Bind transform and material
 		/*scene.context->BindConstantBuffer(scene.transformCBuffer, scene.transformBP);

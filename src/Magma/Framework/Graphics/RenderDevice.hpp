@@ -78,12 +78,62 @@ namespace Magma
 				/// <summary>
 				///		Signed chars that get normalized into a [-1; 1] floating point
 				/// </summary>
+				RGB8SNorm,
+
+				/// <summary>
+				///		Signed shorts that get normalized into a [-1; 1] floating point
+				/// </summary>
+				RGB16SNorm,
+
+				/// <summary>
+				///		Signed chars that get normalized into a [-1; 1] floating point
+				/// </summary>
 				RGBA8SNorm,
 
 				/// <summary>
 				///		Signed shorts that get normalized into a [-1; 1] floating point
 				/// </summary>
 				RGBA16SNorm,
+
+				/// <summary>
+				///		Unsigned char that gets normalized into a [0; 1] floating point
+				/// </summary>
+				R8UNorm,
+
+				/// <summary>
+				///		Unsigned short that gets normalized into a [0; 1] floating point
+				/// </summary>
+				R16UNorm,
+
+				/// <summary>
+				///		Unsigned chars that get normalized into a [0; 1] floating point
+				/// </summary>
+				RG8UNorm,
+
+				/// <summary>
+				///		Unsigned shorts that get normalized into a [0; 1] floating point
+				/// </summary>
+				RG16UNorm,
+
+				/// <summary>
+				///		Unsigned chars that get normalized into a [0; 1] floating point
+				/// </summary>
+				RGB8UNorm,
+
+				/// <summary>
+				///		Unsigned shorts that get normalized into a [0; 1] floating point
+				/// </summary>
+				RGB16UNorm,
+
+				/// <summary>
+				///		Unsigned chars that get normalized into a [0; 1] floating point
+				/// </summary>
+				RGBA8UNorm,
+
+				/// <summary>
+				///		Unsigned shorts that get normalized into a [0; 1] floating point
+				/// </summary>
+				RGBA16UNorm,
 
 				/// <summary>
 				///		Signed char
@@ -104,6 +154,16 @@ namespace Magma
 				///		Signed shorts
 				/// </summary>
 				RG16Int,
+
+				/// <summary>
+				///		Signed chars
+				/// </summary>
+				RGB8Int,
+
+				/// <summary>
+				///		Signed shorts
+				/// </summary>
+				RGB16Int,
 
 				/// <summary>
 				///		Signed chars
@@ -134,6 +194,16 @@ namespace Magma
 				///		Unsigned shorts
 				/// </summary>
 				RG16UInt,
+
+				/// <summary>
+				///		Unsigned chars
+				/// </summary>
+				RGB8UInt,
+
+				/// <summary>
+				///		Unsigned shorts
+				/// </summary>
+				RGB16UInt,
 
 				/// <summary>
 				///		Unsigned chars
@@ -172,18 +242,18 @@ namespace Magma
 			};
 
 			/// <summary>
-			///		Encapsulates a texture sampler
+			///		Encapsulates a 2D texture sampler
 			/// </summary>
-			class Sampler
+			class Sampler2D
 			{
 			public:
-				virtual ~Sampler() = default;
+				virtual ~Sampler2D() = default;
 
 			protected:
 				/// <summary>
 				///		Used to ensure that these are never created directly
 				/// </summary>
-				Sampler() = default;
+				Sampler2D() = default;
 			};
 
 			/// <summary>
@@ -249,9 +319,9 @@ namespace Magma
 			};
 
 			/// <summary>
-			///		Describes a texture sampler
+			///		Describes a 2D texture sampler
 			/// </summary>
-			struct SamplerDesc
+			struct Sampler2DDesc
 			{
 				/// <summary>
 				///		Minifying filter
@@ -326,6 +396,12 @@ namespace Magma
 				virtual void Bind(Texture2D* texture) = 0;
 
 				/// <summary>
+				///		Binds a 2D sampler to this vertex shader binding point
+				/// </summary>
+				/// <param name="sampler">2D sampler handle</param>
+				virtual void Bind(Sampler2D* sampler) = 0;
+
+				/// <summary>
 				///		Binds a constant buffer to this vertex shader binding point
 				/// </summary>
 				/// <param name="buffer">Constant buffer handle</param>
@@ -373,6 +449,12 @@ namespace Magma
 				/// </summary>
 				/// <param name="texture">Texture handle</param>
 				virtual void Bind(Texture2D* texture) = 0;
+
+				/// <summary>
+				///		Binds a 2D sampler to this vertex shader binding point
+				/// </summary>
+				/// <param name="sampler">2D sampler handle</param>
+				virtual void Bind(Sampler2D* sampler) = 0;
 
 				/// <summary>
 				///		Binds a constant buffer to this pixel shader binding point
@@ -1141,15 +1223,27 @@ namespace Magma
 				/// <param name="height">Texture height</param>
 				/// <param name="format">Texture format</param>
 				/// <param name="data">Texture initial data (set to nullptr to create empty texture)</param>
-				/// <param name="usage">Texture usage mode</param>
 				/// <returns>2D texture handle</returns>
-				virtual Texture2D* CreateTexture2D(size_t width, size_t height, TextureFormat format, const void* data = nullptr, BufferUsage usage = BufferUsage::Default) = 0;
+				virtual Texture2D* CreateTexture2D(size_t width, size_t height, TextureFormat format, const void* data = nullptr) = 0;
 				
 				/// <summary>
 				///		Destroys a 2D texture
 				/// </summary>
 				/// <param name="texture">2D texture handle</param>
 				virtual void DestroyTexture2D(Texture2D* texture) = 0;
+
+				/// <summary>
+				///		Creates a 2D sampler
+				/// </summary>
+				/// <param name="desc">2D sampler description</param>
+				/// <returns>2D sampler handle</returns>
+				virtual Sampler2D* CreateSampler2D(const Sampler2DDesc& desc) = 0;
+
+				/// <summary>
+				///		Destroys a 2D sampler
+				/// </summary>
+				/// <param name="sampler">2D sampler handle</param>
+				virtual void DestroySampler2D(Sampler2D* sampler) = 0;
 
 				/// <summary>
 				///		Creates a rasterizer state

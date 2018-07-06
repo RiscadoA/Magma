@@ -31,6 +31,175 @@ using namespace Magma::Framework;
 #endif
 #endif
 
+class OGL410Texture2D final : public Texture2D
+{
+public:
+	OGL410Texture2D(size_t width, size_t height, TextureFormat _format, const void* data)
+	{
+		switch (_format)
+		{
+			case TextureFormat::R8SNorm: internalFormat = GL_R8_SNORM; type = GL_BYTE; format = GL_RED; break;
+			case TextureFormat::R16SNorm: internalFormat = GL_R16_SNORM; type = GL_SHORT; format = GL_RED; break;
+			case TextureFormat::RG8SNorm: internalFormat = GL_RG8_SNORM; type = GL_BYTE; format = GL_RG; break;
+			case TextureFormat::RG16SNorm: internalFormat = GL_RG16_SNORM; type = GL_SHORT; format = GL_RG; break;
+			case TextureFormat::RGB8SNorm: internalFormat = GL_RGB8_SNORM; type = GL_BYTE; format = GL_RGB; break;
+			case TextureFormat::RGB16SNorm: internalFormat = GL_RGB16_SNORM; type = GL_SHORT; format = GL_RGB; break;
+			case TextureFormat::RGBA8SNorm: internalFormat = GL_RGBA8_SNORM; type = GL_BYTE; format = GL_RGBA; break;
+			case TextureFormat::RGBA16SNorm: internalFormat = GL_RGBA16_SNORM; type = GL_SHORT; format = GL_RGBA; break;
+
+			case TextureFormat::R8UNorm: internalFormat = GL_R8; type = GL_UNSIGNED_BYTE; format = GL_RED; break;
+			case TextureFormat::R16UNorm: internalFormat = GL_R16; type = GL_UNSIGNED_SHORT; format = GL_RED; break;
+			case TextureFormat::RG8UNorm: internalFormat = GL_RG8; type = GL_UNSIGNED_BYTE; format = GL_RG; break;
+			case TextureFormat::RG16UNorm: internalFormat = GL_RG16; type = GL_UNSIGNED_SHORT; format = GL_RG; break;
+			case TextureFormat::RGB8UNorm: internalFormat = GL_RGB8; type = GL_UNSIGNED_BYTE; format = GL_RGB; break;
+			case TextureFormat::RGB16UNorm: internalFormat = GL_RGB16; type = GL_UNSIGNED_SHORT; format = GL_RGB; break;
+			case TextureFormat::RGBA8UNorm: internalFormat = GL_RGBA8; type = GL_UNSIGNED_BYTE; format = GL_RGBA; break;
+			case TextureFormat::RGBA16UNorm: internalFormat = GL_RGBA16; type = GL_UNSIGNED_SHORT; format = GL_RGBA; break;
+
+			case TextureFormat::R8Int: internalFormat = GL_R8I; type = GL_BYTE; format = GL_RED; break;
+			case TextureFormat::R16Int: internalFormat = GL_R16I; type = GL_SHORT; format = GL_RED; break;
+			case TextureFormat::RG8Int: internalFormat = GL_RG8I; type = GL_BYTE; format = GL_RG; break;
+			case TextureFormat::RG16Int: internalFormat = GL_RG16I; type = GL_SHORT; format = GL_RG; break;
+			case TextureFormat::RGB8Int: internalFormat = GL_RGB8I; type = GL_BYTE; format = GL_RGB; break;
+			case TextureFormat::RGB16Int: internalFormat = GL_RGB16I; type = GL_SHORT; format = GL_RGB; break;
+			case TextureFormat::RGBA8Int: internalFormat = GL_RGBA8I; type = GL_BYTE; format = GL_RGBA; break;
+			case TextureFormat::RGBA16Int: internalFormat = GL_RGBA16I; type = GL_SHORT; format = GL_RGBA; break;
+
+			case TextureFormat::R8UInt: internalFormat = GL_R8UI; type = GL_UNSIGNED_BYTE; format = GL_RED; break;
+			case TextureFormat::R16UInt: internalFormat = GL_R16UI; type = GL_UNSIGNED_SHORT; format = GL_RED; break;
+			case TextureFormat::RG8UInt: internalFormat = GL_RG8UI; type = GL_UNSIGNED_BYTE; format = GL_RG; break;
+			case TextureFormat::RG16UInt: internalFormat = GL_RG16UI; type = GL_UNSIGNED_SHORT; format = GL_RG; break;
+			case TextureFormat::RGB8UInt: internalFormat = GL_RGB8UI; type = GL_UNSIGNED_BYTE; format = GL_RGB; break;
+			case TextureFormat::RGB16UInt: internalFormat = GL_RGB16UI; type = GL_UNSIGNED_SHORT; format = GL_RGB; break;
+			case TextureFormat::RGBA8UInt: internalFormat = GL_RGBA8UI; type = GL_UNSIGNED_BYTE; format = GL_RGBA; break;
+			case TextureFormat::RGBA16UInt: internalFormat = GL_RGBA16UI; type = GL_UNSIGNED_SHORT; format = GL_RGBA; break;
+
+			case TextureFormat::R32Float: internalFormat = GL_R32F; type = GL_FLOAT; format = GL_RED; break;
+			case TextureFormat::RG32Float: internalFormat = GL_RG32F; type = GL_FLOAT; format = GL_RG; break;
+			case TextureFormat::RGB32Float: internalFormat = GL_RGB32F; type = GL_FLOAT; format = GL_RGB; break;
+			case TextureFormat::RGBA32Float: internalFormat = GL_RGBA32F; type = GL_FLOAT; format = GL_RGBA; break;
+
+			case TextureFormat::Invalid: throw RenderDeviceError("Failed to create OGL410Texture2D:\nInvalid texture format"); break;
+			default: throw RenderDeviceError("Failed to create OGL410Texture2D:\nUnsupported texture format"); break;
+		}
+
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		GL_CHECK_ERROR("Failed to create OGL410Texture2D");
+	}
+
+	virtual ~OGL410Texture2D() final
+	{
+		 glDeleteTextures(1, &texture);
+	}
+
+	virtual void Update(size_t dstX, size_t dstY, size_t width, size_t height, void* data) final
+	{
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, dstX, dstY, width, height, format, type, data);
+		GL_CHECK_ERROR("Failed to update OGL410Texture2D");
+	}
+
+	virtual void GenerateMipmaps()
+	{
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		GL_CHECK_ERROR("Failed to generate OGL410Texture2D mipmaps");
+	}
+
+	GLenum internalFormat;
+	GLenum format;
+	GLenum type;
+	GLuint texture;
+};
+
+class OGL410Sampler2D : public Sampler2D
+{
+public:
+	OGL410Sampler2D(const Sampler2DDesc& desc)
+	{
+		GLenum minFilter, magFilter;
+		GLenum wrapS, wrapT;
+
+		switch (desc.adressU)
+		{
+			case TextureAdressMode::Repeat: wrapS = GL_REPEAT; break;
+			case TextureAdressMode::Mirror: wrapS = GL_MIRRORED_REPEAT; break;
+			case TextureAdressMode::Clamp: wrapS = GL_CLAMP; break;
+			case TextureAdressMode::Border: wrapS = GL_CLAMP_TO_BORDER; break;
+			case TextureAdressMode::Invalid: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nInvalid texture coordinate U adress mode"); break;
+			default: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported texture coordinate U adress mode"); break;
+		}
+
+		switch (desc.adressV)
+		{
+			case TextureAdressMode::Repeat: wrapT = GL_REPEAT; break;
+			case TextureAdressMode::Mirror: wrapT = GL_MIRRORED_REPEAT; break;
+			case TextureAdressMode::Clamp: wrapT = GL_CLAMP; break;
+			case TextureAdressMode::Border: wrapT = GL_CLAMP_TO_BORDER; break;
+			case TextureAdressMode::Invalid: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nInvalid texture coordinate V adress mode"); break;
+			default: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported texture coordinate V adress mode"); break;
+		}
+
+		switch (desc.minFilter)
+		{
+			case TextureFilter::Nearest:
+				if (desc.mipmapFilter == TextureFilter::Invalid)
+					minFilter = GL_NEAREST;
+				else if (desc.mipmapFilter == TextureFilter::Nearest)
+					minFilter = GL_NEAREST_MIPMAP_NEAREST;
+				else if (desc.mipmapFilter == TextureFilter::Linear)
+					minFilter = GL_NEAREST_MIPMAP_LINEAR;
+				else throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported mipmap filter"); break;
+				break;
+			case TextureFilter::Linear:
+				if (desc.mipmapFilter == TextureFilter::Invalid)
+					minFilter = GL_LINEAR;
+				else if (desc.mipmapFilter == TextureFilter::Nearest)
+					minFilter = GL_LINEAR_MIPMAP_NEAREST;
+				else if (desc.mipmapFilter == TextureFilter::Linear)
+					minFilter = GL_LINEAR_MIPMAP_LINEAR;
+				else throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported mipmap filter"); break;
+				break;
+			case TextureFilter::Invalid: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nInvalid minifying filter"); break;
+			default: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported minifying filter"); break;
+		}
+
+		switch (desc.magFilter)
+		{
+			case TextureFilter::Nearest: magFilter = GL_NEAREST; break;
+			case TextureFilter::Linear: magFilter = GL_LINEAR; break;
+			case TextureFilter::Invalid: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nInvalid magnifying filter"); break;
+			default: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported magnifying filter"); break;
+		}
+
+		glGenSamplers(1, &sampler);
+
+		GL_CHECK_ERROR("Failed to create OGL410Sampler2D {1}");
+
+		glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, minFilter);
+		glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, magFilter);
+		glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, wrapS);
+		glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, wrapT);
+
+		GL_CHECK_ERROR("Failed to create OGL410Sampler2D {2}");
+	}
+
+	virtual ~OGL410Sampler2D() final
+	{
+		glDeleteSamplers(1, &sampler);
+	}
+
+	GLuint sampler;
+};
+
 class OGL410VertexBindingPoint;
 
 class OGL410VertexShader final : public VertexShader
@@ -61,6 +230,8 @@ public:
 
 	virtual ~OGL410VertexShader() final
 	{
+		for (auto& bp : bindingPoints)
+			delete bp.second;
 		glDeleteProgram(vertexShader);
 	}
 
@@ -88,7 +259,16 @@ public:
 
 	virtual void Bind(Texture2D* texture) final
 	{
-		//static_cast<OGL410Texture2D*>(texture);
+		glActiveTexture(GL_TEXTURE0 + location);
+		glBindTexture(GL_TEXTURE_2D, static_cast<OGL410Texture2D*>(texture)->texture);
+		glProgramUniform1i(shader->vertexShader, location, location);
+
+		GL_CHECK_ERROR("Failed to bind OGL410Texture2D to OGL410VertexBindingPoint");
+	}
+
+	virtual void Bind(Sampler2D* sampler) final
+	{
+		glBindSampler(GL_TEXTURE0 + location, static_cast<OGL410Sampler2D*>(sampler)->sampler);
 	}
 
 	virtual void Bind(ConstantBuffer* buffer) final
@@ -127,7 +307,7 @@ VertexBindingPoint * OGL410VertexShader::GetBindingPoint(const char * name)
 	for (auto& t : data.GetTexture2DVariables())
 		if (t.name == name)
 		{
-			auto loc = glGetUniformLocation(vertexShader, name);
+			auto loc = glGetUniformLocation(vertexShader, ("tex_" + std::to_string(t.index)).c_str());
 			if (loc == -1)
 			{
 				std::stringstream ss;
@@ -174,6 +354,8 @@ public:
 
 	virtual ~OGL410PixelShader() final
 	{
+		for (auto& bp : bindingPoints)
+			delete bp.second;
 		glDeleteProgram(fragmentShader);
 	}
 
@@ -196,12 +378,23 @@ public:
 
 	virtual ~OGL410PixelBindingPoint() final
 	{
-
+		// Empty
 	}
 
 	virtual void Bind(Texture2D* texture) final
 	{
+		glActiveTexture(GL_TEXTURE0 + location);
+		glBindTexture(GL_TEXTURE_2D, static_cast<OGL410Texture2D*>(texture)->texture);
+		glProgramUniform1i(shader->fragmentShader, location, location);
 
+		GL_CHECK_ERROR("Failed to bind OGL410Texture2D to OGL410PixelBindingPoint");
+	}
+
+	virtual void Bind(Sampler2D* sampler) final
+	{
+		glBindSampler(location, static_cast<OGL410Sampler2D*>(sampler)->sampler);
+
+		GL_CHECK_ERROR("Failed to bind OGL410Sampler2D to OGL410PixelBindingPoint");
 	}
 
 	virtual void Bind(ConstantBuffer* buffer) final
@@ -240,7 +433,7 @@ PixelBindingPoint * OGL410PixelShader::GetBindingPoint(const char * name)
 	for (auto& t : data.GetTexture2DVariables())
 		if (t.name == name)
 		{
-			auto loc = glGetUniformLocation(fragmentShader, name);
+			auto loc = glGetUniformLocation(fragmentShader, ("tex_" + std::to_string(t.index)).c_str());
 			if (loc == -1)
 			{
 				std::stringstream ss;
@@ -645,6 +838,15 @@ void Magma::Framework::Graphics::OGL410RenderDevice::Init(Input::Window * window
 		throw RenderDeviceError(ss.str());
 	}
 
+	// Check extensions
+	if (!GLEW_EXT_texture_filter_anisotropic)
+	{
+		std::stringstream ss;
+		ss << "Failed to init OGL410RenderDevice:" << std::endl << "GLEW coudln't get extension:" << std::endl;
+		ss << "EXT_texture_filter_anisotropic";
+		throw RenderDeviceError(ss.str());
+	}
+
 	// Enable or disable VSync
 	if (settings.enableVSync)
 		glfwSwapInterval(1);
@@ -857,11 +1059,10 @@ void Magma::Framework::Graphics::OGL410RenderDevice::SetIndexBuffer(IndexBuffer 
 #endif	
 }
 
-Texture2D * Magma::Framework::Graphics::OGL410RenderDevice::CreateTexture2D(size_t width, size_t height, const void * data, BufferUsage usage)
+Texture2D * Magma::Framework::Graphics::OGL410RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
-	return nullptr;
+	return new OGL410Texture2D(width, height, format, data);
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 	return nullptr;
@@ -871,7 +1072,25 @@ Texture2D * Magma::Framework::Graphics::OGL410RenderDevice::CreateTexture2D(size
 void Magma::Framework::Graphics::OGL410RenderDevice::DestroyTexture2D(Texture2D * texture)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// TO DO
+	delete texture;
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+Sampler2D * Magma::Framework::Graphics::OGL410RenderDevice::CreateSampler2D(const Sampler2DDesc & desc)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	return new OGL410Sampler2D(desc);
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+void Magma::Framework::Graphics::OGL410RenderDevice::DestroySampler2D(Sampler2D* sampler)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	delete sampler;
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif

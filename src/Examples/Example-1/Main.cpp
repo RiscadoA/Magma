@@ -1,6 +1,4 @@
-﻿//#include <Magma/Framework/Graphics/D3D11Context.hpp>
-//#include <Magma/Framework/Graphics/GLContext.hpp>
-#include <Magma/Framework/Input/D3DWindow.hpp>
+﻿#include <Magma/Framework/Input/D3DWindow.hpp>
 #include <Magma/Framework/Input/GLWindow.hpp>
 #include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
 #include <Magma/Framework/Graphics/OGL410Assembler.hpp>
@@ -100,7 +98,9 @@ void LoadScene(Scene& scene)
 
 			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
 
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffers
+
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffer vars
 		};
 
 		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
@@ -153,7 +153,9 @@ void LoadScene(Scene& scene)
 
 			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
 
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffer var
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffers
+
+			0x00, 0x00, 0x00, 0x00, // 0 constant buffer vars
 		};
 
 		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/pixel1.mslbc");
@@ -399,14 +401,12 @@ void Main(int argc, char** argv) try
 
 		// Update vertex buffer
 		{
-			Vertex data[] =
-			{
-				{ -0.5f + x, -0.5f, 0.0f, },
-				{ -0.5f + x, +0.5f, 0.0f, },
-				{ +0.5f + x, -0.5f, 0.0f, },
-				{ +0.5f + x, +0.5f, 0.0f, },
-			};
-			scene.vertexBuffer->Update(0, sizeof(data), data);
+			auto data = (Vertex*)scene.vertexBuffer->Map();
+			data[0].x = -0.5f + x; data[0].y = -0.5f; data[0].z = 0.0f;
+			data[1].x = -0.5f + x; data[1].y = +0.5f; data[1].z = 0.0f;
+			data[2].x = +0.5f + x; data[2].y = -0.5f; data[2].z = 0.0f;
+			data[3].x = +0.5f + x; data[3].y = +0.5f; data[3].z = 0.0f;
+			scene.vertexBuffer->Unmap();
 		}
 
 		// Set shader pipeline
