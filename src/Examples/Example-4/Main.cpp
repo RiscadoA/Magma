@@ -62,5 +62,12 @@ void Main(int argc, char** argv)
 
 	Graphics::ShaderData data(binaryObject, binaryObjectSize);
 
+	std::string compiled;
+	Graphics::OGL410Assembler::Assemble(data, compiled);
+
+	std::cout << compiled << std::endl;
+
+	getchar();
+
 	delete fileSystem;
 }
