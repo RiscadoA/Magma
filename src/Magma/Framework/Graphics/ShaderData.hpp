@@ -236,6 +236,12 @@ namespace Magma
 			{
 			public:
 				/// <summary>
+				///		Creates a shader data container (makes a copy from the input data and stores it)
+				/// </summary>
+				/// <exception cref="Magma::Framework::Graphics::ShaderError">Thrown if there is an error loading the meta data</exception>
+				ShaderData(const char* binaryObject, size_t binaryObjectSize);
+
+				/// <summary>
 				///		Creates a shader data container	(makes a copy from the input data and stores it)
 				/// </summary>
 				/// <exception cref="Magma::Framework::Graphics::ShaderError">Thrown if there is an error loading the meta data</exception>

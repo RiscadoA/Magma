@@ -5,6 +5,31 @@
 
 using namespace Magma::Framework::Graphics;
 
+Magma::Framework::Graphics::ShaderData::ShaderData(const char * binaryObject, size_t binaryObjectSize)
+{
+	if (4 > binaryObjectSize)
+		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {1}");
+	unsigned long bytecodeSize;
+	memcpy(&bytecodeSize, binaryObject, sizeof(unsigned long));
+	m_bytecodeSize = String::U32FromBE(bytecodeSize);
+	if (4 + m_bytecodeSize > binaryObjectSize)
+		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {2}");
+	m_bytecode = (char*)malloc(m_bytecodeSize);
+	memcpy(m_bytecode, binaryObject + 4, m_bytecodeSize);
+
+	if (8 + m_bytecodeSize > binaryObjectSize)
+		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {3}");
+	unsigned long metaDataSize;
+	memcpy(&metaDataSize, binaryObject + 4 + m_bytecodeSize, sizeof(unsigned long));
+	m_metaDataSize = String::U32FromBE(metaDataSize);
+	if (8 + m_bytecodeSize + m_metaDataSize > binaryObjectSize)
+		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {4}");
+	m_metaData = (char*)malloc(m_metaDataSize);
+	memcpy(m_metaData, binaryObject + 8 + m_bytecodeSize, m_metaDataSize);
+
+	this->Load();
+}
+
 Magma::Framework::Graphics::ShaderData::ShaderData(const char * bytecode, size_t bytecodeSize, const char * metaData, size_t metaDataSize)
 {
 	m_bytecodeSize = bytecodeSize;

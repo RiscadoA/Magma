@@ -72,6 +72,9 @@ void Magma::Framework::Files::STDFileSystem::Read(void * file, void * buffer, si
 		throw FileError(ss.str());
 	}
 
+	if (size == 0)
+		return;
+
 	auto readSize = fread(buffer, 1, size, (FILE*)file);
 	if (readSize == 0)
 	{

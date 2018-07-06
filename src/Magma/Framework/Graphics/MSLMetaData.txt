@@ -1,0 +1,114 @@
+# Magma Shading Language Meta Data (mslmd)
+
+Used to define the properties of a MSLBC shader.
+
+Properties:
+	- Shader major and minor versions;
+	- Shader type;
+	- Input variables:
+		- Index;
+		- Name;
+		- Type;
+	- Output variables:
+		- Index;
+		- Name;
+		- Type;
+	- 2D texture variables:
+		- Index;
+		- Name;
+	- Constant buffers:
+		- Index;
+		- Name;
+	- Constant buffer variables:
+		- Buffer index;
+		- Buffer offset;
+		- Index;
+		- Name;
+		- Type;
+
+String format example:
+	MAJOR "1"
+	MINOR "0"
+	TYPE "VERTEX"
+
+	INPUT VAR
+		INDEX "1"
+		NAME "position"
+		TYPE "float3"
+	INPUT VAR
+		INDEX "2"
+		NAME "uvs"
+		TYPE "float2"
+	INPUT VAR
+		INDEX "3"
+		NAME "index"
+		TYPE "int"
+
+	OUTPUT VAR
+		INDEX "5"
+		NAME "uvs"
+		TYPE "float2"
+
+	TEXTURE 2D
+		INDEX "4"
+		NAME "diffuse"
+
+	CONSTANT BUFFER
+		INDEX "0"
+		NAME "transform"
+
+	CONSTANT BUFFER VAR
+		BUFFER INDEX "0"
+		BUFFER OFFSET "0"
+		INDEX "5"
+		NAME "mvp"
+		TYPE "float44"
+
+Binary Format: (big endian)
+{ major version: unsigned long / 4 bytes }
+{ minor version: unsigned long / 4 bytes }
+{ shader type: unsigned long / 4 bytes }
+
+{ input variable count: unsigned long / 4 bytes }
+{ [input variable count]
+	{ index: unsigned long / 4 bytes }
+	{ name size: unsigned long / 4 bytes }
+	{ name: (name size) }
+	{ type: unsigned long / 4 bytes }
+	...
+}
+{ output variable count: unsigned long / 4 bytes }
+{ [output variable count]
+	{ index: unsigned long / 4 bytes }
+	{ name size: unsigned long / 4 bytes }
+	{ name: (name size) }
+	{ type: unsigned long / 4 bytes }
+	...
+}
+
+{ 2D texture variable count: unsigned long / 4 bytes }
+{ [2D texture variable count]
+	{ index: unsigned long / 4 bytes }
+	{ name size: unsigned long / 4 bytes }
+	{ name: (name size) }
+	...
+}
+
+{ constant buffer count: unsigned long / 4 bytes }
+{ [constant buffer count]
+	{ index: unsigned long / 4 bytes }
+	{ name size: unsigned long / 4 bytes }
+	{ name: (name size) }
+	...
+}
+
+{ constant buffer variable count: unsigned long / 4 bytes }
+{ [constant buffer variable count]
+	{ buffer index: unsigned long / 4 bytes }
+	{ buffer offset: unsigned long / 4 bytes }
+	{ index: unsigned long / 4 bytes }
+	{ name size: unsigned long / 4 bytes }
+	{ name: (name size) }
+	{ type: unsigned long / 4 bytes }
+	...
+}
