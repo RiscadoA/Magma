@@ -48,6 +48,7 @@ struct Scene
 
 	Graphics::RasterState* rasterState;
 	Graphics::DepthStencilState* depthStencilState;
+	Graphics::BlendState* blendState;
 };
 
 struct Transform
@@ -274,28 +275,12 @@ void LoadScene(Scene& scene)
 		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics::IndexType::UInt, sizeof(data), data);
 	}
 
-	// Create raster state
-	{
-		Graphics::RasterStateDesc desc;
-
-		desc.rasterMode = Graphics::RasterMode::Line;
-		desc.cullEnabled = false;
-
-		scene.rasterState = scene.device->CreateRasterState(desc);
-	}
-
-	// Create depth stencil state
-	{
-		Graphics::DepthStencilStateDesc desc;
-		
-		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
-	}
-
+	// Create texture
 	{
 		float data[] =
 		{
-			1.0f, 0.0f, 0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 0.0f, 1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 0.5f,		0.0f, 1.0f, 0.0f, 0.5f,
+			0.0f, 0.0f, 1.0f, 0.5f,		1.0f, 1.0f, 1.0f, 0.5f,
 		};
 
 		scene.texture = scene.device->CreateTexture2D(2, 2, Graphics::TextureFormat::RGBA32Float, data);
@@ -323,59 +308,35 @@ void LoadScene(Scene& scene)
 		scene.transformBP = scene.vertexShader->GetBindingPoint("transform");
 	}
 
-	// Create mask texture
-	/*{
-		unsigned char data[] =
-		{
-			0,
-			255,
-			255,
-			255,
-		};
+	// Create raster state
+	{
+		Graphics::RasterStateDesc desc;
 
-		scene.texture = scene.context->CreateTexture2D(data, 2, 2, Framework::Graphics::TextureFormat::R8UInt);
+		desc.rasterMode = Graphics::RasterMode::Fill;
+		desc.cullEnabled = false;
+
+		scene.rasterState = scene.device->CreateRasterState(desc);
 	}
 
-	// Get mask texture binding point
+	// Create depth stencil state
 	{
-		scene.textureBP = scene.context->GetTextureBindingPoint(scene.program, "fontTexture");
+		Graphics::DepthStencilStateDesc desc;
+		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
 	}
 
-	// Create transform constant buffer and get its binding point
+	// Create blend state
 	{
-		scene.transformCBuffer = scene.context->CreateConstantBuffer(nullptr, sizeof(Transform));
-		scene.transformBP = scene.context->GetConstantBindingPoint(scene.program, "transform");
+		Graphics::BlendStateDesc desc;
+		desc.blendEnabled = true;
+		desc.sourceFactor =	Graphics::BlendFactor::SourceAlpha;
+		desc.destinationFactor = Graphics::BlendFactor::InverseSourceAlpha;
+		scene.blendState = scene.device->CreateBlendState(desc);
 	}
-
-	// Create material constant buffer and get its binding point
-	{
-		Material mat;
-		mat.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-		scene.materialCBuffer = scene.context->CreateConstantBuffer(&mat, sizeof(Material));
-		scene.materialBP = scene.context->GetConstantBindingPoint(scene.program, "material");
-	}
-
-	{
-		scene.context->CreateVertexLayout(desc, program);
-		scene.context->CreateVertexBuffer(nullptr, 1, Graphics::Usage::Default);
-		scene.context->BindVertexBuffer(buffer, layout);
-	}*/
 }
 
 void CleanScene(Scene& scene)
 {
-	// Destroy constant buffers
-	/*scene.context->DestroyConstantBuffer(scene.materialCBuffer);
-	scene.context->DestroyConstantBuffer(scene.transformCBuffer);
-
-	// Destroy texture and sampler
-	scene.context->DestroyTexture2D(scene.texture);
-	scene.context->DestroySampler(scene.sampler);
-
-	// Destroy font
-	delete scene.font;*/
-
+	scene.device->DestroyBlendState(scene.blendState);
 	scene.device->DestroyDepthStencilState(scene.depthStencilState);
 	scene.device->DestroyRasterState(scene.rasterState);
 
@@ -404,34 +365,30 @@ void Main(int argc, char** argv) try
 	LoadScene(scene);
 
 	// Create transformation matrices
-	glm::mat4 model, view, proj;
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 model1, model2, view, proj;
+	model1 = glm::mat4(1.0f);
+	model1 = glm::translate(model1, glm::vec3(0.0f, 0.0f, +0.0f));
+	model2 = glm::mat4(1.0f);
+	model2 = glm::translate(model2, glm::vec3(0.0f, 0.0f, -5.0f));
+	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	// Main loop
 	while (scene.running)
 	{
-		model = glm::rotate(model, glm::radians(0.01f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model1 = glm::rotate(model1, glm::radians(0.01f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Poll events
 		scene.window->PollEvents();
 
-		// Update transform
-		{		
-			auto transform = (Transform*)scene.transformBuffer->Map();
-			transform->mvp = proj * view * model;
-			scene.transformBuffer->Unmap();
-		}
-
 		// Clear screen
 		//scene.device->SetRenderTargets(nullptr, 0);
-		scene.device->Clear(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
+		scene.device->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		// Set raster and depth stencil states
 		scene.device->SetRasterState(scene.rasterState);
 		scene.device->SetDepthStencilState(scene.depthStencilState);
+		scene.device->SetBlendState(scene.blendState);
 
 		// Set shader pipeline
 		scene.device->SetPipeline(scene.pipeline);
@@ -440,14 +397,28 @@ void Main(int argc, char** argv) try
 		scene.textureBP->Bind(scene.texture);
 		scene.textureBP->Bind(scene.sampler);
 
-		// Bind transform and material
-		scene.transformBP->Bind(scene.transformBuffer);
-
-		// Bind vertex array and the index buffer and draw
+		// Bind vertex array and the index buffer
 		scene.device->SetVertexArray(scene.vertexArray);
 		scene.device->SetIndexBuffer(scene.indexBuffer);
-		scene.device->DrawTrianglesIndexed(0, 6);
-		
+
+		// Update transform and draw
+		{
+			auto transform = (Transform*)scene.transformBuffer->Map();
+			transform->mvp = proj * view * model2;
+			scene.transformBuffer->Unmap();
+			scene.transformBP->Bind(scene.transformBuffer);
+			scene.device->DrawTrianglesIndexed(0, 6);
+		}
+
+		// Update transform and draw
+		{
+			auto transform = (Transform*)scene.transformBuffer->Map();
+			transform->mvp = proj * view * model1;
+			scene.transformBuffer->Unmap();
+			scene.transformBP->Bind(scene.transformBuffer);
+			scene.device->DrawTrianglesIndexed(0, 6);
+		}
+
 		// Swap screen back and front buffers
 		scene.device->SwapBuffers();
 	}

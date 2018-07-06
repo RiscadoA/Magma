@@ -1039,6 +1039,169 @@ namespace Magma
 			};
 
 			/// <summary>
+			///		Encapsulates the blend state
+			/// </summary>
+			class BlendState
+			{
+			public:
+				virtual ~BlendState() = default;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				BlendState() = default;
+			};
+
+			/// <summary>
+			///		Describes how a blend function factor is computed
+			/// </summary>
+			enum class BlendFactor
+			{
+				/// <summary>
+				///		Invalid blend factor type
+				/// </summary>
+				Invalid = -1,
+
+				/// <summary>
+				///		Factor is equal to zero
+				/// </summary>
+				Zero,
+
+				/// <summary>
+				///		Factor is equal to one
+				/// </summary>
+				One,
+
+				/// <summary>
+				///		Factor is equal to the source color
+				/// </summary>
+				SourceColor,
+
+				/// <summary>
+				///		Factor is equal to one minus the source color
+				/// </summary>
+				InverseSourceColor,
+
+				/// <summary>
+				///		Factor is equal to the destination color
+				/// </summary>
+				DestinationColor,
+
+				/// <summary>
+				///		Factor is equal to one minus the destination color
+				/// </summary>
+				InverseDestinationColor,
+
+				/// <summary>
+				///		Factor is equal to the source alpha color component
+				/// </summary>
+				SourceAlpha,
+
+				/// <summary>
+				///		Factor is equal to one minus the source alpha color component
+				/// </summary>
+				InverseSourceAlpha,
+
+				/// <summary>
+				///		Factor is equal to the destination alpha color component
+				/// </summary>
+				DestinationAlpha,
+
+				/// <summary>
+				///		Factor is equal to one minus the destination alpha color component
+				/// </summary>
+				InverseDestinationAlpha,
+
+				/// <summary>
+				///		Number of blend factor types
+				/// </summary>
+				Count
+			};
+
+			/// <summary>
+			///		Describes a blend operation
+			/// </summary>
+			enum class BlendOperation
+			{
+				/// <summary>
+				///		Invalid blend operation type
+				/// </summary>
+				Invalid = -1,
+
+				/// <summary>
+				///		Adds the source and the destination colors
+				/// </summary>
+				Add,
+
+				/// <summary>
+				///		Subtracts the destination from the source color
+				/// </summary>
+				Subtract,
+
+				/// <summary>
+				///		Substract the source from the destination color
+				/// </summary>
+				ReverseSubtract,
+
+				/// <summary>
+				///		The output color is the minimum value of the source and the destination colors
+				/// </summary>
+				Min,
+
+				/// <summary>
+				///		The output color is the maximum value of the source and the destination colors
+				/// </summary>
+				Max,
+
+				/// <summary>
+				///		Number of blend operation types
+				/// </summary>
+				Count
+			};
+
+			/// <summary>
+			///		Describes a blend state
+			/// </summary>
+			struct BlendStateDesc
+			{
+				/// <summary>
+				///		Is blending enabled?
+				/// </summary>
+				bool blendEnabled = false;
+
+				/// <summary>
+				///		Source color factor
+				/// </summary>
+				BlendFactor sourceFactor = BlendFactor::One;
+
+				/// <summary>
+				///		Destination color factor
+				/// </summary>
+				BlendFactor destinationFactor = BlendFactor::Zero;
+
+				/// <summary>
+				///		Color blend operation
+				/// </summary>
+				BlendOperation blendOperation = BlendOperation::Add;
+
+				/// <summary>
+				///		Source alpha factor
+				/// </summary>
+				BlendFactor sourceAlphaFactor = BlendFactor::One;
+
+				/// <summary>
+				///		Destination alpha factor
+				/// </summary>
+				BlendFactor destinationAlphaFactor = BlendFactor::Zero;
+
+				/// <summary>
+				///		Alpha blend operation
+				/// </summary>
+				BlendOperation alphaBlendOperation = BlendOperation::Add;
+			};
+
+			/// <summary>
 			///		Describes a buffer's usage
 			/// </summary>
 			enum class BufferUsage
@@ -1330,6 +1493,25 @@ namespace Magma
 				/// </summary>
 				/// <param name="constantBuffer">Constant buffer handle</param>
 				virtual void DestroyConstantBuffer(ConstantBuffer* constantBuffer) = 0;
+
+				/// <summary>
+				///		Creates a blend state
+				/// </summary>
+				/// <param name="desc">Blend state description</param>
+				/// <returns>Blend state handle</returns>
+				virtual BlendState* CreateBlendState(const BlendStateDesc& desc) = 0;
+
+				/// <summary>
+				///		Destroys a blend state
+				/// </summary>
+				/// <param name="depthStencilState">Blend state handle</param>
+				virtual void DestroyBlendState(BlendState* blendState) = 0;
+
+				/// <summary>
+				///		Sets a blend state as active for rendering calls
+				/// </summary>
+				/// <param name="blendState">Blend state handle</param>
+				virtual void SetBlendState(BlendState* blendState) = 0;
 			};
 		}
 	}

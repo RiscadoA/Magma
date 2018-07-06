@@ -52,13 +52,20 @@ namespace Magma
 				virtual void SwapBuffers() override;
 				virtual ConstantBuffer* CreateConstantBuffer(size_t size, const void* data = nullptr, BufferUsage usage = BufferUsage::Dynamic) override;
 				virtual void DestroyConstantBuffer(ConstantBuffer* constantBuffer) override;
+				virtual BlendState* CreateBlendState(const BlendStateDesc& desc) override;
+				virtual void DestroyBlendState(BlendState* blendState) override;
+				virtual void SetBlendState(BlendState* blendState) override;
 
 				Input::GLWindow* m_window;
+
 				Graphics::IndexBuffer* m_currentIndexBuffer;
+
 				Graphics::RasterState* m_defaultRasterState;
 				Graphics::RasterState* m_currentRasterState;
 				Graphics::DepthStencilState* m_defaultDepthStencilState;
 				Graphics::DepthStencilState* m_currentDepthStencilState;
+				Graphics::BlendState* m_defaultBlendState;
+				Graphics::BlendState* m_currentBlendState;
 			};
 		}
 	}

@@ -868,6 +868,69 @@ public:
 	GLuint backFaceWriteMask;
 };
 
+class OGL410BlendState final : public BlendState
+{
+public:
+	OGL410BlendState(const BlendStateDesc& desc)
+	{
+		const static auto GetFactor = [](BlendFactor factor) -> GLenum
+		{
+			switch (factor)
+			{
+				case BlendFactor::Zero: return GL_ZERO; break;
+				case BlendFactor::One: return GL_ONE; break;
+				case BlendFactor::SourceColor: return GL_SRC_COLOR; break;
+				case BlendFactor::InverseSourceColor: return GL_ONE_MINUS_SRC_COLOR; break;
+				case BlendFactor::DestinationColor: return GL_DST_COLOR; break;
+				case BlendFactor::InverseDestinationColor: return GL_ONE_MINUS_DST_COLOR; break;
+				case BlendFactor::SourceAlpha: return GL_SRC_ALPHA; break;
+				case BlendFactor::InverseSourceAlpha: return GL_ONE_MINUS_SRC_ALPHA; break;
+				case BlendFactor::DestinationAlpha: return GL_DST_ALPHA; break;
+				case BlendFactor::InverseDestinationAlpha: return GL_ONE_MINUS_DST_ALPHA; break;
+
+				case BlendFactor::Invalid: throw RenderDeviceError("Failed to create OGL410BlendState:\nInvalid blend factor"); break;
+				default: throw RenderDeviceError("Failed to create OGL410BlendState:\nUnsupported blend factor"); break;
+			}
+		};
+
+		const static auto GetOperation = [](BlendOperation op) -> GLenum
+		{
+			switch (op)
+			{
+				case BlendOperation::Add: return GL_FUNC_ADD; break;
+				case BlendOperation::Subtract: return GL_FUNC_SUBTRACT; break;
+				case BlendOperation::ReverseSubtract: return GL_FUNC_REVERSE_SUBTRACT; break;
+				case BlendOperation::Min: return GL_MIN; break;
+				case BlendOperation::Max: return GL_MAX; break;
+
+				case BlendOperation::Invalid: throw RenderDeviceError("Failed to create OGL410BlendState:\nInvalid blend operation type"); break;
+				default: throw RenderDeviceError("Failed to create OGL410BlendState:\nUnsupported blend operation type"); break;
+			}
+		};
+
+		blendEnabled = desc.blendEnabled;
+		srcFactor = GetFactor(desc.sourceFactor);
+		dstFactor = GetFactor(desc.destinationFactor);
+		blendOp = GetOperation(desc.blendOperation);
+		srcAlphaFactor = GetFactor(desc.sourceAlphaFactor);
+		dstAlphaFactor = GetFactor(desc.destinationAlphaFactor);
+		alphaBlendOp = GetOperation(desc.alphaBlendOperation);
+	}
+
+	virtual ~OGL410BlendState() final
+	{
+
+	}
+
+	GLboolean blendEnabled;
+	GLenum srcFactor;
+	GLenum dstFactor;
+	GLenum blendOp;
+	GLenum srcAlphaFactor;
+	GLenum dstAlphaFactor;
+	GLenum alphaBlendOp;
+};
+
 void Magma::Framework::Graphics::OGL410RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
@@ -914,6 +977,13 @@ void Magma::Framework::Graphics::OGL410RenderDevice::Init(Input::Window * window
 		DepthStencilStateDesc desc; // Default description
 		m_defaultDepthStencilState = this->CreateDepthStencilState(desc);
 		this->SetDepthStencilState(m_defaultDepthStencilState);
+	}
+
+	// Get and set the default blend state
+	{
+		BlendStateDesc desc; // Default description
+		m_defaultBlendState = this->CreateBlendState(desc);
+		this->SetBlendState(m_defaultBlendState);
 	}
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
@@ -1323,6 +1393,57 @@ void Magma::Framework::Graphics::OGL410RenderDevice::DestroyConstantBuffer(Const
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete constantBuffer;
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+BlendState * Magma::Framework::Graphics::OGL410RenderDevice::CreateBlendState(const BlendStateDesc & desc)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	return new OGL410BlendState(desc);
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+	return nullptr;
+#endif
+}
+
+void Magma::Framework::Graphics::OGL410RenderDevice::DestroyBlendState(BlendState* blendState)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	delete blendState;
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+void Magma::Framework::Graphics::OGL410RenderDevice::SetBlendState(BlendState* blendState)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	auto old = m_currentBlendState;
+	if (blendState == nullptr)
+		m_currentBlendState = m_defaultBlendState;
+	else
+		m_currentBlendState = blendState;
+
+	// If the raster state changed
+	if (old != m_currentBlendState)
+	{
+		if (static_cast<OGL410BlendState*>(m_currentBlendState)->blendEnabled)
+			glEnable(GL_BLEND);
+		else
+			glDisable(GL_BLEND);
+
+		glBlendFuncSeparate(static_cast<OGL410BlendState*>(m_currentBlendState)->srcFactor,
+							static_cast<OGL410BlendState*>(m_currentBlendState)->dstFactor,
+							static_cast<OGL410BlendState*>(m_currentBlendState)->srcAlphaFactor,
+							static_cast<OGL410BlendState*>(m_currentBlendState)->dstAlphaFactor);
+
+		glBlendEquationSeparate(static_cast<OGL410BlendState*>(m_currentBlendState)->blendOp,
+								static_cast<OGL410BlendState*>(m_currentBlendState)->alphaBlendOp);
+	}
+
+	GL_CHECK_ERROR("Failed to set blend state on OGL410RenderDevice");
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif
