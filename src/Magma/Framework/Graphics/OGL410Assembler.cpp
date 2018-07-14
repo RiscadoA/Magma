@@ -316,6 +316,130 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 				PutIndex(varIn0);
 				ss << ";" << std::endl;
 				break;
+			case BytecodeOpCode::Add:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << " + ";
+				PutIndex(varIn1);
+				ss << ";" << std::endl;
+				break;
+			case BytecodeOpCode::Sub:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << " - ";
+				PutIndex(varIn1);
+				ss << ";" << std::endl;
+				break;
+			case BytecodeOpCode::Mul:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << " * ";
+				PutIndex(varIn1);
+				ss << ";" << std::endl;
+				break;
+			case BytecodeOpCode::Div:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << " / ";
+				PutIndex(varIn1);
+				ss << ";" << std::endl;
+				break;
+			case BytecodeOpCode::Mod:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << " % ";
+				PutIndex(varIn1);
+				ss << ";" << std::endl;
+				break;
+			case BytecodeOpCode::And:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << " && ";
+				PutIndex(varIn1);
+				ss << ";" << std::endl;
+				break;
+			case BytecodeOpCode::Or:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << " || ";
+				PutIndex(varIn1);
+				ss << ";" << std::endl;
+				break;
+			case BytecodeOpCode::Not:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = !(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
+			case BytecodeOpCode::Greater:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = (";
+				PutIndex(varIn0);
+				ss << " > ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+			case BytecodeOpCode::Less:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = (";
+				PutIndex(varIn0);
+				ss << " < ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+			case BytecodeOpCode::GEqual:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = (";
+				PutIndex(varIn0);
+				ss << " >= ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+			case BytecodeOpCode::LEqual:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = (";
+				PutIndex(varIn0);
+				ss << " <= ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+			case BytecodeOpCode::Equal:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = (";
+				PutIndex(varIn0);
+				ss << " == ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+			case BytecodeOpCode::NEqual:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = (";
+				PutIndex(varIn0);
+				ss << " != ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
 			}
 
 			// Literals
@@ -436,13 +560,13 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::AsI4Cmp:
 				ss << "\t";
 				PutIndex(varOut);
-				ss << ".";
-				GetComponent(4, it[1]);
-				ss << " = ";
-				PutIndex(varIn0);
-				ss << ";" << std::endl;
-				i += 1;
-				break;
+ss << ".";
+GetComponent(4, it[1]);
+ss << " = ";
+PutIndex(varIn0);
+ss << ";" << std::endl;
+i += 1;
+break;
 			case BytecodeOpCode::AsF2Cmp:
 				ss << "\t";
 				PutIndex(varOut);
@@ -536,6 +660,37 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 				break;
 			}
 
+			// Scope and flow control
+			{
+			case BytecodeOpCode::OpScope:
+				ss << "{" << std::endl;
+				break;
+			case BytecodeOpCode::ClScope:
+				ss << "}" << std::endl;
+				break;
+			case BytecodeOpCode::Discard:
+				ss << "\tdiscard;" << std::endl;
+				break;
+			case BytecodeOpCode::Return:
+				ss << "\treturn;" << std::endl;
+				break;
+			case BytecodeOpCode::While:
+				ss << "\twhile (";
+				PutIndex(varIn0);
+				i += 1;
+				ss << " != 0)" << std::endl;
+				break;
+			case BytecodeOpCode::If:
+				ss << "\tif (";
+				PutIndex(varIn0);
+				i += 1;
+				ss << " != 0)" << std::endl;
+				break;
+			case BytecodeOpCode::Else:
+				ss << "\telse" << std::endl;
+				break;
+			}
+
 			// Other functions
 			{
 				case BytecodeOpCode::MulMat:
@@ -555,6 +710,168 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 					PutIndex(varIn0);
 					ss << " , ";
 					PutIndex(varIn1);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Cos:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = cos(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Sin:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = sin(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Tan:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = tan(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::ACos:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = acos(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::ASin:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = asin(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::ATan:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = atan(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Degrees:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = degrees(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Radians:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = radians(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Pow:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = pow(";
+					PutIndex(varIn0);
+					ss << " , ";
+					PutIndex(varIn1);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Exp:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = exp(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Log:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = log(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Exp2:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = exp2(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Log2:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = log2(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Sqrt:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = sqrt(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::ISqrt:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = inversesqrt(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Abs:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = abs(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Sign:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = sign(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Floor:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = exp(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Ceil:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = ceil(";
+					PutIndex(varIn0);
+					ss << ");" << std::endl;
+					break;
+
+				case BytecodeOpCode::Fract:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = fract(";
+					PutIndex(varIn0);
 					ss << ");" << std::endl;
 					break;
 			}

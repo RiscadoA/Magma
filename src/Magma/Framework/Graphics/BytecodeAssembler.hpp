@@ -85,10 +85,32 @@ namespace Magma
 				Discard	= 0x36,	// Discards the current pixel and exits the shader (only works on pixel shaders)
 				Return	= 0x37,	// Exits the shader
 				While	= 0x38, // Repeats the next instruction/scope as long as the variable with the index on { param 1x1 } evaluates to true
+				If		= 0x39,	// Executes the next instruction/scope as long as the variable with the index on { param 1x1 } evaluates to true
+				Else	= 0x3A,	// Executes the next instruction if the previous if failed
 
 				// Math functions
-				MulMat	= 0x39,	// Performs matrix multiplication between VarIn0 and VarIn1 and stores the result on VarOut
-				Smple2D	= 0x3A,	// Sets { VarOut } to the sampled value of a texture on { VarIn0 } on the coordinates on { VarIn1 }
+				MulMat	= 0x3B,	// Performs matrix multiplication between VarIn0 and VarIn1 and stores the result on VarOut
+				Smple2D	= 0x3C,	// Sets { VarOut } to the sampled value of a texture on { VarIn0 } on the coordinates on { VarIn1 }
+				Cos		= 0x3D,	// Sets { VarOut } to the cosine of { VarIn0 } (radians)
+				Sin		= 0x3E,	// Sets { VarOut } to the sine of { VarIn0 } (radians)	
+				Tan		= 0x3F,	// Sets { VarOut } to the tangent of { VarIn0 } (radians)	
+				ACos	= 0x40,	// Sets { VarOut } to the arc cosine of { VarIn0 } (radians)
+				ASin	= 0x41,	// Sets { VarOut } to the arc sine of { VarIn0 } (radians)	
+				ATan	= 0x42,	// Sets { VarOut } to the arc tangent of { VarIn0 } (radians)	
+				Degrees	= 0x43,	// Sets { VarOut } to the value of { VarIn0 } (radians)	in degrees
+				Radians	= 0x44,	// Sets { VarOut } to the value of { VarIn0 } (degrees) in radians
+				Pow		= 0x45,	// Sets { VarOut } to { VarIn0 } raised to { VarIn1 }
+				Exp		= 0x46,	// Sets { VarOut } to the constant e raised to { VarIn0 }
+				Log		= 0x47,	// Sets { VarOut } to the power which the constant e has to be raised to to produce { VarIn0 }
+				Exp2	= 0x48,	// Sets { VarOut } to 2 raised to { VarIn0 }
+				Log2	= 0x49,	// Sets { VarOut } to the power which 2 has to be raised to to produce { VarIn0 }
+				Sqrt	= 0x4A,	// Sets { VarOut } to the square root of { VarIn0 }
+				ISqrt	= 0x4B,	// Sets { VarOut } to the inverse square root of { VarIn0 }
+				Abs		= 0x4C,	// Sets { VarOut } to the absolute value of { VarIn0 }
+				Sign	= 0x4D,	// Sets { VarOut } to the sign of { VarIn0 } (1.0 when positive, -1.0 when negative and 0.0 when zero)
+				Floor	= 0x4E,	// Sets { VarOut } to the floored value of { VarIn0 }
+				Ceil	= 0x4F,	// Sets { VarOut } to the ceiled value of { VarIn0 }
+				Fract	= 0x50,	// Sets { VarOut } to the fractional part of { VarIn0 }
 			};
 
 			/// <summary>
