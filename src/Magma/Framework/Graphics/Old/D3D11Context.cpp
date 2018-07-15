@@ -1003,7 +1003,7 @@ void Magma::Framework::Graphics::D3D11Context::UpdateTexture2D(void* texture, co
 		return;
 
 	auto text = (Texture2D*)texture;
-	
+
 	UINT rowPitch = 0;
 	switch (format)
 	{
@@ -1021,7 +1021,6 @@ void Magma::Framework::Graphics::D3D11Context::UpdateTexture2D(void* texture, co
 		default: throw std::runtime_error("Failed to update 2D texture on D3D11Context:\nUnsupported format"); break;
 	}
 
-
 	D3D11_BOX dstBox;
 	ZeroMemory(&dstBox, sizeof(dstBox));
 	dstBox.back = 1;
@@ -1030,7 +1029,7 @@ void Magma::Framework::Graphics::D3D11Context::UpdateTexture2D(void* texture, co
 	dstBox.top = dstY;
 	dstBox.right = dstX + width;
 	dstBox.bottom = dstY + height;
-	
+
 	((ID3D11DeviceContext*)m_deviceContext)->UpdateSubresource(text->texture, 0, &dstBox, data, rowPitch, 0);
 }
 
