@@ -1002,6 +1002,8 @@ void Magma::Framework::Graphics::OGL410RenderDevice::Terminate()
 VertexShader * Magma::Framework::Graphics::OGL410RenderDevice::CreateVertexShader(const ShaderData& data)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	if (data.GetShaderType() != ShaderType::Vertex)
+		throw RenderDeviceError("Failed to create vertex sahder on OGL410RenderDevice:\nShader data is not of a vertex shader");
 	std::string source;
 	OGL410Assembler::Assemble(data, source);
 	return new OGL410VertexShader(source.c_str(), data);
@@ -1023,6 +1025,8 @@ void Magma::Framework::Graphics::OGL410RenderDevice::DestroyVertexShader(VertexS
 PixelShader * Magma::Framework::Graphics::OGL410RenderDevice::CreatePixelShader(const ShaderData& data)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	if (data.GetShaderType() != ShaderType::Pixel)
+		throw RenderDeviceError("Failed to create pixel sahder on OGL410RenderDevice:\nShader data is not of a pixel shader");
 	std::string source;
 	OGL410Assembler::Assemble(data, source);
 	return new OGL410PixelShader(source.c_str(), data);

@@ -95,8 +95,8 @@ std::map<std::string, BytecodeOpCode> instructionSet =
 	std::make_pair("sqrt", BytecodeOpCode::Sqrt),
 	std::make_pair("isqrt", BytecodeOpCode::ISqrt),
 	std::make_pair("abs", BytecodeOpCode::Abs),
-	std::make_pair("sign", BytecodeOpCode::Floor),
-	std::make_pair("floor", BytecodeOpCode::Smple2D),
+	std::make_pair("sign", BytecodeOpCode::Sign),
+	std::make_pair("floor", BytecodeOpCode::Floor),
 	std::make_pair("ceil", BytecodeOpCode::Ceil),
 	std::make_pair("fract", BytecodeOpCode::Fract),
 };

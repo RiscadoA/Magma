@@ -11,6 +11,7 @@
 
 #include <Magma/Framework/Graphics/ShaderData.hpp>
 #include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
+#include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
 
 using namespace Magma;
 using namespace Magma::Framework;
@@ -74,51 +75,36 @@ void LoadScene(Scene& scene)
 
 	// Load vertex shader
 	{
-		char metaData[] =
+		char metaData[2048];
+		size_t metaDataSize;
+
 		{
-			0x00, 0x00, 0x00, 0x00, // Major version 0
-			0x00, 0x00, 0x00, 0x01, // Minor version 1
-			0x00, 0x00, 0x00, 0x00, // Vertex shader
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-1/vertex.mslmd");
+			auto size = scene.fileSystem->GetSize(file);
+			auto code = new char[size + 1];
+			scene.fileSystem->Read(file, code, size);
+			scene.fileSystem->CloseFile(file);
+			code[size] = '\0';
 
-			0x00, 0x00, 0x00, 0x02, // 2 input var
-			0x00, 0x00, 0x00, 0x01, // Var index 1
-			0x00, 0x00, 0x00, 0x08, // Var name size is 8
-			'p', 'o', 's', 'i', 't', 'i', 'o', 'n',
-			0x00, 0x00, 0x00, 0x09, // Var type is float3 (0x9)
-			0x00, 0x00, 0x00, 0x02, // Var index 2
-			0x00, 0x00, 0x00, 0x05, // Var name size is 5
-			'c', 'o', 'l', 'o', 'r',
-			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
-
-			0x00, 0x00, 0x00, 0x01, // 1 output var
-			0x00, 0x00, 0x00, 0x03, // Var index 3
-			0x00, 0x00, 0x00, 0x05, // Var name size is 5
-			'c', 'o', 'l', 'o', 'r',
-			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
-
-			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
-
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffers
-
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffer vars
-		};
-
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/vertex1.mslbc");
-		auto size = scene.fileSystem->GetSize(file);
-		auto code = new char[size + 1];
-		scene.fileSystem->Read(file, code, size);
-		scene.fileSystem->CloseFile(file);
-		code[size] = '\0';
+			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+		}
 
 		char bytecode[2048];
-		size_t bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+		size_t bytecodeSize;
 
-		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, sizeof(metaData));
+		{
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-1/vertex.mslbc");
+			auto size = scene.fileSystem->GetSize(file);
+			auto code = new char[size + 1];
+			scene.fileSystem->Read(file, code, size);
+			scene.fileSystem->CloseFile(file);
+			code[size] = '\0';
 
-		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/vertex1.bc");
-		scene.fileSystem->Write(file, bytecode, bytecodeSize);
-		scene.fileSystem->CloseFile(file);
-		
+			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+		}
+
+		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+
 		try
 		{
 			scene.vertexShader = scene.device->CreateVertexShader(shaderData);
@@ -133,46 +119,35 @@ void LoadScene(Scene& scene)
 
 	// Load pixel shader
 	{
-		char metaData[] =
+		char metaData[2048];
+		size_t metaDataSize;
+
 		{
-			0x00, 0x00, 0x00, 0x00, // Major version 0
-			0x00, 0x00, 0x00, 0x01, // Minor version 1
-			0x00, 0x00, 0x00, 0x01, // Pixel shader
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-1/pixel.mslmd");
+			auto size = scene.fileSystem->GetSize(file);
+			auto code = new char[size + 1];
+			scene.fileSystem->Read(file, code, size);
+			scene.fileSystem->CloseFile(file);
+			code[size] = '\0';
 
-			0x00, 0x00, 0x00, 0x01, // 1 input var
-			0x00, 0x00, 0x00, 0x03, // Var index 3
-			0x00, 0x00, 0x00, 0x05, // Var name size is 5
-			'c', 'o', 'l', 'o', 'r',
-			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
-
-			0x00, 0x00, 0x00, 0x01, // 1 output var
-			0x00, 0x00, 0x00, 0x00, // Var index 0
-			0x00, 0x00, 0x00, 0x05, // Var name size is 5
-			'c', 'o', 'l', 'o', 'r',
-			0x00, 0x00, 0x00, 0x0A, // Var type is float4 (0xA)
-
-			0x00, 0x00, 0x00, 0x00, // 0 2D texture var
-
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffers
-
-			0x00, 0x00, 0x00, 0x00, // 0 constant buffer vars
-		};
-
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/pixel1.mslbc");
-		auto size = scene.fileSystem->GetSize(file);
-		auto code = new char[size + 1];
-		scene.fileSystem->Read(file, code, size);
-		scene.fileSystem->CloseFile(file);
-		code[size] = '\0';
+			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+		}
 
 		char bytecode[2048];
-		size_t bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+		size_t bytecodeSize;
 
-		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, sizeof(metaData));
+		{
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-1/pixel.mslbc");
+			auto size = scene.fileSystem->GetSize(file);
+			auto code = new char[size + 1];
+			scene.fileSystem->Read(file, code, size);
+			scene.fileSystem->CloseFile(file);
+			code[size] = '\0';
 
-		file = scene.fileSystem->OpenFile(Files::FileMode::Write, "/pixel1.bc");
-		scene.fileSystem->Write(file, bytecode, bytecodeSize);
-		scene.fileSystem->CloseFile(file);
+			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+		}
+
+		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
 		try
 		{

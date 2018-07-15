@@ -1,0 +1,28 @@
+MAJOR "1"
+MINOR "0"
+SHADER TYPE "VERTEX"
+
+INPUT VAR
+	INDEX "1"
+	NAME "position"
+	TYPE "float3"
+INPUT VAR
+	INDEX "2"
+	NAME "uvs"
+	TYPE "float2"
+
+OUTPUT VAR
+	INDEX "3"
+	NAME "uvs"
+	TYPE "float2"
+
+CONSTANT BUFFER
+	INDEX "0"
+	NAME "transform"
+
+CONSTANT BUFFER VAR
+	BUFFER INDEX "0"
+	BUFFER OFFSET "0"
+	INDEX "4"
+	NAME "mvp"
+	TYPE "float44"

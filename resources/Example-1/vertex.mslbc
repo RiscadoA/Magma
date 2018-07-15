@@ -21,12 +21,11 @@ VARIN0,		xb10,			# Set out component z
 VAROUT,		xb00, 
 ASF4CMP,	xb02,
 
-
 SETF1,		xb10,	f1.0,	# Store temporary w value
 VARIN0,		xb10,			# Set out component w
 VAROUT,		xb00,
 ASF4CMP,	xb03,
 
-VARIN0,		xb02,
+VARIN0,		xb02,			# Send color to pixel shader
 VAROUT,		xb03,
 ASSIGN,

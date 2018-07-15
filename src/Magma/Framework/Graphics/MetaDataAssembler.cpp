@@ -63,6 +63,9 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		std::string line;
 		while (std::getline(ss, line))
 		{
+			if (line.empty() || line[0] == '#')
+				continue;
+
 			std::smatch match;
 			if (std::regex_match(line, match, majorRegex))
 				majorVersion = std::stoul(match.str(1));

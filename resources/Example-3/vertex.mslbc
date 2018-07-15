@@ -32,6 +32,6 @@ VARIN1,		xb00,
 VAROUT,		xb00,
 MULMAT,						# Perform matrix multiplication
 
-VARIN0,		xb02,
+VARIN0,		xb02,			# Send uvs to pixel shader
 VAROUT,		xb03,
 ASSIGN,

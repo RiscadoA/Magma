@@ -66,7 +66,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	// Add texture 2D variables
 	for (auto& tex : data.GetTexture2DVariables())
 	{
-		ss << "uniform sampler2D ";
+		ss << "uniform sampler2D";
 		ss << " tex_" << tex.index << "; // Texture2D variable \"" << tex.name << "\"; index " << tex.index;
 		ss << std::endl;
 	}
@@ -560,13 +560,13 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::AsI4Cmp:
 				ss << "\t";
 				PutIndex(varOut);
-ss << ".";
-GetComponent(4, it[1]);
-ss << " = ";
-PutIndex(varIn0);
-ss << ";" << std::endl;
-i += 1;
-break;
+				ss << ".";
+				GetComponent(4, it[1]);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << ";" << std::endl;
+				i += 1;
+				break;
 			case BytecodeOpCode::AsF2Cmp:
 				ss << "\t";
 				PutIndex(varOut);
@@ -854,7 +854,7 @@ break;
 				case BytecodeOpCode::Floor:
 					ss << "\t";
 					PutIndex(varOut);
-					ss << " = exp(";
+					ss << " = floor(";
 					PutIndex(varIn0);
 					ss << ");" << std::endl;
 					break;
