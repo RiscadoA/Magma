@@ -8,6 +8,6 @@ INPUT VAR
 	TYPE "float4"
 
 OUTPUT VAR
-	INDEX "0"
+	INDEX "1"
 	NAME "color"
 	TYPE "float4"

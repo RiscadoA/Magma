@@ -8,10 +8,10 @@ INPUT VAR
 	TYPE "float2"
 
 OUTPUT VAR
-	INDEX "0"
+	INDEX "1"
 	NAME "color"
 	TYPE "float4"
 
 TEXTURE 2D
-	INDEX "1"
+	INDEX "2"
 	NAME "texture"

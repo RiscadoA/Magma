@@ -1,4 +1,4 @@
-#include "OGL410Assembler.hpp"
+#include "D3D11Assembler.hpp"
 #include "BytecodeAssembler.hpp"
 
 #include "../String/Conversion.hpp"
@@ -10,41 +10,40 @@
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
-void TOGL410(ShaderVariableType type, std::stringstream& out)
+void ToHLSL(ShaderVariableType type, std::stringstream& out)
 {
 	switch (type)
 	{
 		case ShaderVariableType::Int1: out << "int"; break;
-		case ShaderVariableType::Int2: out << "ivec2"; break;
-		case ShaderVariableType::Int3: out << "ivec3"; break;
-		case ShaderVariableType::Int4: out << "ivec4"; break;
-		case ShaderVariableType::Int22: out << "imat2"; break;
-		case ShaderVariableType::Int33: out << "imat3"; break;
-		case ShaderVariableType::Int44: out << "imat4"; break;
+		case ShaderVariableType::Int2: out << "int2"; break;
+		case ShaderVariableType::Int3: out << "int3"; break;
+		case ShaderVariableType::Int4: out << "int4"; break;
+		case ShaderVariableType::Int22: out << "int2x2"; break;
+		case ShaderVariableType::Int33: out << "int3x3"; break;
+		case ShaderVariableType::Int44: out << "int4x4"; break;
 
 		case ShaderVariableType::Float1: out << "float"; break;
-		case ShaderVariableType::Float2: out << "vec2"; break;
-		case ShaderVariableType::Float3: out << "vec3"; break;
-		case ShaderVariableType::Float4: out << "vec4"; break;
-		case ShaderVariableType::Float22: out << "mat2"; break;
-		case ShaderVariableType::Float33: out << "mat3"; break;
-		case ShaderVariableType::Float44: out << "mat4"; break;
+		case ShaderVariableType::Float2: out << "float2"; break;
+		case ShaderVariableType::Float3: out << "float3"; break;
+		case ShaderVariableType::Float4: out << "float4"; break;
+		case ShaderVariableType::Float22: out << "float2x2"; break;
+		case ShaderVariableType::Float33: out << "float3x3"; break;
+		case ShaderVariableType::Float44: out << "float4x4"; break;
 
 		case ShaderVariableType::Invalid:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nInvalid shader variable type");
+			throw ShaderError("Failed to assemble from binary bytecode on D3D11Assembler:\nInvalid shader variable type");
 			break;
 		default:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nUnsupported shader variable type");
+			throw ShaderError("Failed to assemble from binary bytecode on D3D11Assembler:\nUnsupported shader variable type");
 			break;
 	}
 }
 
-void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & data, std::string & out)
+void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & data, std::string & out)
 {
 	std::stringstream ss;
-	
-	ss << "#version 410 core" << std::endl << std::endl;
-	ss << "// This shader was automatically generated from binary bytecode by the OGL410Assembler::Assemble function" << std::endl;
+
+	ss << "// This shader was automatically generated from binary bytecode by the D3D11Assembler::Assemble function" << std::endl;
 	switch (data.GetShaderType())
 	{
 		case ShaderType::Vertex:
@@ -54,10 +53,10 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			ss << "// Pixel shader" << std::endl;
 			break;
 		case ShaderType::Invalid:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nInvalid shader type");
+			throw ShaderError("Failed to assemble from binary bytecode on D3D11Assembler:\nInvalid shader type");
 			break;
 		default:
-			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nUnsupported shader type");
+			throw ShaderError("Failed to assemble from binary bytecode on D3D11Assembler:\nUnsupported shader type");
 			break;
 	}
 	ss << "// DO NOT MODIFY THIS FILE BY HAND" << std::endl;
@@ -66,9 +65,8 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	// Add texture 2D variables
 	for (auto& tex : data.GetTexture2DVariables())
 	{
-		ss << "uniform sampler2D";
-		ss << " tex_" << tex.index << "; // Texture2D variable \"" << tex.name << "\"; index " << tex.index;
-		ss << std::endl;
+		ss << "Texture2D tex_" << tex.index << "; // Texture2D variable \"" << tex.name << "\"; index " << tex.index << std::endl;
+		ss << "SamplerState tex_" << tex.index << "_sampler; // Texture2D variable sampler \"" << tex.name << "\"; index " << tex.index << std::endl;
 	}
 	if (data.GetTexture2DVariables().size() > 0)
 		ss << std::endl;
@@ -76,14 +74,14 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	// Add constant buffers
 	for (auto& buf : data.GetShaderConstantBuffers())
 	{
-		ss << "layout (std140) uniform buf_" << buf.index << std::endl;
+		ss << "cbuffer buf_" << buf.index << " // Constant buffer \"" << buf.name << "\"; index " << buf.index << std::endl;
 		ss << "{" << std::endl;
 		for (auto& v : data.GetShaderConstantVariables())
 		{
 			if (v.bufferIndex != buf.index)
 				continue;
 			ss << "\t";
-			TOGL410(v.type, ss);
+			ToHLSL(v.type, ss);
 			ss << " buf_" << buf.index << "_" << v.index << "; // Constant buffer variable \"" << v.name << "\"; index " << v.index << "; buffer index " << v.bufferIndex;
 			ss << std::endl;
 		}
@@ -91,43 +89,63 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	}
 
 	// Add input variables
-	for (auto& in : data.GetInputVariables())
-	{
-		ss << "layout (location = " << in.index << ") in ";
-		TOGL410(in.type, ss);
-		ss << " in_" << in.index << "; // Input variable \"" << in.name << "\"; index " << in.index;
-		ss << std::endl;
-	}
-	if (data.GetInputVariables().size() > 0)
-		ss << std::endl;
-
-	// Add output variables
-	for (auto& out : data.GetOutputVariables())
-	{
-		if (data.GetShaderType() == ShaderType::Pixel)
-			ss << "layout (location = " << out.index - 1 << ") out ";
-		else
-			ss << "layout (location = " << out.index << ") out ";
-		TOGL410(out.type, ss);
-		ss << " out_" << out.index << "; // Output variable \"" << out.name << "\"; index " << out.index;
-		ss << std::endl;
-	}
-	if (data.GetOutputVariables().size() > 0)
-		ss << std::endl;
-	
+	ss << "struct ShaderInput" << std::endl;
+	ss << "{" << std::endl;
 	if (data.GetShaderType() == ShaderType::Vertex)
 	{
-		ss << "out gl_PerVertex" << std::endl;
-		ss << "{" << std::endl;
-		ss << "\tvec4 gl_Position;" << std::endl;
-		ss << "};" << std::endl;
-		ss << std::endl;
+		for (auto& in : data.GetInputVariables())
+		{
+			ss << "\t";
+			ToHLSL(in.type, ss);
+			ss << " in_" << in.index << " : " << "IN_" << in.index << ";";
+			ss << std::endl;
+		}
 	}
+	else if (data.GetShaderType() == ShaderType::Pixel)
+	{
+		for (auto& in : data.GetInputVariables())
+		{
+			ss << "\t";
+			ToHLSL(in.type, ss);
+			ss << " in_" << in.index << " : " << "VOUT_" << in.index << ";";
+			ss << std::endl;
+		}
+	}
+	ss << "};" << std::endl << std::endl;
+
+	// Add output variables
+	ss << "struct ShaderOutput" << std::endl;
+	ss << "{" << std::endl;
+	if (data.GetShaderType() == ShaderType::Vertex)
+	{
+		ss << "\tfloat4 v_pos : SV_POSITION;" << std::endl;
+		for (auto& out : data.GetOutputVariables())
+		{
+			ss << "\t";
+			ToHLSL(out.type, ss);
+			ss << " out_" << out.index << " : " << "VOUT_" << out.index << ";";
+			ss << std::endl;
+		}
+	}
+	else if (data.GetShaderType() == ShaderType::Pixel)
+	{
+		for (auto& out : data.GetOutputVariables())
+		{
+			ss << "\t";
+			ToHLSL(out.type, ss);
+			if (out.index == 0)
+				ss << " out_0 : SV_Depth;";
+			else
+				ss << " out_" << out.index << " : " << "SV_Target" << out.index - 1 << ";";
+			ss << std::endl;
+		}
+	}
+	ss << "};" << std::endl << std::endl;
 
 	auto GetComponent = [&](size_t count, size_t index) -> void
 	{
 		if (index >= count)
-			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nFailed to get vector component, out of bounds");
+			throw ShaderError("Failed to assemble from binary bytecode on D3D11Assembler:\nFailed to get vector component, out of bounds");
 		switch (index)
 		{
 			case 0: ss << "x"; break;
@@ -142,14 +160,14 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 		for (auto& v : data.GetInputVariables())
 			if (v.index == index)
 			{
-				ss << "in_" << v.index;
+				ss << "in.in_" << v.index;
 				return;
 			}
 
 		for (auto& v : data.GetOutputVariables())
 			if (v.index == index)
 			{
-				ss << "out_" << v.index;
+				ss << "out.out_" << v.index;
 				return;
 			}
 
@@ -157,24 +175,19 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			if (v.index == index)
 			{
 				ss << "tex_" << v.index;
-				return;
+				return; // TO DO
 			}
 
 		for (auto& v : data.GetShaderConstantVariables())
 			if (v.index == index)
 			{
 				ss << "buf_" << v.bufferIndex << "_" << v.index;
-				return;
+				return; // TO DO
 			}
 
 		if (index == 0 && data.GetShaderType() == ShaderType::Vertex)
 		{
-			ss << "gl_Position";
-			return;
-		}
-		else if (index == 0 && data.GetShaderType() == ShaderType::Pixel)
-		{
-			ss << "gl_FragDepth";
+			ss << "out.v_pos";
 			return;
 		}
 
@@ -226,8 +239,12 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	size_t varIn1 = 0;
 	size_t varOut = 0;
 
-	ss << "void main()" << std::endl;
+	if (data.GetShaderType() == ShaderType::Vertex)
+		ss << "ShaderOutput VS(ShaderInput in)" << std::endl;
+	else if (data.GetShaderType() == ShaderType::Pixel)
+		ss << "ShaderOutput PS(ShaderInput in)" << std::endl;
 	ss << "{" << std::endl;
+	ss << "\tShaderOutput out;" << std::endl;
 	for (size_t i = 0; i < data.GetBytecodeSize(); ++i)
 	{
 		auto it = &data.GetBytecode()[i];
@@ -240,27 +257,27 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclI2:
-				ss << "\tivec2 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tint2 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclI3:
-				ss << "\tivec3 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tint3 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclI4:
-				ss << "\tivec4 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tint4 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclI22:
-				ss << "\timat2 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tint2x2 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclI33:
-				ss << "\timat3 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tint3x3 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclI44:
-				ss << "\timat4 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tint4x4 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclF1:
@@ -268,27 +285,27 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclF2:
-				ss << "\tvec2 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tfloat2 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclF3:
-				ss << "\tvec3 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tfloat3 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclF4:
-				ss << "\tvec4 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tfloat4 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclF22:
-				ss << "\tmat2 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tfloat2x2 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclF33:
-				ss << "\tmat3 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tfloat3x3 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			case BytecodeOpCode::DeclF44:
-				ss << "\tmat4 local_" << (unsigned long)it[1] << ";" << std::endl;
+				ss << "\tfloat4x4 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
 			}
@@ -357,11 +374,11 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::Mod:
 				ss << "\t";
 				PutIndex(varOut);
-				ss << " = ";
+				ss << " = mod(";
 				PutIndex(varIn0);
-				ss << " % ";
+				ss << ", ";
 				PutIndex(varIn1);
-				ss << ";" << std::endl;
+				ss << ");" << std::endl;
 				break;
 			case BytecodeOpCode::And:
 				ss << "\t";
@@ -457,7 +474,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::SetI2:
 				ss << "\t";
 				PutIndex(it[1]);
-				ss << " = ivec2(";
+				ss << " = int2(";
 				GetInt(it + 2);
 				ss << ", ";
 				GetInt(it + 6);
@@ -467,7 +484,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::SetI3:
 				ss << "\t";
 				PutIndex(it[1]);
-				ss << " = ivec3(";
+				ss << " = int3(";
 				GetInt(it + 2);
 				ss << ", ";
 				GetInt(it + 6);
@@ -479,7 +496,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::SetI4:
 				ss << "\t";
 				PutIndex(it[1]);
-				ss << " = ivec4(";
+				ss << " = int4(";
 				GetInt(it + 2);
 				ss << ", ";
 				GetInt(it + 6);
@@ -502,7 +519,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::SetF2:
 				ss << "\t";
 				PutIndex(it[1]);
-				ss << " = vec2(";
+				ss << " = float2(";
 				GetFloat(it + 2);
 				ss << ", ";
 				GetFloat(it + 6);
@@ -512,7 +529,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::SetF3:
 				ss << "\t";
 				PutIndex(it[1]);
-				ss << " = vec3(";
+				ss << " = float3(";
 				GetFloat(it + 2);
 				ss << ", ";
 				GetFloat(it + 6);
@@ -524,7 +541,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::SetF4:
 				ss << "\t";
 				PutIndex(it[1]);
-				ss << " = vec4(";
+				ss << " = float4(";
 				GetFloat(it + 2);
 				ss << ", ";
 				GetFloat(it + 6);
@@ -674,7 +691,7 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 				ss << "\tdiscard;" << std::endl;
 				break;
 			case BytecodeOpCode::Return:
-				ss << "\treturn;" << std::endl;
+				ss << "\treturn out;" << std::endl;
 				break;
 			case BytecodeOpCode::While:
 				ss << "\twhile (";
@@ -695,194 +712,199 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 
 			// Other functions
 			{
-				case BytecodeOpCode::MulMat:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = ";
-					PutIndex(varIn0);
-					ss << " * ";
-					PutIndex(varIn1);
-					ss << ";" << std::endl;
-					break;
+			case BytecodeOpCode::MulMat:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = mul(";
+				PutIndex(varIn0);
+				ss << ", ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Smple2D:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = texture(";
-					PutIndex(varIn0);
-					ss << " , ";
-					PutIndex(varIn1);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Smple2D:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ";
+				PutIndex(varIn0);
+				ss << ".Sample(";
+				PutIndex(varIn0);
+				ss << "_sampler, ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Cos:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = cos(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Cos:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = cos(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Sin:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = sin(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Sin:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = sin(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Tan:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = tan(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Tan:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = tan(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::ACos:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = acos(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::ACos:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = acos(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::ASin:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = asin(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::ASin:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = asin(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::ATan:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = atan(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::ATan:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = atan(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Degrees:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = degrees(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Degrees:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = degrees(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Radians:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = radians(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Radians:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = radians(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Pow:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = pow(";
-					PutIndex(varIn0);
-					ss << " , ";
-					PutIndex(varIn1);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Pow:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = pow(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Exp:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = exp(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Exp:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = exp(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Log:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = log(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Log:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = log(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Exp2:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = exp2(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Exp2:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = exp2(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Log2:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = log2(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Log2:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = log2(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Sqrt:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = sqrt(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Sqrt:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = sqrt(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::ISqrt:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = inversesqrt(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::ISqrt:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = rsqrt(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Abs:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = abs(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Abs:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = abs(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Sign:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = sign(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Sign:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = sign(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Floor:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = floor(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Floor:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = floor(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Ceil:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = ceil(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Ceil:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = ceil(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 
-				case BytecodeOpCode::Fract:
-					ss << "\t";
-					PutIndex(varOut);
-					ss << " = fract(";
-					PutIndex(varIn0);
-					ss << ");" << std::endl;
-					break;
+			case BytecodeOpCode::Fract:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = fract(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
 			}
 
 			default:
-				throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nUnsupported/unknown operation code");
+				throw ShaderError("Failed to assemble from binary bytecode on D3D11Assembler:\nUnsupported/unknown operation code");
 				break;
 		}
 	}
+
+	ss << "\treturn out;" << std::endl;
+
 	ss << "}" << std::endl;
 
 	out = ss.str();
