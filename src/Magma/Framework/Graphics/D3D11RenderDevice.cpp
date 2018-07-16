@@ -265,30 +265,90 @@ public:
 
 	D3D11RenderDevice* device;
 	ID3D11SamplerState* sampler;
+	ID3D11ShaderResourceView* resourceView;
 };
 
 class D3D11ConstantBuffer final : public ConstantBuffer
 {
 public:
-	D3D11ConstantBuffer(D3D11RenderDevice* device, size_t size, const void* data, BufferUsage _usage)
+	D3D11ConstantBuffer(D3D11RenderDevice* device, size_t size, const void* data, BufferUsage usage)
 	{
-		
+		this->device = device;
+
+		HRESULT hr;
+		D3D11_BUFFER_DESC desc;
+
+		switch (usage)
+		{
+			case BufferUsage::Default: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Static: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+			case BufferUsage::Invalid: throw RenderDeviceError("Failed to create D3D11ConstantBuffer:\nInvalid buffer usage mode"); break;
+			default: throw RenderDeviceError("Failed to create D3D11ConstantBuffer:\nUnknown buffer usage mode"); break;
+		}
+
+		desc.ByteWidth = size;
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.MiscFlags = 0;
+
+		if (data == nullptr)
+		{
+			if (usage != BufferUsage::Dynamic)
+				throw RenderDeviceError("Failed to create D3D11ConstantBuffer:\nOnly dynamic constant buffers can be initialized with null data");
+
+			hr = ((ID3D11Device*)device->m_device)->CreateBuffer(&desc, NULL, &buffer);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11ConstantBuffer:\nFailed to create buffer:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
+		else
+		{
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = data;
+			initData.SysMemPitch = 0;
+			initData.SysMemSlicePitch = 0;
+
+			hr = ((ID3D11Device*)device->m_device)->CreateBuffer(&desc, &initData, &buffer);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11ConstantBuffer:\nFailed to create buffer:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
 	}
 
 	virtual ~D3D11ConstantBuffer() final
 	{
-		
+		buffer->Release();
 	}
 
 	virtual void* Map() final
 	{
-		return nullptr;
+		D3D11_MAPPED_SUBRESOURCE map;
+		HRESULT hr = ((ID3D11DeviceContext*)device->m_deviceContext)->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to map D3D11ConstantBuffer:\nFailed to map buffer:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
+		return map.pData;
 	}
 
 	virtual void Unmap() final
 	{
-		
+		((ID3D11DeviceContext*)device->m_deviceContext)->Unmap(buffer, 0);
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11Buffer* buffer;
 };
 
 class D3D11VertexBindingPoint;
@@ -383,7 +443,8 @@ public:
 
 	virtual void Bind(ConstantBuffer* buffer) final
 	{
-		
+		auto buf = static_cast<D3D11ConstantBuffer*>(buffer);
+		((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetConstantBuffers(index, 1, &buf->buffer);
 	}
 
 	D3D11VertexShader* shader;
@@ -517,7 +578,8 @@ public:
 
 	virtual void Bind(ConstantBuffer* buffer) final
 	{
-
+		auto buf = static_cast<D3D11ConstantBuffer*>(buffer);
+		((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetConstantBuffers(index, 1, &buf->buffer);
 	}
 
 	D3D11PixelShader* shader;
@@ -1163,15 +1225,133 @@ public:
 class D3D11BlendState final : public BlendState
 {
 public:
-	D3D11BlendState(D3D11RenderDevice* device, const BlendStateDesc& desc)
+	D3D11BlendState(D3D11RenderDevice* device, const BlendStateDesc& _desc)
 	{
+		D3D11_BLEND_DESC desc;
 
+		desc.AlphaToCoverageEnable = false;
+		desc.IndependentBlendEnable = false;
+
+		desc.RenderTarget[0].BlendEnable = _desc.blendEnabled;
+		
+		switch (_desc.blendOperation)
+		{
+			case BlendOperation::Add: desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; break;
+			case BlendOperation::Subtract: desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_SUBTRACT; break;
+			case BlendOperation::ReverseSubtract: desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT; break;
+			case BlendOperation::Min: desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_MIN; break;
+			case BlendOperation::Max: desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_MAX; break;
+			case BlendOperation::Invalid: throw RenderDeviceError("Failed to create D3D11BlendState:\nInvalid blend operation function"); break;
+			default: throw RenderDeviceError("Failed to create D3D11BlendState:\nUnsupported blend operation function"); break;
+		}
+
+		switch (_desc.sourceFactor)
+		{
+			case BlendFactor::Zero: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ZERO; break;
+			case BlendFactor::One: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE; break;
+
+			case BlendFactor::SourceColor: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_COLOR; break;
+			case BlendFactor::InverseSourceColor: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_SRC_COLOR; break;
+			case BlendFactor::DestinationColor: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_DEST_COLOR; break;
+			case BlendFactor::InverseDestinationColor: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_DEST_COLOR; break;
+
+			case BlendFactor::SourceAlpha: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA; break;
+			case BlendFactor::InverseSourceAlpha: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_SRC_ALPHA; break;
+			case BlendFactor::DestinationAlpha: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_DEST_ALPHA; break;
+			case BlendFactor::InverseDestinationAlpha: desc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_DEST_ALPHA; break;
+
+			case BlendFactor::Invalid: throw RenderDeviceError("Failed to create D3D11BlendState:\nInvalid source factor"); break;
+			default: throw RenderDeviceError("Failed to create D3D11BlendState:\nUnsupported source factor"); break;
+		}
+
+		switch (_desc.destinationFactor)
+		{
+			case BlendFactor::Zero: desc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO; break;
+			case BlendFactor::One: desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE; break;
+
+			case BlendFactor::SourceColor: desc.RenderTarget[0].DestBlend = D3D11_BLEND_SRC_COLOR; break;
+			case BlendFactor::InverseSourceColor: desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_COLOR; break;
+			case BlendFactor::DestinationColor: desc.RenderTarget[0].DestBlend = D3D11_BLEND_DEST_COLOR; break;
+			case BlendFactor::InverseDestinationColor: desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_DEST_COLOR; break;
+
+			case BlendFactor::SourceAlpha: desc.RenderTarget[0].DestBlend = D3D11_BLEND_SRC_ALPHA; break;
+			case BlendFactor::InverseSourceAlpha: desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA; break;
+			case BlendFactor::DestinationAlpha: desc.RenderTarget[0].DestBlend = D3D11_BLEND_DEST_ALPHA; break;
+			case BlendFactor::InverseDestinationAlpha: desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_DEST_ALPHA; break;
+
+			case BlendFactor::Invalid: throw RenderDeviceError("Failed to create D3D11BlendState:\nInvalid destination factor"); break;
+			default: throw RenderDeviceError("Failed to create D3D11BlendState:\nUnsupported destination factor"); break;
+		}
+
+		switch (_desc.alphaBlendOperation)
+		{
+			case BlendOperation::Add: desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD; break;
+			case BlendOperation::Subtract: desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_SUBTRACT; break;
+			case BlendOperation::ReverseSubtract: desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT; break;
+			case BlendOperation::Min: desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MIN; break;
+			case BlendOperation::Max: desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX; break;
+			case BlendOperation::Invalid: throw RenderDeviceError("Failed to create D3D11BlendState:\nInvalid alpha blend operation function"); break;
+			default: throw RenderDeviceError("Failed to create D3D11BlendState:\nUnsupported alpha blend operation function"); break;
+		}
+
+		switch (_desc.sourceAlphaFactor)
+		{
+			case BlendFactor::Zero: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO; break;
+			case BlendFactor::One: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE; break;
+			
+			case BlendFactor::SourceColor: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_COLOR; break;
+			case BlendFactor::InverseSourceColor: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_SRC_COLOR; break;
+			case BlendFactor::DestinationColor: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_DEST_COLOR; break;
+			case BlendFactor::InverseDestinationColor: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_DEST_COLOR; break;
+
+			case BlendFactor::SourceAlpha: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA; break;
+			case BlendFactor::InverseSourceAlpha: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA; break;
+			case BlendFactor::DestinationAlpha: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_DEST_ALPHA; break;
+			case BlendFactor::InverseDestinationAlpha: desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_DEST_ALPHA; break;
+			
+			case BlendFactor::Invalid: throw RenderDeviceError("Failed to create D3D11BlendState:\nInvalid source alpha factor"); break;
+			default: throw RenderDeviceError("Failed to create D3D11BlendState:\nUnsupported source alpha factor"); break;
+		}
+
+		switch (_desc.destinationAlphaFactor)
+		{
+			case BlendFactor::Zero: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO; break;
+			case BlendFactor::One: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE; break;
+
+			case BlendFactor::SourceColor: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_SRC_COLOR; break;
+			case BlendFactor::InverseSourceColor: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_COLOR; break;
+			case BlendFactor::DestinationColor: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_DEST_COLOR; break;
+			case BlendFactor::InverseDestinationColor: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_DEST_COLOR; break;
+
+			case BlendFactor::SourceAlpha: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_SRC_ALPHA; break;
+			case BlendFactor::InverseSourceAlpha: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA; break;
+			case BlendFactor::DestinationAlpha: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_DEST_ALPHA; break;
+			case BlendFactor::InverseDestinationAlpha: desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_DEST_ALPHA; break;
+
+			case BlendFactor::Invalid: throw RenderDeviceError("Failed to create D3D11BlendState:\nInvalid destination alpha factor"); break;
+			default: throw RenderDeviceError("Failed to create D3D11BlendState:\nUnsupported destination alpha factor"); break;
+		}	
+
+		desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		
+		// Create state
+		HRESULT hr = ((ID3D11Device*)device->m_device)->CreateBlendState(&desc, &state);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11BlendState:\nFailed to create blend state:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
 	}
 
 	virtual ~D3D11BlendState() final
 	{
-
+		state->Release();
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11BlendState* state;
 };
 
 void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
@@ -1712,7 +1892,9 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyBlendState(BlendState
 void Magma::Framework::Graphics::D3D11RenderDevice::SetBlendState(BlendState * blendState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	auto bs = static_cast<D3D11BlendState*>(blendState);
+	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	((ID3D11DeviceContext*)m_deviceContext)->OMSetBlendState(bs->state, color, 0xFFFFFFFF);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif

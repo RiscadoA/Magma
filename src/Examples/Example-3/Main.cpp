@@ -1,11 +1,12 @@
-﻿//#include <Magma/Framework/Graphics/D3D11Context.hpp>
-//#include <Magma/Framework/Graphics/GLContext.hpp>
-#include <Magma/Framework/Input/D3DWindow.hpp>
-#include <Magma/Framework/Input/GLWindow.hpp>
+﻿#include <Magma/Framework/Input/GLWindow.hpp>
 #include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
 #include <Magma/Framework/Graphics/OGL410Assembler.hpp>
+
+#include <Magma/Framework/Input/D3DWindow.hpp>
+#include <Magma/Framework/Graphics/D3D11RenderDevice.hpp>
+#include <Magma/Framework/Graphics/D3D11Assembler.hpp>
+
 #include <Magma/Framework/Files/STDFileSystem.hpp>
-#include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
 #include <iostream>
 
@@ -14,6 +15,8 @@
 #include <Magma/Framework/Graphics/ShaderData.hpp>
 #include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
 #include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
+
+#define USE_GL
 
 using namespace Magma;
 using namespace Magma::Framework;
@@ -71,7 +74,11 @@ void LoadScene(Scene& scene)
 
 	// Create window
 	{
-		scene.window = new Input::GLWindow(800, 600, "Tetris", Input::Window::Mode::Windowed);
+#ifdef USE_GL
+		scene.window = new Framework::Input::GLWindow(800, 600, "Example-3", Framework::Input::Window::Mode::Windowed);
+#else
+		scene.window = new Framework::Input::D3DWindow(800, 600, "Example-3", Framework::Input::Window::Mode::Windowed);
+#endif
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
@@ -79,7 +86,11 @@ void LoadScene(Scene& scene)
 	// Create context
 	{
 		Graphics::RenderDeviceSettings settings;
-		scene.device = new Graphics::OGL410RenderDevice();
+#ifdef USE_GL
+		scene.device = new Framework::Graphics::OGL410RenderDevice();
+#else
+		scene.device = new Framework::Graphics::D3D11RenderDevice();
+#endif
 		scene.device->Init(scene.window, settings);
 	}
 
@@ -245,12 +256,12 @@ void LoadScene(Scene& scene)
 	{
 		Graphics::Sampler2DDesc desc;
 
-		desc.adressU = Graphics::TextureAdressMode::Border;
-		desc.adressV = Graphics::TextureAdressMode::Border;
+		desc.addressU = Graphics::TextureAdressMode::Clamp;
+		desc.addressV = Graphics::TextureAdressMode::Clamp;
 		desc.minFilter = Graphics::TextureFilter::Linear;
 		desc.magFilter = Graphics::TextureFilter::Linear;
 		desc.mipmapFilter = Graphics::TextureFilter::Nearest;
-		desc.border = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		desc.border = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		scene.sampler = scene.device->CreateSampler2D(desc);
 	}

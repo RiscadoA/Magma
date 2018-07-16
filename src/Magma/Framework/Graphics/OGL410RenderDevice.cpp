@@ -127,7 +127,7 @@ public:
 		{
 			case TextureAdressMode::Repeat: wrapS = GL_REPEAT; break;
 			case TextureAdressMode::Mirror: wrapS = GL_MIRRORED_REPEAT; break;
-			case TextureAdressMode::Clamp: wrapS = GL_CLAMP; break;
+			case TextureAdressMode::Clamp: wrapS = GL_CLAMP_TO_EDGE; break;
 			case TextureAdressMode::Border: wrapS = GL_CLAMP_TO_BORDER; break;
 			case TextureAdressMode::Invalid: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nInvalid texture coordinate U adress mode"); break;
 			default: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported texture coordinate U adress mode"); break;
@@ -137,7 +137,7 @@ public:
 		{
 			case TextureAdressMode::Repeat: wrapT = GL_REPEAT; break;
 			case TextureAdressMode::Mirror: wrapT = GL_MIRRORED_REPEAT; break;
-			case TextureAdressMode::Clamp: wrapT = GL_CLAMP; break;
+			case TextureAdressMode::Clamp: wrapT = GL_CLAMP_TO_EDGE; break;
 			case TextureAdressMode::Border: wrapT = GL_CLAMP_TO_BORDER; break;
 			case TextureAdressMode::Invalid: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nInvalid texture coordinate V adress mode"); break;
 			default: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported texture coordinate V adress mode"); break;
