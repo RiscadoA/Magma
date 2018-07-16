@@ -607,23 +607,13 @@ public:
 				case VertexElementType::UShort: oglVertexElements[i].type = GL_UNSIGNED_SHORT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = true; break;
 				case VertexElementType::UInt: oglVertexElements[i].type = GL_UNSIGNED_INT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = true; break;
 
-				case VertexElementType::FByte: oglVertexElements[i].type = GL_BYTE; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::FShort: oglVertexElements[i].type = GL_SHORT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::FInt: oglVertexElements[i].type = GL_INT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::FUByte: oglVertexElements[i].type = GL_UNSIGNED_BYTE; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::FUShort: oglVertexElements[i].type = GL_UNSIGNED_SHORT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::FUInt: oglVertexElements[i].type = GL_UNSIGNED_INT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
-
 				case VertexElementType::NByte: oglVertexElements[i].type = GL_BYTE; oglVertexElements[i].normalized = GL_TRUE; oglVertexElements[i].isInteger = false; break;
 				case VertexElementType::NShort: oglVertexElements[i].type = GL_SHORT; oglVertexElements[i].normalized = GL_TRUE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::NInt: oglVertexElements[i].type = GL_INT; oglVertexElements[i].normalized = GL_TRUE; oglVertexElements[i].isInteger = false; break;
 				case VertexElementType::NUByte: oglVertexElements[i].type = GL_UNSIGNED_BYTE; oglVertexElements[i].normalized = GL_TRUE; oglVertexElements[i].isInteger = false; break;
 				case VertexElementType::NUShort: oglVertexElements[i].type = GL_UNSIGNED_SHORT; oglVertexElements[i].normalized = GL_TRUE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::NUInt: oglVertexElements[i].type = GL_UNSIGNED_INT; oglVertexElements[i].normalized = GL_TRUE; oglVertexElements[i].isInteger = false; break;
 
 				case VertexElementType::HalfFloat: oglVertexElements[i].type = GL_HALF_FLOAT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
 				case VertexElementType::Float: oglVertexElements[i].type = GL_FLOAT; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
-				case VertexElementType::Double: oglVertexElements[i].type = GL_DOUBLE; oglVertexElements[i].normalized = GL_FALSE; oglVertexElements[i].isInteger = false; break;
 
 				case VertexElementType::Invalid: throw RenderDeviceError("Failed to create OGL410VertexLayout:\nInvalid vertex element type"); break;
 				default: throw RenderDeviceError("Failed to create OGL410VertexLayout:\nUnsupported vertex element type"); break;
@@ -720,6 +710,21 @@ public:
 	virtual ~OGL410IndexBuffer() final
 	{
 		glDeleteBuffers(1, &ibo);
+	}
+
+	virtual void* Map() final
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		void* map = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+		GL_CHECK_ERROR("Failed to map OGL410IndexBuffer");
+		return map;
+	}
+
+	virtual void Unmap() final
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		GL_CHECK_ERROR("Failed to unmap OGL410IndexBuffer");
 	}
 
 	GLuint ibo;

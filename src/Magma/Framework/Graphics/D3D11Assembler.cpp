@@ -97,7 +97,7 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 		{
 			ss << "\t";
 			ToHLSL(in.type, ss);
-			ss << " in_" << in.index << " : " << "IN_" << in.index << ";";
+			ss << " in_" << in.index << " : " << "IN" << in.index - 1 << "IN;";
 			ss << std::endl;
 		}
 	}
@@ -107,7 +107,7 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 		{
 			ss << "\t";
 			ToHLSL(in.type, ss);
-			ss << " in_" << in.index << " : " << "VOUT_" << in.index << ";";
+			ss << " in_" << in.index << " : " << "VOUT" << in.index << "VOUT;";
 			ss << std::endl;
 		}
 	}
@@ -118,14 +118,14 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 	ss << "{" << std::endl;
 	if (data.GetShaderType() == ShaderType::Vertex)
 	{
-		ss << "\tfloat4 v_pos : SV_POSITION;" << std::endl;
 		for (auto& out : data.GetOutputVariables())
 		{
 			ss << "\t";
 			ToHLSL(out.type, ss);
-			ss << " out_" << out.index << " : " << "VOUT_" << out.index << ";";
+			ss << " out_" << out.index << " : " << "VOUT" << out.index << "VOUT;";
 			ss << std::endl;
 		}
+		ss << "\tfloat4 v_pos : SV_POSITION;" << std::endl;
 	}
 	else if (data.GetShaderType() == ShaderType::Pixel)
 	{
@@ -141,6 +141,8 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 		}
 	}
 	ss << "};" << std::endl << std::endl;
+
+	printf("%s\n\n\n\n", ss.str().c_str());
 
 	auto GetComponent = [&](size_t count, size_t index) -> void
 	{

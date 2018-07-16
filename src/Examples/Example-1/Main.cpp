@@ -255,73 +255,10 @@ void LoadScene(Scene& scene)
 		
 		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
 	}
-
-	// Create sampler
-	/*{
-		Framework::Graphics::SamplerSettings settings;
-
-		settings.adressU = Framework::Graphics::TextureAdressMode::Border;
-		settings.adressV = Framework::Graphics::TextureAdressMode::Border;
-		settings.minFilter = Framework::Graphics::TextureFilter::Linear;
-		settings.magFilter = Framework::Graphics::TextureFilter::Linear;
-		settings.borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-
-		scene.sampler = scene.context->CreateSampler(settings);
-	}
-
-	// Create mask texture
-	{
-		unsigned char data[] =
-		{
-			0,
-			255,
-			255,
-			255,
-		};
-
-		scene.texture = scene.context->CreateTexture2D(data, 2, 2, Framework::Graphics::TextureFormat::R8UInt);
-	}
-
-	// Get mask texture binding point
-	{
-		scene.textureBP = scene.context->GetTextureBindingPoint(scene.program, "fontTexture");
-	}
-
-	// Create transform constant buffer and get its binding point
-	{
-		scene.transformCBuffer = scene.context->CreateConstantBuffer(nullptr, sizeof(Transform));
-		scene.transformBP = scene.context->GetConstantBindingPoint(scene.program, "transform");
-	}
-
-	// Create material constant buffer and get its binding point
-	{
-		Material mat;
-		mat.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-		scene.materialCBuffer = scene.context->CreateConstantBuffer(&mat, sizeof(Material));
-		scene.materialBP = scene.context->GetConstantBindingPoint(scene.program, "material");
-	}
-
-	{
-		scene.context->CreateVertexLayout(desc, program);
-		scene.context->CreateVertexBuffer(nullptr, 1, Graphics::Usage::Default);
-		scene.context->BindVertexBuffer(buffer, layout);
-	}*/
 }
 
 void CleanScene(Scene& scene)
 {
-	// Destroy constant buffers
-	/*scene.context->DestroyConstantBuffer(scene.materialCBuffer);
-	scene.context->DestroyConstantBuffer(scene.transformCBuffer);
-
-	// Destroy texture and sampler
-	scene.context->DestroyTexture2D(scene.texture);
-	scene.context->DestroySampler(scene.sampler);
-
-	// Destroy font
-	delete scene.font;*/
-
 	scene.device->DestroyDepthStencilState(scene.depthStencilState);
 	scene.device->DestroyRasterState(scene.rasterState);
 
@@ -381,10 +318,10 @@ void Main(int argc, char** argv) try
 		// Update vertex buffer
 		{
 			auto data = (Vertex*)scene.vertexBuffer->Map();
-			/*data[0].x = -0.5f + x; data[0].y = -0.5f; data[0].z = 0.0f;
+			data[0].x = -0.5f + x; data[0].y = -0.5f; data[0].z = 0.0f;
 			data[1].x = -0.5f + x; data[1].y = +0.5f; data[1].z = 0.0f;
 			data[2].x = +0.5f + x; data[2].y = -0.5f; data[2].z = 0.0f;
-			data[3].x = +0.5f + x; data[3].y = +0.5f; data[3].z = 0.0f;*/
+			data[3].x = +0.5f + x; data[3].y = +0.5f; data[3].z = 0.0f;
 			scene.vertexBuffer->Unmap();
 		}
 

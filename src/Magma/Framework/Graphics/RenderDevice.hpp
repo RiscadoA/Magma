@@ -570,6 +570,17 @@ namespace Magma
 			public:
 				virtual ~IndexBuffer() = default;
 				
+				/// <summary>
+				///		Maps the index buffer to a location in memory to update it
+				/// </summary>
+				/// <returns>Pointer to the index buffer data</returns>
+				virtual void* Map() = 0;
+
+				/// <summary>
+				///		Unmaps the index buffer and sends the data to the GPU
+				/// </summary>
+				virtual void Unmap() = 0;
+
 			protected:
 				/// <summary>
 				///		Used to ensure that these are never created directly
@@ -649,36 +660,6 @@ namespace Magma
 				UInt,
 
 				/// <summary>
-				///		Signed byte (8 bits) that gets casted into the nearest floating point value
-				/// </summary>
-				FByte,
-
-				/// <summary>
-				///		Signed short (16 bits) that gets casted into the nearest floating point value
-				/// </summary>
-				FShort,
-
-				/// <summary>
-				///		Signed int (32 bits) that gets casted into the nearest floating point value
-				/// </summary>
-				FInt,
-
-				/// <summary>
-				///		Unsigned byte (8 bits) that gets casted into the nearest floating point value
-				/// </summary>
-				FUByte,
-
-				/// <summary>
-				///		Unsigned short (16 bits) that gets casted into the nearest floating point value
-				/// </summary>
-				FUShort,
-
-				/// <summary>
-				///		Unsigned int (32 bits) that gets casted into the nearest floating point value
-				/// </summary>
-				FUInt,
-
-				/// <summary>
 				///		Normalized signed byte (8 bits)
 				/// </summary>
 				NByte,
@@ -687,11 +668,6 @@ namespace Magma
 				///		Normalized signed short (16 bits)
 				/// </summary>
 				NShort,
-
-				/// <summary>
-				///		Normalized signed int (32 bits)
-				/// </summary>
-				NInt,
 
 				/// <summary>
 				///		Normalized unsigned byte (8 bits)
@@ -704,11 +680,6 @@ namespace Magma
 				NUShort,
 
 				/// <summary>
-				///		Normalized unsigned int (32 bits)
-				/// </summary>
-				NUInt,
-
-				/// <summary>
 				///		Half float (16 bits)
 				/// </summary>
 				HalfFloat,
@@ -717,11 +688,6 @@ namespace Magma
 				///		Float (32 bits)
 				/// </summary>
 				Float,
-
-				/// <summary>
-				///		
-				/// </summary>
-				Double,
 
 				/// <summary>
 				///		Number of vertex element types

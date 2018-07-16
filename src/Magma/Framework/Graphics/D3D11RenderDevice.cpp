@@ -88,6 +88,7 @@ class D3D11VertexShader : public VertexShader
 {
 public:
 	D3D11VertexShader(D3D11RenderDevice* device, const ShaderData& data)
+		: data(data)
 	{
 		this->device = device;
 
@@ -139,6 +140,7 @@ public:
 
 	virtual VertexBindingPoint* GetBindingPoint(const char * name) final;
 
+	ShaderData data;
 	D3D11RenderDevice* device;
 	ID3D11VertexShader* vs;
 	ID3DBlob* blob;
@@ -302,25 +304,31 @@ public:
 class D3D11VertexBuffer final : public VertexBuffer
 {
 public:
-	D3D11VertexBuffer(D3D11RenderDevice* device, size_t size, const void* data, BufferUsage _usage)
+	D3D11VertexBuffer(D3D11RenderDevice* device, size_t size, const void* data, BufferUsage usage)
 	{
 		this->device = device;
 
 		HRESULT hr;
-
 		D3D11_BUFFER_DESC desc;
 		
-		switch (_usage)
+		switch (usage)
 		{
-			case BufferUsage::Default: desc.Usage = D3D11_USAGE_DEFAULT; break;
-			case BufferUsage::Static: desc.Usage = D3D11_USAGE_IMMUTABLE; break;
-			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DYNAMIC; break;
+			case BufferUsage::Default: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Static: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
 			case BufferUsage::Invalid: throw RenderDeviceError("Failed to create D3D11VertexBuffer:\nInvalid buffer usage mode"); break;
 			default: throw RenderDeviceError("Failed to create D3D11VertexBuffer:\nUnknown buffer usage mode"); break;
 		}
 
+		desc.ByteWidth = size;
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		desc.MiscFlags = 0;		
+
 		if (data == nullptr)
 		{
+			if (usage != BufferUsage::Dynamic)
+				throw RenderDeviceError("Failed to create D3D11VertexBuffer:\nOnly dynamic vertex buffers can be initialized with null data");
+
 			hr = ((ID3D11Device*)device->m_device)->CreateBuffer(&desc, NULL, &buffer);
 			if (FAILED(hr))
 			{
@@ -350,17 +358,26 @@ public:
 
 	virtual ~D3D11VertexBuffer() final
 	{
-		
+		buffer->Release();
 	}
 
 	virtual void* Map() final
 	{
-		return nullptr;
+		D3D11_MAPPED_SUBRESOURCE map;
+		HRESULT hr = ((ID3D11DeviceContext*)device->m_deviceContext)->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to map D3D11VertexBuffer:\nFailed to map buffer:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
+		return map.pData;
 	}
 
 	virtual void Unmap() final
 	{
-		
+		((ID3D11DeviceContext*)device->m_deviceContext)->Unmap(buffer, 0);
 	}
 
 	D3D11RenderDevice* device;
@@ -372,13 +389,153 @@ class D3D11VertexLayout final : public VertexLayout
 public:
 	D3D11VertexLayout(D3D11RenderDevice* device, size_t vertexElementCount, const VertexElement* vertexElements, D3D11VertexShader* vertexShader)
 	{
-		
+		this->device = device;
+
+		char** names = new char*[vertexElementCount];
+		for (size_t i = 0; i < vertexElementCount; ++i)
+			names[i] = nullptr;
+		auto inputDesc = new D3D11_INPUT_ELEMENT_DESC[vertexElementCount];
+		offsets = new UINT[vertexElementCount];
+		strides = new UINT[vertexElementCount];
+
+		try
+		{
+			for (size_t i = 0; i < vertexElementCount; ++i)
+			{
+				ZeroMemory(&inputDesc[i], sizeof(inputDesc[i]));
+
+				// Get semantic name
+				for (auto& v : vertexShader->data.GetInputVariables())
+					if (v.name == vertexElements[i].name)
+					{
+						std::string str;
+						str = "IN";
+						str += std::to_string(v.index - 1);
+						str += "IN";
+						names[i] = new char[str.size() + 1];
+						memcpy(names[i], str.c_str(), str.size());
+						names[i][str.size()] = '\0';
+						inputDesc[i].SemanticName = names[i];
+						break;
+					}
+
+				inputDesc[i].SemanticIndex = 0;
+				inputDesc[i].InputSlot = vertexElements[i].bufferIndex;
+				inputDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+				inputDesc[i].AlignedByteOffset = vertexElements[i].offset;
+				inputDesc[i].InstanceDataStepRate = 0;
+				offsets[i] = vertexElements[i].offset;
+				strides[i] = vertexElements[i].stride;
+
+				// Get format
+				switch (vertexElements[i].size)
+				{
+					case 1:
+						switch (vertexElements[i].type)
+						{
+							case VertexElementType::Byte: inputDesc[i].Format = DXGI_FORMAT_R8_SINT; break;
+							case VertexElementType::Short: inputDesc[i].Format = DXGI_FORMAT_R16_SINT; break;
+							case VertexElementType::Int: inputDesc[i].Format = DXGI_FORMAT_R32_SINT; break;
+							case VertexElementType::UByte: inputDesc[i].Format = DXGI_FORMAT_R8_UINT; break;
+							case VertexElementType::UShort: inputDesc[i].Format = DXGI_FORMAT_R16_UINT; break;
+							case VertexElementType::UInt: inputDesc[i].Format = DXGI_FORMAT_R32_UINT; break;
+							case VertexElementType::NByte: inputDesc[i].Format = DXGI_FORMAT_R8_SNORM; break;
+							case VertexElementType::NShort: inputDesc[i].Format = DXGI_FORMAT_R16_SNORM; break;
+							case VertexElementType::NUByte: inputDesc[i].Format = DXGI_FORMAT_R8_UNORM; break;
+							case VertexElementType::NUShort: inputDesc[i].Format = DXGI_FORMAT_R16_UNORM; break;
+							case VertexElementType::HalfFloat: inputDesc[i].Format = DXGI_FORMAT_R16_FLOAT; break;
+							case VertexElementType::Float: inputDesc[i].Format = DXGI_FORMAT_R32_FLOAT; break;
+							case VertexElementType::Invalid: throw RenderDeviceError("Faield to create D3D11VertexLayout:\nInvalid vertex element type"); break;
+							default: throw RenderDeviceError("Faield to create D3D11VertexLayout:\nUnsupported vertex element type"); break;
+						}
+						break;
+					case 2:
+						switch (vertexElements[i].type)
+						{
+							case VertexElementType::Byte: inputDesc[i].Format = DXGI_FORMAT_R8G8_SINT; break;
+							case VertexElementType::Short: inputDesc[i].Format = DXGI_FORMAT_R16G16_SINT; break;
+							case VertexElementType::Int: inputDesc[i].Format = DXGI_FORMAT_R32G32_SINT; break;
+							case VertexElementType::UByte: inputDesc[i].Format = DXGI_FORMAT_R8G8_UINT; break;
+							case VertexElementType::UShort: inputDesc[i].Format = DXGI_FORMAT_R16G16_UINT; break;
+							case VertexElementType::UInt: inputDesc[i].Format = DXGI_FORMAT_R32G32_UINT; break;
+							case VertexElementType::NByte: inputDesc[i].Format = DXGI_FORMAT_R8G8_SNORM; break;
+							case VertexElementType::NShort: inputDesc[i].Format = DXGI_FORMAT_R16G16_SNORM; break;
+							case VertexElementType::NUByte: inputDesc[i].Format = DXGI_FORMAT_R8G8_UNORM; break;
+							case VertexElementType::NUShort: inputDesc[i].Format = DXGI_FORMAT_R16G16_UNORM; break;
+							case VertexElementType::HalfFloat: inputDesc[i].Format = DXGI_FORMAT_R16G16_FLOAT; break;
+							case VertexElementType::Float: inputDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT; break;
+							case VertexElementType::Invalid: throw RenderDeviceError("Faield to create D3D11VertexLayout:\nInvalid vertex element type"); break;
+							default: throw RenderDeviceError("Faield to create D3D11VertexLayout:\nUnsupported vertex element type"); break;
+						}
+						break;
+					case 3:
+						switch (vertexElements[i].type)
+						{
+							case VertexElementType::Int: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_SINT; break;
+							case VertexElementType::UInt: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_UINT; break;
+							case VertexElementType::Float: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
+							case VertexElementType::Invalid: throw RenderDeviceError("Failed to create D3D11VertexLayout:\nInvalid vertex element type"); break;
+							default: throw RenderDeviceError("Failed to create D3D11VertexLayout:\nUnsupported vertex element type"); break;
+						}
+						break;
+					case 4:
+						switch (vertexElements[i].type)
+						{
+							case VertexElementType::Byte: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_SINT; break;
+							case VertexElementType::Short: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SINT; break;
+							case VertexElementType::Int: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_SINT; break;
+							case VertexElementType::UByte: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UINT; break;
+							case VertexElementType::UShort: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_UINT; break;
+							case VertexElementType::UInt: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT; break;
+							case VertexElementType::NByte: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_SNORM; break;
+							case VertexElementType::NShort: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SNORM; break;
+							case VertexElementType::NUByte: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UNORM; break;
+							case VertexElementType::NUShort: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_UNORM; break;
+							case VertexElementType::HalfFloat: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_FLOAT; break;
+							case VertexElementType::Float: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
+							case VertexElementType::Invalid: throw RenderDeviceError("Faield to create D3D11VertexLayout:\nInvalid vertex element type"); break;
+							default: throw RenderDeviceError("Faield to create D3D11VertexLayout:\nUnsupported vertex element type"); break;
+						}
+						break;
+					default: throw RenderDeviceError("Faield to create D3D11VertexLayout:\nUnsupported vertex element component count"); break;
+				}
+			}
+		}
+		catch (...)
+		{
+			for (size_t i = 0; i < vertexElementCount; ++i)
+				if (names[i] != nullptr)
+					delete[] names[i];
+			delete[] names;
+			delete[] inputDesc;		
+			throw;
+		}
+
+		HRESULT hr = ((ID3D11Device*)device->m_device)->CreateInputLayout(inputDesc, vertexElementCount, vertexShader->blob->GetBufferPointer(), vertexShader->blob->GetBufferSize(), &inputLayout);
+		delete[] inputDesc;
+		for (size_t i = 0; i < vertexElementCount; ++i)
+			delete[] names[i];
+		delete[] names;
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11VertexLayout:\nFailed to create input layout:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}	
 	}
 
 	virtual ~D3D11VertexLayout() final
 	{
-		
+		inputLayout->Release();
+		delete[] offsets;
+		delete[] strides;
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11InputLayout* inputLayout;
+	UINT* offsets;
+	UINT* strides;
 };
 
 class D3D11VertexArray final : public VertexArray
@@ -386,27 +543,116 @@ class D3D11VertexArray final : public VertexArray
 public:
 	D3D11VertexArray(D3D11RenderDevice* device, size_t bufferCount, D3D11VertexBuffer** buffers, D3D11VertexLayout* layout)
 	{
-		
+		this->device = device;
+		this->buffers = new ID3D11Buffer*[bufferCount];
+		for (size_t i = 0; i < bufferCount; ++i)
+			this->buffers[i] = buffers[i]->buffer;
+		this->bufferCount = bufferCount;
+		this->layout = layout;
 	}
 
 	virtual ~D3D11VertexArray() final
 	{
 		
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11Buffer** buffers;
+	D3D11VertexLayout* layout;
+	size_t bufferCount;
 };
 
 class D3D11IndexBuffer final : public IndexBuffer
 {
 public:
-	D3D11IndexBuffer(D3D11RenderDevice* device, IndexType _type, size_t size, const void* data, BufferUsage _usage)
+	D3D11IndexBuffer(D3D11RenderDevice* device, IndexType type, size_t size, const void* data, BufferUsage usage)
 	{
-		
+		this->device = device;
+
+		HRESULT hr;
+		D3D11_BUFFER_DESC desc;
+
+		switch (usage)
+		{
+			case BufferUsage::Default: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Static: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+			case BufferUsage::Invalid: throw RenderDeviceError("Failed to create D3D11IndexBuffer:\nInvalid buffer usage mode"); break;
+			default: throw RenderDeviceError("Failed to create D3D11IndexBuffer:\nUnknown buffer usage mode"); break;
+		}
+
+		switch (type)
+		{
+			case IndexType::UByte: format = DXGI_FORMAT_R8_UINT; break;
+			case IndexType::UShort: format = DXGI_FORMAT_R16_UINT; break;
+			case IndexType::UInt: format = DXGI_FORMAT_R32_UINT; break;
+			case IndexType::Invalid: throw RenderDeviceError("Failed to create D3D11IndexBuffer:\nInvalid index type"); break;
+			default: throw RenderDeviceError("Failed to create D3D11IndexBuffer:\nUnknown index type"); break;
+		}
+
+		desc.ByteWidth = size;
+		desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		desc.MiscFlags = 0;
+
+		if (data == nullptr)
+		{
+			if (usage != BufferUsage::Dynamic)
+				throw RenderDeviceError("Failed to create D3D11IndexBuffer:\nOnly dynamic index buffers can be initialized with null data");
+
+			hr = ((ID3D11Device*)device->m_device)->CreateBuffer(&desc, NULL, &buffer);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11IndexBuffer:\nFailed to create buffer:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
+		else
+		{
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = data;
+			initData.SysMemPitch = 0;
+			initData.SysMemSlicePitch = 0;
+
+			hr = ((ID3D11Device*)device->m_device)->CreateBuffer(&desc, &initData, &buffer);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11IndexBuffer:\nFailed to create buffer:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
 	}
 
 	virtual ~D3D11IndexBuffer() final
 	{
-		
+		buffer->Release();
 	}
+
+	virtual void* Map() final
+	{
+		D3D11_MAPPED_SUBRESOURCE map;
+		HRESULT hr = ((ID3D11DeviceContext*)device->m_deviceContext)->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to map D3D11IndexBuffer:\nFailed to map buffer:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
+		return map.pData;
+	}
+
+	virtual void Unmap() final
+	{
+		((ID3D11DeviceContext*)device->m_deviceContext)->Unmap(buffer, 0);
+	}
+
+	D3D11RenderDevice* device;
+	ID3D11Buffer* buffer;
+	DXGI_FORMAT format;
 };
 
 class D3D11RasterState final : public RasterState
@@ -477,11 +723,17 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 		scd.SampleDesc.Quality = 0;
 		scd.Windowed = (window->GetMode() == Input::Window::Mode::Fullscreen) ? FALSE : TRUE;
 
+		UINT flags = 0;
+
+#ifdef MAGMA_FRAMEWORK_RENDER_DEVICE_DEBUG
+		flags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
 		hr = D3D11CreateDeviceAndSwapChain(
 				NULL,
 				D3D_DRIVER_TYPE_HARDWARE,
 				NULL,
-				NULL,
+				flags,
 				NULL,
 				NULL,
 				D3D11_SDK_VERSION,
@@ -704,7 +956,8 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyPipeline(Pipeline * p
 void Magma::Framework::Graphics::D3D11RenderDevice::SetPipeline(Pipeline * pipeline)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	((ID3D11DeviceContext*)m_deviceContext)->VSSetShader(static_cast<D3D11Pipeline*>(pipeline)->vertexShader->vs, NULL, 0);
+	((ID3D11DeviceContext*)m_deviceContext)->PSSetShader(static_cast<D3D11Pipeline*>(pipeline)->pixelShader->ps, NULL, 0);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -767,7 +1020,11 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyVertexArray(VertexArr
 void Magma::Framework::Graphics::D3D11RenderDevice::SetVertexArray(VertexArray * vertexArray)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	auto va = static_cast<D3D11VertexArray*>(vertexArray);
+	auto l = va->layout;
+
+	((ID3D11DeviceContext*)m_deviceContext)->IASetInputLayout(l->inputLayout);
+	((ID3D11DeviceContext*)m_deviceContext)->IASetVertexBuffers(0, va->bufferCount, va->buffers, l->strides, l->offsets);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -794,7 +1051,8 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyIndexBuffer(IndexBuff
 void Magma::Framework::Graphics::D3D11RenderDevice::SetIndexBuffer(IndexBuffer * indexBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	auto b = static_cast<D3D11IndexBuffer*>(indexBuffer);
+	((ID3D11DeviceContext*)m_deviceContext)->IASetIndexBuffer(b->buffer, b->format, 0);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -903,7 +1161,8 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Clear(glm::vec4 color, float
 void Magma::Framework::Graphics::D3D11RenderDevice::DrawTriangles(size_t offset, size_t count)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	((ID3D11DeviceContext*)m_deviceContext)->Draw(offset, count);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -912,7 +1171,8 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DrawTriangles(size_t offset,
 void Magma::Framework::Graphics::D3D11RenderDevice::DrawTrianglesIndexed(size_t offset, size_t count)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	((ID3D11DeviceContext*)m_deviceContext)->DrawIndexed(count, offset, 0);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
