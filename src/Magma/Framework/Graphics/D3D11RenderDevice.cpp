@@ -24,25 +24,165 @@ using namespace Magma::Framework;
 class D3D11Texture2D final : public Texture2D
 {
 public:
-	D3D11Texture2D(D3D11RenderDevice* device, size_t width, size_t height, TextureFormat _format, const void* data)
+	D3D11Texture2D(D3D11RenderDevice* device, size_t width, size_t height, TextureFormat _format, const void* data, BufferUsage usage, bool isRenderTarget)
 	{
+		HRESULT hr;
+
+		this->device = device;
+
+		// Create texture
+		D3D11_TEXTURE2D_DESC desc;
+
+		desc.Width = width;
+		desc.Height = height;
 		
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+
+		switch (usage)
+		{
+			case BufferUsage::Default: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Static: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+			case BufferUsage::Invalid: throw RenderDeviceError("Failed to create D3D11Texture2D:\nInvalid buffer usage mode"); break;
+			default: throw RenderDeviceError("Failed to create D3D11Texture2D:\nUnknown buffer usage mode"); break;
+		}
+
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | (isRenderTarget ? D3D11_BIND_RENDER_TARGET : 0);
+		desc.MiscFlags = 0;
+
+		switch (_format)
+		{
+			case TextureFormat::R8SNorm: desc.Format = DXGI_FORMAT_R8_SNORM; formatSize = 1; break;
+			case TextureFormat::R16SNorm: desc.Format = DXGI_FORMAT_R16_SNORM; formatSize = 2; break;
+			case TextureFormat::RG8SNorm: desc.Format = DXGI_FORMAT_R8G8_SNORM; formatSize = 2; break;
+			case TextureFormat::RG16SNorm: desc.Format = DXGI_FORMAT_R16G16_SNORM; formatSize = 4; break;
+			case TextureFormat::RGBA8SNorm: desc.Format = DXGI_FORMAT_R8G8B8A8_SNORM; formatSize = 4; break;
+			case TextureFormat::RGBA16SNorm: desc.Format = DXGI_FORMAT_R16G16B16A16_SNORM; formatSize = 8; break;
+			
+			case TextureFormat::R8UNorm: desc.Format = DXGI_FORMAT_R8_UNORM; formatSize = 1; break;
+			case TextureFormat::R16UNorm: desc.Format = DXGI_FORMAT_R16_UNORM; formatSize = 2; break;
+			case TextureFormat::RG8UNorm: desc.Format = DXGI_FORMAT_R8G8_UNORM; formatSize = 2; break;
+			case TextureFormat::RG16UNorm: desc.Format = DXGI_FORMAT_R16G16_UNORM; formatSize = 4; break;
+			case TextureFormat::RGBA8UNorm: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; formatSize = 4; break;
+			case TextureFormat::RGBA16UNorm: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; formatSize = 8; break;
+			
+			case TextureFormat::R8Int: desc.Format = DXGI_FORMAT_R8_SINT; formatSize = 1; break;
+			case TextureFormat::R16Int: desc.Format = DXGI_FORMAT_R16_SINT; formatSize = 2; break;
+			case TextureFormat::RG8Int: desc.Format = DXGI_FORMAT_R8G8_SINT; formatSize = 2; break;
+			case TextureFormat::RG16Int: desc.Format = DXGI_FORMAT_R16G16_SINT; formatSize = 4; break;
+			case TextureFormat::RGBA8Int: desc.Format = DXGI_FORMAT_R8G8B8A8_SINT; formatSize = 4; break;
+			case TextureFormat::RGBA16Int: desc.Format = DXGI_FORMAT_R16G16B16A16_SINT; formatSize = 8; break;
+
+			case TextureFormat::R8UInt: desc.Format = DXGI_FORMAT_R8_UINT; formatSize = 1; break;
+			case TextureFormat::R16UInt: desc.Format = DXGI_FORMAT_R16_UINT; formatSize = 2; break;
+			case TextureFormat::RG8UInt: desc.Format = DXGI_FORMAT_R8G8_UINT; formatSize = 2; break;
+			case TextureFormat::RG16UInt: desc.Format = DXGI_FORMAT_R16G16_UINT; formatSize = 4; break;
+			case TextureFormat::RGBA8UInt: desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; formatSize = 4; break;
+			case TextureFormat::RGBA16UInt: desc.Format = DXGI_FORMAT_R16G16B16A16_UINT; formatSize = 8; break;
+
+			case TextureFormat::R32Float: desc.Format = DXGI_FORMAT_R32_FLOAT; formatSize = 4; break;
+			case TextureFormat::RG32Float: desc.Format = DXGI_FORMAT_R32G32_FLOAT; formatSize = 8; break;
+			case TextureFormat::RGB32Float: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; formatSize = 12; break;
+			case TextureFormat::RGBA32Float: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; formatSize = 16; break;
+
+			case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nInvalid format"); break;
+			default: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nUnsupported format"); break;
+		}
+
+		format = desc.Format;
+
+		if (data == nullptr)
+		{
+			if (usage != BufferUsage::Dynamic)
+				throw RenderDeviceError("Failed to create D3D11Texture2D:\nOnly dynamic 2D textures can be initialized with null data");
+
+			hr = ((ID3D11Device*)device->m_device)->CreateTexture2D(&desc, nullptr, &texture);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11Texture2D:\nFailed to create 2D texture:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
+		else
+		{
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = data;
+			initData.SysMemPitch = formatSize * width;
+			initData.SysMemSlicePitch = 0;
+
+			hr = ((ID3D11Device*)device->m_device)->CreateTexture2D(&desc, &initData, &texture);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11Texture2D:\nFailed to create 2D texture:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}	
+
+		// Create resource view
+		hr = ((ID3D11Device*)device->m_device)->CreateShaderResourceView(texture, NULL, &resourceView);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11Texture2D:\nFailed to create shader resource view:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
+
+		// Create render target view
+		renderTargetView = nullptr;
+		if (isRenderTarget)
+		{
+			hr = ((ID3D11Device*)device->m_device)->CreateRenderTargetView(texture, NULL, &renderTargetView);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11Texture2D:\nFailed to create render target view:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
 	}
 
 	virtual ~D3D11Texture2D() final
 	{
-		
+		resourceView->Release();
+		if (renderTargetView != nullptr)
+			renderTargetView->Release();
+		texture->Release();
 	}
 
 	virtual void Update(size_t dstX, size_t dstY, size_t width, size_t height, void* data) final
 	{
-		
+		D3D11_BOX dstBox;
+		dstBox.back = 1;
+		dstBox.front = 0;
+		dstBox.left = dstX;
+		dstBox.top = dstY;
+		dstBox.right = dstX + width;
+		dstBox.bottom = dstY + height;
+
+		((ID3D11DeviceContext*)device->m_deviceContext)->UpdateSubresource(texture, 0, &dstBox, data, formatSize * width, 0);
 	}
 
 	virtual void GenerateMipmaps()
 	{
-		
+		((ID3D11DeviceContext*)device->m_deviceContext)->GenerateMips(resourceView);
 	}
+
+	DXGI_FORMAT format;
+	UINT formatSize;
+	D3D11RenderDevice* device;
+	ID3D11Texture2D* texture;
+	ID3D11ShaderResourceView* resourceView;
+	ID3D11RenderTargetView* renderTargetView;
 };
 
 class D3D11Sampler2D : public Sampler2D
@@ -141,6 +281,7 @@ public:
 	virtual VertexBindingPoint* GetBindingPoint(const char * name) final;
 
 	ShaderData data;
+	std::unordered_map<std::string, D3D11VertexBindingPoint*> bindingPoints;
 	D3D11RenderDevice* device;
 	ID3D11VertexShader* vs;
 	ID3DBlob* blob;
@@ -149,8 +290,8 @@ public:
 class D3D11VertexBindingPoint final : public VertexBindingPoint
 {
 public:
-	D3D11VertexBindingPoint(D3D11VertexShader* _shader, int _location)
-		: shader(_shader), location(_location)
+	D3D11VertexBindingPoint(D3D11VertexShader* _shader, int _index, bool _isTexture)
+		: shader(_shader), index(_index), isTexture(_isTexture)
 	{
 		// Empty
 	}
@@ -162,7 +303,8 @@ public:
 
 	virtual void Bind(Texture2D* texture) final
 	{
-		
+		auto tex = static_cast<D3D11Texture2D*>(texture);
+		((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetShaderResources(index, 1, &tex->resourceView);
 	}
 
 	virtual void Bind(Sampler2D* sampler) final
@@ -176,11 +318,41 @@ public:
 	}
 
 	D3D11VertexShader* shader;
-	int location;
+	bool isTexture;
+	int index;
 };
 
 VertexBindingPoint * D3D11VertexShader::GetBindingPoint(const char * name)
 {
+	// Check current binding points
+	for (auto& bp : bindingPoints)
+		if (bp.first == name)
+			return bp.second;
+
+	// Check textures
+	{
+		const auto& vars = data.GetTexture2DVariables();
+		for (auto& v : vars)
+			if (v.name == name)
+			{
+				auto bp = new D3D11VertexBindingPoint(this, v.index, true);
+				bindingPoints.insert(std::make_pair(std::string(name), bp));
+				return bp;
+			}
+	}
+
+	// Check constant buffers
+	{
+		const auto& vars = data.GetShaderConstantBuffers();
+		for (auto& v : vars)
+			if (v.name == name)
+			{
+				auto bp = new D3D11VertexBindingPoint(this, v.index, false);
+				bindingPoints.insert(std::make_pair(std::string(name), bp));
+				return bp;
+			}
+	}
+
 	return nullptr;
 }
 
@@ -189,6 +361,7 @@ class D3D11PixelShader : public PixelShader
 {
 public:
 	D3D11PixelShader(D3D11RenderDevice* device, const ShaderData& data)
+		: data(data)
 	{
 		this->device = device;
 
@@ -240,6 +413,8 @@ public:
 
 	virtual PixelBindingPoint * GetBindingPoint(const char * name) final;
 
+	ShaderData data;
+	std::unordered_map<std::string, D3D11PixelBindingPoint*> bindingPoints;
 	D3D11RenderDevice* device;
 	ID3D11PixelShader* ps;
 	ID3DBlob* blob;
@@ -248,8 +423,8 @@ public:
 class D3D11PixelBindingPoint final : public PixelBindingPoint
 {
 public:
-	D3D11PixelBindingPoint(D3D11PixelShader* _shader, int _location)
-		: shader(_shader), location(_location)
+	D3D11PixelBindingPoint(D3D11PixelShader* _shader, int _index, bool _isTexture)
+		: shader(_shader), index(_index), isTexture(_isTexture)
 	{
 		// Empty
 	}
@@ -261,7 +436,8 @@ public:
 
 	virtual void Bind(Texture2D* texture) final
 	{
-
+		auto tex = static_cast<D3D11Texture2D*>(texture);
+		((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetShaderResources(index, 1, &tex->resourceView);
 	}
 
 	virtual void Bind(Sampler2D* sampler) final
@@ -275,11 +451,41 @@ public:
 	}
 
 	D3D11PixelShader* shader;
-	int location;
+	bool isTexture;
+	int index;
 };
 
 PixelBindingPoint * D3D11PixelShader::GetBindingPoint(const char * name)
 {
+	// Check current binding points
+	for (auto& bp : bindingPoints)
+		if (bp.first == name)
+			return bp.second;
+
+	// Check textures
+	{
+		const auto& vars = data.GetTexture2DVariables();
+		for (auto& v : vars)
+			if (v.name == name)
+			{
+				auto bp = new D3D11PixelBindingPoint(this, v.index, true);
+				bindingPoints.insert(std::make_pair(std::string(name), bp));
+				return bp;
+			}
+	}
+
+	// Check constant buffers
+	{
+		const auto& vars = data.GetShaderConstantBuffers();
+		for (auto& v : vars)
+			if (v.name == name)
+			{
+				auto bp = new D3D11PixelBindingPoint(this, v.index, false);
+				bindingPoints.insert(std::make_pair(std::string(name), bp));
+				return bp;
+			}
+	}
+
 	return nullptr;
 }
 
@@ -1259,10 +1465,10 @@ void Magma::Framework::Graphics::D3D11RenderDevice::SetIndexBuffer(IndexBuffer *
 #endif
 }
 
-Texture2D * Magma::Framework::Graphics::D3D11RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data)
+Texture2D * Magma::Framework::Graphics::D3D11RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data, BufferUsage usage, bool isRenderTarget)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	return new D3D11Texture2D(this, width, height, format, data);
+	return new D3D11Texture2D(this, width, height, format, data, usage, isRenderTarget);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif

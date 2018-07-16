@@ -78,16 +78,6 @@ namespace Magma
 				/// <summary>
 				///		Signed chars that get normalized into a [-1; 1] floating point
 				/// </summary>
-				RGB8SNorm,
-
-				/// <summary>
-				///		Signed shorts that get normalized into a [-1; 1] floating point
-				/// </summary>
-				RGB16SNorm,
-
-				/// <summary>
-				///		Signed chars that get normalized into a [-1; 1] floating point
-				/// </summary>
 				RGBA8SNorm,
 
 				/// <summary>
@@ -114,16 +104,6 @@ namespace Magma
 				///		Unsigned shorts that get normalized into a [0; 1] floating point
 				/// </summary>
 				RG16UNorm,
-
-				/// <summary>
-				///		Unsigned chars that get normalized into a [0; 1] floating point
-				/// </summary>
-				RGB8UNorm,
-
-				/// <summary>
-				///		Unsigned shorts that get normalized into a [0; 1] floating point
-				/// </summary>
-				RGB16UNorm,
 
 				/// <summary>
 				///		Unsigned chars that get normalized into a [0; 1] floating point
@@ -194,16 +174,6 @@ namespace Magma
 				///		Unsigned shorts
 				/// </summary>
 				RG16UInt,
-
-				/// <summary>
-				///		Unsigned chars
-				/// </summary>
-				RGB8UInt,
-
-				/// <summary>
-				///		Unsigned shorts
-				/// </summary>
-				RGB16UInt,
 
 				/// <summary>
 				///		Unsigned chars
@@ -1342,8 +1312,10 @@ namespace Magma
 				/// <param name="height">Texture height</param>
 				/// <param name="format">Texture format</param>
 				/// <param name="data">Texture initial data (set to nullptr to create empty texture)</param>
+				/// <param name="usage">Texture usage mode</param>
+				/// <param name="isRenderTarget">Can the texture be used as a render target?</param>
 				/// <returns>2D texture handle</returns>
-				virtual Texture2D* CreateTexture2D(size_t width, size_t height, TextureFormat format, const void* data = nullptr) = 0;
+				virtual Texture2D* CreateTexture2D(size_t width, size_t height, TextureFormat format, const void* data = nullptr, BufferUsage usage = BufferUsage::Default, bool isRenderTarget = false) = 0;
 				
 				/// <summary>
 				///		Destroys a 2D texture

@@ -34,7 +34,7 @@ using namespace Magma::Framework;
 class OGL410Texture2D final : public Texture2D
 {
 public:
-	OGL410Texture2D(size_t width, size_t height, TextureFormat _format, const void* data)
+	OGL410Texture2D(size_t width, size_t height, TextureFormat _format, const void* data, BufferUsage usage, bool isRenderTarget)
 	{
 		switch (_format)
 		{
@@ -42,8 +42,6 @@ public:
 			case TextureFormat::R16SNorm: internalFormat = GL_R16_SNORM; type = GL_SHORT; format = GL_RED; break;
 			case TextureFormat::RG8SNorm: internalFormat = GL_RG8_SNORM; type = GL_BYTE; format = GL_RG; break;
 			case TextureFormat::RG16SNorm: internalFormat = GL_RG16_SNORM; type = GL_SHORT; format = GL_RG; break;
-			case TextureFormat::RGB8SNorm: internalFormat = GL_RGB8_SNORM; type = GL_BYTE; format = GL_RGB; break;
-			case TextureFormat::RGB16SNorm: internalFormat = GL_RGB16_SNORM; type = GL_SHORT; format = GL_RGB; break;
 			case TextureFormat::RGBA8SNorm: internalFormat = GL_RGBA8_SNORM; type = GL_BYTE; format = GL_RGBA; break;
 			case TextureFormat::RGBA16SNorm: internalFormat = GL_RGBA16_SNORM; type = GL_SHORT; format = GL_RGBA; break;
 
@@ -51,8 +49,6 @@ public:
 			case TextureFormat::R16UNorm: internalFormat = GL_R16; type = GL_UNSIGNED_SHORT; format = GL_RED; break;
 			case TextureFormat::RG8UNorm: internalFormat = GL_RG8; type = GL_UNSIGNED_BYTE; format = GL_RG; break;
 			case TextureFormat::RG16UNorm: internalFormat = GL_RG16; type = GL_UNSIGNED_SHORT; format = GL_RG; break;
-			case TextureFormat::RGB8UNorm: internalFormat = GL_RGB8; type = GL_UNSIGNED_BYTE; format = GL_RGB; break;
-			case TextureFormat::RGB16UNorm: internalFormat = GL_RGB16; type = GL_UNSIGNED_SHORT; format = GL_RGB; break;
 			case TextureFormat::RGBA8UNorm: internalFormat = GL_RGBA8; type = GL_UNSIGNED_BYTE; format = GL_RGBA; break;
 			case TextureFormat::RGBA16UNorm: internalFormat = GL_RGBA16; type = GL_UNSIGNED_SHORT; format = GL_RGBA; break;
 
@@ -69,8 +65,6 @@ public:
 			case TextureFormat::R16UInt: internalFormat = GL_R16UI; type = GL_UNSIGNED_SHORT; format = GL_RED; break;
 			case TextureFormat::RG8UInt: internalFormat = GL_RG8UI; type = GL_UNSIGNED_BYTE; format = GL_RG; break;
 			case TextureFormat::RG16UInt: internalFormat = GL_RG16UI; type = GL_UNSIGNED_SHORT; format = GL_RG; break;
-			case TextureFormat::RGB8UInt: internalFormat = GL_RGB8UI; type = GL_UNSIGNED_BYTE; format = GL_RGB; break;
-			case TextureFormat::RGB16UInt: internalFormat = GL_RGB16UI; type = GL_UNSIGNED_SHORT; format = GL_RGB; break;
 			case TextureFormat::RGBA8UInt: internalFormat = GL_RGBA8UI; type = GL_UNSIGNED_BYTE; format = GL_RGBA; break;
 			case TextureFormat::RGBA16UInt: internalFormat = GL_RGBA16UI; type = GL_UNSIGNED_SHORT; format = GL_RGBA; break;
 
@@ -1181,10 +1175,10 @@ void Magma::Framework::Graphics::OGL410RenderDevice::SetIndexBuffer(IndexBuffer 
 #endif	
 }
 
-Texture2D * Magma::Framework::Graphics::OGL410RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data)
+Texture2D * Magma::Framework::Graphics::OGL410RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data, BufferUsage usage, bool isRenderTarget)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	return new OGL410Texture2D(width, height, format, data);
+	return new OGL410Texture2D(width, height, format, data, usage, isRenderTarget);
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 	return nullptr;

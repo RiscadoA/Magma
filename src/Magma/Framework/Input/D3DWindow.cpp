@@ -362,6 +362,7 @@ int WINAPI WinMain(
 	ghInstance = hInstance;
 	gnCmdShow = nCmdShow;
 
+	// Run program
 	Main(0, nullptr);
 
 	return 0;

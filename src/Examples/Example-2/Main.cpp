@@ -1,9 +1,12 @@
-﻿#include <Magma/Framework/Input/D3DWindow.hpp>
-#include <Magma/Framework/Input/GLWindow.hpp>
+﻿#include <Magma/Framework/Input/GLWindow.hpp>
 #include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
 #include <Magma/Framework/Graphics/OGL410Assembler.hpp>
+
+#include <Magma/Framework/Input/D3DWindow.hpp>
+#include <Magma/Framework/Graphics/D3D11RenderDevice.hpp>
+#include <Magma/Framework/Graphics/D3D11Assembler.hpp>
+
 #include <Magma/Framework/Files/STDFileSystem.hpp>
-#include <Magma/Framework/String/UTF8.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
 #include <iostream>
 
@@ -65,7 +68,11 @@ void LoadScene(Scene& scene)
 
 	// Create window
 	{
-		scene.window = new Input::GLWindow(800, 600, "Tetris", Input::Window::Mode::Windowed);
+#ifdef USE_GL
+		scene.window = new Framework::Input::GLWindow(800, 600, "Example-2", Framework::Input::Window::Mode::Windowed);
+#else
+		scene.window = new Framework::Input::D3DWindow(800, 600, "Example-2", Framework::Input::Window::Mode::Windowed);
+#endif
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
@@ -73,7 +80,11 @@ void LoadScene(Scene& scene)
 	// Create context
 	{
 		Graphics::RenderDeviceSettings settings;
-		scene.device = new Graphics::OGL410RenderDevice();
+#ifdef USE_GL
+		scene.device = new Framework::Graphics::OGL410RenderDevice();
+#else
+		scene.device = new Framework::Graphics::D3D11RenderDevice();
+#endif
 		scene.device->Init(scene.window, settings);
 	}
 

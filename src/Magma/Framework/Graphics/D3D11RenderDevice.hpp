@@ -35,7 +35,7 @@ namespace Magma
 				virtual IndexBuffer * CreateIndexBuffer(IndexType type, size_t size, const void * data = nullptr, BufferUsage usage = BufferUsage::Default) override;
 				virtual void DestroyIndexBuffer(IndexBuffer * indexBuffer) override;
 				virtual void SetIndexBuffer(IndexBuffer * indexBuffer) override;
-				virtual Texture2D * CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data = nullptr) override;
+				virtual Texture2D * CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data = nullptr, BufferUsage usage = BufferUsage::Default, bool isRenderTarget = false) override;
 				virtual void DestroyTexture2D(Texture2D * texture) override;
 				virtual Sampler2D * CreateSampler2D(const Sampler2DDesc & desc) override;
 				virtual void DestroySampler2D(Sampler2D * sampler) override;

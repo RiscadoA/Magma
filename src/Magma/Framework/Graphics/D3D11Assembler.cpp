@@ -65,8 +65,8 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 	// Add texture 2D variables
 	for (auto& tex : data.GetTexture2DVariables())
 	{
-		ss << "Texture2D tex_" << tex.index << "; // Texture2D variable \"" << tex.name << "\"; index " << tex.index << std::endl;
-		ss << "SamplerState tex_" << tex.index << "_sampler; // Texture2D variable sampler \"" << tex.name << "\"; index " << tex.index << std::endl;
+		ss << "Texture2D tex_" << tex.index << " : register(t" << tex.index << "); // Texture2D variable \"" << tex.name << "\"; index " << tex.index << std::endl;
+		ss << "SamplerState tex_" << tex.index << "_sampler : register(s" << tex.index << "); // Texture2D variable sampler \"" << tex.name << "\"; index " << tex.index << std::endl;
 	}
 	if (data.GetTexture2DVariables().size() > 0)
 		ss << std::endl;
