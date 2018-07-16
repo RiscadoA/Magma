@@ -1155,7 +1155,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateSampler(const SamplerSett
 		}
 
 		// Set adress mode for coordinate U
-		switch (settings.adressU)
+		switch (settings.addressU)
 		{
 			case TextureAdressMode::Wrap: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
 			case TextureAdressMode::Mirror: desc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR; break;
@@ -1166,7 +1166,7 @@ void * Magma::Framework::Graphics::D3D11Context::CreateSampler(const SamplerSett
 		}
 
 		// Set adress mode for coordinate U
-		switch (settings.adressV)
+		switch (settings.addressV)
 		{
 			case TextureAdressMode::Wrap: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
 			case TextureAdressMode::Mirror: desc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR; break;

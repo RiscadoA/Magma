@@ -154,8 +154,8 @@ namespace Magma
 			{
 				TextureFilter minFilter = TextureFilter::Nearest;
 				TextureFilter magFilter = TextureFilter::Nearest;
-				TextureAdressMode adressU = TextureAdressMode::Border;
-				TextureAdressMode adressV = TextureAdressMode::Border;
+				TextureAdressMode addressU = TextureAdressMode::Border;
+				TextureAdressMode addressV = TextureAdressMode::Border;
 				glm::vec4 borderColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 			};
 

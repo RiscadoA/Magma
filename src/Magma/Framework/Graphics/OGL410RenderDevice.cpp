@@ -81,10 +81,11 @@ public:
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
 
 		GL_CHECK_ERROR("Failed to create OGL410Texture2D");
 	}
@@ -122,7 +123,7 @@ public:
 		GLenum minFilter, magFilter;
 		GLenum wrapS, wrapT;
 
-		switch (desc.adressU)
+		switch (desc.addressU)
 		{
 			case TextureAdressMode::Repeat: wrapS = GL_REPEAT; break;
 			case TextureAdressMode::Mirror: wrapS = GL_MIRRORED_REPEAT; break;
@@ -132,7 +133,7 @@ public:
 			default: throw RenderDeviceError("Failed to create OGL410Sampler2D:\nUnsupported texture coordinate U adress mode"); break;
 		}
 
-		switch (desc.adressV)
+		switch (desc.addressV)
 		{
 			case TextureAdressMode::Repeat: wrapT = GL_REPEAT; break;
 			case TextureAdressMode::Mirror: wrapT = GL_MIRRORED_REPEAT; break;
@@ -182,6 +183,7 @@ public:
 		glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, magFilter);
 		glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, wrapS);
 		glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, wrapT);
+		glSamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
 
 		GL_CHECK_ERROR("Failed to create OGL410Sampler2D {2}");
 	}

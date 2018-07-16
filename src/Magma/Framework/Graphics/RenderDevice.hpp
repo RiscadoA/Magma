@@ -311,17 +311,22 @@ namespace Magma
 				/// <summary>
 				///		Texture adress mode on coordinate U
 				/// </summary>
-				TextureAdressMode adressU = TextureAdressMode::Repeat;
+				TextureAdressMode addressU = TextureAdressMode::Repeat;
 
 				/// <summary>
 				///		Texture adress mode on coordinate V
 				/// </summary>
-				TextureAdressMode adressV = TextureAdressMode::Repeat;
+				TextureAdressMode addressV = TextureAdressMode::Repeat;
 
 				/// <summary>
 				///		Border color (when using TextureAdressMode::Border)
 				/// </summary>
 				glm::vec4 border = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+				/// <summary>
+				///		Max texture anisotropy (uses anistropic filtering if bigger than 1)
+				/// </summary>
+				unsigned int maxAnisotropy = 1;
 			};
 
 			/// <summary>

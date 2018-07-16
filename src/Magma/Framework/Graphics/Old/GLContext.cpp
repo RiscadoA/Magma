@@ -760,7 +760,7 @@ void * Magma::Framework::Graphics::GLContext::CreateSampler(const SamplerSetting
 
 		try
 		{
-			switch (settings.adressU)
+			switch (settings.addressU)
 			{
 				case TextureAdressMode::Wrap: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_S, GL_REPEAT); break;
 				case TextureAdressMode::Mirror: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT); break;
@@ -770,7 +770,7 @@ void * Magma::Framework::Graphics::GLContext::CreateSampler(const SamplerSetting
 				default: throw std::runtime_error("Failed to create sampler on GLContext:\nInvalid sampler settings:\nUnsupported U coordinate texture adress mode"); break;
 			}
 
-			switch (settings.adressV)
+			switch (settings.addressV)
 			{
 				case TextureAdressMode::Wrap: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_T, GL_REPEAT); break;
 				case TextureAdressMode::Mirror: glSamplerParameterf(sampler->sampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT); break;

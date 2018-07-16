@@ -51,8 +51,8 @@ public:
 			default: throw RenderDeviceError("Failed to create D3D11Texture2D:\nUnknown buffer usage mode"); break;
 		}
 
-		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | (isRenderTarget ? D3D11_BIND_RENDER_TARGET : 0);
-		desc.MiscFlags = 0;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
 		switch (_format)
 		{
@@ -188,15 +188,83 @@ public:
 class D3D11Sampler2D : public Sampler2D
 {
 public:
-	D3D11Sampler2D(D3D11RenderDevice* device, const Sampler2DDesc& desc)
+	D3D11Sampler2D(D3D11RenderDevice* device, const Sampler2DDesc& _desc)
 	{
-		
+		HRESULT hr;
+
+		this->device = device;
+
+		D3D11_SAMPLER_DESC desc;
+
+		if (_desc.maxAnisotropy > 1)
+			desc.Filter = D3D11_FILTER_ANISOTROPIC;
+		else if (_desc.minFilter == TextureFilter::Nearest && _desc.mipmapFilter != TextureFilter::Linear && _desc.magFilter == TextureFilter::Nearest)
+			desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		else if (_desc.minFilter == TextureFilter::Linear && _desc.mipmapFilter != TextureFilter::Linear && _desc.magFilter == TextureFilter::Nearest)
+			desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+		else if (_desc.minFilter == TextureFilter::Linear && _desc.mipmapFilter != TextureFilter::Linear && _desc.magFilter == TextureFilter::Linear)
+			desc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+		else if (_desc.minFilter == TextureFilter::Nearest && _desc.mipmapFilter != TextureFilter::Linear && _desc.magFilter == TextureFilter::Linear)
+			desc.Filter = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+		else if (_desc.minFilter == TextureFilter::Nearest && _desc.mipmapFilter == TextureFilter::Linear && _desc.magFilter == TextureFilter::Nearest)
+			desc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+		else if (_desc.minFilter == TextureFilter::Linear && _desc.mipmapFilter == TextureFilter::Linear && _desc.magFilter == TextureFilter::Nearest)
+			desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+		else if (_desc.minFilter == TextureFilter::Linear && _desc.mipmapFilter == TextureFilter::Linear && _desc.magFilter == TextureFilter::Linear)
+			desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		else if (_desc.minFilter == TextureFilter::Nearest && _desc.mipmapFilter == TextureFilter::Linear && _desc.magFilter == TextureFilter::Linear)
+			desc.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+		else
+			throw RenderDeviceError("Failed to create 2D sampler:\nUnsupported/invalid texture filter");
+
+		switch (_desc.addressU)
+		{
+			case TextureAdressMode::Repeat: desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Mirror: desc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR; break;
+			case TextureAdressMode::Clamp: desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP; break;
+			case TextureAdressMode::Border: desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER; break;
+			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nInvalid U adress mode"); break;
+			default: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nUnsupported U adress mode"); break;
+		}
+
+		switch (_desc.addressV)
+		{
+			case TextureAdressMode::Repeat: desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
+			case TextureAdressMode::Mirror: desc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR; break;
+			case TextureAdressMode::Clamp: desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP; break;
+			case TextureAdressMode::Border: desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER; break;
+			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nInvalid V adress mode"); break;
+			default: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nUnsupported V adress mode"); break;
+		}
+
+		desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		desc.BorderColor[0] = _desc.border[0];
+		desc.BorderColor[1] = _desc.border[1];
+		desc.BorderColor[2] = _desc.border[2];
+		desc.BorderColor[3] = _desc.border[3];
+		desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		desc.MaxAnisotropy = _desc.maxAnisotropy;
+		desc.MinLOD = -FLT_MAX;
+		desc.MaxLOD = +FLT_MAX;
+		desc.MipLODBias = 0.0f;
+
+		hr = ((ID3D11Device*)device->m_device)->CreateSamplerState(&desc, &sampler);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11Sampler2D:\nFailed to create sampler state:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
 	}
 
 	virtual ~D3D11Sampler2D() final
 	{
-		
+		sampler->Release();
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11SamplerState* sampler;
 };
 
 class D3D11ConstantBuffer final : public ConstantBuffer
@@ -309,7 +377,8 @@ public:
 
 	virtual void Bind(Sampler2D* sampler) final
 	{
-		
+		auto smplr = static_cast<D3D11Sampler2D*>(sampler);
+		((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetSamplers(index, 1, &smplr->sampler);
 	}
 
 	virtual void Bind(ConstantBuffer* buffer) final
@@ -442,7 +511,8 @@ public:
 
 	virtual void Bind(Sampler2D* sampler) final
 	{
-
+		auto smplr = static_cast<D3D11Sampler2D*>(sampler);
+		((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetSamplers(index, 1, &smplr->sampler);
 	}
 
 	virtual void Bind(ConstantBuffer* buffer) final

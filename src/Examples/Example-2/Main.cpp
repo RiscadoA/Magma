@@ -181,16 +181,6 @@ void LoadScene(Scene& scene)
 		scene.pipeline = scene.device->CreatePipeline(scene.vertexShader, scene.pixelShader);
 	}
 
-	// Load font
-	/*{
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Consolas.ttf");
-		auto size = scene.fileSystem->GetSize(file);
-		auto data = new unsigned char[size];
-		scene.fileSystem->Read(file, data, size);
-		scene.fileSystem->CloseFile(file);
-		scene.font = new Graphics::Font(*scene.context, data, size, 0, 60, 1024, 1024);
-	}*/
-
 	// Load vertex buffer
 	{
 		scene.vertexBuffer = scene.device->CreateVertexBuffer(sizeof(Vertex) * 4, nullptr, Graphics::BufferUsage::Dynamic);
@@ -253,6 +243,7 @@ void LoadScene(Scene& scene)
 		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
 	}
 
+	// Create texture
 	{
 		float data[] =
 		{
@@ -269,54 +260,16 @@ void LoadScene(Scene& scene)
 	{
 		Graphics::Sampler2DDesc desc;
 
-		desc.adressU = Graphics::TextureAdressMode::Border;
-		desc.adressV = Graphics::TextureAdressMode::Border;
+		desc.addressU = Graphics::TextureAdressMode::Clamp;
+		desc.addressV = Graphics::TextureAdressMode::Clamp;
 		desc.minFilter = Graphics::TextureFilter::Linear;
 		desc.magFilter = Graphics::TextureFilter::Linear;
-		desc.mipmapFilter = Graphics::TextureFilter::Nearest;
-		desc.border = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		desc.mipmapFilter = Graphics::TextureFilter::Linear;
+		desc.maxAnisotropy = 1;
+		desc.border = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		scene.sampler = scene.device->CreateSampler2D(desc);
 	}
-
-	// Create mask texture
-	/*{
-		unsigned char data[] =
-		{
-			0,
-			255,
-			255,
-			255,
-		};
-
-		scene.texture = scene.context->CreateTexture2D(data, 2, 2, Framework::Graphics::TextureFormat::R8UInt);
-	}
-
-	// Get mask texture binding point
-	{
-		scene.textureBP = scene.context->GetTextureBindingPoint(scene.program, "fontTexture");
-	}
-
-	// Create transform constant buffer and get its binding point
-	{
-		scene.transformCBuffer = scene.context->CreateConstantBuffer(nullptr, sizeof(Transform));
-		scene.transformBP = scene.context->GetConstantBindingPoint(scene.program, "transform");
-	}
-
-	// Create material constant buffer and get its binding point
-	{
-		Material mat;
-		mat.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-		scene.materialCBuffer = scene.context->CreateConstantBuffer(&mat, sizeof(Material));
-		scene.materialBP = scene.context->GetConstantBindingPoint(scene.program, "material");
-	}
-
-	{
-		scene.context->CreateVertexLayout(desc, program);
-		scene.context->CreateVertexBuffer(nullptr, 1, Graphics::Usage::Default);
-		scene.context->BindVertexBuffer(buffer, layout);
-	}*/
 }
 
 void CleanScene(Scene& scene)
