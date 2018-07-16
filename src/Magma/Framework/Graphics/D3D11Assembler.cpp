@@ -160,14 +160,14 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 		for (auto& v : data.GetInputVariables())
 			if (v.index == index)
 			{
-				ss << "in.in_" << v.index;
+				ss << "input.in_" << v.index;
 				return;
 			}
 
 		for (auto& v : data.GetOutputVariables())
 			if (v.index == index)
 			{
-				ss << "out.out_" << v.index;
+				ss << "output.out_" << v.index;
 				return;
 			}
 
@@ -187,7 +187,7 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 
 		if (index == 0 && data.GetShaderType() == ShaderType::Vertex)
 		{
-			ss << "out.v_pos";
+			ss << "output.v_pos";
 			return;
 		}
 
@@ -240,11 +240,11 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 	size_t varOut = 0;
 
 	if (data.GetShaderType() == ShaderType::Vertex)
-		ss << "ShaderOutput VS(ShaderInput in)" << std::endl;
+		ss << "ShaderOutput VS(ShaderInput input)" << std::endl;
 	else if (data.GetShaderType() == ShaderType::Pixel)
-		ss << "ShaderOutput PS(ShaderInput in)" << std::endl;
+		ss << "ShaderOutput PS(ShaderInput input)" << std::endl;
 	ss << "{" << std::endl;
-	ss << "\tShaderOutput out;" << std::endl;
+	ss << "\tShaderOutput output;" << std::endl;
 	for (size_t i = 0; i < data.GetBytecodeSize(); ++i)
 	{
 		auto it = &data.GetBytecode()[i];
@@ -903,7 +903,7 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 		}
 	}
 
-	ss << "\treturn out;" << std::endl;
+	ss << "\treturn output;" << std::endl;
 
 	ss << "}" << std::endl;
 

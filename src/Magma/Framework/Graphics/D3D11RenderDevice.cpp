@@ -90,17 +90,58 @@ public:
 	D3D11VertexShader(D3D11RenderDevice* device, const ShaderData& data)
 	{
 		this->device = device;
+
+		HRESULT hr;
+		std::string src;
+
+		blob = nullptr;
+		vs = nullptr;
+
+		// Compile shader
+		{
+			D3D11Assembler::Assemble(data, src);
+			ID3DBlob* errorMessages;
+			hr = D3DCompile(src.c_str(), src.size(), nullptr, nullptr, nullptr, "VS", "vs_4_0", D3D10_SHADER_PACK_MATRIX_COLUMN_MAJOR, 0, &blob, &errorMessages);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create shader on D3D11RenderDevice:\nFailed to compile vertex shader:\n";
+				if (errorMessages)
+					ss << (char*)errorMessages->GetBufferPointer() << std::endl;
+				else
+					ss << "Error: " << _com_error(hr).ErrorMessage() << " - no error messages";
+				ss << "Assembled shader source:" << std::endl << src;
+				throw RenderDeviceError(ss.str());
+			}
+		}
+
+		// Create shader
+		{
+			hr = ((ID3D11Device*)device->m_device)->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), NULL, &vs);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create shader on D3D11RenderDevice:\nFailed to create vertex shader:\n";
+				ss << "Error: " << _com_error(hr).ErrorMessage() << std::endl;
+				ss << "Assembled shader source:" << std::endl << src;
+				throw RenderDeviceError(ss.str());
+			}
+		}
 	}
 
 	virtual ~D3D11VertexShader() final
 	{
-
+		if (vs != nullptr)
+			vs->Release();
+		if (blob != nullptr)
+			blob->Release();
 	}
 
 	virtual VertexBindingPoint* GetBindingPoint(const char * name) final;
 
 	D3D11RenderDevice* device;
 	ID3D11VertexShader* vs;
+	ID3DBlob* blob;
 };
 
 class D3D11VertexBindingPoint final : public VertexBindingPoint
@@ -148,17 +189,58 @@ public:
 	D3D11PixelShader(D3D11RenderDevice* device, const ShaderData& data)
 	{
 		this->device = device;
+
+		HRESULT hr;
+		std::string src;
+
+		blob = nullptr;
+		ps = nullptr;
+
+		// Compile shader
+		{			
+			D3D11Assembler::Assemble(data, src);
+			ID3DBlob* errorMessages;
+			hr = D3DCompile(src.c_str(), src.size(), nullptr, nullptr, nullptr, "PS", "ps_4_0", D3D10_SHADER_PACK_MATRIX_COLUMN_MAJOR, 0, &blob, &errorMessages);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create shader on D3D11RenderDevice:\nFailed to compile pixel shader:\n";
+				if (errorMessages)
+					ss << (char*)errorMessages->GetBufferPointer() << std::endl;
+				else
+					ss << "Error: " << _com_error(hr).ErrorMessage() << " - no error messages";
+				ss << "Assembled shader source:" << std::endl << src;
+				throw RenderDeviceError(ss.str());
+			}
+		}
+			
+		// Create shader
+		{
+			hr = ((ID3D11Device*)device->m_device)->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), NULL, &ps);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create shader on D3D11RenderDevice:\nFailed to create pixel shader:\n";
+				ss << "Error: " << _com_error(hr).ErrorMessage() << std::endl;
+				ss << "Assembled shader source:" << std::endl << src;
+				throw RenderDeviceError(ss.str());
+			}
+		}
 	}
 
 	virtual ~D3D11PixelShader() final
 	{
-
+		if (ps != nullptr)
+			ps->Release();
+		if (blob != nullptr)
+			blob->Release();
 	}
 
 	virtual PixelBindingPoint * GetBindingPoint(const char * name) final;
 
 	D3D11RenderDevice* device;
 	ID3D11PixelShader* ps;
+	ID3DBlob* blob;
 };
 
 class D3D11PixelBindingPoint final : public PixelBindingPoint
@@ -204,13 +286,17 @@ class D3D11Pipeline final : public Pipeline
 public:
 	D3D11Pipeline(D3D11VertexShader* vertexShader, D3D11PixelShader* pixelShader)
 	{
-		
+		this->vertexShader = vertexShader;
+		this->pixelShader = pixelShader;
 	}
 
 	virtual ~D3D11Pipeline() final
 	{
 		
 	}
+
+	D3D11VertexShader* vertexShader;
+	D3D11PixelShader* pixelShader;
 };
 
 class D3D11VertexBuffer final : public VertexBuffer
@@ -218,7 +304,48 @@ class D3D11VertexBuffer final : public VertexBuffer
 public:
 	D3D11VertexBuffer(D3D11RenderDevice* device, size_t size, const void* data, BufferUsage _usage)
 	{
+		this->device = device;
+
+		HRESULT hr;
+
+		D3D11_BUFFER_DESC desc;
 		
+		switch (_usage)
+		{
+			case BufferUsage::Default: desc.Usage = D3D11_USAGE_DEFAULT; break;
+			case BufferUsage::Static: desc.Usage = D3D11_USAGE_IMMUTABLE; break;
+			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DYNAMIC; break;
+			case BufferUsage::Invalid: throw RenderDeviceError("Failed to create D3D11VertexBuffer:\nInvalid buffer usage mode"); break;
+			default: throw RenderDeviceError("Failed to create D3D11VertexBuffer:\nUnknown buffer usage mode"); break;
+		}
+
+		if (data == nullptr)
+		{
+			hr = ((ID3D11Device*)device->m_device)->CreateBuffer(&desc, NULL, &buffer);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11VertexBuffer:\nFailed to create buffer:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
+		else
+		{
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = data;
+			initData.SysMemPitch = 0;
+			initData.SysMemSlicePitch = 0;
+
+			hr = ((ID3D11Device*)device->m_device)->CreateBuffer(&desc, &initData, &buffer);
+			if (FAILED(hr))
+			{
+				std::stringstream ss;
+				ss << "Failed to create D3D11VertexBuffer:\nFailed to create buffer:" << std::endl;
+				ss << "Error: " << _com_error(hr).ErrorMessage();
+				throw RenderDeviceError(ss.str());
+			}
+		}
 	}
 
 	virtual ~D3D11VertexBuffer() final
@@ -235,6 +362,9 @@ public:
 	{
 		
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11Buffer* buffer;
 };
 
 class D3D11VertexLayout final : public VertexLayout
@@ -327,7 +457,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 	m_settings = settings;
 	m_window = dynamic_cast<Input::D3DWindow*>(window);
 	if (m_window == nullptr)
-		throw std::runtime_error("Failed to init D3D11RenderDevice:\nCouldn't cast from Magma::Framework::Input::Window* to Magma::Framework::Input::D3DWindow*");
+		throw RenderDeviceError("Failed to init D3D11RenderDevice:\nCouldn't cast from Magma::Framework::Input::Window* to Magma::Framework::Input::D3DWindow*");
 
 	HRESULT hr;
 	IDXGISwapChain* swapChain = nullptr;
@@ -364,7 +494,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 		{
 			std::stringstream ss;
 			ss << "Failed to init D3D11RenderDevice:\nCouldn't create device and swap chain:\nError: " << _com_error(hr).ErrorMessage();
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 	}
 	
@@ -379,7 +509,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 			deviceContext->Release();
 			std::stringstream ss;
 			ss << "Failed to init D3D11RenderDevice:\nFailed to get back buffer:\nError: " << _com_error(hr).ErrorMessage();
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 	}
 
@@ -395,7 +525,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 			deviceContext->Release();
 			std::stringstream ss;
 			ss << "Failed to init D3D11RenderDevice:\nFailed to create render target view:\nError: " << _com_error(hr).ErrorMessage();
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 	}
 
@@ -425,7 +555,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 			renderTargetView->Release();
 			std::stringstream ss;
 			ss << "Failed to init D3D11Context:\nFailed to create depth stencil texture:\nError: " << _com_error(hr).ErrorMessage();
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 	}
 
@@ -442,7 +572,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 			renderTargetView->Release();
 			std::stringstream ss;
 			ss << "Failed to init D3D11Context:\nFailed to create depth stencil view:\nError: " << _com_error(hr).ErrorMessage();
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 	}
 
@@ -487,7 +617,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 			renderTargetView->Release();
 			std::stringstream ss;
 			ss << "Failed to create init D3D11Context:\nFailed to create rasterizer state:\nError: " << hr;
-			throw std::runtime_error(ss.str());
+			throw RenderDeviceError(ss.str());
 		}
 		deviceContext->RSSetState(rasterState);
 	}
@@ -764,6 +894,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Clear(glm::vec4 color, float
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	((ID3D11DeviceContext*)m_deviceContext)->ClearRenderTargetView((ID3D11RenderTargetView*)m_renderTargetView, &color[0]);
+	((ID3D11DeviceContext*)m_deviceContext)->ClearDepthStencilView((ID3D11DepthStencilView*)m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
