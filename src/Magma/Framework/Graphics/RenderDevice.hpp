@@ -814,15 +814,10 @@ namespace Magma
 				Invalid = -1,
 
 				/// <summary>
-				///		Only draws points
-				/// </summary>
-				Point,
-
-				/// <summary>
 				///		Only draws lines
 				/// </summary>
-				Line,
-
+				Wireframe,
+				
 				/// <summary>
 				///		Draws the whole triangles
 				/// </summary>
@@ -983,25 +978,20 @@ namespace Magma
 				float depthFar = 1.0f;
 				Compare depthCompare = Compare::Less;
 
-				bool frontFaceStencilEnabled = false;
+				unsigned int stencilRef = 0;
+				bool stencilEnabled = false;
+				unsigned char stencilReadMask = 0xFF;
+				unsigned char stencilWriteMask = 0xFF;
+
 				Compare frontFaceStencilCompare = Compare::Always;
 				StencilAction frontFaceStencilFail = StencilAction::Keep;
 				StencilAction frontFaceStencilPass = StencilAction::Keep;
 				StencilAction frontFaceDepthFail = StencilAction::Keep;
-
-				int frontFaceRef = 0;
-				unsigned int frontFaceReadMask = 0xFFFFFFFF;
-				unsigned int frontFaceWriteMask = 0xFFFFFFFF;
-
-				bool backFaceStencilEnabled = false;
+			
 				Compare backFaceStencilCompare = Compare::Always;
 				StencilAction backFaceStencilFail = StencilAction::Keep;
 				StencilAction backFaceStencilPass = StencilAction::Keep;
 				StencilAction backFaceDepthFail = StencilAction::Keep;
-
-				int backFaceRef = 0;
-				unsigned int backFaceReadMask = 0xFFFFFFFF;
-				unsigned int backFaceWriteMask = 0xFFFFFFFF;
 			};
 
 			/// <summary>

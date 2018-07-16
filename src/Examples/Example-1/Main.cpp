@@ -16,6 +16,8 @@
 #include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
 #include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
 
+//#define USE_GL
+
 using namespace Magma;
 using namespace Magma::Framework;
 
@@ -64,7 +66,12 @@ void LoadScene(Scene& scene)
 
 	// Create window
 	{
-		scene.window = new Framework::Input::D3DWindow(800, 600, "Tetris", Framework::Input::Window::Mode::Windowed);
+#ifdef USE_GL
+		scene.window = new Framework::Input::GLWindow(800, 600, "Example-1", Framework::Input::Window::Mode::Windowed);
+#else
+		scene.window = new Framework::Input::D3DWindow(800, 600, "Example-1", Framework::Input::Window::Mode::Windowed);
+#endif
+		
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
@@ -73,7 +80,11 @@ void LoadScene(Scene& scene)
 	{
 		
 		Graphics::RenderDeviceSettings settings;
+#ifdef USE_GL
+		scene.device = new Framework::Graphics::OGL410RenderDevice();
+#else
 		scene.device = new Framework::Graphics::D3D11RenderDevice();
+#endif
 		scene.device->Init(scene.window, settings);
 	}
 
@@ -170,16 +181,6 @@ void LoadScene(Scene& scene)
 		scene.pipeline = scene.device->CreatePipeline(scene.vertexShader, scene.pixelShader);
 	}
 
-	// Load font
-	/*{
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Consolas.ttf");
-		auto size = scene.fileSystem->GetSize(file);
-		auto data = new unsigned char[size];
-		scene.fileSystem->Read(file, data, size);
-		scene.fileSystem->CloseFile(file);
-		scene.font = new Graphics::Font(*scene.context, data, size, 0, 60, 1024, 1024);
-	}*/
-
 	// Load vertex buffer
 	{
 		scene.vertexBuffer = scene.device->CreateVertexBuffer(48, nullptr, Graphics::BufferUsage::Dynamic);
@@ -244,7 +245,7 @@ void LoadScene(Scene& scene)
 	{
 		Graphics::RasterStateDesc desc;
 
-		//desc.rasterMode = Graphics::RasterMode::Line;
+		desc.rasterMode = Graphics::RasterMode::Wireframe;
 
 		scene.rasterState = scene.device->CreateRasterState(desc);
 	}

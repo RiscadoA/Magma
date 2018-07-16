@@ -142,8 +142,6 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 	}
 	ss << "};" << std::endl << std::endl;
 
-	printf("%s\n\n\n\n", ss.str().c_str());
-
 	auto GetComponent = [&](size_t count, size_t index) -> void
 	{
 		if (index >= count)

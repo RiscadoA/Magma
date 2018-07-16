@@ -757,8 +757,7 @@ public:
 
 		switch (desc.rasterMode)
 		{
-			case RasterMode::Point: polygonMode = GL_POINT; break;
-			case RasterMode::Line: polygonMode = GL_LINE; break;
+			case RasterMode::Wireframe: polygonMode = GL_LINE; break;
 			case RasterMode::Fill: polygonMode = GL_FILL; break;
 			case RasterMode::Invalid: throw RenderDeviceError("Failed to create OGL410RasterState:\nInvalid raster mode"); break;
 			default: throw RenderDeviceError("Failed to create OGL410RasterState:\nUnsupported raster mode"); break;
@@ -822,25 +821,23 @@ public:
 		depthFar = desc.depthFar;
 		depthFunc = GetCompare(desc.depthCompare);
 
+		// Stencil
+		stencilEnabled = desc.stencilEnabled;
+		stencilRef = desc.stencilRef;
+		stencilReadMask = desc.stencilReadMask;
+		stencilWriteMask = desc.stencilWriteMask;
+
 		// Front stencil
-		frontFaceStencilEnabled = desc.frontFaceStencilEnabled;
 		frontStencilFunc = GetCompare(desc.frontFaceStencilCompare);
 		frontFaceStencilFail = GetAction(desc.frontFaceStencilFail);
 		frontFaceStencilPass = GetAction(desc.frontFaceStencilPass);
 		frontFaceDepthFail = GetAction(desc.frontFaceDepthFail);
-		frontFaceRef = desc.frontFaceRef;
-		frontFaceReadMask = desc.frontFaceReadMask;
-		frontFaceWriteMask = desc.frontFaceWriteMask;
 
 		// Back stencil
-		backFaceStencilEnabled = desc.backFaceStencilEnabled;
 		backStencilFunc = GetCompare(desc.backFaceStencilCompare);
 		backFaceStencilFail = GetAction(desc.backFaceStencilFail);
 		backFaceStencilPass = GetAction(desc.backFaceStencilPass);
 		backFaceDepthFail = GetAction(desc.backFaceDepthFail);
-		backFaceRef = desc.backFaceRef;
-		backFaceReadMask = desc.backFaceReadMask;
-		backFaceWriteMask = desc.backFaceWriteMask;
 	}
 
 	virtual ~OGL410DepthStencilState() final
@@ -854,23 +851,20 @@ public:
 	GLfloat depthFar;
 	GLenum depthFunc;
 
-	GLboolean frontFaceStencilEnabled;
-	GLenum	frontStencilFunc;
+	GLuint stencilRef;
+	GLboolean stencilEnabled;
+	GLuint stencilReadMask;
+	GLuint stencilWriteMask;
+
+	GLenum frontStencilFunc;
 	GLenum frontFaceStencilFail;
 	GLenum frontFaceStencilPass;
 	GLenum frontFaceDepthFail;
-	GLint frontFaceRef;
-	GLuint frontFaceReadMask;
-	GLuint frontFaceWriteMask;
 
-	GLboolean backFaceStencilEnabled;
 	GLenum backStencilFunc;
 	GLenum backFaceStencilFail;
 	GLenum backFaceStencilPass;
 	GLenum backFaceDepthFail;
-	GLint backFaceRef;
-	GLuint backFaceReadMask;
-	GLuint backFaceWriteMask;
 };
 
 class OGL410BlendState final : public BlendState
@@ -1312,19 +1306,19 @@ void Magma::Framework::Graphics::OGL410RenderDevice::SetDepthStencilState(DepthS
 		glDepthRange(static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->depthNear, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->depthFar);
 
 		// Stencil
-		if (static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontFaceStencilEnabled || static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backFaceStencilEnabled)
+		if (static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->stencilEnabled)
 			glEnable(GL_STENCIL_TEST);
 		else
 			glDisable(GL_STENCIL_TEST);
 
 		// Front face
-		glStencilFuncSeparate(GL_FRONT, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontStencilFunc, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontFaceRef, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontFaceReadMask);
-		glStencilMaskSeparate(GL_FRONT, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontFaceWriteMask);
+		glStencilFuncSeparate(GL_FRONT, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontStencilFunc, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->stencilRef, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->stencilReadMask);
+		glStencilMaskSeparate(GL_FRONT, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->stencilWriteMask);
 		glStencilOpSeparate(GL_FRONT, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontFaceStencilFail, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontFaceDepthFail, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->frontFaceStencilPass);
 		
 		// Back face
-		glStencilFuncSeparate(GL_BACK, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backStencilFunc, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backFaceRef, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backFaceReadMask);
-		glStencilMaskSeparate(GL_BACK, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backFaceWriteMask);
+		glStencilFuncSeparate(GL_BACK, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backStencilFunc, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->stencilRef, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->stencilReadMask);
+		glStencilMaskSeparate(GL_BACK, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->stencilWriteMask);
 		glStencilOpSeparate(GL_BACK, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backFaceStencilFail, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backFaceDepthFail, static_cast<OGL410DepthStencilState*>(m_currentDepthStencilState)->backFaceStencilPass);
 	}
 

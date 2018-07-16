@@ -658,29 +658,230 @@ public:
 class D3D11RasterState final : public RasterState
 {
 public:
-	D3D11RasterState(D3D11RenderDevice* device, const RasterStateDesc& desc)
+	D3D11RasterState(D3D11RenderDevice* device, const RasterStateDesc& _desc)
 	{
+		this->device = device;
 
+		D3D11_RASTERIZER_DESC desc;
+
+		desc.DepthBias = 0.0f;
+		desc.SlopeScaledDepthBias = 0.0f;
+		desc.DepthBiasClamp = 0.0f;
+		desc.DepthClipEnable = true;
+		desc.ScissorEnable = false;
+		desc.MultisampleEnable = false;
+		desc.AntialiasedLineEnable = false;
+
+		if (_desc.cullEnabled)
+		{
+			switch (_desc.cullFace)
+			{
+				case Face::Front: desc.CullMode = D3D11_CULL_FRONT; break;
+				case Face::Back: desc.CullMode = D3D11_CULL_BACK; break;
+				case Face::Invalid: throw RenderDeviceError("Failed to create D3D11RasterState:\nInvalid cull face"); break;
+				default: throw RenderDeviceError("Failed to create D3D11RasterState:\nUnsupported cull face"); break;
+			}
+		}
+		else desc.CullMode = D3D11_CULL_NONE;
+		
+		switch (_desc.frontFace)
+		{
+			case Winding::CW: desc.FrontCounterClockwise = false; break;
+			case Winding::CCW: desc.FrontCounterClockwise = true; break;
+			case Winding::Invalid: throw RenderDeviceError("Failed to create D3D11RasterState:\nInvalid front face winding"); break;
+			default: throw RenderDeviceError("Failed to create D3D11RasterState:\nUnsupported front face winding"); break;
+		}
+
+		switch (_desc.rasterMode)
+		{
+			case RasterMode::Wireframe: desc.FillMode = D3D11_FILL_WIREFRAME; break;
+			case RasterMode::Fill: desc.FillMode = D3D11_FILL_SOLID; break;
+			case RasterMode::Invalid: throw RenderDeviceError("Failed to create D3D11RasterState:\nInvalid raster mode"); break;
+			default: throw RenderDeviceError("Failed to create D3D11RasterState:\nUnsupported raster mode"); break;
+		}
+
+		HRESULT hr = ((ID3D11Device*)device->m_device)->CreateRasterizerState(&desc, &state);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11RasterState:\nFailed to create rasterizer state:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
 	}
 
 	virtual ~D3D11RasterState() final
 	{
-
+		state->Release();
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11RasterizerState* state;
 };
 
 class D3D11DepthStencilState final : public DepthStencilState
 {
 public:
-	D3D11DepthStencilState(D3D11RenderDevice* device, const DepthStencilStateDesc& desc)
+	D3D11DepthStencilState(D3D11RenderDevice* device, const DepthStencilStateDesc& _desc)
 	{
-		
+		D3D11_DEPTH_STENCIL_DESC desc;
+
+		// Depth
+		desc.DepthEnable = _desc.depthEnabled;
+		desc.DepthWriteMask = _desc.depthWriteEnabled ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+		switch (_desc.depthCompare)
+		{
+			case Compare::Never: desc.DepthFunc = D3D11_COMPARISON_NEVER; break;
+			case Compare::Less: desc.DepthFunc = D3D11_COMPARISON_LESS; break;
+			case Compare::LEqual: desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL; break;
+			case Compare::Greater: desc.DepthFunc = D3D11_COMPARISON_GREATER; break;
+			case Compare::GEqual: desc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL; break;
+			case Compare::Equal: desc.DepthFunc = D3D11_COMPARISON_EQUAL; break;
+			case Compare::NotEqual: desc.DepthFunc = D3D11_COMPARISON_NOT_EQUAL; break;
+			case Compare::Always: desc.DepthFunc = D3D11_COMPARISON_ALWAYS; break;
+			case Compare::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid depth compare function"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported depth compare function"); break;
+		}
+
+		// Stencil
+		desc.StencilEnable = _desc.stencilEnabled;
+		desc.StencilReadMask = _desc.stencilReadMask;
+		desc.StencilWriteMask = _desc.stencilWriteMask;
+		this->stencilRef = _desc.stencilRef;
+
+		// Stencil front face
+		switch (_desc.frontFaceDepthFail)
+		{
+			case StencilAction::Keep: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP; break;
+			case StencilAction::Zero: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_ZERO; break;
+			case StencilAction::Replace: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE; break;
+			case StencilAction::Increment: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR; break;
+			case StencilAction::IncrementWrap: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+			case StencilAction::Decrement: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR; break;
+			case StencilAction::DecrementWrap: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+			case StencilAction::Invert: desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INVERT; break;
+			case StencilAction::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid front face depth stencil fail action"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported front face depth stencil fail action"); break;
+		}
+
+		switch (_desc.frontFaceStencilFail)
+		{
+			case StencilAction::Keep: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP; break;
+			case StencilAction::Zero: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_ZERO; break;
+			case StencilAction::Replace: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE; break;
+			case StencilAction::Increment: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INCR; break;
+			case StencilAction::IncrementWrap: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+			case StencilAction::Decrement: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_DECR; break;
+			case StencilAction::DecrementWrap: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+			case StencilAction::Invert: desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INVERT; break;
+			case StencilAction::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid front face stencil fail action"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported front face stencil fail action"); break;
+		}
+
+		switch (_desc.frontFaceStencilPass)
+		{
+			case StencilAction::Keep: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP; break;
+			case StencilAction::Zero: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_ZERO; break;
+			case StencilAction::Replace: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE; break;
+			case StencilAction::Increment: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR; break;
+			case StencilAction::IncrementWrap: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT; break;
+			case StencilAction::Decrement: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_DECR; break;
+			case StencilAction::DecrementWrap: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_DECR_SAT; break;
+			case StencilAction::Invert: desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INVERT; break;
+			case StencilAction::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid front face stencil pass action"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported front face stencil pass action"); break;
+		}
+
+		switch (_desc.frontFaceStencilCompare)
+		{
+			case Compare::Never: desc.FrontFace.StencilFunc = D3D11_COMPARISON_NEVER; break;
+			case Compare::Less: desc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS; break;
+			case Compare::LEqual: desc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL; break;
+			case Compare::Greater: desc.FrontFace.StencilFunc = D3D11_COMPARISON_GREATER; break;
+			case Compare::GEqual: desc.FrontFace.StencilFunc = D3D11_COMPARISON_GREATER_EQUAL; break;
+			case Compare::Equal: desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL; break;
+			case Compare::NotEqual: desc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL; break;
+			case Compare::Always: desc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS; break;
+			case Compare::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid front face stencil compare function"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported front facil stencil compare function"); break;
+		}
+
+		// Stencil back face
+		switch (_desc.backFaceDepthFail)
+		{
+			case StencilAction::Keep: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP; break;
+			case StencilAction::Zero: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_ZERO; break;
+			case StencilAction::Replace: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE; break;
+			case StencilAction::Increment: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR; break;
+			case StencilAction::IncrementWrap: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+			case StencilAction::Decrement: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR; break;
+			case StencilAction::DecrementWrap: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+			case StencilAction::Invert: desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INVERT; break;
+			case StencilAction::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid back face depth stencil fail action"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported front back depth stencil fail action"); break;
+		}
+
+		switch (_desc.backFaceStencilFail)
+		{
+			case StencilAction::Keep: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP; break;
+			case StencilAction::Zero: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_ZERO; break;
+			case StencilAction::Replace: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE; break;
+			case StencilAction::Increment: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_INCR; break;
+			case StencilAction::IncrementWrap: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+			case StencilAction::Decrement: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_DECR; break;
+			case StencilAction::DecrementWrap: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+			case StencilAction::Invert: desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_INVERT; break;
+			case StencilAction::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid back face stencil fail action"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported back face stencil fail action"); break;
+		}
+
+		switch (_desc.backFaceStencilPass)
+		{
+			case StencilAction::Keep: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP; break;
+			case StencilAction::Zero: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_ZERO; break;
+			case StencilAction::Replace: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE; break;
+			case StencilAction::Increment: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR; break;
+			case StencilAction::IncrementWrap: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT; break;
+			case StencilAction::Decrement: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_DECR; break;
+			case StencilAction::DecrementWrap: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_DECR_SAT; break;
+			case StencilAction::Invert: desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INVERT; break;
+			case StencilAction::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid back face stencil pass action"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported back face stencil pass action"); break;
+		}
+
+		switch (_desc.backFaceStencilCompare)
+		{
+			case Compare::Never: desc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER; break;
+			case Compare::Less: desc.BackFace.StencilFunc = D3D11_COMPARISON_LESS; break;
+			case Compare::LEqual: desc.BackFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL; break;
+			case Compare::Greater: desc.BackFace.StencilFunc = D3D11_COMPARISON_GREATER; break;
+			case Compare::GEqual: desc.BackFace.StencilFunc = D3D11_COMPARISON_GREATER_EQUAL; break;
+			case Compare::Equal: desc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL; break;
+			case Compare::NotEqual: desc.BackFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL; break;
+			case Compare::Always: desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; break;
+			case Compare::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nInvalid back face stencil compare function"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilState:\nUnsupported back facil stencil compare function"); break;
+		}
+
+		// Create state
+		HRESULT hr = ((ID3D11Device*)device->m_device)->CreateDepthStencilState(&desc, &state);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11DepthStencilState:\nFailed to create depth stencil state:" << std::endl;
+			ss << "Error: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
 	}
 
 	virtual ~D3D11DepthStencilState() final
 	{
-
+		state->Release();
 	}
+
+	D3D11RenderDevice* device;
+	ID3D11DepthStencilState* state;
+	unsigned int stencilRef;
 };
 
 class D3D11BlendState final : public BlendState
@@ -1115,7 +1316,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyRasterState(RasterSta
 void Magma::Framework::Graphics::D3D11RenderDevice::SetRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	((ID3D11DeviceContext*)m_deviceContext)->RSSetState(static_cast<D3D11RasterState*>(rasterState)->state);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -1142,7 +1343,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyDepthStencilState(Dep
 void Magma::Framework::Graphics::D3D11RenderDevice::SetDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
+	((ID3D11DeviceContext*)m_deviceContext)->OMSetDepthStencilState(static_cast<D3D11DepthStencilState*>(depthStencilState)->state, static_cast<D3D11DepthStencilState*>(depthStencilState)->stencilRef);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
