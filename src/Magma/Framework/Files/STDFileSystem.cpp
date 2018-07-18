@@ -108,6 +108,9 @@ void Magma::Framework::Files::STDFileSystem::Read(void * file, void * buffer, si
 
 void Magma::Framework::Files::STDFileSystem::Write(void * file, void * buffer, size_t size)
 {
+	if (size == 0)
+		return;
+
 	if (file == nullptr)
 	{
 		std::stringstream ss;
