@@ -1,5 +1,7 @@
 #include "Conversion.hpp"
 
+#include <cctype>
+
 size_t Magma::Framework::String::ConvertU8ToU32(const U8Char * src, U32Char * dst, size_t maxSize)
 {
 	if (maxSize == 0)
@@ -39,4 +41,10 @@ size_t Magma::Framework::String::ConvertU32ToU8(const U32Char * src, U8Char * ds
 	}
 	dst[s] = 0;
 	return s + 1;
+}
+
+void Magma::Framework::String::ToLower(std::string & str)
+{
+	for (auto& c : str)
+		c = tolower(c);
 }

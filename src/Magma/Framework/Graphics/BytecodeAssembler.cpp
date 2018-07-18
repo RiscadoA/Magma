@@ -101,16 +101,10 @@ std::map<std::string, BytecodeOpCode> instructionSet =
 	std::make_pair("fract", BytecodeOpCode::Fract),
 };
 
-void ToLower(std::string& str)
-{
-	for (auto& c : str)
-		c = tolower(c);
-}
-
 BytecodeOpCode GetOpCode(const std::string& str)
 {
 	std::string lowerCase = str;
-	ToLower(lowerCase);
+	String::ToLower(lowerCase);
 	auto it = instructionSet.find(lowerCase);
 	if (it == instructionSet.end())
 	{

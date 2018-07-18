@@ -1,0 +1,17 @@
+#version 1.0
+#type VERTEX
+
+Input in
+{
+	float4 position : POS;
+};
+
+Output out
+{
+	float4 position : SCREEN_POSITION;
+};
+
+Shader
+{
+	out.position = in.position;
+};

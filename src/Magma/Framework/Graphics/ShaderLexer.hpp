@@ -13,7 +13,7 @@ namespace Magma
 		namespace Graphics
 		{
 			/// <summary>
-			///		Mamga Shading Language token
+			///		Magma Shading Language token
 			/// </summary>
 			enum class ShaderTokenSymbol
 			{
@@ -93,6 +93,9 @@ namespace Magma
 				Count
 			};
 
+			/// <summary>
+			///		Magma Shading Language token type
+			/// </summary>
 			enum class ShaderTokenType
 			{
 				/// <summary>
@@ -108,13 +111,25 @@ namespace Magma
 
 				Operator,
 
+				Identifier,
+
 				/// <summary>
 				///		Token type count
 				/// </summary>
 				Count
 			};
 
-			extern const std::vector<std::tuple<std::string, ShaderTokenSymbol, ShaderTokenType>> ShaderTokens;
+			/// <summary>
+			///		Converts a Magma Shading Language token symbol into a string
+			/// </summary>
+			/// <param name="symbol">Magma Shading Language token symbol</param>
+			/// <returns>String</returns>
+			std::string ShaderTokenSymbolToString(ShaderTokenSymbol symbol);
+
+			/// <summary>
+			///		Magma Shading Language token info
+			/// </summary>
+			extern const std::vector<std::tuple<std::string, ShaderTokenSymbol, ShaderTokenType, std::string>> ShaderTokens;
 
 			/// <summary>
 			///		Holds data about a lexed shader token

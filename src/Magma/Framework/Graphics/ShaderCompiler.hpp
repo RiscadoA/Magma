@@ -10,8 +10,14 @@ namespace Magma
 	{
 		namespace Graphics
 		{
+			/// <summary>
+			///		Holds shader info during compilation
+			/// </summary>
 			struct ShaderCompilerData
 			{
+				unsigned int majorVersion;
+				unsigned int minorVersion;
+
 				ShaderType shaderType;
 			};
 

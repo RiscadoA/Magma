@@ -24,6 +24,12 @@ namespace Magma
 			/// <param name="maxSize">Max UTF-8 string size (in bytes, including the null character)</param>
 			/// <returns>UTF-8 string size in characters, including the null character</returns>
 			size_t ConvertU32ToU8(const U32Char* src, U8Char* dst, size_t maxSize);
+
+			/// <summary>
+			///		Makes an ASCII string lower case
+			/// </summary>
+			/// <param name="str">ASCII string</param>
+			void ToLower(std::string& str);
 		}
 	}
 }
