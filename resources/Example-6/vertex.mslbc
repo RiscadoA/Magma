@@ -1,0 +1,36 @@
+DECLF1,		xb10,			# Temp var
+
+VARIN0,		xb01,			# Get in component x
+VAROUT,		xb10,
+GEF3CMP,	xb00,
+VARIN0,		xb10,			# Set out component x
+VAROUT,		xb00, 
+ASF4CMP,	xb00,
+
+VARIN0,		xb01,			# Get in component y
+VAROUT,		xb10,
+GEF3CMP,	xb01,
+VARIN0,		xb10,			# Set out component y
+VAROUT,		xb00, 
+ASF4CMP,	xb01,
+
+VARIN0,		xb01,			# Get in component z
+VAROUT,		xb10,
+GEF3CMP,	xb02,
+VARIN0,		xb10,			# Set out component z
+VAROUT,		xb00, 
+ASF4CMP,	xb02,
+
+SETF1,		xb10,	f1.0,	# Store temporary w value
+VARIN0,		xb10,			# Set out component w
+VAROUT,		xb00,
+ASF4CMP,	xb03,
+
+VARIN0,		xb04,
+VARIN1,		xb00,
+VAROUT,		xb00,
+MULMAT,						# Perform matrix multiplication
+
+VARIN0,		xb02,			# Send uvs to pixel shader
+VAROUT,		xb03,
+ASSIGN,

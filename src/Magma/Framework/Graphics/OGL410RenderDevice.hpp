@@ -48,13 +48,17 @@ namespace Magma
 				virtual void Clear(glm::vec4 color, float depth = 1.0f, int stencil = 0) override;
 				virtual void DrawTriangles(size_t offset, size_t count) override;
 				virtual void DrawTrianglesIndexed(size_t offset, size_t count) override;
-				virtual void SetRenderTargets(Texture2D ** textures, size_t count) override;
 				virtual void SwapBuffers() override;
 				virtual ConstantBuffer* CreateConstantBuffer(size_t size, const void* data = nullptr, BufferUsage usage = BufferUsage::Dynamic) override;
 				virtual void DestroyConstantBuffer(ConstantBuffer* constantBuffer) override;
 				virtual BlendState* CreateBlendState(const BlendStateDesc& desc) override;
 				virtual void DestroyBlendState(BlendState* blendState) override;
 				virtual void SetBlendState(BlendState* blendState) override;
+				virtual DepthStencilBuffer* CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format) override;
+				virtual void DestroyDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer) override;
+				virtual Framebuffer* CreateFramebuffer(size_t attachmentCount, Texture2D** attachments, DepthStencilBuffer* depthStencilAttachment = nullptr) override;
+				virtual void DestroyFramebuffer(Framebuffer* framebuffer) override;
+				virtual void SetFramebuffer(Framebuffer* framebuffer) override;
 
 				Input::GLWindow* m_window;
 

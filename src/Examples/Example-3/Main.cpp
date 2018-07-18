@@ -358,8 +358,8 @@ void Main(int argc, char** argv) try
 		scene.device->SetPipeline(scene.pipeline);
 
 		// Bind texture and set sampler
-		scene.textureBP->Bind(scene.texture);
-		scene.textureBP->Bind(scene.sampler);
+		scene.textureBP->BindTexture2D(scene.texture);
+		scene.textureBP->BindSampler2D(scene.sampler);
 
 		// Bind vertex array and the index buffer
 		scene.device->SetVertexArray(scene.vertexArray);
@@ -370,7 +370,7 @@ void Main(int argc, char** argv) try
 			auto transform = (Transform*)scene.transformBuffer->Map();
 			transform->mvp = proj * view * model2;
 			scene.transformBuffer->Unmap();
-			scene.transformBP->Bind(scene.transformBuffer);
+			scene.transformBP->BindConstantBuffer(scene.transformBuffer);
 			scene.device->DrawTrianglesIndexed(0, 6);
 		}
 
@@ -379,7 +379,7 @@ void Main(int argc, char** argv) try
 			auto transform = (Transform*)scene.transformBuffer->Map();
 			transform->mvp = proj * view * model1;
 			scene.transformBuffer->Unmap();
-			scene.transformBP->Bind(scene.transformBuffer);
+			scene.transformBP->BindConstantBuffer(scene.transformBuffer);
 			scene.device->DrawTrianglesIndexed(0, 6);
 		}
 

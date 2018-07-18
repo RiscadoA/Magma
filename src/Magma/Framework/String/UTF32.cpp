@@ -13,28 +13,28 @@ Magma::Framework::String::U32Char Magma::Framework::String::U32ToLE(U32Char up)
 {
 	if (IsLittleEndian())
 		return up;
-	else SwapBytes(up);
+	else return SwapBytes(up);
 }
 
 Magma::Framework::String::U32Char Magma::Framework::String::U32ToBE(U32Char up)
 {
 	if (!IsLittleEndian())
 		return up;
-	else SwapBytes(up);
+	else return SwapBytes(up);
 }
 
 Magma::Framework::String::U32Char Magma::Framework::String::U32FromLE(U32Char le)
 {
 	if (IsLittleEndian())
 		return le;
-	else SwapBytes(le);
+	else return SwapBytes(le);
 }
 
 Magma::Framework::String::U32Char Magma::Framework::String::U32FromBE(U32Char be)
 {
 	if (!IsLittleEndian())
 		return be;
-	else SwapBytes(be);
+	else return SwapBytes(be);
 }
 
 size_t Magma::Framework::String::U32ToLE(const U32Char * src, U32Char * dst, size_t maxSize)

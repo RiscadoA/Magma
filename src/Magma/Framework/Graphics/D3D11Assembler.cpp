@@ -908,4 +908,6 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 	ss << "}" << std::endl;
 
 	out = ss.str();
+
+	printf("%s\n\n", out.c_str());
 }

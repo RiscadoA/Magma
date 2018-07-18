@@ -233,11 +233,11 @@ size_t Magma::Framework::Files::STDFileSystem::GetSize(void * file)
 
 	int err = 0;
 	auto pos = ftell((FILE*)file);
-	if (pos == -1)
+	if (pos < 0)
 	{
 		std::stringstream ss;
 		ss << "Failed to get file size on STDFileSystem:" << std::endl;
-		ss << "ftell returned -1, error " << errno << ":" << std::endl;
+		ss << "ftell returned less than 0, error " << errno << ":" << std::endl;
 		ss << strerror(errno);
 		errno = 0;
 		throw FileError(ss.str());

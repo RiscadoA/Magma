@@ -36,6 +36,9 @@ class OGL410Texture2D final : public Texture2D
 public:
 	OGL410Texture2D(size_t width, size_t height, TextureFormat _format, const void* data, BufferUsage usage, bool isRenderTarget)
 	{
+		this->width = width;
+		this->height = height;
+
 		switch (_format)
 		{
 			case TextureFormat::R8SNorm: internalFormat = GL_R8_SNORM; type = GL_BYTE; format = GL_RED; break;
@@ -81,11 +84,19 @@ public:
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+		if (isRenderTarget)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		}
+		else
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+		}
 
 		GL_CHECK_ERROR("Failed to create OGL410Texture2D");
 	}
@@ -113,6 +124,8 @@ public:
 	GLenum format;
 	GLenum type;
 	GLuint texture;
+	GLuint width;
+	GLuint height;
 };
 
 class OGL410Sampler2D : public Sampler2D
@@ -299,23 +312,36 @@ public:
 
 	}
 
-	virtual void Bind(Texture2D* texture) final
+	virtual void BindTexture2D(Texture2D* texture) final
 	{
 		glActiveTexture(GL_TEXTURE0 + location);
-		glBindTexture(GL_TEXTURE_2D, static_cast<OGL410Texture2D*>(texture)->texture);
+		if (texture == nullptr)
+			glBindTexture(GL_TEXTURE_2D, 0);
+		else
+			glBindTexture(GL_TEXTURE_2D, static_cast<OGL410Texture2D*>(texture)->texture);
 		glProgramUniform1i(shader->vertexShader, location, location);
 
-		GL_CHECK_ERROR("Failed to bind OGL410Texture2D to OGL410VertexBindingPoint");
+		GL_CHECK_ERROR("Failed to bind Texture2D to OGL410VertexBindingPoint");
 	}
 
-	virtual void Bind(Sampler2D* sampler) final
+	virtual void BindSampler2D(Sampler2D* sampler) final
 	{
-		glBindSampler(GL_TEXTURE0 + location, static_cast<OGL410Sampler2D*>(sampler)->sampler);
+		if (sampler == nullptr)
+			glBindSampler(location, 0);
+		else
+			glBindSampler(location, static_cast<OGL410Sampler2D*>(sampler)->sampler);
+
+		GL_CHECK_ERROR("Failed to bind Sampler2D to OGL410VertexBindingPoint");
 	}
 
-	virtual void Bind(ConstantBuffer* buffer) final
+	virtual void BindConstantBuffer(ConstantBuffer* buffer) final
 	{
-		glBindBufferBase(GL_UNIFORM_BUFFER, location, static_cast<OGL410ConstantBuffer*>(buffer)->ubo);
+		if (buffer == nullptr)
+			glBindBufferBase(GL_UNIFORM_BUFFER, location, 0);
+		else
+			glBindBufferBase(GL_UNIFORM_BUFFER, location, static_cast<OGL410ConstantBuffer*>(buffer)->ubo);
+
+		GL_CHECK_ERROR("Failed to bind ConstantBuffer to OGL410VertexBindingPoint");
 	}
 
 	OGL410VertexShader* shader;
@@ -423,25 +449,35 @@ public:
 		// Empty
 	}
 
-	virtual void Bind(Texture2D* texture) final
+	virtual void BindTexture2D(Texture2D* texture) final
 	{
 		glActiveTexture(GL_TEXTURE0 + location);
-		glBindTexture(GL_TEXTURE_2D, static_cast<OGL410Texture2D*>(texture)->texture);
+		if (texture == nullptr)
+			glBindTexture(GL_TEXTURE_2D, 0);
+		else
+			glBindTexture(GL_TEXTURE_2D, static_cast<OGL410Texture2D*>(texture)->texture);
 		glProgramUniform1i(shader->fragmentShader, location, location);
 
-		GL_CHECK_ERROR("Failed to bind OGL410Texture2D to OGL410PixelBindingPoint");
+		GL_CHECK_ERROR("Failed to bind Texture2D to OGL410PixelBindingPoint");
 	}
 
-	virtual void Bind(Sampler2D* sampler) final
+	virtual void BindSampler2D(Sampler2D* sampler) final
 	{
-		glBindSampler(location, static_cast<OGL410Sampler2D*>(sampler)->sampler);
-
-		GL_CHECK_ERROR("Failed to bind OGL410Sampler2D to OGL410PixelBindingPoint");
+		if (sampler == nullptr)
+			glBindSampler(location, 0);
+		else
+			glBindSampler(location, static_cast<OGL410Sampler2D*>(sampler)->sampler);
+		GL_CHECK_ERROR("Failed to bind Sampler2D on OGL410PixelBindingPoint");
 	}
 
-	virtual void Bind(ConstantBuffer* buffer) final
-	{		
-		glBindBufferBase(GL_UNIFORM_BUFFER, location, static_cast<OGL410ConstantBuffer*>(buffer)->ubo);
+	virtual void BindConstantBuffer(ConstantBuffer* buffer) final
+	{
+		if (buffer == nullptr)
+			glBindBufferBase(GL_UNIFORM_BUFFER, location, 0);
+		else
+			glBindBufferBase(GL_UNIFORM_BUFFER, location, static_cast<OGL410ConstantBuffer*>(buffer)->ubo);
+
+		GL_CHECK_ERROR("Failed to bind ConstantBuffer on OGL410PixelBindingPoint");
 	}
 
 	OGL410PixelShader* shader;
@@ -926,6 +962,93 @@ public:
 	GLenum alphaBlendOp;
 };
 
+class OGL410DepthStencilBuffer final : public DepthStencilBuffer
+{
+public:
+	OGL410DepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format)
+	{
+		this->width = width;
+		this->height = height;
+
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+
+		GL_CHECK_ERROR("Failed to create OGL410DepthStencilBuffer {1}");
+
+		switch (format)
+		{
+			case DepthStencilFormat::Depth24Stencil8: glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); break;
+			case DepthStencilFormat::Depth32Stencil8: glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width, height); break;
+			case DepthStencilFormat::Invalid: throw RenderDeviceError("Failed to create OGL410DepthStencilBuffer:\nInvalid depth and stencil format"); break;
+			default: throw RenderDeviceError("Failed to create OGL410DepthStencilBuffer:\nUnsupported depth and stencil format"); break;
+		}
+		
+		GL_CHECK_ERROR("Failed to create OGL410DepthStencilBuffer {2}");
+	}
+
+	virtual ~OGL410DepthStencilBuffer() final
+	{
+		glDeleteRenderbuffers(1, &rbo);
+	}
+
+	GLuint rbo;
+	size_t width, height;
+};
+
+class OGL410Framebuffer final : public Framebuffer
+{
+public:
+	OGL410Framebuffer(size_t attachmentCount, Texture2D** attachments, DepthStencilBuffer* depthStencilAttachment)
+	{
+		if (attachmentCount == 0)
+			throw RenderDeviceError("Failed to create OGL410Framebuffer:\nA framebuffer must have at least one color attachment");
+
+		width = static_cast<OGL410Texture2D*>(attachments[0])->width;
+		height = static_cast<OGL410Texture2D*>(attachments[0])->height;
+
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+		auto bufs = new GLenum[attachmentCount];
+
+		for (size_t i = 0; i < attachmentCount; ++i)
+		{
+			if (static_cast<OGL410Texture2D*>(attachments[i])->width != width || static_cast<OGL410Texture2D*>(attachments[i])->height != height)
+			{
+				delete[] bufs;
+				throw RenderDeviceError("Failed to create OGL410Framebuffer:\nThe framebuffer color attachments must all have the same width and height");
+			}
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, static_cast<OGL410Texture2D*>(attachments[i])->texture, 0);
+			bufs[i] = GL_COLOR_ATTACHMENT0 + i;
+		}
+
+		glDrawBuffers(attachmentCount, bufs);
+		delete[] bufs;
+
+		if (depthStencilAttachment != nullptr)
+		{
+			if (width != static_cast<OGL410DepthStencilBuffer*>(depthStencilAttachment)->width || height != static_cast<OGL410DepthStencilBuffer*>(depthStencilAttachment)->height)
+				throw RenderDeviceError("Failed to create OGL410Framebuffer:\nThe depth and stencil attachment must have the same size as the color attachments");
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, static_cast<OGL410DepthStencilBuffer*>(depthStencilAttachment)->rbo);
+		}
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			throw RenderDeviceError("Failed to create OGL410Framebuffer:\nglCheckFramebufferStatus didn't return GL_FRAMEBUFFER_COMPLETE");
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		GL_CHECK_ERROR("Failed to create OGL410Framebuffer");
+	}
+
+	virtual ~OGL410Framebuffer() final
+	{
+		glDeleteFramebuffers(1, &fbo);
+	}
+
+	GLuint fbo;
+	GLuint width, height;
+};
+
 void Magma::Framework::Graphics::OGL410RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
@@ -1360,15 +1483,6 @@ void Magma::Framework::Graphics::OGL410RenderDevice::DrawTrianglesIndexed(size_t
 #endif
 }
 
-void Magma::Framework::Graphics::OGL410RenderDevice::SetRenderTargets(Texture2D ** textures, size_t count)
-{
-#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	
-#else
-	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
-#endif
-}
-
 void Magma::Framework::Graphics::OGL410RenderDevice::SwapBuffers()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
@@ -1443,6 +1557,61 @@ void Magma::Framework::Graphics::OGL410RenderDevice::SetBlendState(BlendState* b
 	}
 
 	GL_CHECK_ERROR("Failed to set blend state on OGL410RenderDevice");
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+DepthStencilBuffer * Magma::Framework::Graphics::OGL410RenderDevice::CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	return new OGL410DepthStencilBuffer(width, height, format);
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+void Magma::Framework::Graphics::OGL410RenderDevice::DestroyDepthStencilBuffer(DepthStencilBuffer * depthStencilBuffer)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	delete depthStencilBuffer;
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+Framebuffer * Magma::Framework::Graphics::OGL410RenderDevice::CreateFramebuffer(size_t attachmentCount, Texture2D ** attachments, DepthStencilBuffer * depthStencilAttachment)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	return new OGL410Framebuffer(attachmentCount, attachments, depthStencilAttachment);
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+void Magma::Framework::Graphics::OGL410RenderDevice::DestroyFramebuffer(Framebuffer * framebuffer)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	delete framebuffer;
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+void Magma::Framework::Graphics::OGL410RenderDevice::SetFramebuffer(Framebuffer * framebuffer)
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	if (framebuffer == nullptr)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, m_window->GetWidth(), m_window->GetHeight());
+	}
+	else
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<OGL410Framebuffer*>(framebuffer)->fbo);
+		glViewport(0, 0, static_cast<OGL410Framebuffer*>(framebuffer)->width, static_cast<OGL410Framebuffer*>(framebuffer)->height);
+	}
+	GL_CHECK_ERROR("Failed to set framebuffer on OGL410RenderDevice");
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif

@@ -358,8 +358,8 @@ void Main(int argc, char** argv) try
 		scene.device->SetPipeline(scene.pipeline);
 
 		// Bind texture and set sampler
-		scene.textureBP->Bind(scene.texture);
-		scene.textureBP->Bind(scene.sampler);
+		scene.textureBP->BindTexture2D(scene.texture);
+		scene.textureBP->BindSampler2D(scene.sampler);
 
 		// Bind transform and material
 		/*scene.context->BindConstantBuffer(scene.transformCBuffer, scene.transformBP);

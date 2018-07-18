@@ -30,6 +30,9 @@ public:
 
 		this->device = device;
 
+		this->width = width;
+		this->height = height;
+
 		// Create texture
 		D3D11_TEXTURE2D_DESC desc;
 
@@ -89,15 +92,15 @@ public:
 			case TextureFormat::RGB32Float: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; formatSize = 12; break;
 			case TextureFormat::RGBA32Float: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; formatSize = 16; break;
 
-			case TextureFormat::Invalid: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nInvalid format"); break;
-			default: throw std::runtime_error("Failed to create 2D texture on D3D11Context:\nUnsupported format"); break;
+			case TextureFormat::Invalid: throw RenderDeviceError("Failed to create 2D texture on D3D11Context:\nInvalid format"); break;
+			default: throw RenderDeviceError("Failed to create 2D texture on D3D11Context:\nUnsupported format"); break;
 		}
 
 		format = desc.Format;
 
 		if (data == nullptr)
 		{
-			if (usage != BufferUsage::Dynamic)
+			if (usage != BufferUsage::Dynamic && !isRenderTarget)
 				throw RenderDeviceError("Failed to create D3D11Texture2D:\nOnly dynamic 2D textures can be initialized with null data");
 
 			hr = ((ID3D11Device*)device->m_device)->CreateTexture2D(&desc, nullptr, &texture);
@@ -183,6 +186,7 @@ public:
 	ID3D11Texture2D* texture;
 	ID3D11ShaderResourceView* resourceView;
 	ID3D11RenderTargetView* renderTargetView;
+	size_t width, height;
 };
 
 class D3D11Sampler2D : public Sampler2D
@@ -223,8 +227,8 @@ public:
 			case TextureAdressMode::Mirror: desc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR; break;
 			case TextureAdressMode::Clamp: desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP; break;
 			case TextureAdressMode::Border: desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER; break;
-			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nInvalid U adress mode"); break;
-			default: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nUnsupported U adress mode"); break;
+			case TextureAdressMode::Invalid: throw RenderDeviceError("Failed to create 2D sampler on D3D11Context:\nInvalid U adress mode"); break;
+			default: throw RenderDeviceError("Failed to create 2D sampler on D3D11Context:\nUnsupported U adress mode"); break;
 		}
 
 		switch (_desc.addressV)
@@ -233,8 +237,8 @@ public:
 			case TextureAdressMode::Mirror: desc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR; break;
 			case TextureAdressMode::Clamp: desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP; break;
 			case TextureAdressMode::Border: desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER; break;
-			case TextureAdressMode::Invalid: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nInvalid V adress mode"); break;
-			default: throw std::runtime_error("Failed to create 2D sampler on D3D11Context:\nUnsupported V adress mode"); break;
+			case TextureAdressMode::Invalid: throw RenderDeviceError("Failed to create 2D sampler on D3D11Context:\nInvalid V adress mode"); break;
+			default: throw RenderDeviceError("Failed to create 2D sampler on D3D11Context:\nUnsupported V adress mode"); break;
 		}
 
 		desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -429,22 +433,31 @@ public:
 
 	}
 
-	virtual void Bind(Texture2D* texture) final
+	virtual void BindTexture2D(Texture2D* texture) final
 	{
 		auto tex = static_cast<D3D11Texture2D*>(texture);
-		((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetShaderResources(index, 1, &tex->resourceView);
+		if (tex == nullptr)
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetShaderResources(index, 1, nullptr);
+		else
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetShaderResources(index, 1, &tex->resourceView);
 	}
 
-	virtual void Bind(Sampler2D* sampler) final
+	virtual void BindSampler2D(Sampler2D* sampler) final
 	{
 		auto smplr = static_cast<D3D11Sampler2D*>(sampler);
-		((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetSamplers(index, 1, &smplr->sampler);
+		if (smplr == nullptr)
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetSamplers(index, 1, &smplr->sampler);
+		else
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetSamplers(index, 1, nullptr);
 	}
 
-	virtual void Bind(ConstantBuffer* buffer) final
+	virtual void BindConstantBuffer(ConstantBuffer* buffer) final
 	{
 		auto buf = static_cast<D3D11ConstantBuffer*>(buffer);
-		((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetConstantBuffers(index, 1, &buf->buffer);
+		if (buf == nullptr)
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetConstantBuffers(index, 1, nullptr);
+		else
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->VSSetConstantBuffers(index, 1, &buf->buffer);
 	}
 
 	D3D11VertexShader* shader;
@@ -564,22 +577,40 @@ public:
 
 	}
 
-	virtual void Bind(Texture2D* texture) final
+	virtual void BindTexture2D(Texture2D* texture) final
 	{
 		auto tex = static_cast<D3D11Texture2D*>(texture);
-		((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetShaderResources(index, 1, &tex->resourceView);
+		if (tex != nullptr)
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetShaderResources(index, 1, &tex->resourceView);
+		else
+		{
+			ID3D11ShaderResourceView* texs[] = { nullptr };
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetShaderResources(index, 1, texs);		
+		}
 	}
 
-	virtual void Bind(Sampler2D* sampler) final
+	virtual void BindSampler2D(Sampler2D* sampler) final
 	{
 		auto smplr = static_cast<D3D11Sampler2D*>(sampler);
-		((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetSamplers(index, 1, &smplr->sampler);
+		if (smplr != nullptr)
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetSamplers(index, 1, &smplr->sampler);
+		else
+		{
+			ID3D11SamplerState* smplr[] = { nullptr };
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetSamplers(index, 1, smplr);
+		}
 	}
 
-	virtual void Bind(ConstantBuffer* buffer) final
+	virtual void BindConstantBuffer(ConstantBuffer* buffer) final
 	{
 		auto buf = static_cast<D3D11ConstantBuffer*>(buffer);
-		((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetConstantBuffers(index, 1, &buf->buffer);
+		if (buf != nullptr)
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetConstantBuffers(index, 1, &buf->buffer);
+		else
+		{
+			ID3D11Buffer* bufs[] = { nullptr };
+			((ID3D11DeviceContext*)shader->device->m_deviceContext)->PSSetConstantBuffers(index, 1, bufs);	
+		}
 	}
 
 	D3D11PixelShader* shader;
@@ -1354,6 +1385,119 @@ public:
 	ID3D11BlendState* state;
 };
 
+class D3D11DepthStencilBuffer final : public DepthStencilBuffer
+{
+public:
+	D3D11DepthStencilBuffer(D3D11RenderDevice* device, size_t width, size_t height, DepthStencilFormat format)
+	{
+		this->width = width;
+		this->height = height;
+
+		D3D11_TEXTURE2D_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Width = width;
+		desc.Height = height;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
+
+		switch (format)
+		{
+			case DepthStencilFormat::Depth24Stencil8: desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; break;
+			case DepthStencilFormat::Depth32Stencil8: desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT; break;
+			case DepthStencilFormat::Invalid: throw RenderDeviceError("Failed to create D3D11DepthStencilBuffer:\nInvalid depth and stencil format"); break;
+			default: throw RenderDeviceError("Failed to create D3D11DepthStencilBuffer:\nUnsupported depth and stencil format"); break;
+		}
+
+		HRESULT hr = ((ID3D11Device*)device->m_device)->CreateTexture2D(&desc, NULL, &buffer);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11DepthStencilBuffer:\nFailed to create 2D texture:\nError: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
+
+		// Create depth stencil view
+		hr = ((ID3D11Device*)device->m_device)->CreateDepthStencilView(buffer, NULL, &view);
+		if (FAILED(hr))
+		{
+			std::stringstream ss;
+			ss << "Failed to create D3D11DepthStencilBuffer:\nFailed to create depth stencil view:\nError: " << _com_error(hr).ErrorMessage();
+			throw RenderDeviceError(ss.str());
+		}
+	}
+
+	virtual ~D3D11DepthStencilBuffer() final
+	{
+		view->Release();
+		buffer->Release();
+	}
+
+	ID3D11Texture2D* buffer;
+	ID3D11DepthStencilView* view;
+	size_t width, height;
+};
+
+class D3D11Framebuffer final : public Framebuffer
+{
+public:
+	D3D11Framebuffer(size_t attachmentCount, Texture2D** attachments, DepthStencilBuffer* depthStencilAttachment)
+	{
+		size_t width = 0, height = 0;
+
+		colorAttachmentCount = attachmentCount;
+		if (colorAttachmentCount == 0)
+			throw RenderDeviceError("Failed to create D3D11Framebuffer:\nA framebuffer must have at least one color attachment");
+		colorAttachments = new ID3D11RenderTargetView*[colorAttachmentCount];
+
+		width = static_cast<D3D11Texture2D*>(attachments[0])->width;
+		height = static_cast<D3D11Texture2D*>(attachments[0])->height;
+
+		for (size_t i = 0; i < attachmentCount; ++i)
+		{
+			if (width != static_cast<D3D11Texture2D*>(attachments[0])->width || height != static_cast<D3D11Texture2D*>(attachments[0])->height)
+				throw RenderDeviceError("Failed to create D3D11Framebuffer:\nAll color attachments must have the same size");
+
+			if (static_cast<D3D11Texture2D*>(attachments[i])->renderTargetView == nullptr)
+				throw RenderDeviceError("Failed to create D3D11Framebuffer:\nColor attachment texture must be created with 'isRenderTarget' set to true");
+			colorAttachments[i] = static_cast<D3D11Texture2D*>(attachments[i])->renderTargetView;
+		}
+		
+		if (depthStencilAttachment == nullptr)
+			this->depthStencilAttachment = nullptr;
+		else
+		{
+			if (width != static_cast<D3D11DepthStencilBuffer*>(depthStencilAttachment)->width || height != static_cast<D3D11DepthStencilBuffer*>(depthStencilAttachment)->height)
+				throw RenderDeviceError("Failed to create D3D11Framebuffer:\nThe depth and stencil attachment must have the same size as the color attachments");
+			this->depthStencilAttachment = static_cast<D3D11DepthStencilBuffer*>(depthStencilAttachment)->view;
+		}
+
+		// Set viewport
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = width;
+		viewport.Height = height;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+	}
+
+	virtual ~D3D11Framebuffer() final
+	{
+		delete[] colorAttachments;
+	}
+
+	size_t colorAttachmentCount;
+	ID3D11RenderTargetView** colorAttachments;
+	ID3D11DepthStencilView* depthStencilAttachment;
+	D3D11_VIEWPORT viewport;
+};
+
 void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
@@ -1488,7 +1632,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 	// Set default render target
 	deviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 
-	// Set viewport
+	// Set default viewport
 	{
 		D3D11_VIEWPORT viewport;
 		ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
@@ -1536,11 +1680,12 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 	m_device = device;
 	m_deviceContext = deviceContext;
 	m_defaultRenderTargetView = renderTargetView;
-	m_renderTargetView = renderTargetView;
+	m_renderTargetViews = &m_defaultRenderTargetView;
 	m_depthStencilBuffer = depthStencilBuffer;
 	m_defaultDepthStencilView = depthStencilView;
 	m_depthStencilView = depthStencilView;
 	m_rasterState = rasterState;
+	m_renderTargetCount = 1;
 
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
@@ -1808,7 +1953,8 @@ void Magma::Framework::Graphics::D3D11RenderDevice::SetDepthStencilState(DepthSt
 void Magma::Framework::Graphics::D3D11RenderDevice::Clear(glm::vec4 color, float depth, int stencil)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	((ID3D11DeviceContext*)m_deviceContext)->ClearRenderTargetView((ID3D11RenderTargetView*)m_renderTargetView, &color[0]);
+	for (size_t i = 0; i < m_renderTargetCount; ++i)
+		((ID3D11DeviceContext*)m_deviceContext)->ClearRenderTargetView((ID3D11RenderTargetView*)static_cast<ID3D11RenderTargetView**>(m_renderTargetViews)[i], &color[0]);
 	((ID3D11DeviceContext*)m_deviceContext)->ClearDepthStencilView((ID3D11DepthStencilView*)m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
@@ -1819,7 +1965,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DrawTriangles(size_t offset,
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	((ID3D11DeviceContext*)m_deviceContext)->Draw(offset, count);
+	((ID3D11DeviceContext*)m_deviceContext)->Draw(count, offset);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -1830,15 +1976,6 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DrawTrianglesIndexed(size_t 
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	((ID3D11DeviceContext*)m_deviceContext)->DrawIndexed(count, offset, 0);
-#else
-	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
-#endif
-}
-
-void Magma::Framework::Graphics::D3D11RenderDevice::SetRenderTargets(Texture2D ** textures, size_t count)
-{
-#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	// TO DO
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -1895,6 +2032,82 @@ void Magma::Framework::Graphics::D3D11RenderDevice::SetBlendState(BlendState * b
 	auto bs = static_cast<D3D11BlendState*>(blendState);
 	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	((ID3D11DeviceContext*)m_deviceContext)->OMSetBlendState(bs->state, color, 0xFFFFFFFF);
+#else
+	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
+#endif
+}
+
+DepthStencilBuffer * Magma::Framework::Graphics::D3D11RenderDevice::CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format)
+{
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+	return new D3D11DepthStencilBuffer(this, width, height, format);
+#else
+	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
+#endif
+}
+
+void Magma::Framework::Graphics::D3D11RenderDevice::DestroyDepthStencilBuffer(DepthStencilBuffer * depthStencilBuffer)
+{
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+	delete depthStencilBuffer;
+#else
+	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
+#endif
+}
+
+Framebuffer * Magma::Framework::Graphics::D3D11RenderDevice::CreateFramebuffer(size_t attachmentCount, Texture2D ** attachments, DepthStencilBuffer * depthStencilAttachment)
+{
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+	return new D3D11Framebuffer(attachmentCount, attachments, depthStencilAttachment);
+#else
+	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
+#endif
+}
+
+void Magma::Framework::Graphics::D3D11RenderDevice::DestroyFramebuffer(Framebuffer * framebuffer)
+{
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+	delete framebuffer;
+#else
+	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
+#endif
+}
+
+void Magma::Framework::Graphics::D3D11RenderDevice::SetFramebuffer(Framebuffer * framebuffer)
+{
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+	if (framebuffer == nullptr)
+	{
+		this->m_renderTargetViews = &this->m_defaultRenderTargetView;
+		this->m_depthStencilView = this->m_defaultDepthStencilView;
+		this->m_renderTargetCount = 1;
+		ID3D11RenderTargetView* targets[] = { static_cast<ID3D11RenderTargetView*>(this->m_defaultRenderTargetView) };
+		((ID3D11DeviceContext*)m_deviceContext)->OMSetRenderTargets(1, targets, static_cast<ID3D11DepthStencilView*>(this->m_defaultDepthStencilView));
+
+		// Set default viewport
+		{
+			D3D11_VIEWPORT viewport;
+			ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+			viewport.TopLeftX = 0;
+			viewport.TopLeftY = 0;
+			viewport.Width = m_window->GetWidth();
+			viewport.Height = m_window->GetHeight();
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
+
+			((ID3D11DeviceContext*)m_deviceContext)->RSSetViewports(1, &viewport);
+		}
+	}
+	else
+	{
+		auto fb = static_cast<D3D11Framebuffer*>(framebuffer);
+		this->m_renderTargetViews = fb->colorAttachments;
+		this->m_depthStencilView = fb->depthStencilAttachment;
+		this->m_renderTargetCount = fb->colorAttachmentCount;
+		((ID3D11DeviceContext*)m_deviceContext)->OMSetRenderTargets(fb->colorAttachmentCount, fb->colorAttachments, fb->depthStencilAttachment);
+		((ID3D11DeviceContext*)m_deviceContext)->RSSetViewports(1, &fb->viewport);
+	}
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif

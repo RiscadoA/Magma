@@ -1,0 +1,11 @@
+VARIN0,		xb04,
+VARIN1,		xb03,
+VAROUT,		xb01,
+SMPLE2D,
+
+# Set alpha to 1.0
+DECLF1,		xb10,
+SETF1,		xb10,	f1.0,
+VARIN0,		xb10,
+VAROUT,		xb01,
+ASF4CMP,	xb03,

@@ -1,7 +1,7 @@
 #include "Font.hpp"
 
 #include <sstream>
-#include <algorithm>
+#include <cmath>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -67,8 +67,9 @@ Magma::Framework::Graphics::Font::Font(Context& context, const unsigned char* da
 			}
 
 			// Update max height
-			maxH = std::max(maxH, face->glyph->bitmap.rows);
-
+			if (face->glyph->bitmap.rows > maxH)
+				maxH = face->glyph->bitmap.rows;
+			
 			// Store character info
 			Character chr;
 			chr.codePoint = character;

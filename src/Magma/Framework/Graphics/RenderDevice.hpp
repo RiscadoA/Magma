@@ -368,19 +368,19 @@ namespace Magma
 				///		Binds a 2D texture to this vertex shader binding point
 				/// </summary>
 				/// <param name="texture">Texture handle</param>
-				virtual void Bind(Texture2D* texture) = 0;
+				virtual void BindTexture2D(Texture2D* texture) = 0;
 
 				/// <summary>
 				///		Binds a 2D sampler to this vertex shader binding point
 				/// </summary>
 				/// <param name="sampler">2D sampler handle</param>
-				virtual void Bind(Sampler2D* sampler) = 0;
+				virtual void BindSampler2D(Sampler2D* sampler) = 0;
 
 				/// <summary>
 				///		Binds a constant buffer to this vertex shader binding point
 				/// </summary>
 				/// <param name="buffer">Constant buffer handle</param>
-				virtual void Bind(ConstantBuffer* buffer) = 0;
+				virtual void BindConstantBuffer(ConstantBuffer* buffer) = 0;
 
 			protected:
 				/// <summary>
@@ -423,19 +423,19 @@ namespace Magma
 				///		Binds a 2D texture to this pixel shader binding point
 				/// </summary>
 				/// <param name="texture">Texture handle</param>
-				virtual void Bind(Texture2D* texture) = 0;
+				virtual void BindTexture2D(Texture2D* texture) = 0;
 
 				/// <summary>
 				///		Binds a 2D sampler to this vertex shader binding point
 				/// </summary>
 				/// <param name="sampler">2D sampler handle</param>
-				virtual void Bind(Sampler2D* sampler) = 0;
+				virtual void BindSampler2D(Sampler2D* sampler) = 0;
 
 				/// <summary>
 				///		Binds a constant buffer to this pixel shader binding point
 				/// </summary>
 				/// <param name="buffer">Constant buffer handle</param>
-				virtual void Bind(ConstantBuffer* buffer) = 0;
+				virtual void BindConstantBuffer(ConstantBuffer* buffer) = 0;
 
 			protected:
 				/// <summary>
@@ -1161,6 +1161,62 @@ namespace Magma
 			};
 
 			/// <summary>
+			///		Encapsulates a depth and stencil buffer
+			/// </summary>
+			class DepthStencilBuffer
+			{
+			public:
+				virtual ~DepthStencilBuffer() = default;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				DepthStencilBuffer() = default;
+			};
+
+			/// <summary>
+			///		Represents a depth and stencil buffer format
+			/// </summary>
+			enum class DepthStencilFormat
+			{
+				/// <summary>
+				///		Invalid depth and stencil buffer format type
+				/// </summary>
+				Invalid = -1,
+
+				/// <summary>
+				///		24 bits for depth and 8 bits for stencil on a 32 bit value
+				/// </summary>
+				Depth24Stencil8,
+
+				/// <summary>
+				///		32 bits for depth and 8 bits for stencil on two 32 bit values (24 bits unused)
+				/// </summary>
+				Depth32Stencil8,
+
+				/// <summary>
+				///		Depth and stencil buffer format type count
+				/// </summary>
+				Count
+			};
+
+			/// <summary>
+			///		Encapsulates a framebuffer
+			/// </summary>
+			class Framebuffer
+			{
+			public:
+				virtual ~Framebuffer() = default;
+
+			protected:
+				/// <summary>
+				///		Used to ensure that these are never created directly
+				/// </summary>
+				Framebuffer() = default;
+			};
+
+			/// <summary>
 			///		Render device initialization settings
 			/// </summary>
 			struct RenderDeviceSettings
@@ -1401,13 +1457,6 @@ namespace Magma
 				virtual void DrawTrianglesIndexed(size_t offset, size_t count) = 0;
 
 				/// <summary>
-				///		Sets the current render targets
-				/// </summary>
-				/// <param name="textures">Textures array (set textures to nullptr to set the default render target)</param>
-				/// <param name="count">Render target count</param>
-				virtual void SetRenderTargets(Texture2D** textures, size_t count) = 0;
-
-				/// <summary>
 				///		Swaps the front and back buffers
 				/// </summary>
 				virtual void SwapBuffers() = 0;
@@ -1445,6 +1494,42 @@ namespace Magma
 				/// </summary>
 				/// <param name="blendState">Blend state handle</param>
 				virtual void SetBlendState(BlendState* blendState) = 0;
+
+				/// <summary>
+				///		Creates a new depth stencil buffer
+				/// </summary>
+				/// <param name="width">Depth stencil buffer width</param>
+				/// <param name="height">Depth stencil buffer height</param>
+				/// <param name="format">Depth stencil buffer format</param>
+				/// <returns>Depth stencil buffer handle</returns>
+				virtual DepthStencilBuffer* CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format) = 0;
+
+				/// <summary>
+				///		Destroys a depth stencil buffer
+				/// </summary>
+				/// <param name="depthStencilBuffer">Depth stencil buffer handle</param>
+				virtual void DestroyDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer) = 0;
+
+				/// <summary>
+				///		Creates a new framebuffer
+				/// </summary>
+				/// <param name="attachmentCount">Number of color attachments</param>
+				/// <param name="attachments">Color attachment array pointer</param>
+				/// <param name="depthAttachment">Depth and stencil attachment pointer (set to nullptr to not use a depth and stencil attachment)</param>
+				/// <returns>Framebuffer handle</returns>
+				virtual Framebuffer* CreateFramebuffer(size_t attachmentCount, Texture2D** attachments, DepthStencilBuffer* depthStencilAttachment = nullptr) = 0;
+
+				/// <summary>
+				///		Destroys a framebuffer
+				/// </summary>
+				/// <param name="framebuffer">Framebuffer handle</param>
+				virtual void DestroyFramebuffer(Framebuffer* framebuffer) = 0;
+
+				/// <summary>
+				///		Sets the current framebuffer
+				/// </summary>
+				/// <param name="framebuffer">Framebuffer to render to (set to nullptr to set the default framebuffer</param>
+				virtual void SetFramebuffer(Framebuffer* framebuffer) = 0;
 			};
 		}
 	}

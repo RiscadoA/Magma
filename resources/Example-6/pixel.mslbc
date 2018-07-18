@@ -1,0 +1,30 @@
+VARIN0,		xb04,
+VARIN1,		xb03,
+VAROUT,		xb01,
+SMPLE2D,
+
+DECLF1,		xb10,			# Temp var
+
+VARIN0,		xb03,			# Get in component u
+VAROUT,		xb10,
+GEF3CMP,	xb00,
+VARIN0,		xb10,			# Set out component u
+VAROUT,		xb02, 
+ASF4CMP,	xb00,
+
+VARIN0,		xb03,			# Get in component v
+VAROUT,		xb10,
+GEF3CMP,	xb01,
+VARIN0,		xb10,			# Set out component v
+VAROUT,		xb02, 
+ASF4CMP,	xb01,
+
+SETF1,		xb10,	f0.0,	# Store temporary t value
+VARIN0,		xb10,			# Set out component t
+VAROUT,		xb02,
+ASF4CMP,	xb02,
+
+SETF1,		xb10,	f1.0,	# Store temporary w value
+VARIN0,		xb10,			# Set out component w
+VAROUT,		xb02,
+ASF4CMP,	xb03,
