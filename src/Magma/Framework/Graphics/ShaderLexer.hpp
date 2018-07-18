@@ -1,6 +1,9 @@
 #pragma once
 
+#include "ShaderPreprocessor.hpp"
+
 #include <vector>
+#include <string>
 #include <tuple>
 
 namespace Magma
@@ -12,14 +15,44 @@ namespace Magma
 			/// <summary>
 			///		Mamga Shading Language token
 			/// </summary>
-			enum class ShaderToken
+			enum class ShaderTokenSymbol
 			{
 				/// <summary>
 				///		Invalid token
 				/// </summary>
 				Invalid = -1,
 
+				// Types
+				Int1,
+				Int2,
+				Int3,
+				Int4,
+				Int22,
+				Int33,
+				Int44,
+				
+				Float1,
+				Float2,
+				Float3,
+				Float4,
+				Float22,
+				Float33,
+				Float44,
+
+				Bool,
+
 				// Keywords
+				Shader,
+				Input,
+				Output,
+				Texture2D,
+				ConstantBuffer,
+				
+				If,
+				Else,
+				While,
+				Return,
+				Discard,
 
 				// Punctuation
 
@@ -67,6 +100,8 @@ namespace Magma
 				/// </summary>
 				Invalid = -1,
 
+				Type,
+
 				Keyword,
 
 				Punctuation,
@@ -79,7 +114,36 @@ namespace Magma
 				Count
 			};
 
-			extern const std::vector<std::tuple<std::string, ShaderToken, ShaderTokenType>> ShaderTokens;
+			extern const std::vector<std::tuple<std::string, ShaderTokenSymbol, ShaderTokenType>> ShaderTokens;
+
+			/// <summary>
+			///		Holds data about a lexed shader token
+			/// </summary>
+			struct ShaderToken
+			{
+				ShaderTokenSymbol symbol;
+				ShaderTokenType type;
+				std::string attribute;
+				size_t lineNumber;
+			};
+
+			/// <summary>
+			///		Static class for the MSL compiler lexing stage
+			/// </summary>
+			class ShaderLexer
+			{
+			public:
+				ShaderLexer() = delete;
+				~ShaderLexer() = delete;
+
+				/// <summary>
+				///		Runs the lexer stage from the preprocessor output
+				/// </summary>
+				/// <param name="in">Preprocessor data</param>
+				/// <param name="out">Shader tokens</param>
+				/// <param name="data">Shader compiler data</param>
+				static void Run(const std::vector<ShaderLine>& in, std::vector<ShaderToken>& out, ShaderCompilerData& data);
+			};
 		}
 	}
 }
