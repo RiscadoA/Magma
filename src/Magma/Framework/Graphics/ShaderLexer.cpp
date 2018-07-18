@@ -35,6 +35,9 @@ using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
 const std::vector<std::tuple<std::string, ShaderTokenSymbol, ShaderTokenType, std::string>> Magma::Framework::Graphics::ShaderTokens =
 {
+	std::make_tuple(R"(\b(\d+\.\d+)f?\b)", ShaderTokenSymbol::FloatLiteral, ShaderTokenType::Literal, "float-literal"),
+	std::make_tuple(R"(\b(\d+)\b)", ShaderTokenSymbol::IntLiteral, ShaderTokenType::Literal, "int-literal"),
+
 	std::make_tuple(R"(\bint\b)", ShaderTokenSymbol::Int1, ShaderTokenType::Type, "int"),
 	std::make_tuple(R"(\bint1\b)", ShaderTokenSymbol::Int1, ShaderTokenType::Type, "int"),
 	std::make_tuple(R"(\bint2\b)", ShaderTokenSymbol::Int2, ShaderTokenType::Type, "int2"),

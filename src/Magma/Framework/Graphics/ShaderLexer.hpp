@@ -87,6 +87,10 @@ namespace Magma
 				// Identifier
 				Identifier,
 
+				// Literals
+				IntLiteral,
+				FloatLiteral,
+
 				/// <summary>
 				///		Token count
 				/// </summary>
@@ -112,6 +116,8 @@ namespace Magma
 				Operator,
 
 				Identifier,
+
+				Literal,
 
 				/// <summary>
 				///		Token type count

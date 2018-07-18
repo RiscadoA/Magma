@@ -18,6 +18,67 @@ namespace Magma
 			{
 				Invalid = -1,
 
+				Root,
+
+				// Types
+				Int1,
+				Int2,
+				Int3,
+				Int4,
+				Int22,
+				Int33,
+				Int44,
+
+				Float1,
+				Float2,
+				Float3,
+				Float4,
+				Float22,
+				Float33,
+				Float44,
+
+				Bool,
+
+				// Operator
+				Add, // +
+				Subtract, // -
+				Multiply, // *
+				Divide, // /				
+				Equal, // ==
+				Different, // !=
+				Greater, // >
+				Less, // <
+				GEqual, // >=
+				LEqual,	// <=
+				And, // &&
+				Or, // ||
+				Not, // !
+				Assign,	// =
+				Member, // . (member access)
+				
+				// Identifier
+				Identifier,
+
+				// Literals
+				IntLiteral,
+				FloatLiteral,
+
+				// Other
+				Shader,
+				Input,
+				Output,
+				Texture2D,
+				ConstantBuffer,
+				Scope,
+
+				Constructor,
+
+				If,
+				While,
+				Return,
+				Discard,
+				Call,
+
 				Count
 			};
 
@@ -27,6 +88,16 @@ namespace Magma
 			enum class ShaderASTNodeType
 			{
 				Invalid = -1,
+
+				Type,
+
+				Operator,
+
+				Identifier,
+
+				Literal,
+
+				Other,
 
 				Count
 			};
@@ -38,6 +109,7 @@ namespace Magma
 			{
 				ShaderASTNodeSymbol symbol;
 				ShaderASTNodeType type;
+				std::string attribute;
 
 				ShaderASTNode* parent;
 				ShaderASTNode* child;
