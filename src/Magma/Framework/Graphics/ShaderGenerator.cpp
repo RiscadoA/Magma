@@ -39,6 +39,27 @@ std::string ShaderVarTypeToString(ShaderVariableType type)
 	}
 }
 
+void GenerateStatement(const ShaderASTNode* statement, GeneratorInfo& info)
+{
+
+}
+
+void GenerateScope(const ShaderASTNode* scope, GeneratorInfo& info)
+{
+	auto c = scope->child;
+	while (c != nullptr)
+	{
+		GenerateStatement(c);
+		c = c->next;
+	}
+}
+
+void GenerateShader(const ShaderASTNode* shader, GeneratorInfo& info)
+{
+	auto scope = shader->child;
+	GenerateScope(scope, info);
+}
+
 void Magma::Framework::Graphics::ShaderGenerator::Run(const ShaderASTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
 {
 	GeneratorInfo info;
@@ -171,11 +192,14 @@ void Magma::Framework::Graphics::ShaderGenerator::Run(const ShaderASTNode * in, 
 				info.md << "\tINDEX \"" << i.second.index << "\"" << std::endl;
 				info.md << "\tNAME \"" << i.first << "\"" << std::endl;
 				info.md << "\tTYPE \"" << ShaderVarTypeToString(i.second.type) << "\"" << std::endl << std::endl;
-			}		
+			}
 
 			info.varIndexes.insert(std::make_pair(i.first, i.second.index));
 		}
 	}
+
+	// Generate BC
+	GenerateShader(in, info);
 
 	outBC = info.bc.str();
 	outMD = info.md.str();
