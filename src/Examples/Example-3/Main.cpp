@@ -340,7 +340,7 @@ void Main(int argc, char** argv) try
 	// Main loop
 	while (scene.running)
 	{
-		model1 = glm::rotate(model1, glm::radians(0.01f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model1 = glm::rotate(model1, glm::radians(90.0f * (1.0f / 60.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Poll events
 		scene.window->PollEvents();

@@ -71,6 +71,13 @@ namespace Magma
 				ConstantBuffer,
 				Scope,
 
+				/*
+					Declaration
+						Type
+						Identifier
+						[OPTIONAL DEFINITION EXPRESSION]
+				*/
+				Declaration,
 				Constructor,
 
 				If,
