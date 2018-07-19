@@ -202,6 +202,28 @@ const ShaderToken& ExpectTokenType(ShaderTokenType type, ParserInfo& info)
 	return tok;
 }
 
+ShaderASTNode* ParseStatement(ParserInfo& info)
+{
+
+}
+
+ShaderASTNode* ParseScope(ParserInfo& info)
+{
+	auto node = CreateNode(ShaderASTNodeSymbol::Scope, ShaderASTNodeType::Other, "", info);
+
+	ExpectTokenSymbol(ShaderTokenSymbol::OpenBrace, info);
+	while (info.token->symbol != ShaderTokenSymbol::CloseBrace)
+	{
+		if (info.token->symbol == ShaderTokenSymbol::OpenBrace)
+			AddToNode(node, ParseScope(info));
+		else
+			AddToNode(node, ParseStatement(info));
+	}
+	ExpectTokenSymbol(ShaderTokenSymbol::CloseBrace, info);
+
+	return node;
+}
+
 void ParseInput(ParserInfo& info)
 {
 	if (info.inputID != "")
@@ -241,12 +263,56 @@ void ParseInput(ParserInfo& info)
 
 void ParseOutput(ParserInfo& info)
 {
-	
+	if (info.outputID != "")
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderParser:" << std::endl;
+		ss << "Output is defined multiple times" << std::endl;
+		ss << "Line: " << info.lineNumber;
+		throw ShaderError(ss.str());
+	}
+
+	ExpectTokenSymbol(ShaderTokenSymbol::Output, info);
+	info.outputID = ExpectTokenSymbol(ShaderTokenSymbol::Identifier, info).attribute;
+	ExpectTokenSymbol(ShaderTokenSymbol::OpenBrace, info);
+
+	// Get output vars
+	while (AcceptTokenType(ShaderTokenType::Type, info))
+	{
+		ShaderOutputVariable var;
+		
+		var.type = ShaderTokenSymbolToVarType(info.acceptedToken->symbol);
+		auto id = ExpectTokenSymbol(ShaderTokenSymbol::Identifier, info).attribute;
+		var.index = -1;
+
+		ExpectTokenSymbol(ShaderTokenSymbol::Colon, info);
+		var.name = ExpectTokenSymbol(ShaderTokenSymbol::Identifier, info).attribute;
+
+		info.outputVars.push_back(std::make_pair(id, var));
+
+		ExpectTokenSymbol(ShaderTokenSymbol::Semicolon, info);
+	}
+
+
+	ExpectTokenSymbol(ShaderTokenSymbol::CloseBrace, info);
+	ExpectTokenSymbol(ShaderTokenSymbol::Semicolon, info);
 }
 
-ShaderASTNode* ParseShader(ParserInfo& info)
+void ParseTexture2D(ParserInfo& info)
 {
-	return nullptr;
+	// TO DO
+}
+
+void ParseConstantBuffer(ParserInfo& info)
+{
+	// TO DO
+}
+
+void ParseShader(ParserInfo& info)
+{
+	ExpectTokenSymbol(ShaderTokenSymbol::Shader, info);
+	AddToNode(info.root, ParseScope(info));
+	ExpectTokenSymbol(ShaderTokenSymbol::Semicolon, info);
 }
 
 // Main parsing function (whole shader)
@@ -261,11 +327,12 @@ void ParseWholeShader(ParserInfo& info)
 			ParseInput(info);
 		else if (info.token->symbol == ShaderTokenSymbol::Output)
 			ParseOutput(info);
+		else if (info.token->symbol == ShaderTokenSymbol::Texture2D)
+			ParseTexture2D(info);
+		else if (info.token->symbol == ShaderTokenSymbol::ConstantBuffer)
+			ParseConstantBuffer(info);
 		else if (info.token->symbol == ShaderTokenSymbol::Shader)
-		{
-			auto node = ParseShader(info);
-			AddToNode(info.root, node);
-		}
+			ParseShader(info);
 		else
 		{
 			std::stringstream ss;
@@ -281,7 +348,7 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 {
 	ParserInfo info
 	{
-		CreateNode(ShaderASTNodeSymbol::Root, ShaderASTNodeType::Other, "", info),
+		CreateNode(ShaderASTNodeSymbol::Shader, ShaderASTNodeType::Other, "", info),
 		0,
 		in,
 	};
