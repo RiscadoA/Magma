@@ -21,6 +21,7 @@ struct ParserInfo
 	std::vector<std::pair<std::string, ShaderOutputVariable>> outputVars;
 
 	std::vector<ShaderConstantBuffer> constantBuffers;
+	std::vector<ShaderConstantBufferVariable> constantBufferVars;
 };
 
 ShaderVariableType ShaderTokenSymbolToVarType(ShaderTokenSymbol symbol)
@@ -564,6 +565,13 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 	info.token = info.tokens.begin();
 	ParseWholeShader(info);
 	out = info.root;
+
+	data.inputID = info.inputID;
+	data.outputID = info.outputID;
+	data.inputVars = info.inputVars;
+	data.outputVars = info.outputVars;
+	data.constantBuffers = info.constantBuffers;
+	data.constantBufferVars = info.constantBufferVars;
 }
 
 void Magma::Framework::Graphics::ShaderParser::Clean(ShaderASTNode * node)

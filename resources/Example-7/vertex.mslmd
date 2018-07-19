@@ -1,0 +1,13 @@
+MAJOR "1"
+MINOR "0"
+SHADER TYPE "PIXEL"
+
+OUTPUT VAR
+	INDEX "1"
+	NAME "ATTACHMENT_0"
+	TYPE "float4"
+
+INPUT VAR
+	INDEX "9"
+	NAME "color"
+	TYPE "float4"

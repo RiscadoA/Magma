@@ -45,7 +45,7 @@ void Main(int argc, char** argv)
 		// Write meta data
 		{
 			auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/vertex.mslmd");
-			fileSystem->Write(file, bytecodeSrc.data(), bytecodeSrc.size());
+			fileSystem->Write(file, metaDataSrc.data(), metaDataSrc.size());
 			fileSystem->CloseFile(file);
 		}
 
