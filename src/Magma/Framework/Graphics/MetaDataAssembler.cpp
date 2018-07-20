@@ -32,7 +32,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		unsigned long bufferOffset;
 		unsigned long index;
 		std::string name;
-		ShaderVariableType varType;
+		ShaderDataVariableType varType;
 	};
 
 	unsigned long majorVersion = 0;
@@ -117,33 +117,33 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 			{
 				auto str = ToLower(match.str(1));
 				if (str == "int" || str == "int1")
-					objects.back().varType = ShaderVariableType::Int1;
+					objects.back().varType = ShaderDataVariableType::Int1;
 				else if (str == "int2")
-					objects.back().varType = ShaderVariableType::Int2;
+					objects.back().varType = ShaderDataVariableType::Int2;
 				else if (str == "int3")
-					objects.back().varType = ShaderVariableType::Int3;
+					objects.back().varType = ShaderDataVariableType::Int3;
 				else if (str == "int4")
-					objects.back().varType = ShaderVariableType::Int4;
+					objects.back().varType = ShaderDataVariableType::Int4;
 				else if (str == "int22")
-					objects.back().varType = ShaderVariableType::Int22;
+					objects.back().varType = ShaderDataVariableType::Int22;
 				else if (str == "int33")
-					objects.back().varType = ShaderVariableType::Int33;
+					objects.back().varType = ShaderDataVariableType::Int33;
 				else if (str == "int44")
-					objects.back().varType = ShaderVariableType::Int44;
+					objects.back().varType = ShaderDataVariableType::Int44;
 				else if (str == "float" || str == "float1")
-					objects.back().varType = ShaderVariableType::Float1;
+					objects.back().varType = ShaderDataVariableType::Float1;
 				else if (str == "float2")
-					objects.back().varType = ShaderVariableType::Float2;
+					objects.back().varType = ShaderDataVariableType::Float2;
 				else if (str == "float3")
-					objects.back().varType = ShaderVariableType::Float3;
+					objects.back().varType = ShaderDataVariableType::Float3;
 				else if (str == "float4")
-					objects.back().varType = ShaderVariableType::Float4;
+					objects.back().varType = ShaderDataVariableType::Float4;
 				else if (str == "float22")
-					objects.back().varType = ShaderVariableType::Float22;
+					objects.back().varType = ShaderDataVariableType::Float22;
 				else if (str == "float33")
-					objects.back().varType = ShaderVariableType::Float33;
+					objects.back().varType = ShaderDataVariableType::Float33;
 				else if (str == "float44")
-					objects.back().varType = ShaderVariableType::Float44;
+					objects.back().varType = ShaderDataVariableType::Float44;
 				else
 					throw ShaderError("Failed to assemble binary shader meta data:\nUnknown variable type");
 			}
@@ -207,7 +207,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 			size += o.name.size();
 
 			// Write type
-			o.varType = (ShaderVariableType)String::U32ToBE((unsigned long)o.varType);
+			o.varType = (ShaderDataVariableType)String::U32ToBE((unsigned long)o.varType);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.varType, sizeof(unsigned long));
@@ -250,7 +250,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 			size += o.name.size();
 
 			// Write type
-			o.varType = (ShaderVariableType)String::U32ToBE((unsigned long)o.varType);
+			o.varType = (ShaderDataVariableType)String::U32ToBE((unsigned long)o.varType);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.varType, sizeof(unsigned long));
@@ -379,7 +379,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 			size += o.name.size();
 
 			// Write type
-			o.varType = (ShaderVariableType)String::U32ToBE((unsigned long)o.varType);
+			o.varType = (ShaderDataVariableType)String::U32ToBE((unsigned long)o.varType);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.varType, sizeof(unsigned long));

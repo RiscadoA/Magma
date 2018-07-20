@@ -108,8 +108,8 @@ namespace Magma
 					Invalid					= -1,
 
 					// Punctuation
-					OpenBrace				= 0x00,
-					CloseBrace				= 0x01,
+					OpenBraces				= 0x00,
+					CloseBraces				= 0x01,
 					OpenParenthesis			= 0x02,
 					CloseParenthesis		= 0x03,
 					OpenBrackets			= 0x04,

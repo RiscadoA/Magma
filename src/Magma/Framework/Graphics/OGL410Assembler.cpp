@@ -10,27 +10,27 @@
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
-void TOGL410(ShaderVariableType type, std::stringstream& out)
+void TOGL410(ShaderDataVariableType type, std::stringstream& out)
 {
 	switch (type)
 	{
-		case ShaderVariableType::Int1: out << "int"; break;
-		case ShaderVariableType::Int2: out << "ivec2"; break;
-		case ShaderVariableType::Int3: out << "ivec3"; break;
-		case ShaderVariableType::Int4: out << "ivec4"; break;
-		case ShaderVariableType::Int22: out << "imat2"; break;
-		case ShaderVariableType::Int33: out << "imat3"; break;
-		case ShaderVariableType::Int44: out << "imat4"; break;
+		case ShaderDataVariableType::Int1: out << "int"; break;
+		case ShaderDataVariableType::Int2: out << "ivec2"; break;
+		case ShaderDataVariableType::Int3: out << "ivec3"; break;
+		case ShaderDataVariableType::Int4: out << "ivec4"; break;
+		case ShaderDataVariableType::Int22: out << "imat2"; break;
+		case ShaderDataVariableType::Int33: out << "imat3"; break;
+		case ShaderDataVariableType::Int44: out << "imat4"; break;
 
-		case ShaderVariableType::Float1: out << "float"; break;
-		case ShaderVariableType::Float2: out << "vec2"; break;
-		case ShaderVariableType::Float3: out << "vec3"; break;
-		case ShaderVariableType::Float4: out << "vec4"; break;
-		case ShaderVariableType::Float22: out << "mat2"; break;
-		case ShaderVariableType::Float33: out << "mat3"; break;
-		case ShaderVariableType::Float44: out << "mat4"; break;
+		case ShaderDataVariableType::Float1: out << "float"; break;
+		case ShaderDataVariableType::Float2: out << "vec2"; break;
+		case ShaderDataVariableType::Float3: out << "vec3"; break;
+		case ShaderDataVariableType::Float4: out << "vec4"; break;
+		case ShaderDataVariableType::Float22: out << "mat2"; break;
+		case ShaderDataVariableType::Float33: out << "mat3"; break;
+		case ShaderDataVariableType::Float44: out << "mat4"; break;
 
-		case ShaderVariableType::Invalid:
+		case ShaderDataVariableType::Invalid:
 			throw ShaderError("Failed to assemble from binary bytecode on OGL410Assembler:\nInvalid shader variable type");
 			break;
 		default:

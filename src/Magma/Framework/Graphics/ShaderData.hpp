@@ -15,7 +15,7 @@ namespace Magma
 			/// <summary>
 			///		Describes a shader variable type
 			/// </summary>
-			enum class ShaderVariableType : unsigned long
+			enum class ShaderDataVariableType : unsigned long
 			{
 				/// <summary>
 				///		Invalid variable type
@@ -142,7 +142,7 @@ namespace Magma
 				/// <summary>
 				///		Shader variable type
 				/// </summary>
-				ShaderVariableType type;
+				ShaderDataVariableType type;
 			};
 
 			/// <summary>
@@ -163,7 +163,7 @@ namespace Magma
 				/// <summary>
 				///		Shader variable type
 				/// </summary>
-				ShaderVariableType type;
+				ShaderDataVariableType type;
 			};
 
 			/// <summary>
@@ -210,7 +210,7 @@ namespace Magma
 				/// <summary>
 				///		Shader variable type
 				/// </summary>
-				ShaderVariableType type;
+				ShaderDataVariableType type;
 			};
 
 			/// <summary>

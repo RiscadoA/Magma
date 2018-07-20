@@ -33,73 +33,78 @@
 
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
-const std::vector<std::tuple<std::string, ShaderTokenSymbol, ShaderTokenType, std::string>> Magma::Framework::Graphics::ShaderTokens =
+
+const std::vector<std::tuple<std::string, ShaderTokenType, ShaderVariableType, ShaderOperatorType, ShaderPunctuationType>> ShaderTokens =
 {
-	std::make_tuple(R"(\b(\d+\.\d+)f?\b)", ShaderTokenSymbol::FloatLiteral, ShaderTokenType::Literal, "float-literal"),
-	std::make_tuple(R"(\b(\d+)\b)", ShaderTokenSymbol::IntLiteral, ShaderTokenType::Literal, "int-literal"),
+	// Literals
+	std::make_tuple(R"(\b(\d+\.\d+)f?\b)", ShaderTokenType::Literal, ShaderVariableType::Float1, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\b(\d+)\b)", ShaderTokenType::Literal, ShaderVariableType::Int1, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\bint\b)", ShaderTokenSymbol::Int1, ShaderTokenType::Type, "int"),
-	std::make_tuple(R"(\bint1\b)", ShaderTokenSymbol::Int1, ShaderTokenType::Type, "int"),
-	std::make_tuple(R"(\bint2\b)", ShaderTokenSymbol::Int2, ShaderTokenType::Type, "int2"),
-	std::make_tuple(R"(\bint3\b)", ShaderTokenSymbol::Int3, ShaderTokenType::Type, "int3"),
-	std::make_tuple(R"(\bint4\b)", ShaderTokenSymbol::Int4, ShaderTokenType::Type, "int4"),
-	std::make_tuple(R"(\bint22\b)", ShaderTokenSymbol::Int22, ShaderTokenType::Type, "int22"),
-	std::make_tuple(R"(\bint33\b)", ShaderTokenSymbol::Int33, ShaderTokenType::Type, "int33"),
-	std::make_tuple(R"(\bint44\b)", ShaderTokenSymbol::Int44, ShaderTokenType::Type, "int44"),
+	// Types
+	std::make_tuple(R"(\bint\b)", ShaderTokenType::Type, ShaderVariableType::Int1, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bint1\b)", ShaderTokenType::Type, ShaderVariableType::Int1, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bint2\b)", ShaderTokenType::Type, ShaderVariableType::Int2, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bint3\b)", ShaderTokenType::Type, ShaderVariableType::Int3, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bint4\b)", ShaderTokenType::Type, ShaderVariableType::Int4, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bint22\b)", ShaderTokenType::Type, ShaderVariableType::Int22, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bint33\b)", ShaderTokenType::Type, ShaderVariableType::Int33, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bint44\b)", ShaderTokenType::Type, ShaderVariableType::Int44, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\bfloat\b)", ShaderTokenSymbol::Float1, ShaderTokenType::Type, "float"),
-	std::make_tuple(R"(\bfloat1\b)", ShaderTokenSymbol::Float1, ShaderTokenType::Type, "float"),
-	std::make_tuple(R"(\bfloat2\b)", ShaderTokenSymbol::Float2, ShaderTokenType::Type, "float2"),
-	std::make_tuple(R"(\bfloat3\b)", ShaderTokenSymbol::Float3, ShaderTokenType::Type, "float3"),
-	std::make_tuple(R"(\bfloat4\b)", ShaderTokenSymbol::Float4, ShaderTokenType::Type, "float4"),
-	std::make_tuple(R"(\bfloat22\b)", ShaderTokenSymbol::Float22, ShaderTokenType::Type, "float22"),
-	std::make_tuple(R"(\bfloat33\b)", ShaderTokenSymbol::Float33, ShaderTokenType::Type, "float33"),
-	std::make_tuple(R"(\bfloat44\b)", ShaderTokenSymbol::Float44, ShaderTokenType::Type, "float44"),
+	std::make_tuple(R"(\bfloat\b)", ShaderTokenType::Type, ShaderVariableType::Float1, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bfloat1\b)", ShaderTokenType::Type, ShaderVariableType::Float1, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bfloat2\b)", ShaderTokenType::Type, ShaderVariableType::Float2, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bfloat3\b)", ShaderTokenType::Type, ShaderVariableType::Float3, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bfloat4\b)", ShaderTokenType::Type, ShaderVariableType::Float4, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bfloat22\b)", ShaderTokenType::Type, ShaderVariableType::Float22, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bfloat33\b)", ShaderTokenType::Type, ShaderVariableType::Float33, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bfloat44\b)", ShaderTokenType::Type, ShaderVariableType::Float44, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\bbool\b)", ShaderTokenSymbol::Bool, ShaderTokenType::Type, "bool"),
+	std::make_tuple(R"(\bbool\b)", ShaderTokenType::Type, ShaderVariableType::Bool, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\bShader\b)", ShaderTokenSymbol::Shader, ShaderTokenType::Keyword, "Shader"),
-	std::make_tuple(R"(\bInput\b)", ShaderTokenSymbol::Input, ShaderTokenType::Keyword, "Input"),
-	std::make_tuple(R"(\bOutput\b)", ShaderTokenSymbol::Output, ShaderTokenType::Keyword, "Output"),
-	std::make_tuple(R"(\bTexture2D\b)", ShaderTokenSymbol::Texture2D, ShaderTokenType::Keyword, "Texture2D"),
-	std::make_tuple(R"(\bConstantBuffer\b)", ShaderTokenSymbol::ConstantBuffer, ShaderTokenType::Keyword, "ConstantBuffer"),
-	std::make_tuple(R"(\bif\b)", ShaderTokenSymbol::If, ShaderTokenType::Keyword, "if"),
-	std::make_tuple(R"(\belse\b)", ShaderTokenSymbol::Else, ShaderTokenType::Keyword, "else"),
-	std::make_tuple(R"(\bwhile\b)", ShaderTokenSymbol::While, ShaderTokenType::Keyword, "while"),
-	std::make_tuple(R"(\breturn\b)", ShaderTokenSymbol::Return, ShaderTokenType::Keyword, "return"),
-	std::make_tuple(R"(\bdiscard\b)", ShaderTokenSymbol::Discard, ShaderTokenType::Keyword, "discard"),
+	// Operators
+	std::make_tuple(R"(\+)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Add, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\-)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Subtract, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\*)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Multiply, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\/)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Divide, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\{)", ShaderTokenSymbol::OpenBrace, ShaderTokenType::Punctuation, "{"),
-	std::make_tuple(R"(\})", ShaderTokenSymbol::CloseBrace, ShaderTokenType::Punctuation, "}"),
-	std::make_tuple(R"(\[)", ShaderTokenSymbol::OpenBrackets, ShaderTokenType::Punctuation, "["),
-	std::make_tuple(R"(\])", ShaderTokenSymbol::CloseBrackets, ShaderTokenType::Punctuation, "]"),
-	std::make_tuple(R"(\()", ShaderTokenSymbol::OpenParenthesis, ShaderTokenType::Punctuation, "("),
-	std::make_tuple(R"(\))", ShaderTokenSymbol::CloseParenthesis, ShaderTokenType::Punctuation, ")"),
-	std::make_tuple(R"(\;)", ShaderTokenSymbol::Semicolon, ShaderTokenType::Punctuation, ";"),
-	std::make_tuple(R"(\:)", ShaderTokenSymbol::Colon, ShaderTokenType::Punctuation, ":"),
-	std::make_tuple(R"(\,)", ShaderTokenSymbol::Comma, ShaderTokenType::Punctuation, ","),
+	std::make_tuple(R"(\=\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Equal, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\!\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Different, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\>)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Greater, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\<)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Less, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\>\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::GEqual, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\<\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::LEqual, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\+)", ShaderTokenSymbol::Add, ShaderTokenType::Operator, "+"),
-	std::make_tuple(R"(\-)", ShaderTokenSymbol::Subtract, ShaderTokenType::Operator, "-"),
-	std::make_tuple(R"(\*)", ShaderTokenSymbol::Multiply, ShaderTokenType::Operator, "*"),
-	std::make_tuple(R"(\/)", ShaderTokenSymbol::Divide, ShaderTokenType::Operator, "/"),
+	std::make_tuple(R"(\&\&)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::And, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\|\|)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Or, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\!)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Not, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\=\=)", ShaderTokenSymbol::Equal, ShaderTokenType::Operator, "=="),
-	std::make_tuple(R"(\!\=)", ShaderTokenSymbol::Different, ShaderTokenType::Operator, "!="),
-	std::make_tuple(R"(\>)", ShaderTokenSymbol::Greater, ShaderTokenType::Operator, ">"),
-	std::make_tuple(R"(\<)", ShaderTokenSymbol::Less, ShaderTokenType::Operator, "<"),
-	std::make_tuple(R"(\>\=)", ShaderTokenSymbol::GEqual, ShaderTokenType::Operator, ">="),
-	std::make_tuple(R"(\<\=)", ShaderTokenSymbol::LEqual, ShaderTokenType::Operator, "<="),
+	std::make_tuple(R"(\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Assign, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\&\&)", ShaderTokenSymbol::And, ShaderTokenType::Operator, "&&"),
-	std::make_tuple(R"(\|\|)", ShaderTokenSymbol::Or, ShaderTokenType::Operator, "||"),
-	std::make_tuple(R"(\!)", ShaderTokenSymbol::Not, ShaderTokenType::Operator, "!"),
+	std::make_tuple(R"(\.)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Member, ShaderPunctuationType::Invalid),
 
-	std::make_tuple(R"(\=)", ShaderTokenSymbol::Assign, ShaderTokenType::Operator, "="),
+	// Punctuation
+	std::make_tuple(R"(\{)", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::OpenBraces),
+	std::make_tuple(R"(\})", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::CloseBraces),
+	std::make_tuple(R"(\[)", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::OpenBrackets),
+	std::make_tuple(R"(\])", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::CloseBrackets),
+	std::make_tuple(R"(\()", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::OpenParenthesis),
+	std::make_tuple(R"(\))", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::CloseParenthesis),
+	std::make_tuple(R"(\;)", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Semicolon),
+	std::make_tuple(R"(\:)", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Colon),
+	std::make_tuple(R"(\,)", ShaderTokenType::Punctuation, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Comma),
 
-	std::make_tuple(R"(\.)", ShaderTokenSymbol::Member, ShaderTokenType::Operator, "."),
-
-	std::make_tuple(R"(\b([a-zA-Z]\w*)\b)", ShaderTokenSymbol::Identifier, ShaderTokenType::Identifier, "identifier"),
+	// Other
+	std::make_tuple(R"(\bShader\b)", ShaderTokenType::Shader, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bInput\b)", ShaderTokenType::Input, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bOutput\b)", ShaderTokenType::Output, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bTexture2D\b)", ShaderTokenType::Texture2D, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bConstantBuffer\b)", ShaderTokenType::ConstantBuffer, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bif\b)", ShaderTokenType::If, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\belse\b)", ShaderTokenType::Else, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bwhile\b)", ShaderTokenType::While, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\breturn\b)", ShaderTokenType::Return, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\bdiscard\b)", ShaderTokenType::Discard, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\b([a-zA-Z]\w*)\b)",ShaderTokenType::Identifier, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
 };
 
 void Magma::Framework::Graphics::ShaderLexer::Run(const std::vector<ShaderLine>& in, std::vector<ShaderToken>& out, ShaderCompilerData& data)
@@ -107,9 +112,9 @@ void Magma::Framework::Graphics::ShaderLexer::Run(const std::vector<ShaderLine>&
 	// Get regexes
 	const static auto tokenRegexes = []()
 	{
-		std::vector<std::tuple<std::regex, ShaderTokenSymbol, ShaderTokenType>> tokenRegexes;
+		std::vector<std::tuple<std::regex, ShaderTokenType, ShaderVariableType, ShaderOperatorType, ShaderPunctuationType>> tokenRegexes;
 		for (auto& t : ShaderTokens)
-			tokenRegexes.emplace_back(std::make_tuple(std::regex(std::get<0>(t)), std::get<1>(t), std::get<2>(t)));
+			tokenRegexes.emplace_back(std::make_tuple(std::regex(std::get<0>(t)), std::get<1>(t), std::get<2>(t), std::get<3>(t), std::get<4>(t)));
 		return tokenRegexes;
 	} ();
 
@@ -123,24 +128,36 @@ void Magma::Framework::Graphics::ShaderLexer::Run(const std::vector<ShaderLine>&
 				*it != '\t' &&
 				*it != ' ')
 			{
-				bool did = false;
+				bool matched = false;
 				for (size_t i = 0; i < tokenRegexes.size(); ++i)
 				{
 					if (std::regex_search(it, l.str.end(), match, std::get<0>(tokenRegexes[i]), std::regex_constants::match_continuous))
 					{
 						ShaderToken token;
-						token.symbol = std::get<1>(tokenRegexes[i]);
-						token.type = std::get<2>(tokenRegexes[i]);
+
+						token.type = std::get<1>(tokenRegexes[i]);
+
+						if (std::get<2>(tokenRegexes[i]) != ShaderVariableType::Invalid)
+							token.variableType = std::get<2>(tokenRegexes[i]);
+						else if (std::get<3>(tokenRegexes[i]) != ShaderOperatorType::Invalid)
+							token.operatorType = std::get<3>(tokenRegexes[i]);
+						else if (std::get<4>(tokenRegexes[i]) != ShaderPunctuationType::Invalid)
+							token.punctuationType = std::get<4>(tokenRegexes[i]);
+						else
+							token.variableType = ShaderVariableType::Invalid;
+
 						token.attribute = match.size() > 1 ? match.str(1) : "";
 						token.lineNumber = l.lineNumber;
+
 						out.push_back(token);
 						it += match.length() - 1;
-						did = true;
+						matched = true;
+
 						break;
 					}
 				}
 
-				if (did == false)
+				if (matched == false)
 				{
 					std::stringstream ss;
 					ss << "Failed to run ShaderLexer:" << std::endl;
@@ -151,17 +168,6 @@ void Magma::Framework::Graphics::ShaderLexer::Run(const std::vector<ShaderLine>&
 			}
 		}
 
-	//for (auto& t : out)
-	//	printf("'%s' \"%s\"\n", ShaderTokenSymbolToString(t.symbol).c_str(), t.attribute.c_str());
-}
-
-std::string Magma::Framework::Graphics::ShaderTokenSymbolToString(ShaderTokenSymbol symbol)
-{
-	for (auto& t : ShaderTokens)
-		if (std::get<1>(t) == symbol)
-			return std::get<3>(t);
-	if (symbol == ShaderTokenSymbol::Invalid)
-		return "$invalid-token$";
-	else
-		return "$unsupported-token$";
+	for (auto& t : out)
+		printf("%s\n", ShaderTokenToString(t).c_str());
 }

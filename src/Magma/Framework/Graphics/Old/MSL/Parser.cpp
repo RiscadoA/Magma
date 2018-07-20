@@ -96,8 +96,8 @@ std::string TokenSymbolToString(TokenSymbol token)
 		case TokenSymbol::IntLiteral: return "int literal";
 		case TokenSymbol::FloatLiteral: return "float literal";
 		case TokenSymbol::Identifier: return "identifier";
-		case TokenSymbol::OpenBrace: return "{";
-		case TokenSymbol::CloseBrace: return "}";
+		case TokenSymbol::OpenBraces: return "{";
+		case TokenSymbol::CloseBraces: return "}";
 		case TokenSymbol::OpenParenthesis: return "(";
 		case TokenSymbol::CloseParenthesis: return ")";
 		case TokenSymbol::OpenBrackets: return "[";
@@ -338,17 +338,17 @@ ASTNode* VertexOutput(ParserInfo& info)
 	Expect(TokenSymbol::Identifier, info);
 	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, vertexOutputNode);
 
-	Expect(TokenSymbol::OpenBrace, info);
+	Expect(TokenSymbol::OpenBraces, info);
 
 	// Get declarations
 	auto declarationsNode = AddToTree(ASTNodeSymbol::Scope, "", vertexOutputNode);
-	while (Peek(info) != TokenSymbol::CloseBrace)
+	while (Peek(info) != TokenSymbol::CloseBraces)
 	{
 		AddToTree(Declaration(info), declarationsNode);
 		Expect(TokenSymbol::Semicolon, info);
 	}
 
-	Expect(TokenSymbol::CloseBrace, info);
+	Expect(TokenSymbol::CloseBraces, info);
 	
 	return vertexOutputNode;
 }
@@ -373,17 +373,17 @@ ASTNode* ConstantBuffer(ParserInfo& info)
 	Expect(TokenSymbol::Identifier, info);
 	AddToTree(ASTNodeSymbol::Identifier, info.lastToken.attribute, constantBufferNode);
 
-	Expect(TokenSymbol::OpenBrace, info);
+	Expect(TokenSymbol::OpenBraces, info);
 
 	// Get declarations
 	auto declarationsNode = AddToTree(ASTNodeSymbol::Scope, "", constantBufferNode);
-	while (Peek(info) != TokenSymbol::CloseBrace)
+	while (Peek(info) != TokenSymbol::CloseBraces)
 	{
 		AddToTree(Declaration(info), declarationsNode);
 		Expect(TokenSymbol::Semicolon, info);
 	}
 
-	Expect(TokenSymbol::CloseBrace, info);
+	Expect(TokenSymbol::CloseBraces, info);
 
 	return constantBufferNode;
 }
@@ -750,7 +750,7 @@ ASTNode* Statement(ParserInfo& info)
 		Expect(TokenSymbol::CloseParenthesis, info);
 
 		// Add if body
-		if (Peek(info) == TokenSymbol::OpenBrace)
+		if (Peek(info) == TokenSymbol::OpenBraces)
 			AddToTree(Scope(info), statementNode);
 		else
 			AddToTree(Statement(info), statementNode);
@@ -758,7 +758,7 @@ ASTNode* Statement(ParserInfo& info)
 		// Add else body
 		if (Accept(TokenSymbol::Else, info))
 		{
-			if (Peek(info) == TokenSymbol::OpenBrace)
+			if (Peek(info) == TokenSymbol::OpenBraces)
 				AddToTree(Scope(info), statementNode);
 			else
 				AddToTree(Statement(info), statementNode);
@@ -782,7 +782,7 @@ ASTNode* Statement(ParserInfo& info)
 		Expect(TokenSymbol::CloseParenthesis, info);
 
 		// Add body
-		if (Peek(info) == TokenSymbol::OpenBrace)
+		if (Peek(info) == TokenSymbol::OpenBraces)
 			AddToTree(Scope(info), statementNode);
 		else
 			AddToTree(Statement(info), statementNode);
@@ -799,7 +799,7 @@ ASTNode* Statement(ParserInfo& info)
 		AddToTree(ASTNodeSymbol::Do, "", statementNode);
 
 		// Add body
-		if (Peek(info) == TokenSymbol::OpenBrace)
+		if (Peek(info) == TokenSymbol::OpenBraces)
 			AddToTree(Scope(info), statementNode);
 		else
 			AddToTree(Statement(info), statementNode);
@@ -837,7 +837,7 @@ ASTNode* Statement(ParserInfo& info)
 		Expect(TokenSymbol::CloseParenthesis, info);
 
 		// Add body
-		if (Peek(info) == TokenSymbol::OpenBrace)
+		if (Peek(info) == TokenSymbol::OpenBraces)
 			AddToTree(Scope(info), statementNode);
 		else
 			AddToTree(Statement(info), statementNode);
@@ -868,27 +868,27 @@ ASTNode* Statement(ParserInfo& info)
 ASTNode* Scope(ParserInfo& info)
 {
 	// Open scope
-	Expect(TokenSymbol::OpenBrace, info);
+	Expect(TokenSymbol::OpenBraces, info);
 	auto scopeNode = CreateTree(ASTNodeSymbol::Scope, "");
 
 	// Get statements
 	while (true)
 	{
 		// Found another scope
-		if (Peek(info) ==  TokenSymbol::OpenBrace)
+		if (Peek(info) ==  TokenSymbol::OpenBraces)
 		{
 			AddToTree(Scope(info), scopeNode);
 			continue;
 		}
 		// Scope end
-		if (Peek(info) == TokenSymbol::CloseBrace)
+		if (Peek(info) == TokenSymbol::CloseBraces)
 			break;
 		// Statement
 		AddToTree(Statement(info), scopeNode);
 	}
 
 	// Close scope
-	Expect(TokenSymbol::CloseBrace, info);
+	Expect(TokenSymbol::CloseBraces, info);
 	return scopeNode;
 }
 

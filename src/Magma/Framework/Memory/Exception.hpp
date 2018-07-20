@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 namespace Magma
 {
 	namespace Framework

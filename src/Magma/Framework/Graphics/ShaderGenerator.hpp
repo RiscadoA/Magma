@@ -24,7 +24,7 @@ namespace Magma
 				/// <param name="outBC">Output MSLBC source</param>
 				/// <param name="outMD">Output MSLMD source</param>
 				/// <param name="data">Shader compiler data</param>
-				static void Run(const ShaderASTNode* in, std::string& outBC, std::string& outMD, ShaderCompilerData& data);
+				static void Run(const ShaderSTNode* in, std::string& outBC, std::string& outMD, ShaderCompilerData& data);
 			};
 		}
 	}

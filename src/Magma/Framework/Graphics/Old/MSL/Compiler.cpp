@@ -43,8 +43,8 @@ TokenType Magma::Framework::Graphics::MSL::GetTokenType(TokenSymbol symbol)
 	switch (symbol)
 	{
 		// Punctuation
-		case TokenSymbol::OpenBrace:
-		case TokenSymbol::CloseBrace:
+		case TokenSymbol::OpenBraces:
+		case TokenSymbol::CloseBraces:
 		case TokenSymbol::OpenParenthesis:
 		case TokenSymbol::CloseParenthesis:
 		case TokenSymbol::OpenBrackets:
