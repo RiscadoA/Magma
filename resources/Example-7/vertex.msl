@@ -1,11 +1,9 @@
-/*
-
 #version 1.0
 #type VERTEX
 
 Input in
 {
-	float4 position : POSITION;
+	float3 position : POSITION;
 	float4 color : COLOR;
 };
 
@@ -17,26 +15,6 @@ Output out
 
 Shader
 {
-	out.position = in.position;
-	out.color = in.color;
-};
-
-*/
-
-#version 1.0
-#type PIXEL
-
-Input in
-{
-	float4 color : IN_0;
-};
-
-Output out
-{
-	float4 color : ATTACHMENT_0;
-};
-
-Shader
-{
+	out.position = float4(in.position.x, in.position.y, in.position.z, 1.0);
 	out.color = in.color;
 };

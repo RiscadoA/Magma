@@ -264,10 +264,63 @@ ShaderASTNode* ParseIdentifier(ParserInfo& info)
 	return node;
 }
 
+ShaderASTNode* ParseConstructor(ParserInfo& info)
+{
+	auto type = ExpectTokenType(ShaderTokenType::Type, info).symbol;
+	auto node = CreateNode(ShaderASTNodeSymbol::Constructor, ShaderASTNodeType::Other, "", info);
+
+	int expectedParams = 0;
+	switch (type)
+	{
+		case ShaderTokenSymbol::Int1:
+		case ShaderTokenSymbol::Float1:
+			expectedParams = 1;
+			break;
+
+		case ShaderTokenSymbol::Int2:
+		case ShaderTokenSymbol::Float2:
+			expectedParams = 2;
+			break;
+
+		case ShaderTokenSymbol::Int3:
+		case ShaderTokenSymbol::Float3:
+			expectedParams = 3;
+			break;
+
+		case ShaderTokenSymbol::Int4:
+		case ShaderTokenSymbol::Float4:
+			expectedParams = 4;
+			break;
+
+		default:
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderParser:" << std::endl;
+
+			throw ShaderError(ss.str());
+			break;
+		}		
+	}
+
+
+	// While there is member access
+	if (AcceptTokenSymbol(ShaderTokenSymbol::Member, info))
+	{
+		auto idNode = node;
+		node = CreateNode(ShaderASTNodeSymbol::Member, ShaderASTNodeType::Operator, "", info);
+		AddToNode(node, idNode);
+		AddToNode(node, ParseIdentifier(info));
+	}
+
+	return node;
+}
+
 ShaderASTNode* ParseFactor(ParserInfo& info)
 {
 	if (info.token->symbol == ShaderTokenSymbol::Identifier)
 		return ParseIdentifier(info);
+	else if (info.token->type == ShaderTokenType::Type)
+		return ParseConstructor(info);
 
 	else if (AcceptTokenSymbol(ShaderTokenSymbol::OpenParenthesis, info))
 	{

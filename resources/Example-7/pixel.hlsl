@@ -1,28 +1,23 @@
 // This shader was automatically generated from binary bytecode by the D3D11Assembler::Assemble function
-// Vertex shader
+// Pixel shader
 // DO NOT MODIFY THIS FILE BY HAND
 
 struct ShaderInput
 {
-	float4 in_32 : IN31IN;
-	float4 in_33 : IN32IN;
+	float4 in_9 : VOUT9VOUT;
 };
 
 struct ShaderOutput
 {
-	float4 out_9 : VOUT9VOUT;
-	float4 v_pos : SV_POSITION;
+	float4 out_1 : SV_Target0;
 };
 
-ShaderOutput VS(ShaderInput input)
+ShaderOutput PS(ShaderInput input)
 {
 	ShaderOutput output;
 {
 {
-	output.v_pos = input.in_32;
-}
-{
-	output.out_9 = input.in_33;
+	output.out_1 = input.in_9;
 }
 }
 	return output;
