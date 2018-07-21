@@ -1,28 +1,3 @@
-/*
-
-#version 1.0
-#type VERTEX
-
-Input in
-{
-	float4 position : POSITION;
-	float4 color : COLOR;
-};
-
-Output out
-{
-	float4 position : SCREEN_POSITION;
-	float4 color : OUT_0;
-};
-
-Shader
-{
-	out.position = in.position;
-	out.color = in.color;
-};
-
-*/
-
 #version 1.0
 #type PIXEL
 

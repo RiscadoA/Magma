@@ -24,15 +24,22 @@ namespace Magma
 				///		Parses the shader tokens into a syntax tree
 				/// </summary>
 				/// <param name="in">Shader tokens</param>
-				/// <param name="out">Syntax tree root pointer</param>
+				/// <param name="out">Syntax tree root node pointer</param>
 				/// <param name="data">Shader compiler data</param>
 				static void Run(const std::vector<ShaderToken>& in, ShaderSTNode*& out, ShaderCompilerData& data);
 
 				/// <summary>
-				///		Cleans an syntax tree
+				///		Cleans a syntax tree
 				/// </summary>
-				/// <param name="node">Syntax tree root pointer</param>
+				/// <param name="node">Syntax tree root node pointer</param>
 				static void Clean(ShaderSTNode* node);
+
+				/// <summary>
+				///		Prints a syntax tree
+				/// </summary>
+				/// <param name="node">Syntax tree root node pointer</param>
+				/// <param name="indentation">Starting indentation</param>
+				static void Print(ShaderSTNode* node, size_t indentation = 0);
 			};
 		} 
 	}

@@ -3,6 +3,7 @@
 #include "ShaderPreprocessor.hpp"
 #include "ShaderLexer.hpp"
 #include "ShaderParser.hpp"
+#include "ShaderAnnotator.hpp"
 #include "ShaderGenerator.hpp"
 
 void Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, std::string& outBC, std::string& outMD)
@@ -17,7 +18,11 @@ void Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, std
 
 	ShaderSTNode* parserOut;
 	ShaderParser::Run(lexerOut, parserOut, data);
+	ShaderParser::Print(parserOut);
+
+	ShaderAnnotator::Run(parserOut, data);
 
 	ShaderGenerator::Run(parserOut, outBC, outMD, data);
+
 	ShaderParser::Clean(parserOut);
 }

@@ -15,6 +15,10 @@ Output out
 
 Shader
 {
-	out.position = float4(in.position.x, in.position.y, in.position.z, 1.0);
-	out.color = in.color;
+	float4 position = float4(in.position.x, in.position.y, in.position.z, 1.0);
+	float4 color;
+	color = in.color;
+
+	out.position = position;
+	out.color = color;
 };

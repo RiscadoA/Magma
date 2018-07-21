@@ -1,6 +1,7 @@
 #include "ShaderParser.hpp"
 
 #include <sstream>
+#include <iostream>
 
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
@@ -294,23 +295,141 @@ ShaderSTNode* ParseOperatorLast(ParserInfo& info)
 		return node;
 	}
 
-	// <id>
+	// <id> or <call>
 	else if (auto id = AcceptTokenType(ShaderTokenType::Identifier, info))
-		return CreateNode(ShaderSTNodeType::Identifier, id->attribute, info);
-	
+	{
+		// <call>
+		if (AcceptPunctuationType(ShaderPunctuationType::OpenParenthesis, info))
+		{
+			auto node = CreateNode(ShaderSTNodeType::Call, "", info);
+			AddToNode(node, CreateNode(ShaderSTNodeType::Identifier, id->attribute, info));
+
+			size_t paramCount = 0;
+
+			while (!PeekPunctuationType(ShaderPunctuationType::CloseParenthesis, info))
+			{
+				auto exp = ParseExpression(info);
+				if (exp == nullptr)
+				{
+					std::stringstream ss;
+					ss << "Failed to run ShaderParser:" << std::endl;
+					ss << "Failed to parse function call:" << std::endl;
+					ss << "Failed to parse exception on parameter " << paramCount + 1 << std::endl;
+					ss << "Line: " << info.lineNumber;
+					throw ShaderError(ss.str());
+				}
+				AddToNode(node, exp);
+				++paramCount;
+				if (PeekPunctuationType(ShaderPunctuationType::CloseParenthesis, info))
+					break;
+				ExpectPunctuationType(ShaderPunctuationType::Comma, info);
+			}
+			
+			ExpectPunctuationType(ShaderPunctuationType::CloseParenthesis, info);
+			return node;
+		}
+		// <id>
+		else return CreateNode(ShaderSTNodeType::Identifier, id->attribute, info);
+	}
+
 	// <constructor>
 	else if (auto type = AcceptTokenType(ShaderTokenType::Type, info))
 	{
-		// TO DO TO DO TO DO TO DO TO DO
-		ThrowNotImplemented("Constructor", info);
+		auto node = CreateNode(ShaderSTNodeType::Constructor, "", info);
+
+		size_t componentCount = 0;
+
+		switch (type->variableType)
+		{
+			case ShaderVariableType::Int1:
+			case ShaderVariableType::Float1:
+				componentCount = 1;
+				break;
+
+			case ShaderVariableType::Int2:
+			case ShaderVariableType::Float2:
+				componentCount = 2;
+				break;
+
+			case ShaderVariableType::Int3:
+			case ShaderVariableType::Float3:
+				componentCount = 3;
+				break;
+
+			case ShaderVariableType::Int4:
+			case ShaderVariableType::Float4:
+				componentCount = 4;
+				break;
+
+			default:
+			{
+				std::stringstream ss;
+				ss << "Failed to run ShaderParser:" << std::endl;
+				ss << "Failed to parse constructor:" << std::endl;
+				ss << "Unsupported constructor type: '" << ShaderVariableTypeToString(type->variableType) << "'" << std::endl;
+				ss << "Line: " << info.lineNumber;
+				throw ShaderError(ss.str());
+			}
+		}
+
+		auto typeNode = CreateNode(ShaderSTNodeType::Type, "", info);
+		typeNode->variableType = type->variableType;
+		AddToNode(node, typeNode);
+
+		ExpectPunctuationType(ShaderPunctuationType::OpenParenthesis, info);
+
+		for (size_t i = 0; i < componentCount; ++i)
+		{
+			auto exp = ParseExpression(info);
+			if (exp == nullptr)
+			{
+				std::stringstream ss;
+				ss << "Failed to run ShaderParser:" << std::endl;
+				ss << "Failed to parse constructor:" << std::endl;
+				ss << "Failed to parse expression on param " << i + 1 << std::endl;
+				ss << "Line: " << info.lineNumber;
+				throw ShaderError(ss.str());
+			}
+			
+			AddToNode(node, exp);
+
+			if (i + 1 != componentCount)
+				ExpectPunctuationType(ShaderPunctuationType::Comma, info);
+		}
+
+		ExpectPunctuationType(ShaderPunctuationType::CloseParenthesis, info);
+
+		return node;
 	}
 
-	// No operator
+	// <literal>
+	else if (auto lit = AcceptTokenType(ShaderTokenType::Literal, info))
+	{
+		auto node = CreateNode(ShaderSTNodeType::Literal, lit->attribute, info);
+		node->variableType = lit->variableType;
+		return node;
+	}
+
+	// Not an operator
 	else return nullptr;
 }
 
 ShaderSTNode* ParseOperator6(ParserInfo& info)
 {
+	// <unary-op>
+	if (PeekOperatorType(ShaderOperatorType::Add, info) ||
+		PeekOperatorType(ShaderOperatorType::Subtract, info) ||
+		PeekOperatorType(ShaderOperatorType::Not, info))
+	{
+		auto op = AcceptTokenType(ShaderTokenType::Operator, info);
+
+		auto node = CreateNode(ShaderSTNodeType::Operator, "", info);
+		node->operatorType = op->operatorType;
+		AddToNode(node, ParseOperator6(info));
+		return node;
+	}
+	
+	// <member-op>
 	ShaderSTNode* term1 = ParseOperatorLast(info);
 	if (term1 == nullptr)
 		return nullptr;
@@ -491,10 +610,52 @@ ShaderSTNode* ParseExpression(ParserInfo& info)
 	return term1;
 }
 
+ShaderSTNode* ParseDeclaration(ParserInfo& info)
+{
+	auto type = AcceptTokenType(ShaderTokenType::Type, info);
+	if (type == nullptr)
+		return nullptr;
+	auto id = ExpectTokenType(ShaderTokenType::Identifier, info);
+
+	auto node = CreateNode(ShaderSTNodeType::Declaration, "", info);
+	auto typeNode = CreateNode(ShaderSTNodeType::Type, "", info);
+	typeNode->variableType = type->variableType;
+
+	AddToNode(node, typeNode);
+	AddToNode(node, CreateNode(ShaderSTNodeType::Identifier, id->attribute, info));
+
+	// If has definition
+	if (AcceptOperatorType(ShaderOperatorType::Assign, info))
+	{
+		auto exp = ParseExpression(info);
+
+		if (exp == nullptr)
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderParser:" << std::endl;
+			ss << "Failed to parse declaration definition expression" << std::endl;
+			ss << "Line: " << info.lineNumber;
+			throw ShaderError(ss.str());
+		}
+
+		AddToNode(node, exp);
+	}
+
+	ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
+
+	return node;
+}
+
 ShaderSTNode* ParseStatement(ParserInfo& info)
 {
 	ShaderSTNode* node = nullptr;
 
+	// <declaration> ;
+	node = ParseDeclaration(info);
+	if (node != nullptr)
+		return node;
+
+	// <exp> ;
 	node = ParseExpression(info);
 	if (node != nullptr)
 	{
@@ -512,7 +673,20 @@ ShaderSTNode* ParseScope(ParserInfo& info)
 	ExpectPunctuationType(ShaderPunctuationType::OpenBraces, info);
 
 	while (!PeekPunctuationType(ShaderPunctuationType::CloseBraces, info))
-		AddToNode(node, ParseStatement(info));
+	{
+		auto statement = ParseStatement(info);
+
+		if (statement == nullptr)
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderParser:" << std::endl;
+			ss << "Failed to parse statement" << std::endl;
+			ss << "Line: " << info.lineNumber;
+			throw ShaderError(ss.str());
+		}
+
+		AddToNode(node, statement);
+	}
 
 	ExpectPunctuationType(ShaderPunctuationType::CloseBraces, info);
 
@@ -530,14 +704,6 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 	info.nextToken = info.tokens.begin();
 	info.lineNumber = info.nextToken->lineNumber;
 
-	data.rootScope = std::make_shared<ShaderScope>();
-	data.rootScope->parent = nullptr;
-	data.rootScope->child = nullptr;
-	data.rootScope->next = nullptr;
-	data.rootScope->variables = {};
-	
-	info.root = nullptr;
-
 	while (PeekToken(info) != nullptr)
 	{
 		// Input vars
@@ -552,6 +718,8 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 				ShaderVariable var;
 
 				var.type = ExpectTokenType(ShaderTokenType::Type, info)->variableType;
+				var.id = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
+				ExpectPunctuationType(ShaderPunctuationType::Colon, info);
 				var.name = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
 				ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
 
@@ -561,6 +729,7 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 			ExpectPunctuationType(ShaderPunctuationType::CloseBraces, info);
 			ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
 		}
+
 		// Output vars
 		else if (AcceptTokenType(ShaderTokenType::Output, info))
 		{
@@ -573,6 +742,8 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 				ShaderVariable var;
 
 				var.type = ExpectTokenType(ShaderTokenType::Type, info)->variableType;
+				var.id = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
+				ExpectPunctuationType(ShaderPunctuationType::Colon, info);
 				var.name = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
 				ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
 
@@ -582,6 +753,7 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 			ExpectPunctuationType(ShaderPunctuationType::CloseBraces, info);
 			ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
 		}
+
 		// Texture 2D vars
 		else if (AcceptTokenType(ShaderTokenType::Texture2D, info))
 		{
@@ -594,12 +766,14 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 			
 			data.texture2Ds.push_back(var);
 		}
+
 		// Constant Buffers
 		else if (AcceptTokenType(ShaderTokenType::ConstantBuffer, info))
 		{
 			// TO DO TO DO TO DO TO DO TO DO
 			ThrowNotImplemented("ConstantBuffer", info);
 		}
+
 		// Shader
 		else if (AcceptTokenType(ShaderTokenType::Shader, info))
 		{
@@ -611,10 +785,12 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 				ss << "Line: " << info.lineNumber;
 				throw ShaderError(ss.str());
 			}
+
 			info.root = ParseScope(info);
 
 			ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
 		}
+
 		// Unexpected token
 		else
 		{
@@ -625,9 +801,25 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 			throw ShaderError(ss.str());
 		}
 	}
+
+	out = info.root;
 }
 
 void Magma::Framework::Graphics::ShaderParser::Clean(ShaderSTNode * node)
 {
 	DestroyNode(node);
+}
+
+void Magma::Framework::Graphics::ShaderParser::Print(ShaderSTNode * node, size_t indentation)
+{
+	for (size_t i = 0; i < indentation; ++i)
+		std::cout << "  ";
+	std::cout << ShaderSTNodeToString(node) << std::endl;
+
+	ShaderSTNode* c = node->child;
+	while (c != nullptr)
+	{
+		ShaderParser::Print(c, indentation + 1);
+		c = c->next;
+	}
 }

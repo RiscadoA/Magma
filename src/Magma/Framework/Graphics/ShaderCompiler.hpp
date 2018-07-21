@@ -271,7 +271,10 @@ namespace Magma
 					ss << " [" << ShaderPunctuationTypeToString(tok.punctuationType) << "]";
 
 				if (!tok.attribute.empty())
-					ss << " {\"" << tok.attribute << "\"}'";
+					ss << " {\"" << tok.attribute << "\"}";
+
+				ss << "'";
+
 				return ss.str();
 			}
 
@@ -282,6 +285,7 @@ namespace Magma
 			{
 				std::string bufferName = "";
 				std::string name = "";
+				std::string id = "";
 				ShaderVariableType type = ShaderVariableType::Invalid;
 				size_t index = -1;
 			};
@@ -291,7 +295,7 @@ namespace Magma
 			/// </summary>
 			struct ShaderScope
 			{
-				ShaderScope* parent = nullptr;
+				std::weak_ptr<ShaderScope> parent;
 				std::shared_ptr<ShaderScope> child = nullptr;
 				std::shared_ptr<ShaderScope> next = nullptr;
 
@@ -306,82 +310,89 @@ namespace Magma
 				Invalid = -1,
 
 				/*
-				Type
+					Type
 				*/
 				Type,
 
 				/*
-				Operator
+					Operator
 				*/
 				Operator,
 
 				// Other
 
 				/*
-				Identifier
+					Identifier
 				*/
 				Identifier,
+				
+				Reference,
+
+				ComponentX,
+				ComponentY,
+				ComponentZ,
+				ComponentW,
 
 				/*
-				Literal
+					Literal
 				*/
 				Literal,
 
 				/*
-				Declaration
-				Type
-				Identifier
-				[OPTIONAL DEFINITION EXPRESSION]
+					Declaration
+						Type
+						Identifier
+						[OPTIONAL DEFINITION EXPRESSION]
 				*/
 				Declaration,
 
 				/*
-				Constructor
-				Type
-				Param 1 (expression)
-				...
-				Param x (expression)
+					Constructor
+						Type
+						Param 1 (expression)
+						...
+						Param x (expression)
 				*/
 				Constructor,
 
 				/*
-				Scope
-				Statement 1
-				Statement 2
+					Scope
+						Statement 1
+						Statement 2
 				*/
 				Scope,
 
 				/*
-				Branch
-				Condition
-				If scope
-				Else scope (may be null)
+					Branch
+						Condition
+						If scope
+						Else scope (may be null)
 				*/
 				Branch,
 
 				/*
-				While
-				Condition
-				Body scope
+					While
+						Condition
+						Body scope
 				*/
 				While,
 
 				/*
-				Return
+					Return
 				*/
 				Return,
 
 				/*
-				Discard
+					Discard
 				*/
 				Discard,
 
 				/*
-				Call
-				Identifier
-				Param 1 (expression)
-				...
-				Param X (expression)
+					Call
+						Identifier
+						Param 1 (expression)
+						...
+						Param X (expression)
 				*/
 				Call,
 
@@ -436,6 +447,28 @@ namespace Magma
 
 				size_t lineNumber;
 			};
+
+			/// <summary>
+			///		Converts a shader syntax tree node into a string
+			/// </summary>
+			inline std::string ShaderSTNodeToString(const ShaderSTNode* node)
+			{
+				std::stringstream ss;
+				ss << "'" << ShaderSTNodeTypeToString(node->type);
+
+				if (node->type == ShaderSTNodeType::Type ||
+					node->type == ShaderSTNodeType::Literal)
+					ss << " [" << ShaderVariableTypeToString(node->variableType) << "]";
+				else if (node->type == ShaderSTNodeType::Operator)
+					ss << " [" << ShaderOperatorTypeToString(node->operatorType) << "]";
+
+				if (!node->attribute.empty())
+					ss << " {\"" << node->attribute << "\"}";
+
+				ss << "'";
+
+				return ss.str();
+			}
 
 			/// <summary>
 			///		Holds shader info during compilation
