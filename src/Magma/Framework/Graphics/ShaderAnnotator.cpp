@@ -136,23 +136,25 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 
 			if (!found)
 			{
-				if (node->child->next->attribute == "x")
+				Annotate(node->child, data);
+
+				if (node->child->next->attribute == "x" || node->child->next->attribute == "r")
 				{
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentX;
 					
 				}
-				else if (node->child->next->attribute == "y")
+				else if (node->child->next->attribute == "y" || node->child->next->attribute == "g")
 				{
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentY;
 				}
-				else if (node->child->next->attribute == "z")
+				else if (node->child->next->attribute == "z" || node->child->next->attribute == "b")
 				{
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentZ;
 				}
-				else if (node->child->next->attribute == "w")
+				else if (node->child->next->attribute == "w" || node->child->next->attribute == "a")
 				{
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentW;
@@ -192,19 +194,190 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 	}
 }
 
-void Check(ShaderSTNode* node, ShaderCompilerData& data)
+ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 {
+	auto type = ShaderVariableType::Invalid;
+
 	if (node->type == ShaderSTNodeType::Operator && node->operatorType == ShaderOperatorType::Assign)
 	{
-
+		auto type1 = Check(node->child, data);
+		auto type2 = Check(node->child->next, data);
+		if (type1 != type2)
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderAnnotator:" << std::endl;
+			ss << "Assign operand types do not match:" << std::endl;
+			ss << ShaderVariableTypeToString(type1) << " = " << ShaderVariableTypeToString(type2) << std::endl;
+			ss << "Line: " << node->lineNumber;
+			throw ShaderError(ss.str());
+		}
 	}
-
-	auto c = node->child;
-	while (c != nullptr)
+	else if (node->type == ShaderSTNodeType::Constructor)
 	{
-		Check(c, data);
-		c = c->next;
+		auto type = node->child->variableType;
+
+		ShaderVariableType compType = ShaderVariableType::Invalid;
+		size_t compCount;
+
+		switch (type)
+		{
+			case ShaderVariableType::Int1: compCount = 1; compType = ShaderVariableType::Int1; break;
+			case ShaderVariableType::Int2: compCount = 2; compType = ShaderVariableType::Int1; break;
+			case ShaderVariableType::Int3: compCount = 3; compType = ShaderVariableType::Int1; break;
+			case ShaderVariableType::Int4: compCount = 4; compType = ShaderVariableType::Int1; break;
+
+			case ShaderVariableType::Float1: compCount = 1; compType = ShaderVariableType::Float1; break;
+			case ShaderVariableType::Float2: compCount = 2; compType = ShaderVariableType::Float1; break;
+			case ShaderVariableType::Float3: compCount = 3; compType = ShaderVariableType::Float1; break;
+			case ShaderVariableType::Float4: compCount = 4; compType = ShaderVariableType::Float1; break;
+
+			default:
+			{
+				std::stringstream ss;
+				ss << "Failed to run ShaderAnnotator:" << std::endl;
+				ss << "Unsupported constructor type:" << std::endl;
+				ss << "'" << ShaderVariableTypeToString(type) << "'" << std::endl;
+				ss << "Line: " << node->lineNumber;
+				throw ShaderError(ss.str());
+			}
+		}
+
+		auto c = node->child->next;
+		for (size_t i = 0; i < compCount; ++i)
+		{
+			auto t = Check(c, data);
+			if (t != compType)
+			{
+				std::stringstream ss;
+				ss << "Failed to run ShaderAnnotator:" << std::endl;
+				ss << "Constructor parameter type doesn't match constructor type:" << std::endl;
+				ss << "'" << ShaderVariableTypeToString(t) << "' (param) " << "'" << ShaderVariableTypeToString(type) << "' (constructor)" << std::endl;
+				ss << "Line: " << node->lineNumber;
+				throw ShaderError(ss.str());
+			}
+			c = c->next;
+		}
+
+		return type;
 	}
+	else
+	{
+		if (node->type == ShaderSTNodeType::Literal)
+			return node->variableType;
+		else if (node->type == ShaderSTNodeType::Reference)
+			return node->reference->type;
+		else if (node->type == ShaderSTNodeType::ComponentX)
+		{
+			switch (node->reference->type)
+			{
+				case ShaderVariableType::Float2:
+				case ShaderVariableType::Float3:
+				case ShaderVariableType::Float4:
+					return ShaderVariableType::Float1;
+					break;
+
+				case ShaderVariableType::Int2:
+				case ShaderVariableType::Int3:
+				case ShaderVariableType::Int4:
+					return ShaderVariableType::Int1;
+					break;
+
+				default:
+				{
+					std::stringstream ss;
+					ss << "Failed to run ShaderAnnotator:" << std::endl;
+					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'x'" << std::endl;
+					ss << "Line: " << node->lineNumber;
+					throw ShaderError(ss.str());
+					break;
+				}
+			}
+		}
+		else if (node->type == ShaderSTNodeType::ComponentY)
+		{
+			switch (node->reference->type)
+			{
+				case ShaderVariableType::Float2:
+				case ShaderVariableType::Float3:
+				case ShaderVariableType::Float4:
+					return ShaderVariableType::Float1;
+					break;
+
+				case ShaderVariableType::Int2:
+				case ShaderVariableType::Int3:
+				case ShaderVariableType::Int4:
+					return ShaderVariableType::Int1;
+					break;
+
+				default:
+				{
+					std::stringstream ss;
+					ss << "Failed to run ShaderAnnotator:" << std::endl;
+					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'y'" << std::endl;
+					ss << "Line: " << node->lineNumber;
+					throw ShaderError(ss.str());
+					break;
+				}
+			}
+		}
+		else if (node->type == ShaderSTNodeType::ComponentZ)
+		{
+			switch (node->reference->type)
+			{
+				case ShaderVariableType::Float3:
+				case ShaderVariableType::Float4:
+					return ShaderVariableType::Float1;
+					break;
+
+				case ShaderVariableType::Int3:
+				case ShaderVariableType::Int4:
+					return ShaderVariableType::Int1;
+					break;
+
+				default:
+				{
+					std::stringstream ss;
+					ss << "Failed to run ShaderAnnotator:" << std::endl;
+					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'z'" << std::endl;
+					ss << "Line: " << node->lineNumber;
+					throw ShaderError(ss.str());
+					break;
+				}
+			}
+		}
+		else if (node->type == ShaderSTNodeType::ComponentW)
+		{
+			switch (node->reference->type)
+			{
+				case ShaderVariableType::Float4:
+					return ShaderVariableType::Float1;
+					break;
+
+				case ShaderVariableType::Int4:
+					return ShaderVariableType::Int1;
+					break;
+
+				default:
+				{
+					std::stringstream ss;
+					ss << "Failed to run ShaderAnnotator:" << std::endl;
+					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'w'" << std::endl;
+					ss << "Line: " << node->lineNumber;
+					throw ShaderError(ss.str());
+					break;
+				}
+			}
+		}
+
+		auto c = node->child;
+		while (c != nullptr)
+		{
+			Check(c, data);
+			c = c->next;
+		}
+	}
+
+	return type;
 }
 
 void Magma::Framework::Graphics::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
@@ -215,5 +388,5 @@ void Magma::Framework::Graphics::ShaderAnnotator::Run(ShaderSTNode * tree, Shade
 
 void Magma::Framework::Graphics::ShaderAnnotator::Print(ShaderSTNode * node, size_t indentation)
 {
-
+	ShaderParser::Print(node, indentation);
 }

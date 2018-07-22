@@ -26,7 +26,7 @@ void Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, std
 	ShaderParser::Print(tree);
 
 	ShaderAnnotator::Run(tree, data);
-	ShaderParser::Print(tree);
+	ShaderAnnotator::Print(tree);
 
 	ShaderGenerator::Run(tree, outBC, outMD, data);
 
