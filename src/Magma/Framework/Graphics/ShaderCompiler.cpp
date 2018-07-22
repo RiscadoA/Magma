@@ -10,19 +10,37 @@ void Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, std
 {
 	ShaderCompilerData data;
 
-	std::vector<ShaderLine> preprocessorOut;
-	ShaderPreprocessor::Run(in, preprocessorOut, data);
+	std::vector<ShaderLine> preprocessed;
+	std::vector<ShaderToken> tokens;
+	ShaderSTNode* tree;
+	
 
-	std::vector<ShaderToken> lexerOut;
-	ShaderLexer::Run(preprocessorOut, lexerOut, data);
+	ShaderPreprocessor::Run(in, preprocessed, data);
 
-	ShaderSTNode* parserOut;
-	ShaderParser::Run(lexerOut, parserOut, data);
-	ShaderParser::Print(parserOut);
+	
+	ShaderLexer::Run(preprocessed, tokens, data);
 
-	ShaderAnnotator::Run(parserOut, data);
+	
 
-	ShaderGenerator::Run(parserOut, outBC, outMD, data);
+	ShaderParser::Run(tokens, tree, data);
+	ShaderParser::Print(tree);
 
-	ShaderParser::Clean(parserOut);
+	ShaderAnnotator::Run(tree, data);
+	ShaderParser::Print(tree);
+
+	ShaderGenerator::Run(tree, outBC, outMD, data);
+
+	ShaderParser::Clean(tree);
 }
+
+Magma::Framework::Graphics::ShaderVariable* Magma::Framework::Graphics::ShaderScope::GetVar(const std::string& name)
+{
+	for (auto& v : this->variables)
+		if (v.id == name)
+			return &v;
+	if (this->parent.expired())
+		return nullptr;
+	else
+		return this->parent.lock()->GetVar(name);
+}
+

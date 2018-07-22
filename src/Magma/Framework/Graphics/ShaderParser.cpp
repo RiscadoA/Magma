@@ -17,17 +17,7 @@ struct ParserInfo
 	size_t lineNumber;
 };
 
-void ThrowNotImplemented(const std::string& feature, ParserInfo& info)
-{
-	std::stringstream ss;
-	ss << "Failed to run ShaderParser:" << std::endl;
-	ss << "Feature not yet implemented:" << std::endl;
-	ss << feature << std::endl;
-	ss << "Line: " << info.lineNumber;
-	throw ShaderError(ss.str());
-}
-
-ShaderSTNode* CreateNode(ShaderSTNodeType type, const std::string& attribute, ParserInfo& info)
+inline ShaderSTNode* CreateNode(ShaderSTNodeType type, const std::string& attribute, ParserInfo& info)
 {
 	auto node = new ShaderSTNode();
 
@@ -39,11 +29,11 @@ ShaderSTNode* CreateNode(ShaderSTNodeType type, const std::string& attribute, Pa
 	node->next = nullptr;
 
 	node->lineNumber = info.lineNumber;
-	
+
 	return node;
 }
 
-void AddToNode(ShaderSTNode* node, ShaderSTNode* child)
+inline void AddToNode(ShaderSTNode* node, ShaderSTNode* child)
 {
 	child->parent = node;
 	if (node->child == nullptr)
@@ -82,6 +72,16 @@ void DestroyNode(ShaderSTNode* node)
 	}
 
 	delete node;
+}
+
+void ThrowNotImplemented(const std::string& feature, ParserInfo& info)
+{
+	std::stringstream ss;
+	ss << "Failed to run ShaderParser:" << std::endl;
+	ss << "Feature not yet implemented:" << std::endl;
+	ss << feature << std::endl;
+	ss << "Line: " << info.lineNumber;
+	throw ShaderError(ss.str());
 }
 
 void SkipToken(ParserInfo& info)

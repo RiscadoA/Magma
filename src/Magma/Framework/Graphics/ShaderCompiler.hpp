@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <sstream>
 #include <memory>
 
@@ -299,7 +300,9 @@ namespace Magma
 				std::shared_ptr<ShaderScope> child = nullptr;
 				std::shared_ptr<ShaderScope> next = nullptr;
 
-				std::vector<ShaderVariable> variables;
+				std::list<ShaderVariable> variables;
+
+				ShaderVariable* GetVar(const std::string& name);
 			};
 
 			/// <summary>
@@ -326,11 +329,34 @@ namespace Magma
 				*/
 				Identifier,
 				
+				/*
+					Reference
+						Identifier
+				*/
 				Reference,
 
+				/*
+					ComponentX
+						Reference
+				*/
 				ComponentX,
+				
+				/*
+					ComponentY
+						Reference
+				*/
 				ComponentY,
+
+				/*
+					ComponentZ
+						Reference
+				*/
 				ComponentZ,
+
+				/*
+					ComponentW
+						Reference
+				*/
 				ComponentW,
 
 				/*
@@ -410,6 +436,11 @@ namespace Magma
 					case ShaderSTNodeType::Operator: return "operator";
 					case ShaderSTNodeType::Literal: return "literal";
 					case ShaderSTNodeType::Identifier: return "identifier";
+					case ShaderSTNodeType::Reference: return "reference";
+					case ShaderSTNodeType::ComponentX: return "componentx";
+					case ShaderSTNodeType::ComponentY: return "componenty";
+					case ShaderSTNodeType::ComponentZ: return "componentz";
+					case ShaderSTNodeType::ComponentW: return "componentxw";
 					case ShaderSTNodeType::Declaration: return "declaration";
 					case ShaderSTNodeType::Constructor: return "constructor";
 					case ShaderSTNodeType::Scope: return "scope";
@@ -438,15 +469,35 @@ namespace Magma
 				};
 
 				std::string attribute;
+				ShaderVariable* reference = nullptr;
 
-				ShaderSTNode* parent;
-				ShaderSTNode* child;
-				ShaderSTNode* next;
+				ShaderSTNode* parent = nullptr;
+				ShaderSTNode* child = nullptr;
+				ShaderSTNode* next = nullptr;
 
 				std::shared_ptr<ShaderScope> scope;
 
 				size_t lineNumber;
 			};
+
+			/// <summary>
+			///		Converts a shader variable into a string
+			/// </summary>
+			inline std::string ShaderVariableToString(const ShaderVariable& var)
+			{
+				std::stringstream ss;
+				ss << "'" << ShaderVariableTypeToString(var.type);
+
+				if (var.bufferName != "")
+					ss << " ; [" << var.bufferName << "] ID: \"" << var.id << "\" NAME: \"" << var.name << "\"";
+				else
+					ss << " ; ID: \"" << var.id << "\" NAME: \"" << var.name << "\"";
+
+				ss << " ; INDEX: " << var.index;
+				ss << "'";
+
+				return ss.str();
+			}
 
 			/// <summary>
 			///		Converts a shader syntax tree node into a string
@@ -464,6 +515,9 @@ namespace Magma
 
 				if (!node->attribute.empty())
 					ss << " {\"" << node->attribute << "\"}";
+
+				if (node->reference != nullptr)
+					ss << " (" << ShaderVariableToString(*node->reference) << ")";
 
 				ss << "'";
 
