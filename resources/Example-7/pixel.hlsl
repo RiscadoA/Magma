@@ -4,21 +4,16 @@
 
 struct ShaderInput
 {
-	float4 in_9 : VOUT9VOUT;
+	int in_4294967295 : VOUT4294967295VOUT;
 };
 
 struct ShaderOutput
 {
-	float4 out_1 : SV_Target0;
+	int out_4294967295 : SV_Target4294967294;
 };
 
 ShaderOutput PS(ShaderInput input)
 {
 	ShaderOutput output;
-{
-{
-	output.out_1 = input.in_9;
-}
-}
 	return output;
 }

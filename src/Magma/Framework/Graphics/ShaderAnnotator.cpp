@@ -35,6 +35,8 @@ void DestroyShaderNode(ShaderSTNode* node)
 
 void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 {
+	node->lvalue = true;
+
 	if (node->parent == nullptr)
 	{
 		node->scope = std::make_shared<ShaderScope>();
@@ -56,6 +58,8 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 			node->scope->next = node->parent->scope->child;
 			node->parent->scope->child = node->scope;
 			node->scope->variables = {};
+
+			node->lvalue = false;
 		}
 		else if (node->type == ShaderSTNodeType::Declaration)
 		{
@@ -72,6 +76,8 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 
 			DestroyShaderNode(node->child->next);
 			DestroyShaderNode(node->child);
+
+			node->lvalue = false;
 		}
 		else if (node->type == ShaderSTNodeType::Operator && node->operatorType == ShaderOperatorType::Member)
 		{
@@ -130,19 +136,17 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 				}
 			}
 			
-			// If has another member operator
-			else if (node->child->type == ShaderSTNodeType::Operator && node->child->operatorType == ShaderOperatorType::Member)
-				Annotate(node->child, data);
-
 			if (!found)
 			{
 				Annotate(node->child, data);
+
+				if (!node->child->lvalue)
+					node->lvalue = false;
 
 				if (node->child->next->attribute == "x" || node->child->next->attribute == "r")
 				{
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentX;
-					
 				}
 				else if (node->child->next->attribute == "y" || node->child->next->attribute == "g")
 				{
@@ -161,10 +165,12 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 				}
 
 				DestroyShaderNode(node->child->next);
-				DestroyShaderNode(node->child);
+				if (node->reference != nullptr)
+					DestroyShaderNode(node->child);
 			}
-			
 		}
+		else if (node->type == ShaderSTNodeType::Operator && node->operatorType != ShaderOperatorType::Assign)
+			node->lvalue = false;
 		else if (node->type == ShaderSTNodeType::Identifier)
 		{
 			node->type = ShaderSTNodeType::Reference;
@@ -184,6 +190,8 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 			if (!found)
 				node->reference = node->scope->GetVar(node->attribute);
 		}
+		else if (node->type == ShaderSTNodeType::Literal)
+			node->lvalue = false;
 	}
 
 	auto c = node->child;
@@ -202,6 +210,16 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 	{
 		auto type1 = Check(node->child, data);
 		auto type2 = Check(node->child->next, data);
+
+		if (!node->child->lvalue)
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderAnnotator:" << std::endl;
+			ss << "Assign operand must be a lvalue" << std::endl;
+			ss << "Line: " << node->lineNumber;
+			throw ShaderError(ss.str());
+		}
+
 		if (type1 != type2)
 		{
 			std::stringstream ss;
@@ -210,7 +228,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			ss << ShaderVariableTypeToString(type1) << " = " << ShaderVariableTypeToString(type2) << std::endl;
 			ss << "Line: " << node->lineNumber;
 			throw ShaderError(ss.str());
-		}
+		}	
 	}
 	else if (node->type == ShaderSTNodeType::Constructor)
 	{
@@ -268,7 +286,17 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			return node->reference->type;
 		else if (node->type == ShaderSTNodeType::ComponentX)
 		{
-			switch (node->reference->type)
+			ShaderVariableType type;
+
+			if (node->reference == nullptr)
+			{
+				auto exp = node->child;
+				type = Check(exp, data);
+			}
+			else
+				type = node->reference->type;
+
+			switch (type)
 			{
 				case ShaderVariableType::Float2:
 				case ShaderVariableType::Float3:
@@ -286,7 +314,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				{
 					std::stringstream ss;
 					ss << "Failed to run ShaderAnnotator:" << std::endl;
-					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'x'" << std::endl;
+					ss << "Expression doesn't have a component 'x'" << std::endl;
 					ss << "Line: " << node->lineNumber;
 					throw ShaderError(ss.str());
 					break;
@@ -295,7 +323,17 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 		}
 		else if (node->type == ShaderSTNodeType::ComponentY)
 		{
-			switch (node->reference->type)
+			ShaderVariableType type;
+
+			if (node->reference == nullptr)
+			{
+				auto exp = node->child;
+				type = Check(exp, data);
+			}
+			else
+				type = node->reference->type;
+
+			switch (type)
 			{
 				case ShaderVariableType::Float2:
 				case ShaderVariableType::Float3:
@@ -313,7 +351,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				{
 					std::stringstream ss;
 					ss << "Failed to run ShaderAnnotator:" << std::endl;
-					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'y'" << std::endl;
+					ss << "Expression doesn't have a component 'y'" << std::endl;
 					ss << "Line: " << node->lineNumber;
 					throw ShaderError(ss.str());
 					break;
@@ -322,7 +360,17 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 		}
 		else if (node->type == ShaderSTNodeType::ComponentZ)
 		{
-			switch (node->reference->type)
+			ShaderVariableType type;
+
+			if (node->reference == nullptr)
+			{
+				auto exp = node->child;
+				type = Check(exp, data);
+			}
+			else
+				type = node->reference->type;
+
+			switch (type)
 			{
 				case ShaderVariableType::Float3:
 				case ShaderVariableType::Float4:
@@ -338,7 +386,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				{
 					std::stringstream ss;
 					ss << "Failed to run ShaderAnnotator:" << std::endl;
-					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'z'" << std::endl;
+					ss << "Expression doesn't have a component 'z'" << std::endl;
 					ss << "Line: " << node->lineNumber;
 					throw ShaderError(ss.str());
 					break;
@@ -347,7 +395,17 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 		}
 		else if (node->type == ShaderSTNodeType::ComponentW)
 		{
-			switch (node->reference->type)
+			ShaderVariableType type;
+
+			if (node->reference == nullptr)
+			{
+				auto exp = node->child;
+				type = Check(exp, data);
+			}
+			else
+				type = node->reference->type;
+
+			switch (type)
 			{
 				case ShaderVariableType::Float4:
 					return ShaderVariableType::Float1;
@@ -361,7 +419,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				{
 					std::stringstream ss;
 					ss << "Failed to run ShaderAnnotator:" << std::endl;
-					ss << "Variable (" << ShaderVariableToString(*node->reference) << ") doesn't have a component 'w'" << std::endl;
+					ss << "Expression doesn't have a component 'w'" << std::endl;
 					ss << "Line: " << node->lineNumber;
 					throw ShaderError(ss.str());
 					break;

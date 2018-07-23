@@ -4,15 +4,10 @@
 // Pixel shader
 // DO NOT MODIFY THIS FILE BY HAND
 
-layout (location = 9) in vec4 in_9; // Input variable "color"; index 9
+layout (location = 4294967295) in int in_4294967295; // Input variable "IN_0"	TYPE "float4"; index 4294967295
 
-layout (location = 0) out vec4 out_1; // Output variable "ATTACHMENT_0"; index 1
+layout (location = 4294967294) out int out_4294967295; // Output variable "ATTACHMENT_0"	TYPE "float4"; index 4294967295
 
 void main()
 {
-{
-{
-	out_1 = in_9;
-}
-}
 }

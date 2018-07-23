@@ -478,6 +478,8 @@ namespace Magma
 				std::shared_ptr<ShaderScope> scope;
 
 				size_t lineNumber;
+
+				bool lvalue = false;
 			};
 
 			/// <summary>

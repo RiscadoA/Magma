@@ -14,22 +14,22 @@ void Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, std
 	std::vector<ShaderToken> tokens;
 	ShaderSTNode* tree;
 	
-
+	// Preprocessor
 	ShaderPreprocessor::Run(in, preprocessed, data);
 
-	
+	// Lexer
 	ShaderLexer::Run(preprocessed, tokens, data);
 
-	
-
+	// Parser
 	ShaderParser::Run(tokens, tree, data);
 	ShaderParser::Print(tree);
 
+	// Annotator
 	ShaderAnnotator::Run(tree, data);
 	ShaderAnnotator::Print(tree);
 
+	// Generator
 	ShaderGenerator::Run(tree, outBC, outMD, data);
-
 	ShaderParser::Clean(tree);
 }
 

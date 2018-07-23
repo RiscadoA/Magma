@@ -4,26 +4,19 @@
 
 struct ShaderInput
 {
-	float4 in_32 : IN31IN;
-	float4 in_33 : IN32IN;
+	int in_4294967295 : IN4294967294IN;
+	int in_4294967295 : IN4294967294IN;
 };
 
 struct ShaderOutput
 {
-	float4 out_9 : VOUT9VOUT;
+	int out_4294967295 : VOUT4294967295VOUT;
+	int out_4294967295 : VOUT4294967295VOUT;
 	float4 v_pos : SV_POSITION;
 };
 
 ShaderOutput VS(ShaderInput input)
 {
 	ShaderOutput output;
-{
-{
-	output.v_pos = input.in_32;
-}
-{
-	output.out_9 = input.in_33;
-}
-}
 	return output;
 }

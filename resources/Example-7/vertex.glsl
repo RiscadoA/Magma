@@ -4,10 +4,11 @@
 // Vertex shader
 // DO NOT MODIFY THIS FILE BY HAND
 
-layout (location = 32) in vec4 in_32; // Input variable "POSITION"; index 32
-layout (location = 33) in vec4 in_33; // Input variable "COLOR"; index 33
+layout (location = 4294967295) in int in_4294967295; // Input variable "POSITION"	TYPE "float3"; index 4294967295
+layout (location = 4294967295) in int in_4294967295; // Input variable "COLOR"	TYPE "float4"; index 4294967295
 
-layout (location = 9) out vec4 out_9; // Output variable "OUT_0"; index 9
+layout (location = 4294967295) out int out_4294967295; // Output variable "SCREEN_POSITION"	TYPE "float4"; index 4294967295
+layout (location = 4294967295) out int out_4294967295; // Output variable "OUT_0"	TYPE "float4"; index 4294967295
 
 out gl_PerVertex
 {
@@ -16,12 +17,4 @@ out gl_PerVertex
 
 void main()
 {
-{
-{
-	gl_Position = in_32;
-}
-{
-	out_9 = in_33;
-}
-}
 }

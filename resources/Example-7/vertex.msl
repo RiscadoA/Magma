@@ -19,8 +19,6 @@ Shader
 	float4 color;
 	color = in.color;
 
-	color.r = float3(1.0, 1.0, 1.0);
-
 	out.position = position;
 	out.color = color;
 };
