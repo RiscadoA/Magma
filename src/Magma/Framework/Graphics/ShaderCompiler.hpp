@@ -302,6 +302,8 @@ namespace Magma
 
 				std::list<ShaderVariable> variables;
 
+				size_t nextVarID;
+
 				ShaderVariable* GetVar(const std::string& name);
 			};
 
@@ -461,6 +463,7 @@ namespace Magma
 			struct ShaderSTNode
 			{
 				ShaderSTNodeType type;
+				ShaderVariableType resultType;
 
 				union
 				{

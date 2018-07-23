@@ -204,8 +204,6 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 
 ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 {
-	auto type = ShaderVariableType::Invalid;
-
 	if (node->type == ShaderSTNodeType::Operator && node->operatorType == ShaderOperatorType::Assign)
 	{
 		auto type1 = Check(node->child, data);
@@ -338,12 +336,14 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				case ShaderVariableType::Float2:
 				case ShaderVariableType::Float3:
 				case ShaderVariableType::Float4:
+					node->resultType = ShaderVariableType::Float1;
 					return ShaderVariableType::Float1;
 					break;
 
 				case ShaderVariableType::Int2:
 				case ShaderVariableType::Int3:
 				case ShaderVariableType::Int4:
+					node->resultType = ShaderVariableType::Int1;
 					return ShaderVariableType::Int1;
 					break;
 
@@ -374,11 +374,13 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			{
 				case ShaderVariableType::Float3:
 				case ShaderVariableType::Float4:
+					node->resultType = ShaderVariableType::Float1;
 					return ShaderVariableType::Float1;
 					break;
 
 				case ShaderVariableType::Int3:
 				case ShaderVariableType::Int4:
+					node->resultType = ShaderVariableType::Int1;
 					return ShaderVariableType::Int1;
 					break;
 
@@ -408,10 +410,12 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			switch (type)
 			{
 				case ShaderVariableType::Float4:
+					node->resultType = ShaderVariableType::Float1;
 					return ShaderVariableType::Float1;
 					break;
 
 				case ShaderVariableType::Int4:
+					node->resultType = ShaderVariableType::Int1;
 					return ShaderVariableType::Int1;
 					break;
 
@@ -435,7 +439,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 		}
 	}
 
-	return type;
+	return ShaderVariableType::Invalid;
 }
 
 void Magma::Framework::Graphics::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)

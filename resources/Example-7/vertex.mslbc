@@ -1,0 +1,6 @@
+OPSCOPE, # scope
+OPSCOPE, # expression
+CLSCOPE, # expression
+OPSCOPE, # expression
+CLSCOPE, # expression
+CLSCOPE, # scope

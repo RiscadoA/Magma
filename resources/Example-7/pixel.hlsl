@@ -4,16 +4,20 @@
 
 struct ShaderInput
 {
-	int in_4294967295 : VOUT4294967295VOUT;
+	int in_8 : VOUT8VOUT;
 };
 
 struct ShaderOutput
 {
-	int out_4294967295 : SV_Target4294967294;
+	int out_0 : SV_Depth;
 };
 
 ShaderOutput PS(ShaderInput input)
 {
 	ShaderOutput output;
+{
+{
+}
+}
 	return output;
 }

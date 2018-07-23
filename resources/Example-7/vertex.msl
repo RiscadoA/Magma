@@ -3,7 +3,7 @@
 
 Input in
 {
-	float3 position : POSITION;
+	float4 position : POSITION;
 	float4 color : COLOR;
 };
 
@@ -15,10 +15,10 @@ Output out
 
 Shader
 {
-	float4 position = float4(in.position.x, in.position.y, in.position.z, 1.0);
+	/*float4 position = float4(in.position.x, in.position.y, in.position.z, 1.0);
 	float4 color;
 	color = in.color;
-
-	out.position = position;
-	out.color = color;
+	*/
+	out.position = in.position;
+	out.color = in.color;
 };

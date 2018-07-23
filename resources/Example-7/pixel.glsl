@@ -4,10 +4,14 @@
 // Pixel shader
 // DO NOT MODIFY THIS FILE BY HAND
 
-layout (location = 4294967295) in int in_4294967295; // Input variable "IN_0"	TYPE "float4"; index 4294967295
+layout (location = 8) in int in_8; // Input variable "IN_0"	TYPE "float4"; index 8
 
-layout (location = 4294967294) out int out_4294967295; // Output variable "ATTACHMENT_0"	TYPE "float4"; index 4294967295
+layout (location = 4294967295) out int out_0; // Output variable "ATTACHMENT_0"	TYPE "float4"; index 0
 
 void main()
 {
+{
+{
+}
+}
 }
