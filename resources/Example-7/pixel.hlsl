@@ -4,12 +4,12 @@
 
 struct ShaderInput
 {
-	int in_8 : VOUT8VOUT;
+	float4 in_8 : VOUT8VOUT;
 };
 
 struct ShaderOutput
 {
-	int out_0 : SV_Depth;
+	float4 out_0 : SV_Depth;
 };
 
 ShaderOutput PS(ShaderInput input)
@@ -17,6 +17,7 @@ ShaderOutput PS(ShaderInput input)
 	ShaderOutput output;
 {
 {
+	output.out_0 = input.in_8;
 }
 }
 	return output;

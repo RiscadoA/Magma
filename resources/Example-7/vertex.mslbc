@@ -1,6 +1,53 @@
 OPSCOPE, # scope
+DECLF4, db32,
 OPSCOPE, # expression
+DECLF4, db33,
+OPSCOPE, # expression
+DECLF4, db34,
+OPSCOPE, # constructor
+DECLF1, db35,
+VARIN0, db16,
+VAROUT, db35,
+GEF4CMP, db00,
+VARIN0, db35,
+VAROUT, db34,
+ASF4CMP, db0,
+VARIN0, db16,
+VAROUT, db35,
+GEF4CMP, db01,
+VARIN0, db35,
+VAROUT, db34,
+ASF4CMP, db1,
+VARIN0, db16,
+VAROUT, db35,
+GEF4CMP, db02,
+VARIN0, db35,
+VAROUT, db34,
+ASF4CMP, db2,
+SETF1, db35, f1.0,
+VARIN0, db35,
+VAROUT, db34,
+ASF4CMP, db3,
+CLSCOPE, # constructor
+DECLF4, db36,
+SETF4, db36, f0, f0, f0, f0,
+VARIN0, db36,
+VARIN1, db34,
+VAROUT, db33,
+SUB,
+CLSCOPE, # expression
+VARIN0, db33,
+VAROUT, db32,
+ASSIGN,
 CLSCOPE, # expression
 OPSCOPE, # expression
+VARIN0, db32,
+VAROUT, db0,
+ASSIGN,
+CLSCOPE, # expression
+OPSCOPE, # expression
+VARIN0, db17,
+VAROUT, db8,
+ASSIGN,
 CLSCOPE, # expression
 CLSCOPE, # scope

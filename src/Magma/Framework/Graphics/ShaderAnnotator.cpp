@@ -145,21 +145,37 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 
 				if (node->child->next->attribute == "x" || node->child->next->attribute == "r")
 				{
+					if (node->parent->type == ShaderSTNodeType::Operator && node->parent->operatorType == ShaderOperatorType::Assign && node == node->parent->child)
+						node->lvalue = true;
+					else
+						node->lvalue = false;
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentX;
 				}
 				else if (node->child->next->attribute == "y" || node->child->next->attribute == "g")
 				{
+					if (node->parent->type == ShaderSTNodeType::Operator && node->parent->operatorType == ShaderOperatorType::Assign && node == node->parent->child)
+						node->lvalue = true;
+					else
+						node->lvalue = false;
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentY;
 				}
 				else if (node->child->next->attribute == "z" || node->child->next->attribute == "b")
 				{
+					if (node->parent->type == ShaderSTNodeType::Operator && node->parent->operatorType == ShaderOperatorType::Assign && node == node->parent->child)
+						node->lvalue = true;
+					else
+						node->lvalue = false;
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentZ;
 				}
 				else if (node->child->next->attribute == "w" || node->child->next->attribute == "a")
 				{
+					if (node->parent->type == ShaderSTNodeType::Operator && node->parent->operatorType == ShaderOperatorType::Assign && node == node->parent->child)
+						node->lvalue = true;
+					else
+						node->lvalue = false;
 					node->reference = node->child->reference;
 					node->type = ShaderSTNodeType::ComponentW;
 				}
@@ -171,6 +187,11 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 		}
 		else if (node->type == ShaderSTNodeType::Operator && node->operatorType != ShaderOperatorType::Assign)
 			node->lvalue = false;
+		else if (node->type == ShaderSTNodeType::Constructor)
+		{
+			node->lvalue = false;
+			node->resultType = node->child->variableType;
+		}
 		else if (node->type == ShaderSTNodeType::Identifier)
 		{
 			node->type = ShaderSTNodeType::Reference;
@@ -233,7 +254,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 		auto type = node->child->variableType;
 
 		ShaderVariableType compType = ShaderVariableType::Invalid;
-		size_t compCount;
+		size_t compCount = 0;
 
 		switch (type)
 		{
@@ -266,8 +287,8 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			{
 				std::stringstream ss;
 				ss << "Failed to run ShaderAnnotator:" << std::endl;
-				ss << "Constructor parameter type doesn't match constructor type:" << std::endl;
-				ss << "'" << ShaderVariableTypeToString(t) << "' (param) " << "'" << ShaderVariableTypeToString(type) << "' (constructor)" << std::endl;
+				ss << "Constructor parameter " << (i + 1) << " type doesn't match constructor parameter type:" << std::endl;
+				ss << "'" << ShaderVariableTypeToString(t) << "' should be " << "'" << ShaderVariableTypeToString(type) << "'" << std::endl;
 				ss << "Line: " << node->lineNumber;
 				throw ShaderError(ss.str());
 			}
@@ -275,6 +296,18 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 		}
 
 		return type;
+	}
+	else if (node->type == ShaderSTNodeType::Operator)
+	{
+		auto c = node->child;
+		while (c != nullptr)
+		{
+			Check(c, data);
+			c = c->next;
+		}
+
+		node->resultType = node->child->resultType;
+		return node->resultType;
 	}
 	else
 	{
@@ -299,13 +332,13 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				case ShaderVariableType::Float2:
 				case ShaderVariableType::Float3:
 				case ShaderVariableType::Float4:
-					return ShaderVariableType::Float1;
+					node->resultType = ShaderVariableType::Float1;
 					break;
 
 				case ShaderVariableType::Int2:
 				case ShaderVariableType::Int3:
 				case ShaderVariableType::Int4:
-					return ShaderVariableType::Int1;
+					node->resultType = ShaderVariableType::Int1;
 					break;
 
 				default:
@@ -318,6 +351,8 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 					break;
 				}
 			}
+
+			return node->resultType;
 		}
 		else if (node->type == ShaderSTNodeType::ComponentY)
 		{
@@ -337,14 +372,12 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				case ShaderVariableType::Float3:
 				case ShaderVariableType::Float4:
 					node->resultType = ShaderVariableType::Float1;
-					return ShaderVariableType::Float1;
 					break;
 
 				case ShaderVariableType::Int2:
 				case ShaderVariableType::Int3:
 				case ShaderVariableType::Int4:
 					node->resultType = ShaderVariableType::Int1;
-					return ShaderVariableType::Int1;
 					break;
 
 				default:
@@ -357,6 +390,8 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 					break;
 				}
 			}
+
+			return node->resultType;
 		}
 		else if (node->type == ShaderSTNodeType::ComponentZ)
 		{
@@ -375,13 +410,11 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 				case ShaderVariableType::Float3:
 				case ShaderVariableType::Float4:
 					node->resultType = ShaderVariableType::Float1;
-					return ShaderVariableType::Float1;
 					break;
 
 				case ShaderVariableType::Int3:
 				case ShaderVariableType::Int4:
 					node->resultType = ShaderVariableType::Int1;
-					return ShaderVariableType::Int1;
 					break;
 
 				default:
@@ -394,6 +427,8 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 					break;
 				}
 			}
+
+			return node->resultType;
 		}
 		else if (node->type == ShaderSTNodeType::ComponentW)
 		{
@@ -411,12 +446,10 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			{
 				case ShaderVariableType::Float4:
 					node->resultType = ShaderVariableType::Float1;
-					return ShaderVariableType::Float1;
 					break;
 
 				case ShaderVariableType::Int4:
 					node->resultType = ShaderVariableType::Int1;
-					return ShaderVariableType::Int1;
 					break;
 
 				default:
@@ -429,6 +462,8 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 					break;
 				}
 			}
+
+			return node->resultType;
 		}
 
 		auto c = node->child;
