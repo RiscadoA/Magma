@@ -6,6 +6,225 @@
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
 
+std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
+{
+	{
+		"cos",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"sin",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"tan",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"acos",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"asin",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"atan",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"degrees",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"radians",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"asin",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"atan",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"mulvec",
+		ShaderVariableType::Float4,
+		{
+			ShaderVariableType::Float44,
+			ShaderVariableType::Float4,
+		}
+	},
+	{
+		"mulmat",
+		ShaderVariableType::Float44,
+		{
+			ShaderVariableType::Float44,
+			ShaderVariableType::Float44,
+		}
+	},
+	{
+		"Sample2D",
+		ShaderVariableType::Float4,
+		{
+			ShaderVariableType::Texture2D,
+			ShaderVariableType::Float2,
+		}
+	},
+	{
+		"powf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"powi",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+		}
+	},
+	{
+		"exp",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"log",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"exp2",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"log2",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"sqrt",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"isqrt",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"absf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"absi",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+		}
+	},
+	{
+		"signf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"signi",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"floorf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"floori",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"ceilf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"ceili",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"fract",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+};
+
 void DestroyShaderNode(ShaderSTNode* node)
 {
 	if (node->parent != nullptr)
@@ -192,7 +411,9 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 			node->lvalue = false;
 			node->resultType = node->child->variableType;
 		}
-		else if (node->type == ShaderSTNodeType::Identifier)
+		else if (node->type == ShaderSTNodeType::Call)
+			node->lvalue = false;
+		else if (node->type == ShaderSTNodeType::Identifier && !(node->parent->type == ShaderSTNodeType::Call && node == node->parent->child))
 		{
 			node->type = ShaderSTNodeType::Reference;
 			
@@ -297,6 +518,54 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 
 		return type;
 	}
+	else if (node->type == ShaderSTNodeType::Call)
+	{
+		for (auto& f : ShaderFunctions)
+			if (f.name == node->child->attribute)
+			{
+				auto pc = node->child->next;
+				size_t pi = 1;
+				for (auto& p : f.params)
+				{
+					if (pc == nullptr)
+					{
+						std::stringstream ss;
+						ss << "Failed to run ShaderAnnotator:" << std::endl;
+						ss << "Failed to call function '" << node->child->attribute << "'" << std::endl;
+						ss << "Failed to get param " << pi << ":" << std::endl;
+						ss << "Function has " << f.params.size() << " params but call only assigns " << pi - 1 << " params" << std::endl;
+						ss << "Line: " << node->lineNumber;
+						throw ShaderError(ss.str());
+					}
+
+					auto tp = Check(pc, data);
+
+					if (p != tp)
+					{
+						std::stringstream ss;
+						ss << "Failed to run ShaderAnnotator:" << std::endl;
+						ss << "Failed to call function '" << node->child->attribute << "'" << std::endl;
+						ss << "Failed to get param " << pi << ":" << std::endl;
+						ss << "Call parameter type doesn't match function parameter type:" << std::endl;
+						ss << "'" << ShaderVariableTypeToString(tp) << "' should be " << "'" << ShaderVariableTypeToString(p) << "'" << std::endl;
+						ss << "Line: " << node->lineNumber;
+						throw ShaderError(ss.str());
+					}
+
+					pc = pc->next;
+				}
+
+				node->resultType = f.returnType;
+				return node->resultType;
+			}
+		
+		std::stringstream ss;
+		ss << "Failed to run ShaderAnnotator:" << std::endl;
+		ss << "Failed to call function '" << node->child->attribute << "'" << std::endl;
+		ss << "Unsupported/unknown function" << std::endl;
+		ss << "Line: " << node->lineNumber;
+		throw ShaderError(ss.str());
+	}
 	else if (node->type == ShaderSTNodeType::Operator)
 	{
 		auto c = node->child;
@@ -312,9 +581,15 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 	else
 	{
 		if (node->type == ShaderSTNodeType::Literal)
+		{
+			node->resultType = node->variableType;
 			return node->variableType;
+		}
 		else if (node->type == ShaderSTNodeType::Reference)
+		{
+			node->resultType = node->reference->type;
 			return node->reference->type;
+		}
 		else if (node->type == ShaderSTNodeType::ComponentX)
 		{
 			ShaderVariableType type;

@@ -12,6 +12,18 @@ namespace Magma
 		namespace Graphics
 		{
 			/// <summary>
+			///		Holds data about a shader function
+			/// </summary>
+			struct ShaderFunction
+			{
+				std::string name;
+				ShaderVariableType returnType;
+				std::vector<ShaderVariableType> params;
+			};
+
+			extern std::vector<ShaderFunction> ShaderFunctions;
+
+			/// <summary>
 			///		Static class for the MSL compiler annotator stage
 			/// </summary>
 			class ShaderAnnotator

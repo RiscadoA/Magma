@@ -13,12 +13,15 @@ Output out
 	float4 color : OUT_0;
 };
 
+ConstantBuffer transform : TRANSFORM
+{
+	float44 mvp;
+};
+
 Shader
 {
-	float4 position;
-
-	position = -float4(in.position.x, in.position.y, in.position.z, 1.0);
-
-	out.position = position;
+	out.position = mulvec(transform.mvp, in.position);
 	out.color = in.color;
+	out.color.r = cos(1.0f);
+	out.color.g = 1.0f + out.color.b;
 };

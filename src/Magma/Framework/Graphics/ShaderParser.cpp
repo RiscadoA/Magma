@@ -759,6 +759,8 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 		{
 			ShaderVariable var;
 
+			var.id = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
+			ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
 			var.name = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
 			var.type = ShaderVariableType::Texture2D;
 
@@ -770,8 +772,30 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 		// Constant Buffers
 		else if (AcceptTokenType(ShaderTokenType::ConstantBuffer, info))
 		{
-			// TO DO TO DO TO DO TO DO TO DO
-			ThrowNotImplemented("ConstantBuffer", info);
+			ShaderVariable buf;
+
+			buf.id = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
+			ExpectPunctuationType(ShaderPunctuationType::Colon, info);
+			buf.name = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
+			buf.type = ShaderVariableType::ConstantBuffer;
+			data.constantBuffers.push_back(buf);
+
+			ExpectPunctuationType(ShaderPunctuationType::OpenBraces, info);
+
+			while (!PeekPunctuationType(ShaderPunctuationType::CloseBraces, info))
+			{
+				ShaderVariable var;
+
+				var.bufferName = buf.id;
+				var.type = ExpectTokenType(ShaderTokenType::Type, info)->variableType;
+				var.id = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
+				ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
+
+				data.constantBufferVariables.push_back(var);
+			}
+
+			ExpectPunctuationType(ShaderPunctuationType::CloseBraces, info);
+			ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
 		}
 
 		// Shader

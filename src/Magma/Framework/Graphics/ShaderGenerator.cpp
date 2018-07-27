@@ -167,6 +167,36 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 					exp->scope->nextVarID++;
 					GenerateExpression(exp->child->next, out, data, id1);
 				}
+
+				out << "VARIN0, db" << exp->scope->nextVarID << "," << std::endl;
+				out << "VARIN1, db" << id0 << "," << std::endl;
+				out << "VAROUT, db" << outVar << "," << std::endl;
+
+				switch (exp->operatorType)
+				{
+					case ShaderOperatorType::Add: out << "ADD," << std::endl; break;
+					case ShaderOperatorType::Subtract: out << "SUB," << std::endl; break;
+					case ShaderOperatorType::Multiply: out << "MUL," << std::endl; break;
+					case ShaderOperatorType::Divide: out << "DIV," << std::endl; break;
+					case ShaderOperatorType::And: out << "AND," << std::endl; break;
+					case ShaderOperatorType::Or: out << "OR," << std::endl; break;
+					case ShaderOperatorType::Greater: out << "GREATER," << std::endl; break;
+					case ShaderOperatorType::Less: out << "LESS," << std::endl; break;
+					case ShaderOperatorType::GEqual: out << "GEQUAL," << std::endl; break;
+					case ShaderOperatorType::LEqual: out << "LEQUAL," << std::endl; break;
+					case ShaderOperatorType::Equal: out << "EQUAL," << std::endl; break;
+					case ShaderOperatorType::Different: out << "NEQUAL," << std::endl; break;
+					default:
+					{
+						std::stringstream ss;
+						ss << "Failed to run ShaderGenerator:" << std::endl;
+						ss << "Failed to generate expression:" << std::endl;
+						ss << "Unsupported/invalid shader binary operator type '" << ShaderOperatorTypeToString(exp->operatorType) << "'" << std::endl;
+						ss << "Line: " << exp->lineNumber;
+						throw ShaderError(ss.str());
+						break;
+					}
+				}
 			}		
 		}
 
@@ -361,6 +391,110 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 			}				
 		}
 	}
+	else if (exp->type == ShaderSTNodeType::Call)
+	{
+		size_t params[2];
+
+		auto p = exp->child->next;
+		size_t pCount = 0;
+		while (p != nullptr)
+		{
+			if (pCount >= 2)
+			{
+				std::stringstream ss;
+				ss << "Failed to run ShaderGenerator:" << std::endl;
+				ss << "Failed to call function '" << exp->child->attribute << "'" << std::endl;
+				ss << "ShaderGenerator only supports functions with up to 2 parameters";
+				ss << "Line: " << exp->lineNumber;
+				throw ShaderError(ss.str());
+			}
+
+			if (p->lvalue == false)
+			{
+				out << "DECL" << ShaderVariableTypeToBC(p->resultType) << ", db" << p->scope->nextVarID << "," << std::endl;
+				params[pCount] = p->scope->nextVarID;
+				p->scope->nextVarID++;
+				GenerateExpression(p, out, data, params[pCount]);
+			}
+			else
+				params[pCount] = GenerateExpression(p, out, data, -1);
+
+			p = p->next;
+			++pCount;
+		}
+		
+		if (pCount == 1)
+		{
+			out << "VARIN0, db" << params[0] << "," << std::endl;
+			out << "VAROUT, db" << outVar << "," << std::endl;
+		}
+		else if (pCount == 2)
+		{
+			out << "VARIN0, db" << params[0] << "," << std::endl;
+			out << "VARIN1, db" << params[1] << "," << std::endl;
+			out << "VAROUT, db" << outVar << "," << std::endl;
+		}
+
+		if (exp->child->attribute == "mulmat" ||
+			exp->child->attribute == "mulvec")
+			out << "MULMAT," << std::endl;
+		else if (exp->child->attribute == "Sample2D")
+			out << "SMPLE2D," << std::endl;
+		else if (exp->child->attribute == "cos")
+			out << "COS," << std::endl;
+		else if (exp->child->attribute == "sin")
+			out << "SIN," << std::endl;
+		else if (exp->child->attribute == "tan")
+			out << "TAN," << std::endl;
+		else if (exp->child->attribute == "acos")
+			out << "ACOS," << std::endl;
+		else if (exp->child->attribute == "asin")
+			out << "ASIN," << std::endl;
+		else if (exp->child->attribute == "atan")
+			out << "ATAN," << std::endl;
+		else if (exp->child->attribute == "degrees")
+			out << "DEGREES," << std::endl;
+		else if (exp->child->attribute == "radians")
+			out << "RADIANS," << std::endl;
+		else if (exp->child->attribute == "powf" ||
+				 exp->child->attribute == "powi")
+			out << "POW," << std::endl;
+		else if (exp->child->attribute == "exp")
+			out << "EXP," << std::endl;
+		else if (exp->child->attribute == "log")
+			out << "LOG," << std::endl;
+		else if (exp->child->attribute == "exp2")
+			out << "EXP2," << std::endl;
+		else if (exp->child->attribute == "log2")
+			out << "LOG2," << std::endl;
+		else if (exp->child->attribute == "sqrt")
+			out << "SQRT," << std::endl;
+		else if (exp->child->attribute == "isqrt")
+			out << "ISQRT," << std::endl;
+		else if (exp->child->attribute == "absf" ||
+				 exp->child->attribute == "absi")
+			out << "ABS," << std::endl;
+		else if (exp->child->attribute == "signf" ||
+				 exp->child->attribute == "signi")
+			out << "SIGN," << std::endl;
+		else if (exp->child->attribute == "floorf" ||
+				 exp->child->attribute == "floori")
+			out << "FLOOR," << std::endl;
+		else if (exp->child->attribute == "ceilf" ||
+				 exp->child->attribute == "ceili")
+			out << "CEIL," << std::endl;
+		else if (exp->child->attribute == "fract")
+			out << "FRACT," << std::endl;
+		else
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderGenerator:" << std::endl;
+			ss << "Failed to call function '" << exp->child->attribute << "'" << std::endl;
+			ss << "ShaderGenerator doesn't support this function";
+			ss << "Line: " << exp->lineNumber;
+			throw ShaderError(ss.str());
+		}
+	}
 
 	return -1;
 }
@@ -373,7 +507,10 @@ void GenerateScope(const ShaderSTNode * scope, std::stringstream& out, ShaderCom
 	while (c != nullptr)
 	{
 		if (c->type == ShaderSTNodeType::Scope)
+		{
+			c->scope->nextVarID = scope->scope->nextVarID;
 			GenerateScope(c, out, data);
+		}
 		else if (c->type == ShaderSTNodeType::Declaration)
 		{
 			out << "DECL" << ShaderVariableTypeToBC(c->reference->type) << ", db" << c->scope->nextVarID << "," << std::endl;
@@ -538,12 +675,24 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 	}
 
 	// Constant buffers
+	size_t nextBuf = 0;
 	for (auto& b : data.constantBuffers)
 	{
-		std::stringstream ss;
-		ss << "Failed to run ShaderGenerator:" << std::endl;
-		ss << "Constant buffers not yet implemented";
-		throw ShaderError(ss.str());
+		b.index = nextBuf++;
+		ss << "CONSTANT BUFFER" << std::endl;
+		ss << "\tNAME \"" << b.name << "\"" << std::endl;
+		ss << "\tINDEX \"" << b.index << "\"" << std::endl << std::endl;
+
+		for (auto& v : data.constantBufferVariables)
+		{
+			v.index = data.rootScope->nextVarID++;
+			if (v.bufferName != b.id)
+				continue;
+			ss << "CONSTANT BUFFER VAR" << std::endl;
+			ss << "\tINDEX \"" << v.index << "\"" << std::endl;
+			ss << "\tNAME \"" << v.name << "\"" << std::endl;
+			ss << "\tTYPE \"" << ShaderVariableTypeToString(v.type) << "\"" << std::endl << std::endl;
+		}
 	}
 
 	outMD = ss.str();
@@ -551,10 +700,11 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 
 void Magma::Framework::Graphics::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
 {
+	data.rootScope->nextVarID = 32;
+
 	GenerateMD(outMD, data);
 
 	std::stringstream ss;
-	in->scope->nextVarID = 32;
 	GenerateScope(in, ss, data);
 	outBC = ss.str();
 }
