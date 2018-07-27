@@ -1,0 +1,19 @@
+#version 1.0
+#type PIXEL
+
+Input in
+{
+	float2 uvs : IN_0;
+};
+
+Output out
+{
+	float4 color : ATTACHMENT_0;
+};
+
+Texture2D diffuse : DIFFUSE;
+
+Shader
+{
+	out.color = Sample2D(diffuse, in.uvs);
+};

@@ -15,6 +15,7 @@
 #include <Magma/Framework/Graphics/ShaderData.hpp>
 #include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
 #include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
+#include <Magma/Framework/Graphics/ShaderCompiler.hpp>
 
 #define USE_GL
 
@@ -118,37 +119,21 @@ void LoadScene(Scene& scene)
 
 	// Load vertex shader
 	{
-		char metaData[2048];
-		size_t metaDataSize;
+		char object[4096];
+		size_t objectSize;
 
 		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/vertex.mslmd");
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/vertex.msl");
 			auto size = scene.fileSystem->GetSize(file);
 			auto code = new char[size + 1];
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			objectSize = Graphics::ShaderCompiler::Run(code, object, sizeof(object));
 			delete[] code;
 		}
 
-		char bytecode[2048];
-		size_t bytecodeSize;
-
-		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/vertex.mslbc");
-			auto size = scene.fileSystem->GetSize(file);
-			auto code = new char[size + 1];
-			scene.fileSystem->Read(file, code, size);
-			scene.fileSystem->CloseFile(file);
-			code[size] = '\0';
-
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
-			delete[] code;
-		}
-
-		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+		Graphics::ShaderData shaderData(object, objectSize);
 
 		try
 		{
@@ -164,35 +149,27 @@ void LoadScene(Scene& scene)
 
 	// Load pixel shader
 	{
-		char metaData[2048];
-		size_t metaDataSize;
+		std::string metaDataSrc;
+		std::string bytecodeSrc;
 
 		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/pixel.mslmd");
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/pixel.msl");
 			auto size = scene.fileSystem->GetSize(file);
 			auto code = new char[size + 1];
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			Graphics::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
+
+		char metaData[2048];
+		size_t metaDataSize;
+		metaDataSize = Graphics::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-
-		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/pixel.mslbc");
-			auto size = scene.fileSystem->GetSize(file);
-			auto code = new char[size + 1];
-			scene.fileSystem->Read(file, code, size);
-			scene.fileSystem->CloseFile(file);
-			code[size] = '\0';
-
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
-			delete[] code;
-		}
+		bytecodeSize = Graphics::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
 		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
@@ -203,6 +180,7 @@ void LoadScene(Scene& scene)
 		catch (Graphics::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
+			getchar();
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -214,35 +192,27 @@ void LoadScene(Scene& scene)
 
 	// Load screen vertex shader
 	{
-		char metaData[2048];
-		size_t metaDataSize;
+		std::string metaDataSrc;
+		std::string bytecodeSrc;
 
 		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-vertex.mslmd");
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-vertex.msl");
 			auto size = scene.fileSystem->GetSize(file);
 			auto code = new char[size + 1];
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			Graphics::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
+
+		char metaData[2048];
+		size_t metaDataSize;
+		metaDataSize = Graphics::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-
-		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-vertex.mslbc");
-			auto size = scene.fileSystem->GetSize(file);
-			auto code = new char[size + 1];
-			scene.fileSystem->Read(file, code, size);
-			scene.fileSystem->CloseFile(file);
-			code[size] = '\0';
-
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
-			delete[] code;
-		}
+		bytecodeSize = Graphics::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
 		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
@@ -260,35 +230,27 @@ void LoadScene(Scene& scene)
 
 	// Load screen diffuse pixel shader
 	{
-		char metaData[2048];
-		size_t metaDataSize;
+		std::string metaDataSrc;
+		std::string bytecodeSrc;
 
 		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-pixel-dif.mslmd");
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-pixel-dif.msl");
 			auto size = scene.fileSystem->GetSize(file);
 			auto code = new char[size + 1];
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			Graphics::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
+
+		char metaData[2048];
+		size_t metaDataSize;
+		metaDataSize = Graphics::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-
-		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-pixel-dif.mslbc");
-			auto size = scene.fileSystem->GetSize(file);
-			auto code = new char[size + 1];
-			scene.fileSystem->Read(file, code, size);
-			scene.fileSystem->CloseFile(file);
-			code[size] = '\0';
-
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
-			delete[] code;
-		}
+		bytecodeSize = Graphics::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
 		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
@@ -311,35 +273,27 @@ void LoadScene(Scene& scene)
 
 	// Load screen UVs pixel shader
 	{
-		char metaData[2048];
-		size_t metaDataSize;
+		std::string metaDataSrc;
+		std::string bytecodeSrc;
 
 		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-pixel-uvs.mslmd");
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-pixel-uvs.msl");
 			auto size = scene.fileSystem->GetSize(file);
 			auto code = new char[size + 1];
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			Graphics::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
+
+		char metaData[2048];
+		size_t metaDataSize;
+		metaDataSize = Graphics::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-
-		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-6/screen-pixel-uvs.mslbc");
-			auto size = scene.fileSystem->GetSize(file);
-			auto code = new char[size + 1];
-			scene.fileSystem->Read(file, code, size);
-			scene.fileSystem->CloseFile(file);
-			code[size] = '\0';
-
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
-			delete[] code;
-		}
+		bytecodeSize = Graphics::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
 		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
@@ -377,14 +331,14 @@ void LoadScene(Scene& scene)
 		Graphics::VertexElement elements[2];
 
 		elements[0].bufferIndex = 0;
-		elements[0].name = "position";
+		elements[0].name = "POSITION";
 		elements[0].offset = offsetof(Vertex, x);
 		elements[0].size = 3;
 		elements[0].stride = sizeof(Vertex);
 		elements[0].type = Graphics::VertexElementType::Float;
 
 		elements[1].bufferIndex = 0;
-		elements[1].name = "uvs";
+		elements[1].name = "UVS";
 		elements[1].offset = offsetof(Vertex, u);
 		elements[1].size = 2;
 		elements[1].stride = sizeof(Vertex);
@@ -422,14 +376,14 @@ void LoadScene(Scene& scene)
 		Graphics::VertexElement elements[2];
 
 		elements[0].bufferIndex = 0;
-		elements[0].name = "position";
+		elements[0].name = "POSITION";
 		elements[0].offset = offsetof(Vertex, x);
 		elements[0].size = 3;
 		elements[0].stride = sizeof(Vertex);
 		elements[0].type = Graphics::VertexElementType::Float;
 
 		elements[1].bufferIndex = 0;
-		elements[1].name = "uvs";
+		elements[1].name = "UVS";
 		elements[1].offset = offsetof(Vertex, u);
 		elements[1].size = 2;
 		elements[1].stride = sizeof(Vertex);
@@ -468,7 +422,7 @@ void LoadScene(Scene& scene)
 
 		scene.texture = scene.device->CreateTexture2D(2, 2, Graphics::TextureFormat::RGBA32Float, data);
 		scene.texture->GenerateMipmaps();
-		scene.textureBP = scene.pixelShader->GetBindingPoint("texture");
+		scene.textureBP = scene.pixelShader->GetBindingPoint("TEXTURE");
 	}
 
 	// Create sampler
@@ -488,7 +442,7 @@ void LoadScene(Scene& scene)
 	// Create constant buffer
 	{
 		scene.transformBuffer = scene.device->CreateConstantBuffer(sizeof(Transform));
-		scene.transformBP = scene.vertexShader->GetBindingPoint("transform");
+		scene.transformBP = scene.vertexShader->GetBindingPoint("TRANSFORM");
 	}
 
 	// Create raster state
@@ -519,13 +473,13 @@ void LoadScene(Scene& scene)
 	// Create diffuse attachment
 	{
 		scene.diffuseAttachment = scene.device->CreateTexture2D(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics::TextureFormat::RGBA8UNorm, nullptr, Graphics::BufferUsage::Default, true);
-		scene.diffuseBP = scene.screenDifPixelShader->GetBindingPoint("diffuse");
+		scene.diffuseBP = scene.screenDifPixelShader->GetBindingPoint("DIFFUSE");
 	}
 
 	// Create UVs attachment
 	{
 		scene.uvsAttachment = scene.device->CreateTexture2D(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics::TextureFormat::RGBA8UNorm, nullptr, Graphics::BufferUsage::Default, true);
-		scene.uvsBP = scene.screenUVsPixelShader->GetBindingPoint("uvs");
+		scene.uvsBP = scene.screenUVsPixelShader->GetBindingPoint("UVS");
 	}
 
 	// Create depth and stencil attachment
@@ -557,7 +511,7 @@ void LoadScene(Scene& scene)
 		auto& mvp = *(glm::mat4*)scene.screenConstantBuffer->Map();
 		mvp = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 0.0f));
 		scene.screenConstantBuffer->Unmap();
-		scene.screenConstantBufferBP = scene.screenVertexShader->GetBindingPoint("transform");
+		scene.screenConstantBufferBP = scene.screenVertexShader->GetBindingPoint("TRANSFORM");
 	}
 }
 

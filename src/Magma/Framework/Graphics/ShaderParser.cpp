@@ -760,7 +760,7 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 			ShaderVariable var;
 
 			var.id = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
-			ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
+			ExpectPunctuationType(ShaderPunctuationType::Colon, info);
 			var.name = ExpectTokenType(ShaderTokenType::Identifier, info)->attribute;
 			var.type = ShaderVariableType::Texture2D;
 

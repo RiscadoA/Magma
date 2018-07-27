@@ -167,7 +167,4 @@ void Magma::Framework::Graphics::ShaderLexer::Run(const std::vector<ShaderLine>&
 				}
 			}
 		}
-
-	for (auto& t : out)
-		printf("%s\n", ShaderTokenToString(t).c_str());
 }

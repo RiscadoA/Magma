@@ -886,6 +886,4 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	ss << "}" << std::endl;
 
 	out = ss.str();
-
-	printf("%s\n\n\n", out.c_str());
 }

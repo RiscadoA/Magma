@@ -88,7 +88,4 @@ void Magma::Framework::Graphics::ShaderPreprocessor::Run(const std::string & in,
 		ss << "The shader must define its type (didn't find \"#type [TYPE]\")";
 		throw ShaderError(ss.str());
 	}
-
-	for (auto& l : out)
-		std::cout << "\"" << l.str << "\" (" << l.lineNumber << ")" << std::endl;
 }

@@ -576,6 +576,14 @@ namespace Magma
 				/// <param name="outBC">MSLBC shader</param>
 				/// <param name="outMD">MSLMD shader meta data</param>
 				static void Run(const std::string& in, std::string& outBC, std::string& outMD);
+			
+				/// <summary>
+				///		Compiles a MSL shader into a MSL shader binary object
+				/// </summary>
+				/// <param name="in">MSL shader source</param>
+				/// <param name="binaryObject">MSL shader binary object pointer</param>
+				/// <returns>MSL shader binary object size</returns>
+				static size_t Run(const std::string& in, char* binaryObject, size_t maxSize);
 			};
 		}
 	}

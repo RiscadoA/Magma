@@ -1,0 +1,21 @@
+#version 1.0
+#type PIXEL
+
+Input in
+{
+	float2 uvs : IN_0;
+};
+
+Output out
+{
+	float4 color : ATTACHMENT_0;
+	float4 uvs : ATTACHMENT_1;
+};
+
+Texture2D texture : TEXTURE;
+
+Shader
+{
+	out.color = Sample2D(texture, in.uvs);
+	out.uvs = float4(in.uvs.x, in.uvs.y, 0.0f, 1.0f);
+};

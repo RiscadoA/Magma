@@ -538,8 +538,6 @@ void GenerateScope(const ShaderSTNode * scope, std::stringstream& out, ShaderCom
 
 void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 {
-	size_t nextVarID = 0;
-
 	static std::regex inNameRegex(R"(in_(\d+))", std::regex_constants::icase);
 	static std::regex positionNameRegex(R"(screen_position)", std::regex_constants::icase);
 	static std::regex outNameRegex(R"(out_(\d+))", std::regex_constants::icase);
@@ -575,42 +573,6 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 		ss << std::endl;
 	}
 
-	// Input vars
-	for (auto& v : data.inputVariables)
-	{
-		if (std::regex_match(v.name, match, inNameRegex))
-		{
-			auto id = std::stoull(match.str(1));
-			v.index = 8 + id;
-			if (id >= 8)
-			{
-				std::stringstream ss;
-				ss << "Failed to run ShaderGenerator:" << std::endl;
-				ss << "Failed to generate input variable \"" << v.id << "\":";
-				ss << "Name \"" << v.name << "\" input index can only contain the numbers between 0 and 7";
-				throw ShaderError(ss.str());
-			}
-		}
-		else
-		{
-			if (nextVarID >= 8)
-			{
-				std::stringstream ss;
-				ss << "Failed to run ShaderGenerator:" << std::endl;
-				ss << "Failed to generate input variable \"" << v.id << "\":";
-				ss << "Too many input variables (8 max)";
-				throw ShaderError(ss.str());
-			}
-			v.index = 16 + nextVarID;
-			++nextVarID;
-		}
-
-		ss << "INPUT VAR" << std::endl;
-		ss << "\tINDEX \"" << v.index << "\"" << std::endl;
-		ss << "\tNAME \"" << v.name << "\"" << std::endl;
-		ss << "\tTYPE \"" << ShaderVariableTypeToString(v.type) << "\"" << std::endl << std::endl;
-	}
-
 	// Output vars
 	for (auto& v : data.outputVariables)
 	{
@@ -630,7 +592,7 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 		else if (std::regex_match(v.name, match, attachmentNameRegex))
 		{
 			auto id = std::stoull(match.str(1));
-			v.index = id;
+			v.index = id + 1;
 			if (id >= 8)
 			{
 				std::stringstream ss;
@@ -659,7 +621,48 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 			throw ShaderError(ss.str());
 		}
 
+		if (v.index > data.rootScope->nextVarID)
+			data.rootScope->nextVarID = v.index + 1;
+
 		ss << "OUTPUT VAR" << std::endl;
+		ss << "\tINDEX \"" << v.index << "\"" << std::endl;
+		ss << "\tNAME \"" << v.name << "\"" << std::endl;
+		ss << "\tTYPE \"" << ShaderVariableTypeToString(v.type) << "\"" << std::endl << std::endl;
+	}
+
+	// Input vars
+	if (data.inputVariables.size() >= 8)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderGenerator:" << std::endl;
+		ss << "Too many input variables (8 max)";
+		throw ShaderError(ss.str());
+	}
+
+	for (auto& v : data.inputVariables)
+	{
+		if (std::regex_match(v.name, match, inNameRegex))
+		{
+			auto id = std::stoull(match.str(1));
+			v.index = 8 + id;
+			if (id >= 8)
+			{
+				std::stringstream ss;
+				ss << "Failed to run ShaderGenerator:" << std::endl;
+				ss << "Failed to generate input variable \"" << v.id << "\":";
+				ss << "Name \"" << v.name << "\" input index can only contain the numbers between 0 and 7";
+				throw ShaderError(ss.str());
+			}
+		}
+		else
+		{
+			v.index = data.rootScope->nextVarID++;
+		}
+
+		if (v.index > data.rootScope->nextVarID)
+			data.rootScope->nextVarID = v.index + 1;
+
+		ss << "INPUT VAR" << std::endl;
 		ss << "\tINDEX \"" << v.index << "\"" << std::endl;
 		ss << "\tNAME \"" << v.name << "\"" << std::endl;
 		ss << "\tTYPE \"" << ShaderVariableTypeToString(v.type) << "\"" << std::endl << std::endl;
@@ -668,10 +671,10 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 	// Textures
 	for (auto& t : data.texture2Ds)
 	{
-		std::stringstream ss;
-		ss << "Failed to run ShaderGenerator:" << std::endl;
-		ss << "2D textures not yet implemented";
-		throw ShaderError(ss.str());
+		t.index = data.rootScope->nextVarID++;
+		ss << "TEXTURE 2D" << std::endl;
+		ss << "\tNAME \"" << t.name << "\"" << std::endl;
+		ss << "\tINDEX \"" << t.index << "\"" << std::endl << std::endl;
 	}
 
 	// Constant buffers
@@ -689,6 +692,7 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 			if (v.bufferName != b.id)
 				continue;
 			ss << "CONSTANT BUFFER VAR" << std::endl;
+			ss << "\tBUFFER INDEX \"" << b.index << "\"" << std::endl;
 			ss << "\tINDEX \"" << v.index << "\"" << std::endl;
 			ss << "\tNAME \"" << v.name << "\"" << std::endl;
 			ss << "\tTYPE \"" << ShaderVariableTypeToString(v.type) << "\"" << std::endl << std::endl;
@@ -700,8 +704,6 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 
 void Magma::Framework::Graphics::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
 {
-	data.rootScope->nextVarID = 32;
-
 	GenerateMD(outMD, data);
 
 	std::stringstream ss;
