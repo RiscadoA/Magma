@@ -6,8 +6,14 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-Magma::Framework::Graphics::Font::Font(Context& context, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth, size_t atlasHeight)
-	: m_context(context), m_height(charHeight)
+struct Vertex
+{
+	float x, y;
+	float u, v;
+};
+
+Magma::Framework::Graphics::Font::Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth, size_t atlasHeight)
+	: m_device(device), m_height(charHeight)
 {
 	FT_Library ft;
 	if (auto err = FT_Init_FreeType(&ft))
@@ -28,11 +34,23 @@ Magma::Framework::Graphics::Font::Font(Context& context, const unsigned char* da
 	}
 
 	FT_Set_Pixel_Sizes(face, charWidth, charHeight);
-
 	m_chars.clear();
 
-	m_atlas = m_context.CreateTexture2D(nullptr, atlasWidth, atlasHeight, TextureFormat::R8UInt);
+	/*{
+		unsigned char data[16] =
+		{
+			255, 255, 255, 255,
+			255, 0, 0, 255,
+			255, 0, 0, 255,
+			255, 255, 255, 255,
+		};
+
+		m_atlas = m_device->CreateTexture2D(4, 4, TextureFormat::R8UNorm, data);
+	}*/
+
+	// Create atlas
 	{
+		m_atlas = m_device->CreateTexture2D(atlasWidth, atlasHeight, TextureFormat::R8UNorm, nullptr, BufferUsage::Dynamic);
 		size_t x = 0;
 		size_t y = 0;
 		size_t maxH = 0;
@@ -50,7 +68,7 @@ Magma::Framework::Graphics::Font::Font(Context& context, const unsigned char* da
 				throw std::runtime_error(ss.str());
 			}
 
-			// Check if fits
+			// Check if characters fits on the current row
 			if (x + face->glyph->bitmap.width > atlasWidth)
 			{
 				x = 0;
@@ -85,17 +103,24 @@ Magma::Framework::Graphics::Font::Font(Context& context, const unsigned char* da
 			m_chars.push_back(chr);
 
 			// Add character to atlas
-			m_context.UpdateTexture2D(m_atlas, face->glyph->bitmap.buffer, face->glyph->bitmap.width, face->glyph->bitmap.rows, x, y, TextureFormat::R8UInt);
+			m_atlas->Update(x, y, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
 			x += face->glyph->bitmap.width + 1;
 
 			// Try to get next character
 			character = FT_Get_Next_Char(face, character, &index);
 
-			// Got to teh end
+			// Quit if end
 			if (index == 0)
 				break;
 		}
+
+		m_atlas->GenerateMipmaps();
 	}
+}
+
+Magma::Framework::Graphics::Font::~Font()
+{
+	m_device->DestroyTexture2D(m_atlas);
 }
 
 void Magma::Framework::Graphics::Font::Set(Magma::Framework::Graphics::Character character)
@@ -120,92 +145,7 @@ Magma::Framework::Graphics::Character Magma::Framework::Graphics::Font::Get(Magm
 	throw std::runtime_error(ss.str());
 }
 
-void * Magma::Framework::Graphics::Font::GetAtlas(size_t index) const
+Magma::Framework::Graphics::Texture2D * Magma::Framework::Graphics::Font::GetAtlas(size_t index) const
 {
 	return m_atlas; /* MULTIPLE ATLAS NOT YET IMPLEMENTED */
-}
-
-void Magma::Framework::Graphics::RenderU32Text(Context& context, void* program, const Font & font, float scale, const String::U32Char * string, size_t length)
-{
-	struct Vertex
-	{
-		float x, y;
-		float u, v;
-	};
-
-	static void* vertexBuffer = nullptr;
-	if (vertexBuffer == nullptr)
-	{
-		Vertex data[] =
-		{
-			{ 0.0f, 0.0f,		0.0f, 0.0f },
-			{ 1.0f, 0.0f,		1.0f, 0.0f },
-			{ 1.0f, 1.0f,		1.0f, 1.0f },
-
-			{ 0.0f, 0.0f,		0.0f, 0.0f },
-			{ 0.0f, 1.0f,		0.0f, 1.0f },
-			{ 1.0f, 1.0f,		1.0f, 1.0f },
-		};
-
-		Graphics::VertexLayoutDesc layout;
-		
-		layout.elements.emplace_back();
-		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float2;
-		layout.elements.back().name = "position";
-		layout.elements.back().offset = offsetof(Vertex, x);
-
-		layout.elements.emplace_back();
-		layout.elements.back().format = Framework::Graphics::VertexElementFormat::Float2;
-		layout.elements.back().name = "uvs";
-		layout.elements.back().offset = offsetof(Vertex, u);
-
-		layout.size = sizeof(Vertex);
-
-		vertexBuffer = context.CreateVertexBuffer(data, sizeof(data), layout, program, Usage::Dynamic);
-	}
-
-	if (length == 0)
-		length = SIZE_MAX;
-
-	float x = 0.0f;
-	float y = 0.0f;
-
-	auto it = string;
-	for (size_t i = 0; i < length; ++i, ++it)
-	{
-		if (*it == '\n')
-		{
-			x = 0.0f;
-			y -= font.GetHeight() * scale;
-			continue;
-		}
-		else if (*it == 0)
-			break;
-
-		auto chr = font.Get(*it);
-			
-		float xpos = x + chr.bearing.x * scale;
-		float ypos = -y - chr.bearing.y * scale;
-
-		float w = chr.size.x * scale;
-		float h = chr.size.y * scale;
-
-		Vertex data[] =
-		{
-			{ xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y, },
-			{ xpos + w,	-ypos,		chr.endUVs.x,	chr.startUVs.y },
-			{ xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y },
-
-			{ xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y },
-			{ xpos,		-ypos - h,	chr.startUVs.x,	chr.endUVs.y },
-			{ xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y },
-		};
-
-		x += (chr.advance.x / 64.0f) * scale;
-		y += (chr.advance.y / 64.0f) * scale;
-
-		context.UpdateVertexBuffer(vertexBuffer, data, sizeof(data), 0);
-		context.BindVertexBuffer(vertexBuffer);
-		context.Draw(6, 0, DrawMode::Triangles);
-	}
 }

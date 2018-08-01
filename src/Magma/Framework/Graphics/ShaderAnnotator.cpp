@@ -446,7 +446,19 @@ void Annotate(ShaderSTNode* node, ShaderCompilerData & data)
 
 ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 {
-	if (node->type == ShaderSTNodeType::Operator && node->operatorType == ShaderOperatorType::Assign)
+	if (node->type == ShaderSTNodeType::Branch)
+	{
+		auto expType = Check(node->child, data);
+		if (expType != ShaderVariableType::Bool)
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderAnnotator:" << std::endl;
+			ss << "Branch (if) expression must evaluate to bool (evaluates to '" << ShaderVariableTypeToString(expType) << "')" << std::endl;
+			ss << "Line: " << node->lineNumber;
+			throw ShaderError(ss.str());
+		}
+	}
+	else if (node->type == ShaderSTNodeType::Operator && node->operatorType == ShaderOperatorType::Assign)
 	{
 		auto type1 = Check(node->child, data);
 		auto type2 = Check(node->child->next, data);
@@ -469,6 +481,21 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			ss << "Line: " << node->lineNumber;
 			throw ShaderError(ss.str());
 		}	
+	}
+	else if (node->type == ShaderSTNodeType::Declaration)
+	{
+		auto type1 = node->reference->type;
+		auto type2 = Check(node->child, data);
+
+		if (type1 != type2)
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderAnnotator:" << std::endl;
+			ss << "Declaration assign operand types do not match:" << std::endl;
+			ss << ShaderVariableTypeToString(type1) << " = " << ShaderVariableTypeToString(type2) << std::endl;
+			ss << "Line: " << node->lineNumber;
+			throw ShaderError(ss.str());
+		}
 	}
 	else if (node->type == ShaderSTNodeType::Constructor)
 	{
@@ -575,7 +602,23 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 			c = c->next;
 		}
 
-		node->resultType = node->child->resultType;
+		switch (node->operatorType)
+		{
+			case ShaderOperatorType::Equal:
+			case ShaderOperatorType::Different:
+			case ShaderOperatorType::Greater:
+			case ShaderOperatorType::Less:
+			case ShaderOperatorType::GEqual:
+			case ShaderOperatorType::LEqual:
+				node->resultType = ShaderVariableType::Bool;
+				break;
+
+			default:
+				node->resultType = node->child->resultType;
+				break;
+		}
+
+		
 		return node->resultType;
 	}
 	else

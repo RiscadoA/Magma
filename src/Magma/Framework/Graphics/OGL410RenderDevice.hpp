@@ -59,6 +59,7 @@ namespace Magma
 				virtual Framebuffer* CreateFramebuffer(size_t attachmentCount, Texture2D** attachments, DepthStencilBuffer* depthStencilAttachment = nullptr) override;
 				virtual void DestroyFramebuffer(Framebuffer* framebuffer) override;
 				virtual void SetFramebuffer(Framebuffer* framebuffer) override;
+				virtual unsigned int GetMaxAnisotropyLimit() override;
 
 				Input::GLWindow* m_window;
 

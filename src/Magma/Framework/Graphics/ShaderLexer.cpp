@@ -69,10 +69,10 @@ const std::vector<std::tuple<std::string, ShaderTokenType, ShaderVariableType, S
 
 	std::make_tuple(R"(\=\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Equal, ShaderPunctuationType::Invalid),
 	std::make_tuple(R"(\!\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Different, ShaderPunctuationType::Invalid),
-	std::make_tuple(R"(\>)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Greater, ShaderPunctuationType::Invalid),
-	std::make_tuple(R"(\<)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Less, ShaderPunctuationType::Invalid),
 	std::make_tuple(R"(\>\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::GEqual, ShaderPunctuationType::Invalid),
 	std::make_tuple(R"(\<\=)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::LEqual, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\>)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Greater, ShaderPunctuationType::Invalid),
+	std::make_tuple(R"(\<)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Less, ShaderPunctuationType::Invalid),
 
 	std::make_tuple(R"(\&\&)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::And, ShaderPunctuationType::Invalid),
 	std::make_tuple(R"(\|\|)", ShaderTokenType::Operator, ShaderVariableType::Invalid, ShaderOperatorType::Or, ShaderPunctuationType::Invalid),

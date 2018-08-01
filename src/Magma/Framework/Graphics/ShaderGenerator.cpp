@@ -28,6 +28,8 @@ std::string ShaderVariableTypeToBC(ShaderVariableType type)
 		case ShaderVariableType::Float33: return "F33";
 		case ShaderVariableType::Float44: return "F44";
 
+		case ShaderVariableType::Bool: return "B";
+
 		default:
 		{
 			std::stringstream ss;
@@ -168,8 +170,8 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 					GenerateExpression(exp->child->next, out, data, id1);
 				}
 
-				out << "VARIN0, db" << exp->scope->nextVarID << "," << std::endl;
-				out << "VARIN1, db" << id0 << "," << std::endl;
+				out << "VARIN0, db" << id0 << "," << std::endl;
+				out << "VARIN1, db" << id1 << "," << std::endl;
 				out << "VAROUT, db" << outVar << "," << std::endl;
 
 				switch (exp->operatorType)
@@ -238,10 +240,19 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 
 		while (c != nullptr)
 		{
-			GenerateExpression(c, out, data, id);
-			out << "VARIN0, db" << id << "," << std::endl;
-			out << "VAROUT, db" << outVar << "," << std::endl;
-			out << "AS" << ShaderVariableTypeToBC(exp->child->variableType) << "CMP, db" << cmpId << "," << std::endl;
+			if (c->lvalue)
+			{
+				out << "VARIN0, db" << c->reference->index << "," << std::endl;
+				out << "VAROUT, db" << outVar << "," << std::endl;
+				out << "AS" << ShaderVariableTypeToBC(exp->child->variableType) << "CMP, db" << cmpId << "," << std::endl;
+			}
+			else
+			{
+				GenerateExpression(c, out, data, id);
+				out << "VARIN0, db" << id << "," << std::endl;
+				out << "VAROUT, db" << outVar << "," << std::endl;
+				out << "AS" << ShaderVariableTypeToBC(exp->child->variableType) << "CMP, db" << cmpId << "," << std::endl;
+			}
 			c = c->next;
 			++cmpId;
 		}
@@ -499,6 +510,65 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 	return -1;
 }
 
+void GenerateScope(const ShaderSTNode * scope, std::stringstream& out, ShaderCompilerData& data);
+
+void GenerateStatement(const ShaderSTNode * statement, std::stringstream& out, ShaderCompilerData& data)
+{
+	if (statement->type == ShaderSTNodeType::Declaration)
+	{
+		out << "DECL" << ShaderVariableTypeToBC(statement->reference->type) << ", db" << statement->scope->nextVarID << "," << std::endl;
+		statement->reference->index = statement->scope->nextVarID;
+		statement->scope->nextVarID++;
+		if (statement->child != nullptr)
+		{
+			if (statement->child->lvalue)
+			{
+				out << "VARIN0, db" << statement->child->reference->index << "," << std::endl;
+				out << "VAROUT, db" << statement->reference->index << "," << std::endl;
+				out << "ASSIGN," << std::endl;
+			}
+			else
+				GenerateExpression(statement->child, out, data, statement->reference->index);
+		}
+	}
+	else if (statement->type == ShaderSTNodeType::Return)
+		out << "RETURN," << std::endl;
+	else if (statement->type == ShaderSTNodeType::Discard)
+		out << "DISCARD," << std::endl;
+	else if (statement->type == ShaderSTNodeType::Operator)
+		GenerateExpression(statement, out, data, -1);
+	else if (statement->type == ShaderSTNodeType::Branch)
+	{	
+		size_t id;
+
+		if (statement->child->lvalue)
+			id = GenerateExpression(statement->child, out, data, -1);
+		else
+		{
+			out << "DECLB, db" << statement->scope->nextVarID << "," << std::endl;
+			id = statement->scope->nextVarID;
+			statement->scope->nextVarID++;
+			GenerateExpression(statement->child, out, data, id);
+		}
+
+		out << "VARIN0, db" << id << "," << std::endl;
+		out << "IF," << std::endl;
+		if (statement->child->next->type == ShaderSTNodeType::Scope)
+			GenerateScope(statement->child->next, out, data);
+		else
+			GenerateStatement(statement->child->next, out, data);
+
+		if (statement->child->next->next != nullptr)
+		{
+			out << "ELSE," << std::endl;
+			if (statement->child->next->next->type == ShaderSTNodeType::Scope)
+				GenerateScope(statement->child->next->next, out, data);
+			else
+				GenerateStatement(statement->child->next->next, out, data);
+		}
+	}
+}
+
 void GenerateScope(const ShaderSTNode * scope, std::stringstream& out, ShaderCompilerData& data)
 {
 	out << "OPSCOPE, # scope" << std::endl;
@@ -511,25 +581,8 @@ void GenerateScope(const ShaderSTNode * scope, std::stringstream& out, ShaderCom
 			c->scope->nextVarID = scope->scope->nextVarID;
 			GenerateScope(c, out, data);
 		}
-		else if (c->type == ShaderSTNodeType::Declaration)
-		{
-			out << "DECL" << ShaderVariableTypeToBC(c->reference->type) << ", db" << c->scope->nextVarID << "," << std::endl;
-			c->reference->index = c->scope->nextVarID;
-			c->scope->nextVarID++;
-			if (c->child != nullptr)
-			{
-				if (c->child->lvalue)
-				{
-					out << "VARIN0, db" << c->child->reference->index << "," << std::endl;
-					out << "VAROUT, db" << c->reference->index << "," << std::endl;
-					out << "ASSIGN," << std::endl;
-				}
-				else
-					GenerateExpression(c->child, out, data, c->reference->index);
-			}
-		}
-		else if (c->type == ShaderSTNodeType::Operator)
-			GenerateExpression(c, out, data, -1);
+		else
+			GenerateStatement(c, out, data);
 		c = c->next;
 	}
 
@@ -710,5 +763,3 @@ void Magma::Framework::Graphics::ShaderGenerator::Run(const ShaderSTNode * in, s
 	GenerateScope(in, ss, data);
 	outBC = ss.str();
 }
-
-

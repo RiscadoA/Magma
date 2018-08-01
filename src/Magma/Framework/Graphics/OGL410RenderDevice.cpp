@@ -36,53 +36,52 @@ class OGL410Texture2D final : public Texture2D
 public:
 	OGL410Texture2D(size_t width, size_t height, TextureFormat _format, const void* data, BufferUsage usage, bool isRenderTarget)
 	{
+		this->hasMipmaps = false;
 		this->width = width;
 		this->height = height;
 
 		switch (_format)
 		{
-			case TextureFormat::R8SNorm: internalFormat = GL_R8_SNORM; type = GL_BYTE; format = GL_RED; break;
-			case TextureFormat::R16SNorm: internalFormat = GL_R16_SNORM; type = GL_SHORT; format = GL_RED; break;
-			case TextureFormat::RG8SNorm: internalFormat = GL_RG8_SNORM; type = GL_BYTE; format = GL_RG; break;
-			case TextureFormat::RG16SNorm: internalFormat = GL_RG16_SNORM; type = GL_SHORT; format = GL_RG; break;
-			case TextureFormat::RGBA8SNorm: internalFormat = GL_RGBA8_SNORM; type = GL_BYTE; format = GL_RGBA; break;
-			case TextureFormat::RGBA16SNorm: internalFormat = GL_RGBA16_SNORM; type = GL_SHORT; format = GL_RGBA; break;
+			case TextureFormat::R8SNorm: internalFormat = GL_R8_SNORM; type = GL_BYTE; format = GL_RED; packAlignment = 1; break;
+			case TextureFormat::R16SNorm: internalFormat = GL_R16_SNORM; type = GL_SHORT; format = GL_RED; packAlignment = 2; break;
+			case TextureFormat::RG8SNorm: internalFormat = GL_RG8_SNORM; type = GL_BYTE; format = GL_RG; packAlignment = 2; break;
+			case TextureFormat::RG16SNorm: internalFormat = GL_RG16_SNORM; type = GL_SHORT; format = GL_RG; packAlignment = 4; break;
+			case TextureFormat::RGBA8SNorm: internalFormat = GL_RGBA8_SNORM; type = GL_BYTE; format = GL_RGBA; packAlignment = 4; break;
+			case TextureFormat::RGBA16SNorm: internalFormat = GL_RGBA16_SNORM; type = GL_SHORT; format = GL_RGBA; packAlignment = 4; break;
 
-			case TextureFormat::R8UNorm: internalFormat = GL_R8; type = GL_UNSIGNED_BYTE; format = GL_RED; break;
-			case TextureFormat::R16UNorm: internalFormat = GL_R16; type = GL_UNSIGNED_SHORT; format = GL_RED; break;
-			case TextureFormat::RG8UNorm: internalFormat = GL_RG8; type = GL_UNSIGNED_BYTE; format = GL_RG; break;
-			case TextureFormat::RG16UNorm: internalFormat = GL_RG16; type = GL_UNSIGNED_SHORT; format = GL_RG; break;
-			case TextureFormat::RGBA8UNorm: internalFormat = GL_RGBA8; type = GL_UNSIGNED_BYTE; format = GL_RGBA; break;
-			case TextureFormat::RGBA16UNorm: internalFormat = GL_RGBA16; type = GL_UNSIGNED_SHORT; format = GL_RGBA; break;
+			case TextureFormat::R8UNorm: internalFormat = GL_R8; type = GL_UNSIGNED_BYTE; format = GL_RED; packAlignment = 1; break;
+			case TextureFormat::R16UNorm: internalFormat = GL_R16; type = GL_UNSIGNED_SHORT; format = GL_RED; packAlignment = 2; break;
+			case TextureFormat::RG8UNorm: internalFormat = GL_RG8; type = GL_UNSIGNED_BYTE; format = GL_RG; packAlignment = 2; break;
+			case TextureFormat::RG16UNorm: internalFormat = GL_RG16; type = GL_UNSIGNED_SHORT; format = GL_RG; packAlignment = 4; break;
+			case TextureFormat::RGBA8UNorm: internalFormat = GL_RGBA8; type = GL_UNSIGNED_BYTE; format = GL_RGBA; packAlignment = 4; break;
+			case TextureFormat::RGBA16UNorm: internalFormat = GL_RGBA16; type = GL_UNSIGNED_SHORT; format = GL_RGBA; packAlignment = 4; break;
 
-			case TextureFormat::R8Int: internalFormat = GL_R8I; type = GL_BYTE; format = GL_RED; break;
-			case TextureFormat::R16Int: internalFormat = GL_R16I; type = GL_SHORT; format = GL_RED; break;
-			case TextureFormat::RG8Int: internalFormat = GL_RG8I; type = GL_BYTE; format = GL_RG; break;
-			case TextureFormat::RG16Int: internalFormat = GL_RG16I; type = GL_SHORT; format = GL_RG; break;
-			case TextureFormat::RGB8Int: internalFormat = GL_RGB8I; type = GL_BYTE; format = GL_RGB; break;
-			case TextureFormat::RGB16Int: internalFormat = GL_RGB16I; type = GL_SHORT; format = GL_RGB; break;
-			case TextureFormat::RGBA8Int: internalFormat = GL_RGBA8I; type = GL_BYTE; format = GL_RGBA; break;
-			case TextureFormat::RGBA16Int: internalFormat = GL_RGBA16I; type = GL_SHORT; format = GL_RGBA; break;
+			case TextureFormat::R8Int: internalFormat = GL_R8I; type = GL_BYTE; format = GL_RED_INTEGER; packAlignment = 1; break;
+			case TextureFormat::R16Int: internalFormat = GL_R16I; type = GL_SHORT; format = GL_RED_INTEGER; packAlignment = 2; break;
+			case TextureFormat::RG8Int: internalFormat = GL_RG8I; type = GL_BYTE; format = GL_RG_INTEGER; packAlignment = 2; break;
+			case TextureFormat::RG16Int: internalFormat = GL_RG16I; type = GL_SHORT; format = GL_RG_INTEGER; packAlignment = 4; break;
+			case TextureFormat::RGBA8Int: internalFormat = GL_RGBA8I; type = GL_BYTE; format = GL_RGBA_INTEGER; packAlignment = 4; break;
+			case TextureFormat::RGBA16Int: internalFormat = GL_RGBA16I; type = GL_SHORT; format = GL_RGBA_INTEGER; packAlignment = 4; break;
 
-			case TextureFormat::R8UInt: internalFormat = GL_R8UI; type = GL_UNSIGNED_BYTE; format = GL_RED; break;
-			case TextureFormat::R16UInt: internalFormat = GL_R16UI; type = GL_UNSIGNED_SHORT; format = GL_RED; break;
-			case TextureFormat::RG8UInt: internalFormat = GL_RG8UI; type = GL_UNSIGNED_BYTE; format = GL_RG; break;
-			case TextureFormat::RG16UInt: internalFormat = GL_RG16UI; type = GL_UNSIGNED_SHORT; format = GL_RG; break;
-			case TextureFormat::RGBA8UInt: internalFormat = GL_RGBA8UI; type = GL_UNSIGNED_BYTE; format = GL_RGBA; break;
-			case TextureFormat::RGBA16UInt: internalFormat = GL_RGBA16UI; type = GL_UNSIGNED_SHORT; format = GL_RGBA; break;
+			case TextureFormat::R8UInt: internalFormat = GL_R8UI; type = GL_UNSIGNED_BYTE; format = GL_RED_INTEGER; packAlignment = 1; break;
+			case TextureFormat::R16UInt: internalFormat = GL_R16UI; type = GL_UNSIGNED_SHORT; format = GL_RED_INTEGER; packAlignment = 2; break;
+			case TextureFormat::RG8UInt: internalFormat = GL_RG8UI; type = GL_UNSIGNED_BYTE; format = GL_RG_INTEGER; packAlignment = 2; break;
+			case TextureFormat::RG16UInt: internalFormat = GL_RG16UI; type = GL_UNSIGNED_SHORT; format = GL_RG_INTEGER; packAlignment = 4; break;
+			case TextureFormat::RGBA8UInt: internalFormat = GL_RGBA8UI; type = GL_UNSIGNED_BYTE; format = GL_RGBA_INTEGER; packAlignment = 4; break;
+			case TextureFormat::RGBA16UInt: internalFormat = GL_RGBA16UI; type = GL_UNSIGNED_SHORT; format = GL_RGBA_INTEGER; packAlignment = 4; break;
 
-			case TextureFormat::R32Float: internalFormat = GL_R32F; type = GL_FLOAT; format = GL_RED; break;
-			case TextureFormat::RG32Float: internalFormat = GL_RG32F; type = GL_FLOAT; format = GL_RG; break;
-			case TextureFormat::RGB32Float: internalFormat = GL_RGB32F; type = GL_FLOAT; format = GL_RGB; break;
-			case TextureFormat::RGBA32Float: internalFormat = GL_RGBA32F; type = GL_FLOAT; format = GL_RGBA; break;
+			case TextureFormat::R32Float: internalFormat = GL_R32F; type = GL_FLOAT; format = GL_RED; packAlignment = 4; break;
+			case TextureFormat::RG32Float: internalFormat = GL_RG32F; type = GL_FLOAT; format = GL_RG; packAlignment = 4; break;
+			case TextureFormat::RGB32Float: internalFormat = GL_RGB32F; type = GL_FLOAT; format = GL_RGB; packAlignment = 4; break;
+			case TextureFormat::RGBA32Float: internalFormat = GL_RGBA32F; type = GL_FLOAT; format = GL_RGBA; packAlignment = 4; break;
 
 			case TextureFormat::Invalid: throw RenderDeviceError("Failed to create OGL410Texture2D:\nInvalid texture format"); break;
 			default: throw RenderDeviceError("Failed to create OGL410Texture2D:\nUnsupported texture format"); break;
 		}
 
+		glActiveTexture(GL_TEXTURE0);
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
 
 		if (isRenderTarget)
 		{
@@ -98,6 +97,13 @@ public:
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
 		}
 
+		glPixelStorei(GL_PACK_ALIGNMENT, packAlignment);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, packAlignment);
+		if (data == nullptr)
+			glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
+		else
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
+
 		GL_CHECK_ERROR("Failed to create OGL410Texture2D");
 	}
 
@@ -108,9 +114,22 @@ public:
 
 	virtual void Update(size_t dstX, size_t dstY, size_t width, size_t height, void* data) final
 	{
+		if (dstX + width > this->width ||
+			dstY + height > this->height)
+		{
+			std::stringstream ss;
+			ss << "Failed to update OGL410Texture2D:" << std::endl;
+			ss << "Update coordinates (" << dstX << " ; " << dstY << ")" << " to (" << (dstX + width) << " ; " << (dstY + height) << ") are out of bounds";
+			throw RenderDeviceError(ss.str());
+		}
+
 		glBindTexture(GL_TEXTURE_2D, texture);
+		glPixelStorei(GL_PACK_ALIGNMENT, packAlignment);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, packAlignment);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, dstX, dstY, width, height, format, type, data);
 		GL_CHECK_ERROR("Failed to update OGL410Texture2D");
+
+		this->hasMipmaps = false;
 	}
 
 	virtual void GenerateMipmaps()
@@ -118,7 +137,11 @@ public:
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		GL_CHECK_ERROR("Failed to generate OGL410Texture2D mipmaps");
+
+		this->hasMipmaps = true;
 	}
+
+	size_t packAlignment = 4;
 
 	GLenum internalFormat;
 	GLenum format;
@@ -126,6 +149,8 @@ public:
 	GLuint texture;
 	GLuint width;
 	GLuint height;
+
+	bool hasMipmaps;
 };
 
 class OGL410Sampler2D : public Sampler2D
@@ -1614,5 +1639,17 @@ void Magma::Framework::Graphics::OGL410RenderDevice::SetFramebuffer(Framebuffer 
 	GL_CHECK_ERROR("Failed to set framebuffer on OGL410RenderDevice");
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+#endif
+}
+
+unsigned int Magma::Framework::Graphics::OGL410RenderDevice::GetMaxAnisotropyLimit()
+{
+#if defined(MAGMA_FRAMEWORK_USE_OPENGL)
+	float max;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max);
+	return static_cast<unsigned int>(max);
+#else
+	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
+	return 0;
 #endif
 }

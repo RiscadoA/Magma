@@ -26,6 +26,8 @@ std::map<std::string, BytecodeOpCode> instructionSet =
 	std::make_pair("declf33", BytecodeOpCode::DeclF33),
 	std::make_pair("declf44", BytecodeOpCode::DeclF44),
 
+	std::make_pair("declb", BytecodeOpCode::DeclB),
+
 	std::make_pair("varin0", BytecodeOpCode::VarIn0),
 	std::make_pair("varin1", BytecodeOpCode::VarIn1),
 	std::make_pair("varout", BytecodeOpCode::VarOut),

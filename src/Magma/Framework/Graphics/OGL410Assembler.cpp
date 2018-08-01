@@ -291,6 +291,10 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 				ss << "\tmat4 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
+			case BytecodeOpCode::DeclB:
+				ss << "\tbool local_" << (unsigned long)it[1] << ";" << std::endl;
+				i += 1;
+				break;
 			}
 
 			// Registers
@@ -679,14 +683,12 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 			case BytecodeOpCode::While:
 				ss << "\twhile (";
 				PutIndex(varIn0);
-				i += 1;
-				ss << " != 0)" << std::endl;
+				ss << ")" << std::endl;
 				break;
 			case BytecodeOpCode::If:
 				ss << "\tif (";
 				PutIndex(varIn0);
-				i += 1;
-				ss << " != 0)" << std::endl;
+				ss << ")" << std::endl;
 				break;
 			case BytecodeOpCode::Else:
 				ss << "\telse" << std::endl;
@@ -886,4 +888,6 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	ss << "}" << std::endl;
 
 	out = ss.str();
+
+	printf("%s\n\n\n", out.c_str());
 }

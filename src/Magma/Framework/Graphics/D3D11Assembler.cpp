@@ -308,6 +308,10 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 				ss << "\tfloat4x4 local_" << (unsigned long)it[1] << ";" << std::endl;
 				i += 1;
 				break;
+			case BytecodeOpCode::DeclB:
+				ss << "\tbool local_" << (unsigned long)it[1] << ";" << std::endl;
+				i += 1;
+				break;
 			}
 
 			// Registers
@@ -691,19 +695,17 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 				ss << "\tdiscard;" << std::endl;
 				break;
 			case BytecodeOpCode::Return:
-				ss << "\treturn out;" << std::endl;
+				ss << "\treturn output;" << std::endl;
 				break;
 			case BytecodeOpCode::While:
 				ss << "\twhile (";
 				PutIndex(varIn0);
-				i += 1;
-				ss << " != 0)" << std::endl;
+				ss << ")" << std::endl;
 				break;
 			case BytecodeOpCode::If:
 				ss << "\tif (";
 				PutIndex(varIn0);
-				i += 1;
-				ss << " != 0)" << std::endl;
+				ss << ")" << std::endl;
 				break;
 			case BytecodeOpCode::Else:
 				ss << "\telse" << std::endl;

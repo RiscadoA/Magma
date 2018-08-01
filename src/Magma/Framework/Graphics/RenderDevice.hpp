@@ -138,16 +138,6 @@ namespace Magma
 				/// <summary>
 				///		Signed chars
 				/// </summary>
-				RGB8Int,
-
-				/// <summary>
-				///		Signed shorts
-				/// </summary>
-				RGB16Int,
-
-				/// <summary>
-				///		Signed chars
-				/// </summary>
 				RGBA8Int,
 
 				/// <summary>
@@ -1530,6 +1520,12 @@ namespace Magma
 				/// </summary>
 				/// <param name="framebuffer">Framebuffer to render to (set to nullptr to set the default framebuffer</param>
 				virtual void SetFramebuffer(Framebuffer* framebuffer) = 0;
+
+				/// <summary>
+				///		Gets the maximum anisotropy filter limit
+				/// </summary>
+				/// <returns>Maximum anisotropy filter limit</returns>
+				virtual unsigned int GetMaxAnisotropyLimit() = 0;
 			};
 		}
 	}

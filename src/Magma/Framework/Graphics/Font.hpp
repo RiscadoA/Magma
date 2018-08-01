@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Old/Context.hpp"
+#include "RenderDevice.hpp"
 #include "../String/UTF32.hpp"
 
 #include <glm/vec2.hpp>
@@ -25,7 +25,7 @@ namespace Magma
 				/// <summary>
 				///		Character texture handle.
 				/// </summary>
-				void* texture;
+				Texture2D* texture;
 
 				/// <summary>
 				///		Character top left texture coordinates
@@ -56,20 +56,21 @@ namespace Magma
 			/// <summary>
 			///		Holds and loads a list of characters from a true-type font.
 			/// </summary>
-			class Font
+			class Font final
 			{
 			public:
 				/// <summary>
 				///		Loads a font from memory
 				/// </summary>
-				/// <param name="context">Graphics context</param>
+				/// <param name="device">Graphics render device</param>
 				/// <param name="data">Data pointer</param>
 				/// <param name="size">Data size</param>
 				/// <param name="charWidth">Character width (set automatically if 0)</param>
 				/// <param name="charHeight">Character height</param>
 				/// <param name="atlasWidth">The atlas texture width</param>
 				/// <param name="atlasHeight">The atlas texture height</param>
-				Font(Context& context, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth = 1024, size_t atlasHeight = 1024);
+				Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth = 1024, size_t atlasHeight = 1024);
+				~Font();
 
 				/// <summary>
 				///		Sets a character in a font
@@ -89,31 +90,19 @@ namespace Magma
 				/// </summary>
 				/// <param name="index">Atlas index</param>
 				/// <returns>Atlas texture handle</returns>
-				void* GetAtlas(size_t index) const;
+				Texture2D* GetAtlas(size_t index) const;
 
+				/// <summary>
+				///		Gets the height of a character in pixels
+				/// </summary>
 				inline size_t GetHeight() const { return m_height; }
 
 			private:
-				Context& m_context;
+				RenderDevice* m_device;
 				std::vector<Character> m_chars;
-				void* m_atlas;
+				Texture2D* m_atlas;
 				size_t m_height;
 			};
-
-			/// <summary>
-			///		Renders UTF-32 text.
-			///		Shader takes as input:
-			///		- Texture2D fontTexture (font atlas);
-			///		- vec3 position (vertex position);
-			///		- vec2 uvs (atlas UV coordinates);
-			/// </summary>
-			/// <param name="context">Context to render to</param>
-			/// <param name="program">Shader program</param>
-			/// <param name="font">Font to render text with</param>
-			/// <param name="scale">Scaling to apply to the text</param>
-			/// <param name="string">UTF-32 string to render</param>
-			/// <param name="length">UTF-32 string length to render (if 0 renders until the null terminator character)</param>
-			void RenderU32Text(Context& context, void* program, const Font& font, float scale, const String::U32Char* string, size_t length = 0);
 		}
 	}
 }

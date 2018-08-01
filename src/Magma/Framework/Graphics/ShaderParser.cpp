@@ -646,12 +646,81 @@ ShaderSTNode* ParseDeclaration(ParserInfo& info)
 	return node;
 }
 
+ShaderSTNode* ParseBranch(ParserInfo& info)
+{
+	if (!AcceptTokenType(ShaderTokenType::If, info))
+		return nullptr;
+
+	auto node = CreateNode(ShaderSTNodeType::Branch, "", info);
+
+	ExpectPunctuationType(ShaderPunctuationType::OpenParenthesis, info);
+	AddToNode(node, ParseExpression(info));
+	ExpectPunctuationType(ShaderPunctuationType::CloseParenthesis, info);
+
+
+	auto body = ParseScope(info);
+	if (body == nullptr)
+		body = ParseStatement(info);
+	if (body == nullptr)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderParser:" << std::endl;
+		ss << "Failed to parse branch:" << std::endl;
+		ss << "Failed to parse 'if' body" << std::endl;
+		ss << "Line: " << info.lineNumber;
+		throw ShaderError(ss.str());
+	}
+
+	AddToNode(node, body);
+
+	if (AcceptTokenType(ShaderTokenType::Else, info))
+	{
+		auto elseBody = ParseScope(info);
+		if (elseBody == nullptr)
+			elseBody = ParseStatement(info);
+		if (elseBody == nullptr)
+		{
+			std::stringstream ss;
+			ss << "Failed to run ShaderParser:" << std::endl;
+			ss << "Failed to parse branch:" << std::endl;
+			ss << "Failed to parse 'else' body" << std::endl;
+			ss << "Line: " << info.lineNumber;
+			throw ShaderError(ss.str());
+		}
+
+		AddToNode(node, elseBody);
+	}
+
+	return node;
+}
+
 ShaderSTNode* ParseStatement(ParserInfo& info)
 {
 	ShaderSTNode* node = nullptr;
 
 	// <declaration> ;
 	node = ParseDeclaration(info);
+	if (node != nullptr)
+		return node;
+
+	// <discard>
+	if (AcceptTokenType(ShaderTokenType::Discard, info))
+	{
+		node = CreateNode(ShaderSTNodeType::Discard, "", info);
+		ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
+		return node;
+	}
+
+	// <return>
+	if (AcceptTokenType(ShaderTokenType::Return, info))
+	{
+		node = CreateNode(ShaderSTNodeType::Return, "", info);
+		ExpectPunctuationType(ShaderPunctuationType::Semicolon, info);
+		return node;
+	}
+
+	// <branch>
+	node = ParseBranch(info);
 	if (node != nullptr)
 		return node;
 
@@ -663,14 +732,15 @@ ShaderSTNode* ParseStatement(ParserInfo& info)
 		return node;
 	}
 
-	return node;
+	return nullptr;
 }
 
 ShaderSTNode* ParseScope(ParserInfo& info)
 {
-	auto node = CreateNode(ShaderSTNodeType::Scope, "", info);
+	if (!AcceptPunctuationType(ShaderPunctuationType::OpenBraces, info))
+		return nullptr;
 
-	ExpectPunctuationType(ShaderPunctuationType::OpenBraces, info);
+	auto node = CreateNode(ShaderSTNodeType::Scope, "", info);
 
 	while (!PeekPunctuationType(ShaderPunctuationType::CloseBraces, info))
 	{

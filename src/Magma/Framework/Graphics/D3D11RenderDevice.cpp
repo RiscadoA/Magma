@@ -49,7 +49,7 @@ public:
 		{
 			case BufferUsage::Default: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
 			case BufferUsage::Static: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
-			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+			case BufferUsage::Dynamic: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
 			case BufferUsage::Invalid: throw RenderDeviceError("Failed to create D3D11Texture2D:\nInvalid buffer usage mode"); break;
 			default: throw RenderDeviceError("Failed to create D3D11Texture2D:\nUnknown buffer usage mode"); break;
 		}
@@ -164,6 +164,15 @@ public:
 
 	virtual void Update(size_t dstX, size_t dstY, size_t width, size_t height, void* data) final
 	{
+		if (dstX + width > this->width ||
+			dstY + height > this->height)
+		{
+			std::stringstream ss;
+			ss << "Failed to update D3D11Texture2D:" << std::endl;
+			ss << "Update coordinates (" << dstX << " ; " << dstY << ")" << " to (" << (dstX + width) << " ; " << (dstY + height) << ") are out of bounds";
+			throw RenderDeviceError(ss.str());
+		}
+
 		D3D11_BOX dstBox;
 		dstBox.back = 1;
 		dstBox.front = 0;
@@ -2108,6 +2117,15 @@ void Magma::Framework::Graphics::D3D11RenderDevice::SetFramebuffer(Framebuffer *
 		((ID3D11DeviceContext*)m_deviceContext)->OMSetRenderTargets(fb->colorAttachmentCount, fb->colorAttachments, fb->depthStencilAttachment);
 		((ID3D11DeviceContext*)m_deviceContext)->RSSetViewports(1, &fb->viewport);
 	}
+#else
+	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
+#endif
+}
+
+unsigned int Magma::Framework::Graphics::D3D11RenderDevice::GetMaxAnisotropyLimit()
+{
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+	return D3D11_REQ_MAXANISOTROPY;
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif

@@ -1,0 +1,25 @@
+#version 1.0
+#type VERTEX
+
+Input in
+{
+	float2 position : POSITION;
+	float2 uvs : UVS;
+};
+
+Output out
+{
+	float4 position : SCREEN_POSITION;
+	float2 uvs : OUT_0;
+};
+
+ConstantBuffer transform : TRANSFORM
+{
+	float44 mvp;
+};
+
+Shader
+{
+	out.position = mulvec(transform.mvp, float4(in.position.x, in.position.y, 0.0f, 1.0f));
+	out.uvs = in.uvs;
+};

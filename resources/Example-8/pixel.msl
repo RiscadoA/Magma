@@ -1,0 +1,25 @@
+#version 1.0
+#type PIXEL
+
+Input in
+{
+	float2 uvs : IN_0;
+};
+
+Output out
+{
+	float4 color : ATTACHMENT_0;
+};
+
+Texture2D texture : TEXTURE;
+
+Shader
+{
+	float sampled = Sample2D(texture, in.uvs).r;
+
+	bool shouldDiscard = sampled <= 0.1f;
+	if (shouldDiscard)
+		discard;
+	else
+		out.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+};

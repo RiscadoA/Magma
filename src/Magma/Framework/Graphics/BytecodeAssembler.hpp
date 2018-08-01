@@ -111,6 +111,8 @@ namespace Magma
 				Floor	= 0x4E,	// Sets { VarOut } to the floored value of { VarIn0 }
 				Ceil	= 0x4F,	// Sets { VarOut } to the ceiled value of { VarIn0 }
 				Fract	= 0x50,	// Sets { VarOut } to the fractional part of { VarIn0 }
+
+				DeclB	= 0x51, // Declares a local boolean { variable index stored on param 1x1 }
 			};
 
 			/// <summary>
