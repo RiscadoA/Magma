@@ -212,12 +212,12 @@ void LoadScene(Scene& scene)
 
 	// Create font
 	{
-		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Fonts/Consolas.ttf");
+		auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Fonts/Arial.ttf");
 		auto size = scene.fileSystem->GetSize(file);
 		auto data = new unsigned char[size];
 		scene.fileSystem->Read(file, data, size);
 		scene.fileSystem->CloseFile(file);
-		scene.font = new Graphics::Font(scene.device, data, size, 0, 48);
+		scene.font = new Graphics::Font(scene.device, data, size, 0, 48, 1024, 1024);
 		delete[] data;
 	}
 
@@ -291,7 +291,8 @@ void Main(int argc, char** argv) try
 			transform->mvp = glm::translate(transform->mvp, glm::vec3(0.0f, scene.window->GetHeight() / 2, 0.0f));
 			scene.transformBuffer->Unmap();
 			scene.transformBP->BindConstantBuffer(scene.transformBuffer);
-			scene.textRenderer->RenderU32(U"Sámple tèxté ãõ\nMultiple lines\rReturn", scene.textureBP, 1.0f);
+
+			scene.textRenderer->RenderU32(U"Sãmplè téxt", scene.textureBP, 1.0f);
 		}
 
 		// Swap screen back and front buffers
@@ -309,6 +310,12 @@ catch (Graphics::ShaderError& e)
 catch (Graphics::RenderDeviceError& e)
 {
 	std::cout << "Render device error caught:" << std::endl;
+	std::cout << e.what() << std::endl;
+	getchar();
+}
+catch (Graphics::TextError& e)
+{
+	std::cout << "Text error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }

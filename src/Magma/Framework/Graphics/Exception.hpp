@@ -25,6 +25,15 @@ namespace Magma
 			public:
 				using std::runtime_error::runtime_error;
 			};
+
+			/// <summary>
+			///		Thrown when there is a text related error
+			/// </summary>
+			class TextError : public std::runtime_error
+			{
+			public:
+				using std::runtime_error::runtime_error;
+			};
 		}
 	}
 }

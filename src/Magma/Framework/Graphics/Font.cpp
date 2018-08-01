@@ -12,16 +12,24 @@ struct Vertex
 	float u, v;
 };
 
-Magma::Framework::Graphics::Font::Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth, size_t atlasHeight)
+Magma::Framework::Graphics::Font::Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth, size_t atlasHeight, size_t maxAtlasCount)
 	: m_device(device), m_height(charHeight)
 {
+	if (maxAtlasCount < 1)
+	{
+		std::stringstream ss;
+		ss << "Failed to create font:" << std::endl;
+		ss << "The maximum atlas count must be at least 1";
+		throw TextError(ss.str());
+	}
+
 	FT_Library ft;
 	if (auto err = FT_Init_FreeType(&ft))
 	{
 		std::stringstream ss;
 		ss << "Failed to create font:" << std::endl;
 		ss << "FT_Init_FreeType returned error " << err;
-		throw std::runtime_error(ss.str());
+		throw TextError(ss.str());
 	}
 
 	FT_Face face;
@@ -30,27 +38,15 @@ Magma::Framework::Graphics::Font::Font(RenderDevice* device, const unsigned char
 		std::stringstream ss;
 		ss << "Failed to create font:" << std::endl;
 		ss << "FT_New_Memory_Face returned error " << err;
-		throw std::runtime_error(ss.str());
+		throw TextError(ss.str());
 	}
 
 	FT_Set_Pixel_Sizes(face, charWidth, charHeight);
 	m_chars.clear();
 
-	/*{
-		unsigned char data[16] =
-		{
-			255, 255, 255, 255,
-			255, 0, 0, 255,
-			255, 0, 0, 255,
-			255, 255, 255, 255,
-		};
-
-		m_atlas = m_device->CreateTexture2D(4, 4, TextureFormat::R8UNorm, data);
-	}*/
-
 	// Create atlas
 	{
-		m_atlas = m_device->CreateTexture2D(atlasWidth, atlasHeight, TextureFormat::R8UNorm, nullptr, BufferUsage::Dynamic);
+		m_atlas.push_back(m_device->CreateTexture2D(atlasWidth, atlasHeight, TextureFormat::R8UNorm, nullptr, BufferUsage::Dynamic));
 		size_t x = 0;
 		size_t y = 0;
 		size_t maxH = 0;
@@ -65,22 +61,34 @@ Magma::Framework::Graphics::Font::Font(RenderDevice* device, const unsigned char
 				std::stringstream ss;
 				ss << "Failed to create font:" << std::endl;
 				ss << "FT_Load_Char returned error " << err << " on character " << character;
-				throw std::runtime_error(ss.str());
+				throw TextError(ss.str());
 			}
 
-			// Check if characters fits on the current row
+			// Check if the character fits on the current row
 			if (x + face->glyph->bitmap.width > atlasWidth)
 			{
 				x = 0;
 				y += maxH;
 				maxH = 0;
+			}
 
-				if (y + face->glyph->bitmap.rows > atlasHeight)
+			// Check if the character fits on the current atlas
+			if (y + face->glyph->bitmap.rows > atlasHeight)
+			{
+				if (m_atlas.size() + 1 > maxAtlasCount)
 				{
 					std::stringstream ss;
 					ss << "Failed to create font:" << std::endl;
-					ss << "Character '" << character << "' doesn't fit on the atlas";
-					throw std::runtime_error(ss.str());
+					ss << "Character U+" << std::hex << character << " doesn't fit on the atlas:" << std::endl;
+					ss << "Maximum atlas count of " << std::dec << maxAtlasCount << " already achieved, try raising the maximum atlas count or increasing each atlas size" << std::endl;
+					throw TextError(ss.str());
+				}
+				else
+				{
+					m_atlas.push_back(m_device->CreateTexture2D(atlasWidth, atlasHeight, TextureFormat::R8UNorm, nullptr, BufferUsage::Dynamic));
+					x = 0;
+					y = 0;
+					maxH = 0;
 				}
 			}
 
@@ -99,11 +107,11 @@ Magma::Framework::Graphics::Font::Font(RenderDevice* device, const unsigned char
 			chr.bearing.y = face->glyph->bitmap_top;
 			chr.startUVs = glm::vec2(x, y) / glm::vec2(atlasWidth, atlasHeight);
 			chr.endUVs = glm::vec2(x + chr.size.x, y + chr.size.y) / glm::vec2(atlasWidth, atlasHeight);
-			chr.texture = m_atlas;
+			chr.texture = m_atlas.back();
 			m_chars.push_back(chr);
 
 			// Add character to atlas
-			m_atlas->Update(x, y, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
+			m_atlas.back()->Update(x, y, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
 			x += face->glyph->bitmap.width + 1;
 
 			// Try to get next character
@@ -114,13 +122,16 @@ Magma::Framework::Graphics::Font::Font(RenderDevice* device, const unsigned char
 				break;
 		}
 
-		m_atlas->GenerateMipmaps();
+		for (auto& t : m_atlas)
+			t->GenerateMipmaps();
 	}
 }
 
 Magma::Framework::Graphics::Font::~Font()
 {
-	m_device->DestroyTexture2D(m_atlas);
+	for (auto& t : m_atlas)
+		m_device->DestroyTexture2D(t);
+	m_atlas.clear();
 }
 
 void Magma::Framework::Graphics::Font::Set(Magma::Framework::Graphics::Character character)
@@ -142,10 +153,10 @@ Magma::Framework::Graphics::Character Magma::Framework::Graphics::Font::Get(Magm
 	std::stringstream ss;
 	ss << "Failed to get font character:" << std::endl;
 	ss << "Font has no character U+" << std::hex << (unsigned int)codePoint;
-	throw std::runtime_error(ss.str());
+	throw TextError(ss.str());
 }
 
 Magma::Framework::Graphics::Texture2D * Magma::Framework::Graphics::Font::GetAtlas(size_t index) const
 {
-	return m_atlas; /* MULTIPLE ATLAS NOT YET IMPLEMENTED */
+	return m_atlas.at(index);
 }

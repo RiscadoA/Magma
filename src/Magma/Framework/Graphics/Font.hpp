@@ -69,7 +69,8 @@ namespace Magma
 				/// <param name="charHeight">Character height</param>
 				/// <param name="atlasWidth">The atlas texture width</param>
 				/// <param name="atlasHeight">The atlas texture height</param>
-				Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth = 1024, size_t atlasHeight = 1024);
+				/// <param name="maxAtlasCount">The maximum atlas texture count</param>
+				Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth = 1024, size_t atlasHeight = 1024, size_t maxAtlasCount = 2);
 				~Font();
 
 				/// <summary>
@@ -93,6 +94,12 @@ namespace Magma
 				Texture2D* GetAtlas(size_t index) const;
 
 				/// <summary>
+				///		Gets the number of atlas used by this font
+				/// </summary>
+				/// <returns>Atlas count</returns>
+				inline size_t GetAtlasCount() const { return m_atlas.size(); }
+
+				/// <summary>
 				///		Gets the height of a character in pixels
 				/// </summary>
 				inline size_t GetHeight() const { return m_height; }
@@ -100,7 +107,7 @@ namespace Magma
 			private:
 				RenderDevice* m_device;
 				std::vector<Character> m_chars;
-				Texture2D* m_atlas;
+				std::vector<Texture2D*> m_atlas;
 				size_t m_height;
 			};
 		}
