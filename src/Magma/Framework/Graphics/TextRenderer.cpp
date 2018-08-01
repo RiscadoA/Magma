@@ -49,38 +49,44 @@ void Magma::Framework::Graphics::TextRenderer::RenderU32(const String::U32Char *
 	auto it = str;
 	while (*it != U'\0')
 	{
-		if (*it == U'\n')
+		if (*it == 0)
+			break;
+		else if (*it == U'\n')
 		{
 			x = 0.0f;
 			y -= m_font->GetHeight() * scale;
-			continue;
 		}
-		else if (*it == 0)
-			break;
+		else if (*it == U'\r')
+		{
+			x = 0.0f;
+		}
+		else 
+		{
+			auto chr = m_font->Get(*it);
 
-		auto chr = m_font->Get(*it);
+			float xpos = x + chr.bearing.x * scale;
+			float ypos = -y - chr.bearing.y * scale;
+
+			float w = chr.size.x * scale;
+			float h = chr.size.y * scale;
+
+			auto data = (Vertex*)m_vertexBuffer->Map();
+			data[0] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y, };
+			data[1] = { xpos + w,	-ypos,		chr.endUVs.x,	chr.startUVs.y };
+			data[2] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };
+			data[3] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y };
+			data[4] = { xpos,		-ypos - h,	chr.startUVs.x,	chr.endUVs.y };
+			data[5] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };
+			m_vertexBuffer->Unmap();
+
+			x += (chr.advance.x / 64.0f) * scale;
+			y += (chr.advance.y / 64.0f) * scale;
+
+			textureBP->BindTexture2D(chr.texture);
+			m_device->SetVertexArray(m_vertexArray);
+			m_device->DrawTriangles(0, 6);
+		}
+
 		++it;
-
-		float xpos = x + chr.bearing.x * scale;
-		float ypos = -y - chr.bearing.y * scale;
-
-		float w = chr.size.x * scale;
-		float h = chr.size.y * scale;
-
-		auto data = (Vertex*)m_vertexBuffer->Map();
-		data[0] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y, };
-		data[1] = { xpos + w,	-ypos,		chr.endUVs.x,	chr.startUVs.y };
-		data[2] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };
-		data[3] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y };
-		data[4] = { xpos,		-ypos - h,	chr.startUVs.x,	chr.endUVs.y };
-		data[5] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };
-		m_vertexBuffer->Unmap();
-
-		x += (chr.advance.x / 64.0f) * scale;
-		y += (chr.advance.y / 64.0f) * scale;
-
-		textureBP->BindTexture2D(chr.texture);
-		m_device->SetVertexArray(m_vertexArray);
-		m_device->DrawTriangles(0, 6);
 	}
 }

@@ -40,11 +40,6 @@ struct Scene
 	Graphics::PixelShader* pixelShader;
 	Graphics::Pipeline* pipeline;
 
-	Graphics::VertexArray* vertexArray;
-	Graphics::VertexBuffer* vertexBuffer;
-	Graphics::VertexLayout* vertexLayout;
-	Graphics::IndexBuffer* indexBuffer;
-
 	Graphics::Sampler2D* sampler;
 	Graphics::PixelBindingPoint* textureBP;
 
@@ -163,58 +158,6 @@ void LoadScene(Scene& scene)
 		scene.pipeline = scene.device->CreatePipeline(scene.vertexShader, scene.pixelShader);
 	}
 
-	// Load vertex buffer
-	{
-		Vertex data[4];
-		data[0].x = -0.5f; data[0].y = -0.5f; data[0].z = 0.0f; data[0].u = 0.0f; data[0].v = 0.0f;
-		data[1].x = -0.5f; data[1].y = +0.5f; data[1].z = 0.0f; data[1].u = 0.0f; data[1].v = 1.0f;
-		data[2].x = +0.5f; data[2].y = -0.5f; data[2].z = 0.0f; data[2].u = 1.0f; data[2].v = 0.0f;
-		data[3].x = +0.5f; data[3].y = +0.5f; data[3].z = 0.0f; data[3].u = 1.0f; data[3].v = 1.0f;
-
-		scene.vertexBuffer = scene.device->CreateVertexBuffer(sizeof(data), data, Graphics::BufferUsage::Static);
-	}
-
-	// Create vertex layout
-	{
-		Graphics::VertexElement elements[2];
-
-		elements[0].bufferIndex = 0;
-		elements[0].name = "POSITION";
-		elements[0].offset = offsetof(Vertex, x);
-		elements[0].size = 3;
-		elements[0].stride = sizeof(Vertex);
-		elements[0].type = Graphics::VertexElementType::Float;
-
-		elements[1].bufferIndex = 0;
-		elements[1].name = "UVS";
-		elements[1].offset = offsetof(Vertex, u);
-		elements[1].size = 2;
-		elements[1].stride = sizeof(Vertex);
-		elements[1].type = Graphics::VertexElementType::Float;
-
-		scene.vertexLayout = scene.device->CreateVertexLayout(2, elements, scene.vertexShader);
-	}
-
-	// Create vertex array
-	{
-		Graphics::VertexBuffer* buffers[] =
-		{
-			scene.vertexBuffer,
-		};
-		scene.vertexArray = scene.device->CreateVertexArray(1, buffers, scene.vertexLayout);
-	}
-
-	// Create index buffer
-	{
-		unsigned int data[] =
-		{
-			2, 1, 0,
-			2, 3, 1,
-		};
-
-		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics::IndexType::UInt, sizeof(data), data);
-	}
-
 	// Create texture
 	{
 		scene.textureBP = scene.pixelShader->GetBindingPoint("TEXTURE");
@@ -295,11 +238,6 @@ void CleanScene(Scene& scene)
 
 	scene.device->DestroySampler2D(scene.sampler);
 
-	scene.device->DestroyIndexBuffer(scene.indexBuffer);
-	scene.device->DestroyVertexArray(scene.vertexArray);
-	scene.device->DestroyVertexLayout(scene.vertexLayout);
-	scene.device->DestroyVertexBuffer(scene.vertexBuffer);
-
 	scene.device->DestroyPipeline(scene.pipeline);
 	scene.device->DestroyPixelShader(scene.pixelShader);
 	scene.device->DestroyVertexShader(scene.vertexShader);
@@ -333,7 +271,6 @@ void Main(int argc, char** argv) try
 		scene.window->PollEvents();
 
 		// Clear screen
-		//scene.device->SetRenderTargets(nullptr, 0);
 		scene.device->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		// Set raster and depth stencil states
@@ -344,25 +281,18 @@ void Main(int argc, char** argv) try
 		// Set shader pipeline
 		scene.device->SetPipeline(scene.pipeline);
 
-		// Bind texture and set sampler
+		// Bind sampler
 		scene.textureBP->BindSampler2D(scene.sampler);
-		//scene.textureBP->BindTexture2D(scene.font->GetAtlas(0));
 
 		// Update transform and draw
 		{
 			auto transform = (Transform*)scene.transformBuffer->Map();
-			transform->mvp = proj * view * model;
-			//transform->mvp = glm::mat4(1.0f);
-			//transform->mvp = glm::translate(transform->mvp, glm::vec3(-0.5f, -0.5f, 0.0f));
+			transform->mvp = glm::ortho(0.0f, (float)scene.window->GetWidth(), 0.0f, (float)scene.window->GetHeight());
+			transform->mvp = glm::translate(transform->mvp, glm::vec3(0.0f, scene.window->GetHeight() / 2, 0.0f));
 			scene.transformBuffer->Unmap();
 			scene.transformBP->BindConstantBuffer(scene.transformBuffer);
-			scene.textRenderer->RenderU32(U"test", scene.textureBP, 0.01f);
+			scene.textRenderer->RenderU32(U"Sámple tèxté ãõ\nMultiple lines\rReturn", scene.textureBP, 1.0f);
 		}
-
-		// Bind vertex array and the index buffer
-		//scene.device->SetVertexArray(scene.vertexArray);
-		//scene.device->SetIndexBuffer(scene.indexBuffer);
-		//scene.device->DrawTrianglesIndexed(0, 6);
 
 		// Swap screen back and front buffers
 		scene.device->SwapBuffers();

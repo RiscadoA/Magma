@@ -17,9 +17,8 @@ Shader
 {
 	float sampled = Sample2D(texture, in.uvs).r;
 
-	bool shouldDiscard = sampled <= 0.1f;
-	if (shouldDiscard)
+	if (sampled == 0.0f)
 		discard;
-	else
-		out.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	out.color = float4(1.0f, 0.0f, 0.0f, sampled);
 };
