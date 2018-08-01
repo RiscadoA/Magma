@@ -99,7 +99,7 @@ void LoadScene(Scene& scene)
 		size_t objectSize;
 
 		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-8/vertex.msl");
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Shaders/Text/v-default.msl");
 			auto size = scene.fileSystem->GetSize(file);
 			auto code = new char[size + 1];
 			scene.fileSystem->Read(file, code, size);
@@ -129,7 +129,7 @@ void LoadScene(Scene& scene)
 		size_t objectSize;
 
 		{
-			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Example-8/pixel.msl");
+			auto file = scene.fileSystem->OpenFile(Files::FileMode::Read, "/Shaders/Text/p-basic.msl");
 			auto size = scene.fileSystem->GetSize(file);
 			auto code = new char[size + 1];
 			scene.fileSystem->Read(file, code, size);
