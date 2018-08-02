@@ -1,6 +1,9 @@
 #include "Element.hpp"
 
-Magma::GUI::Element::Element(ElementType type)
+#include <glm/gtc/matrix_transform.hpp>
+
+Magma::GUI::Element::Element(Elements::Type type)
+	: m_type(type)
 {
 	m_parent = nullptr;
 	m_child = nullptr;
@@ -48,9 +51,6 @@ void Magma::GUI::Element::SetParent(Element * parent)
 
 void Magma::GUI::Element::AddChild(Element * child)
 {
-	if (child->GetParent() != this)
-		child->SetParent(this);
-
 	auto c = m_child;
 	if (c == nullptr)
 		m_child = child;
@@ -73,9 +73,6 @@ void Magma::GUI::Element::AddChild(Element * child)
 
 void Magma::GUI::Element::RemoveChild(Element * child)
 {
-	if (child->GetParent() == this)
-		child->SetParent(nullptr);
-
 	Element* prev = nullptr;
 	auto c = m_child;
 	while (c != nullptr)
@@ -178,4 +175,16 @@ bool Magma::GUI::Element::Contains(Point point, Element * relativeElement) const
 	else
 		return true;
 }
+void Magma::GUI::Element::UpdateTransform() const
+{
+	m_dirty = false;
+	auto b = this->GetAbsoluteBoundingBox();
+	m_transform = glm::translate(glm::mat4(1.0f), glm::vec3(b.left.absolute, b.bottom.absolute, 0.0f));
+}
 
+const glm::mat4 & Magma::GUI::Element::GetTransform() const
+{
+	if (m_dirty)
+		this->UpdateTransform();
+	return m_transform;
+}

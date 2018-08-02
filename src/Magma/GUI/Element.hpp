@@ -1,26 +1,12 @@
 #pragma once
 
 #include "BoundingBox.hpp"
+#include "Elements/Type.hpp"
 
 namespace Magma
 {
 	namespace GUI
 	{
-		/// <summary>
-		///		Represents an element type
-		/// </summary>
-		enum class ElementType
-		{
-			Invalid = -1,
-
-			Root,
-			Null,
-			Box,
-			Text,
-
-			Count
-		};
-
 		/// <summary>
 		///		Represents an element in the graphical user interface
 		/// </summary>
@@ -31,7 +17,7 @@ namespace Magma
 			///		Constructs a new graphical user interface element (starts as invalid, must be validated)
 			/// </summary>
 			/// <param name="type">Element type</param>
-			Element(ElementType type);
+			Element(Elements::Type type);
 
 			/// <summary>
 			///		Deconstructs an element
@@ -49,13 +35,13 @@ namespace Magma
 			void SetParent(Element* parent);
 
 			/// <summary>
-			///		Adds a child to this element and sets this element as the child's parent (calls SetParent on parent)
+			///		Adds a child to this element and sets this element as the child's parent (doesn't call SetParent on child)
 			/// </summary>
 			/// <param name=""></param>
 			void AddChild(Element* child);
 
 			/// <summary>
-			///		Removes a child from this element and sets the child's parent to nullptr
+			///		Removes a child from this element and sets the child's parent to nullptr (doesn't call SetParent on child)
 			/// </summary>
 			/// <param name="child">Child element pointer</param>
 			void RemoveChild(Element* child);
@@ -137,6 +123,11 @@ namespace Magma
 			inline const BoundingBox& GetBox() const { return m_box; }
 
 			/// <summary>
+			///		Gets this element's type
+			/// </summary>
+			inline Elements::Type GetType() const { return m_type; }
+
+			/// <summary>
 			///		Gets this element's bounding box in pixels (absolute coordinates)
 			/// </summary>
 			/// <returns>This element's bounding box in pixels (absolute coordinates)</returns>
@@ -146,6 +137,16 @@ namespace Magma
 			///		Checks if this element contains a point inside its bounding box (point with relative coordinates to <paramref name="relativeElement"></paramref>)
 			/// </summary>
 			bool Contains(Point point, Element* relativeElement = nullptr) const;
+
+			/// <summary>
+			///		Updates this element's transform
+			/// </summary>
+			virtual void UpdateTransform() const;
+
+			/// <summary>
+			///		Gets this element's transform
+			/// </summary>
+			const glm::mat4& GetTransform() const;
 
 		private:
 			bool m_enabled;
@@ -157,8 +158,10 @@ namespace Magma
 
 			BoundingBox m_box;
 
-			bool m_dirty;
-			glm::mat4 m_transform;
+			Elements::Type m_type;
+
+			mutable bool m_dirty;
+			mutable glm::mat4 m_transform;
 		};
 	}
 }

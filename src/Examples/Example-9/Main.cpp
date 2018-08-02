@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <Magma/GUI/Renderer.hpp>
+#include <Magma/GUI/Elements/Box.hpp>
 
 #define USE_GL
 
@@ -91,6 +92,27 @@ void LoadScene(Scene& scene)
 	// Create GUI Renderer
 	{
 		scene.guiRenderer = new GUI::Renderer(scene.device);
+	}
+
+	// Create GUI box element
+	{
+		auto element = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+		GUI::BoundingBox bb;
+
+		bb.left.absolute = 0.0f;
+		bb.left.relative = 0.5f;
+
+		bb.right.absolute = 50.0f;
+		bb.right.relative = 0.5f;
+
+		bb.bottom.absolute = 0.0f;
+		bb.bottom.relative = 0.5f;
+
+		bb.top.absolute = 50.0f;
+		bb.top.relative = 0.5f;
+
+		element->SetBox(bb);
 	}
 }
 

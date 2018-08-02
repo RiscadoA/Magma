@@ -1,14 +1,14 @@
-# ./src/Magma/GUI/CMakeLists.txt
+# ./src/Magma/Resources/CMakeLists.txt
 
 # Get all files
-file(GLOB_RECURSE Magma_GUI_Source
+file(GLOB_RECURSE Magma_Resources_Source
     "*.hpp"
     "*.cpp"
 )
 
 # Add files as library
-add_library(Magma-GUI ${Magma_GUI_Source})
-set_target_properties (Magma-GUI PROPERTIES FOLDER Magma)
+add_library(Magma-Resources ${Magma_Resources_Source})
+set_target_properties (Magma-Resources PROPERTIES FOLDER Magma)
 
 # Include config file
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
@@ -20,5 +20,4 @@ include_directories(../../)
 include_directories(../../../extern/glm/)
 
 # Link libraries
-target_link_libraries(Magma-GUI Magma-Framework)
-target_link_libraries(Magma-GUI Magma-Resources)
+target_link_libraries(Magma-Resources Magma-Framework)

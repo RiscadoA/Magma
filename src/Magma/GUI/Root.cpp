@@ -4,7 +4,7 @@
 #include <sstream>
 
 Magma::GUI::Root::Root(size_t poolSize, size_t maxElementSize)
-	: Element(ElementType::Root)
+	: Element(Elements::Type::Root)
 {
 	m_poolSize = poolSize;
 	m_maxElementSize = maxElementSize;
@@ -18,6 +18,8 @@ Magma::GUI::Root::Root(size_t poolSize, size_t maxElementSize)
 
 Magma::GUI::Root::~Root()
 {
+	this->Destroy();
+	this->Clean();
 	free(m_pool);
 }
 

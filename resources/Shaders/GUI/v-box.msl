@@ -1,0 +1,27 @@
+#version 1.0
+#type VERTEX
+
+/*
+	GUI box element vertex shader.
+*/
+
+Input in
+{
+	float2 position : POSITION;
+};
+
+Output out
+{
+	float4 position : SCREEN_POSITION;
+};
+
+ConstantBuffer buffer : BUFFER
+{
+	float44 mvp;
+	float4 backgroundColor;
+};
+
+Shader
+{
+	out.position = mulvec(buffer.mvp, float4(in.position.x, in.position.y, 0.0f, 1.0f));
+};

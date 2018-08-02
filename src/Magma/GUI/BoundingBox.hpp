@@ -29,10 +29,10 @@ namespace Magma
 		/// </summary>
 		struct BoundingBox
 		{
-			Coordinate top;
-			Coordinate bottom;
 			Coordinate left;
 			Coordinate right;
+			Coordinate bottom;
+			Coordinate top;
 		};
 	}
 }

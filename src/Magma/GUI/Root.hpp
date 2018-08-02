@@ -30,7 +30,7 @@ namespace Magma
 			/// <param name="parent">Element parent</param>
 			/// <returns>GUI element pointer</returns>
 			template <typename T, typename ... TArgs>
-			T* CreateElement(TArgs ... args, Element* parent = nullptr);
+			T* CreateElement(Element* parent, TArgs ... args);
 
 			/// <summary>
 			///		Deallocates the invalid elements
@@ -49,7 +49,7 @@ namespace Magma
 		};
 
 		template<typename T, typename ...TArgs>
-		inline T* Root::CreateElement(TArgs ... args, Element* parent)
+		inline T* Root::CreateElement(Element* parent, TArgs ... args)
 		{
 			static_assert(std::is_base_of<Element, T>::value);
 			static_assert(!std::is_same<Root, T>::value);

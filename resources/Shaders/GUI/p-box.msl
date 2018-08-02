@@ -1,0 +1,22 @@
+#version 1.0
+#type PIXEL
+
+/*
+	GUI box element pixel shader.
+*/
+
+Output out
+{
+	float4 color : ATTACHMENT_0;
+};
+
+ConstantBuffer buffer : BUFFER
+{
+	float44 mvp;
+	float4 backgroundColor;
+};
+
+Shader
+{
+	out.color = buffer.backgroundColor;
+};
