@@ -11,9 +11,13 @@ namespace Magma
 			/// <summary>
 			///		OpenAL Soft audio render device implementation
 			/// </summary>
-			class OALRenderDevice : public RenderDevice
+			class OALRenderDevice final : public RenderDevice
 			{
+			public:
+				virtual void Init(const RenderDeviceSettings& settings) override;
+				virtual void Terminate() override;
 
+				void * m_device;
 			};
 		}
 	}

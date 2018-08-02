@@ -19,7 +19,6 @@ using namespace Magma::Framework;
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 #pragma comment (lib, "dxguid.lib")
-#endif
 
 class D3D11Texture2D final : public Texture2D
 {
@@ -1507,6 +1506,8 @@ public:
 	D3D11_VIEWPORT viewport;
 };
 
+#endif
+
 void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
@@ -1535,7 +1536,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 
 		UINT flags = 0;
 
-#ifdef MAGMA_FRAMEWORK_RENDER_DEVICE_DEBUG
+#ifdef MAGMA_FRAMEWORK_DEBUG
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 

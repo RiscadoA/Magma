@@ -21,4 +21,3 @@ include_directories(../../../extern/glm/)
 
 # Link magma libraries
 target_link_libraries(Example-9 Magma-Framework)
-target_link_libraries(Example-9 Magma-GUI)

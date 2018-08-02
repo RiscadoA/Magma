@@ -18,7 +18,7 @@ namespace Magma
 			};
 
 			/// <summary>
-			///		Thrown when a render device encounters an exception
+			///		Thrown when a graphics render device encounters an exception
 			/// </summary>
 			class RenderDeviceError : public std::runtime_error
 			{

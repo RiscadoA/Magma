@@ -14,7 +14,7 @@ using namespace Magma::Framework;
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#if defined(MAGMA_FRAMEWORK_RENDER_DEVICE_DEBUG)
+#if defined(MAGMA_FRAMEWORK_DEBUG)
 #define GL_CHECK_ERROR(title)\
 {\
 	GLenum err = glGetError();\
@@ -1497,7 +1497,7 @@ void Magma::Framework::Graphics::OGL410RenderDevice::DrawTriangles(size_t offset
 void Magma::Framework::Graphics::OGL410RenderDevice::DrawTrianglesIndexed(size_t offset, size_t count)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-#ifdef MAGMA_FRAMEWORK_RENDER_DEVICE_DEBUG
+#ifdef MAGMA_FRAMEWORK_DEBUG
 	if (m_currentIndexBuffer == nullptr)
 		throw RenderDeviceError("Failed to draw indexed triangles on OGL410RenderDevice:\nNo index buffer currently bound");
 #endif
