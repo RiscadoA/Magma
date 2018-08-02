@@ -1218,7 +1218,7 @@ namespace Magma
 			};
 
 			/// <summary>
-			///		Abstract class that encapsulates the low level API specific rendering calls
+			///		Abstract class that encapsulates the low level API specific graphics rendering calls
 			/// </summary>
 			class RenderDevice
 			{
