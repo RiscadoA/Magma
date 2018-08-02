@@ -13,6 +13,7 @@ namespace Magma
 		{
 			Invalid = -1,
 
+			Root,
 			Null,
 			Box,
 			Text,

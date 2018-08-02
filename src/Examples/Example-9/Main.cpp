@@ -8,15 +8,11 @@
 #include <Magma/Framework/String/Conversion.hpp>
 #include <iostream>
 
+#include <Magma/GUI/Renderer.hpp>
+
 #define USE_GL
 
 using namespace Magma;
-
-struct Vertex
-{
-	float x, y, z;
-	float u, v;
-};
 
 struct Scene
 {
@@ -28,6 +24,9 @@ struct Scene
 	Framework::Graphics::RasterState* rasterState;
 	Framework::Graphics::DepthStencilState* depthStencilState;
 	Framework::Graphics::BlendState* blendState;
+
+	GUI::Root* guiRoot;
+	GUI::Renderer* guiRenderer;
 };
 
 void LoadScene(Scene& scene)
@@ -83,10 +82,24 @@ void LoadScene(Scene& scene)
 		desc.destinationFactor = Framework::Graphics::BlendFactor::InverseSourceAlpha;
 		scene.blendState = scene.device->CreateBlendState(desc);
 	}
+
+	// Create GUI Root
+	{
+		scene.guiRoot = new GUI::Root();
+	}
+
+	// Create GUI Renderer
+	{
+		scene.guiRenderer = new GUI::Renderer(scene.device);
+	}
 }
 
 void CleanScene(Scene& scene)
 {
+	// Delete GUI stuff
+	delete scene.guiRenderer;
+	delete scene.guiRoot;
+
 	// Clean render device objects
 	scene.device->DestroyBlendState(scene.blendState);
 	scene.device->DestroyDepthStencilState(scene.depthStencilState);
@@ -118,7 +131,8 @@ void Main(int argc, char** argv) try
 		scene.device->SetDepthStencilState(scene.depthStencilState);
 		scene.device->SetBlendState(scene.blendState);
 
-
+		// Draw GUI
+		scene.guiRenderer->Render(scene.guiRoot);
 
 		// Swap screen back and front buffers
 		scene.device->SwapBuffers();
