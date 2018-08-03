@@ -8,6 +8,8 @@
 #include <Magma/Framework/String/Conversion.hpp>
 #include <iostream>
 
+#include <Magma/Resources/Manager.hpp>
+
 #include <Magma/GUI/Renderer.hpp>
 #include <Magma/GUI/Elements/Box.hpp>
 
@@ -19,7 +21,6 @@ struct Scene
 {
 	Framework::Input::Window* window;
 	Framework::Graphics::RenderDevice* device;
-	Framework::Files::FileSystem* fileSystem;
 	bool running;
 
 	Framework::Graphics::RasterState* rasterState;
@@ -32,9 +33,11 @@ struct Scene
 
 void LoadScene(Scene& scene)
 {
-	// Create filesystem
+	// Init resource manager
 	{
-		scene.fileSystem = new Framework::Files::STDFileSystem("../../../../../resources/");
+		Resources::ManagerSettings settings;
+		settings.rootPath = "../../../../../resources/";
+		Resources::Manager::Init(settings);
 	}
 
 	// Create window
@@ -130,7 +133,9 @@ void CleanScene(Scene& scene)
 	// Destroy context, window and filesytem
 	delete scene.device;
 	delete scene.window;
-	delete scene.fileSystem;
+
+	// Terminate resources manager
+	Resources::Manager::Terminate();
 }
 
 void Main(int argc, char** argv) try
