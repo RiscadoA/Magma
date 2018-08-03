@@ -18,6 +18,7 @@ namespace Magma
 				virtual void Terminate() override;
 
 				void * m_device;
+				void * m_context;
 			};
 		}
 	}
