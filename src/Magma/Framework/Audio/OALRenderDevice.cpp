@@ -211,22 +211,6 @@ public:
 #endif
 	}
 
-	virtual void UnqueueBuffer(Buffer * buffer) override
-	{
-		alSourceUnqueueBuffers(m_object, 1, &static_cast<OALBuffer*>(buffer)->m_object);
-
-#ifdef MAGMA_FRAMEWORK_DEBUG
-		auto err = alGetError();
-		if (err != AL_NO_ERROR)
-		{
-			std::stringstream ss;
-			ss << "Failed to unqueue buffer on OALSource:" << std::endl;
-			ss << "alGetError returned " << err;
-			throw RenderDeviceError(ss.str());
-		}
-#endif
-	}
-
 	virtual void SetPosition(float x, float y, float z) override
 	{
 		alSource3f(m_object, AL_POSITION, x, y, z);

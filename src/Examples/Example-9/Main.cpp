@@ -85,9 +85,9 @@ void LoadScene(Scene& scene)
 	// Create source
 	{
 		scene.source = scene.audioDevice->CreateSource();
-		scene.source->SetLooping(true);
-		scene.source->Bind(scene.buffer);
+		scene.source->QueueBuffer(scene.buffer);
 		scene.source->Play();
+		
 	}
 }
 

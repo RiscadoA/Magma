@@ -81,12 +81,6 @@ namespace Magma
 				/// </summary>
 				/// <param name="buffer">Buffer handle</param>
 				virtual void QueueBuffer(Buffer* buffer) = 0;
-				
-				/// <summary>
-				///		Unqueues an audio buffer from this audio source
-				/// </summary>
-				/// <param name="buffer">Buffer handle</param>
-				virtual void UnqueueBuffer(Buffer* buffer) = 0;
 
 				/// <summary>
 				///		Sets the source position
