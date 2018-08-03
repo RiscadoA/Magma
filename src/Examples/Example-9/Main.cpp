@@ -67,7 +67,7 @@ void LoadScene(Scene& scene)
 	// Create buffer
 	{
 		// Load
-		auto file = scene.fileSystem->OpenFile(Framework::Files::FileMode::Read, "/Example-9/pcm stereo 16 bit 8kHz.wav");
+		auto file = scene.fileSystem->OpenFile(Framework::Files::FileMode::Read, "/Example-9/pcm mono 16 bit 8kHz.wav");
 		auto fileSize = scene.fileSystem->GetSize(file);
 		char* fileData = new char[fileSize];
 		scene.fileSystem->Read(file, fileData, fileSize);
@@ -87,7 +87,6 @@ void LoadScene(Scene& scene)
 		scene.source = scene.audioDevice->CreateSource();
 		scene.source->QueueBuffer(scene.buffer);
 		scene.source->Play();
-		
 	}
 }
 
@@ -109,6 +108,58 @@ void Main(int argc, char** argv) try
 	Scene scene;
 
 	LoadScene(scene);
+
+	glm::vec3 sourcePos;
+	sourcePos.x = 0.0f;
+	sourcePos.y = 0.0f;
+	sourcePos.z = 0.0f;
+
+	scene.window->OnKeyDown.AddListener([&](Framework::Input::Keyboard code, Framework::Input::KeyModifiers mods)
+	{
+		if ((mods & Framework::Input::KeyModifiers::Shift) != Framework::Input::KeyModifiers::None)
+		{
+			switch (code)
+			{
+				case Framework::Input::Keyboard::P:
+					scene.source->Pause();
+					break;
+				case Framework::Input::Keyboard::U:
+					scene.source->Stop();
+					break;
+				case Framework::Input::Keyboard::O:
+					scene.source->Play();
+					break;
+				case Framework::Input::Keyboard::I:
+					scene.source->Rewind();
+					break;
+
+				case Framework::Input::Keyboard::A:
+					sourcePos.x -= 1.0f;
+					scene.source->SetPosition(sourcePos.x, sourcePos.y, sourcePos.z);
+					break;
+				case Framework::Input::Keyboard::D:
+					sourcePos.x += 1.0f;
+					scene.source->SetPosition(sourcePos.x, sourcePos.y, sourcePos.z);
+					break;
+				case Framework::Input::Keyboard::W:
+					sourcePos.z += 1.0f;
+					scene.source->SetPosition(sourcePos.x, sourcePos.y, sourcePos.z);
+					break;
+				case Framework::Input::Keyboard::S:
+					sourcePos.z -= 1.0f;
+					scene.source->SetPosition(sourcePos.x, sourcePos.y, sourcePos.z);
+					break;
+				case Framework::Input::Keyboard::E:
+					sourcePos.y += 1.0f;
+					scene.source->SetPosition(sourcePos.x, sourcePos.y, sourcePos.z);
+					break;
+				case Framework::Input::Keyboard::Q:
+					sourcePos.y -= 1.0f;
+					scene.source->SetPosition(sourcePos.x, sourcePos.y, sourcePos.z);
+					break;
+			}
+		}
+	});
 
 	// Main loop
 	while (scene.running)
