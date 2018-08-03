@@ -1,7 +1,5 @@
 #include "Manager.hpp"
-#include "Exception.hpp"
 
-#include <sstream>
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 
 Magma::Resources::Manager* Magma::Resources::Manager::s_manager = nullptr;
@@ -31,6 +29,15 @@ void Magma::Resources::Manager::Terminate()
 
 	delete s_manager;
 	s_manager = nullptr;
+}
+
+Magma::Resources::Resource * Magma::Resources::Manager::GetResource(const std::string & name)
+{
+	return nullptr;
+}
+
+void Magma::Resources::Manager::DestroyResource(const std::string & name)
+{
 }
 
 Magma::Resources::Manager::Manager(const ManagerSettings& settings)
