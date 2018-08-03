@@ -35,6 +35,10 @@ namespace Magma
 				/// <summary>
 				///		Updates the audio buffer contents (raw PCM data)
 				/// </summary>
+				/// <param name="data">Buffer data pointer</param>
+				/// <param name="size">Buffer data size</param>
+				/// <param name="format">Buffer data format</param>
+				/// <param name="frequency">Buffer data frequency</param>
 				virtual void Update(void* data, size_t size, Format format, size_t frequency) = 0;
 
 			protected:
@@ -51,6 +55,38 @@ namespace Magma
 			{
 			public:
 				virtual ~Source() = default;
+
+				/// <summary>
+				///		Plays this audio source (asynchronously)
+				/// </summary>
+				virtual void Play() = 0;
+
+				/// <summary>
+				///		Stops the audio playing on this source
+				/// </summary>
+				virtual void Stop() = 0;
+
+				/// <summary>
+				///		Rewinds the audio playing on this source back to the beginning
+				/// </summary>
+				virtual void Rewind() = 0;
+
+				/// <summary>
+				///		Pauses the audio playing on this source
+				/// </summary>
+				virtual void Pause() = 0;
+
+				/// <summary>
+				///		Queues an audio buffer to later play on this source
+				/// </summary>
+				/// <param name="buffer">Buffer handle</param>
+				virtual void QueueBuffer(Buffer* buffer) = 0;
+				
+				/// <summary>
+				///		Unqueues an audio buffer from this audio source
+				/// </summary>
+				/// <param name="buffer">Buffer handle</param>
+				virtual void UnqueueBuffer(Buffer* buffer) = 0;
 
 				/// <summary>
 				///		Sets the source position
@@ -175,6 +211,16 @@ namespace Magma
 				/// </summary>
 				/// <returns>New audio buffer object handle</returns>
 				virtual Buffer* CreateBuffer() = 0;
+
+				/// <summary>
+				///		Creates a new audio buffer object
+				/// </summary>
+				/// <param name="data">Buffer data pointer</param>
+				/// <param name="size">Buffer data size</param>
+				/// <param name="format">Buffer data format</param>
+				/// <param name="frequency">Buffer data frequency</param>
+				/// <returns>New audio buffer object handle</returns>
+				virtual Buffer* CreateBuffer(void* data, size_t size, Format format, size_t frequency) = 0;
 
 				/// <summary>
 				///		Destroys an audio buffer object

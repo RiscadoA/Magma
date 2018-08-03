@@ -10,6 +10,8 @@
 #include <Magma/Framework/String/Conversion.hpp>
 #include <iostream>
 
+#include <Magma/Framework/Audio/WAVLoader.hpp>
+
 #define USE_GL
 
 using namespace Magma;
@@ -21,6 +23,9 @@ struct Scene
 	Framework::Audio::RenderDevice* audioDevice;
 	Framework::Files::FileSystem* fileSystem;
 	bool running;
+
+	Framework::Audio::Buffer* buffer;
+	Framework::Audio::Source* source;
 };
 
 void LoadScene(Scene& scene)
@@ -58,10 +63,40 @@ void LoadScene(Scene& scene)
 		scene.audioDevice = new Framework::Audio::OALRenderDevice();
 		scene.audioDevice->Init(settings);
 	}
+
+	// Create buffer
+	{
+		// Load
+		auto file = scene.fileSystem->OpenFile(Framework::Files::FileMode::Read, "/Example-9/pcm stereo 16 bit 8kHz.wav");
+		auto fileSize = scene.fileSystem->GetSize(file);
+		char* fileData = new char[fileSize];
+		scene.fileSystem->Read(file, fileData, fileSize);
+		scene.fileSystem->CloseFile(file);
+
+		// Parse
+		Framework::Audio::WAVData data;
+		Framework::Audio::LoadWAV(fileData, fileSize, data);
+
+		scene.buffer = scene.audioDevice->CreateBuffer(data.pcmData, data.pcmSize, data.format, data.sampleRate);
+
+		Framework::Audio::UnloadWAV(data);
+	}
+
+	// Create source
+	{
+		scene.source = scene.audioDevice->CreateSource();
+		scene.source->SetLooping(true);
+		scene.source->Bind(scene.buffer);
+		scene.source->Play();
+	}
 }
 
 void CleanScene(Scene& scene)
 {
+	// Destroy audio buffer and source
+	scene.audioDevice->DestroySource(scene.source);
+	scene.audioDevice->DestroyBuffer(scene.buffer);
+
 	// Destroy graphics and audio devices, window and filesytem
 	delete scene.audioDevice;
 	delete scene.graphicsDevice;
