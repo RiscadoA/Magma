@@ -42,8 +42,8 @@ namespace Magma
 			///		Gets a resource from the resource manager.
 			/// </summary>
 			/// <param name="name">Resource name</param>
-			/// <returns>Resource handle</returns>
-			static Resource* GetResource(const std::string& name);
+			/// <returns>Resource view</returns>
+			static ResourceView GetResource(const std::string& name);
 
 			/// <summary>
 			///		Destroys a resource from the resource manager
@@ -51,8 +51,17 @@ namespace Magma
 			/// <param name="name"></param>
 			static void DestroyResource(const std::string& name);
 
+			/// <summary>
+			///		Adds a resource importer to the resource manager
+			/// </summary>
+			/// <typeparam name="T">Importer type</typeparam>
 			template <typename T>
 			static void AddImporter();
+
+			/// <summary>
+			///		Gets the manager's file system
+			/// </summary>
+			inline Framework::Files::FileSystem* GetFileSystem() { return m_fileSystem; }
 
 		private:
 			static Manager* s_manager;
@@ -71,7 +80,7 @@ namespace Magma
 		{
 			static_assert(std::is_base_of<Importer, T>::value);
 
-			auto imp = new T();
+			auto imp = new T(this);
 			for (auto& i : m_importers)
 				if (i->GetName() == imp->GetName())
 				{

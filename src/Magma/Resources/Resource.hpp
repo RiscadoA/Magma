@@ -1,6 +1,9 @@
 #pragma once
 
 #include <atomic>
+#include <string>
+
+#include <Magma/Framework/Files/Path.hpp>
 
 /*
 RESOURCE TYPES:
@@ -91,10 +94,10 @@ namespace Magma
 		/// <summary>
 		///		Class used to represent a resource.
 		/// </summary>
-		class Resource
+		class Resource final
 		{
 		public:
-			Resource();
+			Resource(const std::string& name, const Framework::Files::Path& dataPath, ResourceMode mode);
 			~Resource();
 
 			/// <summary>
@@ -128,13 +131,36 @@ namespace Magma
 			/// <summary>
 			///		Gets the current number of references this resource has.
 			/// </summary>
+			/// <returns>Resource's reference count</returns>
 			inline size_t GetReferenceCount() const { return m_referenceCount; }
+
+			/// <summary>
+			///		Gets this resource's name.
+			/// </summary>
+			/// <returns>This resource's name</returns>
+			inline const std::string& GetName() const { return m_name; }
+
+			/// <summary>
+			///		Gets this resource's data path.
+			/// </summary>
+			/// <returns>This resource's data path</returns>
+			inline const Framework::Files::Path& GetDataPath() const { return m_dataPath; }
+
+			/// <summary>
+			///		Gets this resource's storage mode.
+			/// </summary>
+			/// <returns>This resource's storage mode</returns>
+			inline ResourceMode GetMode() const { return m_mode; }
 
 		private:
 			friend class ResourceView;
 
 			ResourceData* m_data;
 			std::atomic<size_t> m_referenceCount;
+
+			std::string m_name;
+			Framework::Files::Path m_dataPath;
+			ResourceMode m_mode;
 		};
 
 		/// <summary>
@@ -147,6 +173,11 @@ namespace Magma
 			ResourceView(ResourceView&& rhs);
 			ResourceView(Resource& resource);
 			~ResourceView();
+
+			/// <summary>
+			///		Releases this resource view (cannot be used again after this)
+			/// </summary>
+			void Release();
 
 			/// <summary>
 			///		Gets a pointer to the resource this view points to.

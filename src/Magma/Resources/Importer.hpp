@@ -8,6 +8,8 @@ namespace Magma
 {
 	namespace Resources
 	{
+		class Manager;
+
 		/// <summary>
 		///		Abstract class for importing the multiple types of resources
 		/// </summary>
@@ -18,7 +20,7 @@ namespace Magma
 			///		Constructs a new importer of a certain type
 			/// </summary>
 			/// <param name="name">Importer type name</param>
-			Importer(const std::string& name);
+			Importer(const std::string& name, Manager* manager);
 
 			/// <summary>
 			///		Deconstructs an importer
@@ -41,12 +43,20 @@ namespace Magma
 			virtual void Destroy(Resource* resource) = 0;
 
 			/// <summary>
-			///		Gets the importer name
+			///		Gets this importer's name
 			/// </summary>
+			/// <returns>This importer's name</returns>
 			inline const std::string& GetName() { return m_name; }
+
+			/// <summary>
+			///		Gets this importer's manager
+			/// </summary>
+			/// <returns>This importer's manager</returns>
+			inline Manager* GetManager() { return m_manager; }
 
 		private:
 			std::string m_name;
+			Manager* m_manager;
 		};
 	}
 }
