@@ -97,7 +97,7 @@ namespace Magma
 		class Resource final
 		{
 		public:
-			Resource(const std::string& name, const Framework::Files::Path& dataPath, ResourceMode mode);
+			Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath, ResourceMode mode);
 			~Resource();
 
 			/// <summary>
@@ -141,6 +141,12 @@ namespace Magma
 			inline const std::string& GetName() const { return m_name; }
 
 			/// <summary>
+			///		Gets this resource's type.
+			/// </summary>
+			/// <returns>This resource's type</returns>
+			inline const std::string& GetType() const { return m_type; }
+
+			/// <summary>
 			///		Gets this resource's data path.
 			/// </summary>
 			/// <returns>This resource's data path</returns>
@@ -159,6 +165,7 @@ namespace Magma
 			std::atomic<size_t> m_referenceCount;
 
 			std::string m_name;
+			std::string m_type;
 			Framework::Files::Path m_dataPath;
 			ResourceMode m_mode;
 		};

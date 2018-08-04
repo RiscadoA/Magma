@@ -1,0 +1,7 @@
+#!MNI!
+[p-basic]
+type=shader
+path=/Shaders/Text/p-basic.msl
+[v-default]
+type=shader
+path=/Shaders/Text/v-default.msl

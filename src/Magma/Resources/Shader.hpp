@@ -42,7 +42,7 @@ namespace Magma
 		class ShaderImporter final : public Importer
 		{
 		public:
-			ShaderImporter(Manager* manager);
+			ShaderImporter(Manager* manager, Framework::Graphics::RenderDevice* device);
 			virtual ~ShaderImporter() final;
 
 			// Inherited via Importer
@@ -51,6 +51,7 @@ namespace Magma
 			virtual void Destroy(Resource * resource) final;
 
 		private:
+			Framework::Graphics::RenderDevice* m_device;
 			Framework::Memory::PoolAllocator m_pool;
 		};
 	}

@@ -13,6 +13,8 @@
 #include <Magma/GUI/Renderer.hpp>
 #include <Magma/GUI/Elements/Box.hpp>
 
+#include <Magma/Resources/Shader.hpp>
+
 #define USE_GL
 
 using namespace Magma;
@@ -51,7 +53,7 @@ void LoadScene(Scene& scene)
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
 
-	// Create context
+	// Create device
 	{
 		Framework::Graphics::RenderDeviceSettings settings;
 #ifdef USE_GL
@@ -61,6 +63,12 @@ void LoadScene(Scene& scene)
 #endif
 		scene.device->Init(scene.window, settings);
 	}
+
+	// Add resource importers
+	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.device);
+
+	// Load permament resources
+	Resources::Manager::Load();
 
 	// Create raster state
 	{

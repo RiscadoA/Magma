@@ -1,10 +1,13 @@
 #include "Shader.hpp"
 #include "Manager.hpp"
+#include "Exception.hpp"
 
-Magma::Resources::ShaderImporter::ShaderImporter(Manager* manager)
-	: Importer("shader", manager), m_pool(sizeof(Shader), 256)
+#include <Magma/Framework/Graphics/ShaderCompiler.hpp>
+
+Magma::Resources::ShaderImporter::ShaderImporter(Manager* manager, Framework::Graphics::RenderDevice* device)
+	: Importer("shader", manager), m_pool(sizeof(Shader), 256), m_device(device)
 {
-
+	
 }
 
 Magma::Resources::ShaderImporter::~ShaderImporter()
@@ -20,11 +23,76 @@ void Magma::Resources::ShaderImporter::Update()
 void Magma::Resources::ShaderImporter::Import(Resource * resource)
 {
 	auto data = new (m_pool.Allocate(sizeof(Shader))) Shader(resource);
+	auto path = resource->GetDataPath();
 
-	auto fs = this->GetManager()->GetFileSystem();
+	// Check extension
+	if (path.GetExtension() == "msl")
+	{
+		// Read shader source from file
+		auto fs = this->GetManager()->GetFileSystem();
+		auto file = fs->OpenFile(Framework::Files::FileMode::Read, path);
+		auto size = fs->GetSize(file);
+		char* src = new char[size + 1];
+		fs->Read(file, src, size);
+		src[size] = '\0';
+		fs->CloseFile(file);
 
-	fs->OpenFile(Framework::Files::FileMode::Read, resource->GetData());
+		// Compile shader
+		try
+		{
+			char bo[4096];
+			auto boSize = Framework::Graphics::ShaderCompiler::Run(src, bo, sizeof(bo));
+			delete[] src;
 
+			Framework::Graphics::ShaderData shaderData(bo, boSize);
+			data->type = shaderData.GetShaderType();
+			switch (data->type)
+			{
+				case Framework::Graphics::ShaderType::Vertex:
+					data->vertexShader = m_device->CreateVertexShader(shaderData);
+					break;
+
+				case Framework::Graphics::ShaderType::Pixel:
+					data->pixelShader = m_device->CreatePixelShader(shaderData);
+					break;
+
+				case Framework::Graphics::ShaderType::Invalid:
+				{
+					std::stringstream ss;
+					ss << "Failed to import shader resource on path '" << path.ToString() << "':" << std::endl;
+					ss << "Invalid shader type" << std::endl;
+					throw ImporterError(ss.str());
+					break;
+				}
+
+				default:
+				{
+					std::stringstream ss;
+					ss << "Failed to import shader resource on path '" << path.ToString() << "':" << std::endl;
+					ss << "Unsupported shader type" << std::endl;
+					throw ImporterError(ss.str());
+					break;
+				}
+			}
+			
+		}
+		catch (Framework::Graphics::ShaderError& err)
+		{
+			std::stringstream ss;
+			ss << "Failed to import shader resource on path '" << path.ToString() << "':" << std::endl;
+			ss << "MSL shader compilation failed:" << std::endl;
+			ss << err.what();
+			throw ImporterError(ss.str());
+		}
+	}
+	else
+	{
+		std::stringstream ss;
+		ss << "Failed to import shader resource on path '" << path.ToString() << "':" << std::endl;
+		ss << "Unsupported extension '" << path.GetExtension() << "':" << std::endl;
+		ss << "Supported extensions: 'msl'";
+		throw ImporterError(ss.str());
+	}
 
 	resource->SetData(data);
 }

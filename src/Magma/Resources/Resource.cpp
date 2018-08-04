@@ -67,8 +67,8 @@ const Magma::Resources::Resource & Magma::Resources::ResourceView::Get() const
 	return *m_resource;
 }
 
-Magma::Resources::Resource::Resource(const std::string& name, const Framework::Files::Path& dataPath, ResourceMode mode)
-	: m_name(name), m_dataPath(dataPath), m_mode(mode)
+Magma::Resources::Resource::Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath, ResourceMode mode)
+	: m_name(name), m_type(type), m_dataPath(dataPath), m_mode(mode)
 {
 	m_data = nullptr;
 	m_referenceCount = 0;

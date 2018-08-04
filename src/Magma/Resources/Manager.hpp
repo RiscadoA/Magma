@@ -34,6 +34,11 @@ namespace Magma
 			static void Init(const ManagerSettings& settings);
 
 			/// <summary>
+			///		Loads the permament resources
+			/// </summary>
+			static void Load();
+			
+			/// <summary>
 			///		Terminates the resource manager.
 			/// </summary>
 			static void Terminate();
@@ -55,8 +60,8 @@ namespace Magma
 			///		Adds a resource importer to the resource manager
 			/// </summary>
 			/// <typeparam name="T">Importer type</typeparam>
-			template <typename T>
-			static void AddImporter();
+			template <typename T, typename ... TArgs>
+			static void AddImporter(TArgs ... args);
 
 			/// <summary>
 			///		Gets the manager's file system
@@ -69,19 +74,25 @@ namespace Magma
 			Manager(const ManagerSettings& settings);
 			~Manager();
 
+			void LoadMetaData(const Framework::Files::Path& directory = "/");
+			void CreateResources(const std::string& metaData);
+			void Import(Resource* resource);
+			void Destroy(Resource* resource);
+
 			ManagerSettings m_settings;
 			Framework::Files::FileSystem* m_fileSystem;
 
 			std::vector<Importer*> m_importers;
+			std::vector<Resource*> m_resources;
 		};
 
-		template<typename T>
-		inline void Manager::AddImporter()
+		template <typename T, typename ... TArgs>
+		inline void Manager::AddImporter(TArgs ... args)
 		{
 			static_assert(std::is_base_of<Importer, T>::value);
 
-			auto imp = new T(this);
-			for (auto& i : m_importers)
+			auto imp = new T(s_manager, args...);
+			for (auto& i : s_manager->m_importers)
 				if (i->GetName() == imp->GetName())
 				{
 					delete imp;
@@ -91,7 +102,7 @@ namespace Magma
 					throw ManagerError(ss.str());
 				}
 
-			m_importers.push_back(imp);
+			s_manager->m_importers.push_back(imp);
 		}
 	}
 }
