@@ -195,6 +195,24 @@ public:
 #endif
 	}
 
+	virtual size_t GetProcessedBuffers() override
+	{
+		ALint ret = 0;
+		alGetSourcei(m_object, AL_BUFFERS_PROCESSED, &ret);
+		return ret;
+
+#ifdef MAGMA_FRAMEWORK_DEBUG
+		auto err = alGetError();
+		if (err != AL_NO_ERROR)
+		{
+			std::stringstream ss;
+			ss << "Failed to queue buffer on OALSource:" << std::endl;
+			ss << "alGetError returned " << err;
+			throw RenderDeviceError(ss.str());
+		}
+#endif
+	}
+
 	virtual void QueueBuffer(Buffer * buffer) override
 	{
 		alSourceQueueBuffers(m_object, 1, &static_cast<OALBuffer*>(buffer)->m_object);

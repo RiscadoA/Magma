@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-void Magma::Framework::Audio::LoadWAV(void * data, size_t size, WAVData & out)
+void Magma::Framework::Audio::LoadWAV(const void * data, size_t size, WAVData & out)
 {
 	size_t dataHead = 0;
 
@@ -25,10 +25,12 @@ void Magma::Framework::Audio::LoadWAV(void * data, size_t size, WAVData & out)
 		throw LoaderError(ss.str());
 	}
 	
+	// Get chunks
 	while (dataHead < size)
 	{
 		auto oldHead = dataHead;
 
+		// Get chunk header
 		WAVChunkHeader header;
 		dataHead += ParseWAVChunkHeader((char*)data + dataHead, size - dataHead, header);
 
@@ -60,7 +62,7 @@ void Magma::Framework::Audio::UnloadWAV(WAVData & data)
 	UnloadWAVDataChunk(data.dataChunk);
 }
 
-size_t Magma::Framework::Audio::ParseWAVHeader(void * data, size_t size, WAVFileHeader & out)
+size_t Magma::Framework::Audio::ParseWAVHeader(const void * data, size_t size, WAVFileHeader & out)
 {
 	if (size < 12)
 	{
@@ -98,7 +100,7 @@ size_t Magma::Framework::Audio::ParseWAVHeader(void * data, size_t size, WAVFile
 	return 12;
 }
 
-size_t Magma::Framework::Audio::ParseWAVFormatChunk(void * data, size_t size, WAVFormatChunk & out)
+size_t Magma::Framework::Audio::ParseWAVFormatChunk(const void * data, size_t size, WAVFormatChunk & out)
 {
 	if (size < 18)
 	{
@@ -183,7 +185,7 @@ size_t Magma::Framework::Audio::ParseWAVFormatChunk(void * data, size_t size, WA
 	return out.header.chunkSize + 8;
 }
 
-size_t Magma::Framework::Audio::ParseWAVDataChunk(void * data, size_t size, WAVDataChunk & out)
+size_t Magma::Framework::Audio::ParseWAVDataChunk(const void * data, size_t size, WAVDataChunk & out)
 {
 	if (size < 8)
 	{
@@ -213,6 +215,7 @@ size_t Magma::Framework::Audio::ParseWAVDataChunk(void * data, size_t size, WAVD
 
 	// Length of data data (4-7)
 	out.header.chunkSize = *(int32_t*)((char*)data + 4);
+	Memory::FromLittleEndian4(&out.header.chunkSize);
 
 	// Store PCM data
 	out.pcmData = malloc(out.header.chunkSize);
@@ -221,12 +224,20 @@ size_t Magma::Framework::Audio::ParseWAVDataChunk(void * data, size_t size, WAVD
 	return out.header.chunkSize + 8;
 }
 
+size_t Magma::Framework::Audio::GetWAVDataChunk(const void* data, size_t dataSize, size_t chunkSize, void * out)
+{
+	if (dataSize < chunkSize)
+		chunkSize = dataSize;
+	memcpy(out, data, chunkSize);
+	return chunkSize;
+}
+
 void Magma::Framework::Audio::UnloadWAVDataChunk(WAVDataChunk & data)
 {
 	free(data.pcmData);
 }
 
-size_t Magma::Framework::Audio::ParseWAVChunkHeader(void * data, size_t size, WAVChunkHeader & out)
+size_t Magma::Framework::Audio::ParseWAVChunkHeader(const void * data, size_t size, WAVChunkHeader & out)
 {
 	if (size < 8)
 	{
@@ -244,6 +255,7 @@ size_t Magma::Framework::Audio::ParseWAVChunkHeader(void * data, size_t size, WA
 
 	// Length of format data (not needed) (4-7)
 	out.chunkSize = *(int32_t*)((char*)data + 4);
+	Memory::FromLittleEndian4(&out.chunkSize);
 
 	return 8;
 }

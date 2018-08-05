@@ -64,19 +64,21 @@ namespace Magma
 				WAVDataChunk dataChunk;
 			};
 
-			void LoadWAV(void* data, size_t size, WAVData& out);
+			void LoadWAV(const void* data, size_t size, WAVData& out);
 
 			void UnloadWAV(WAVData& data);
 
-			size_t ParseWAVHeader(void* data, size_t size, WAVFileHeader& out);
+			size_t ParseWAVHeader(const void* data, size_t size, WAVFileHeader& out);
 
-			size_t ParseWAVFormatChunk(void* data, size_t size, WAVFormatChunk& out);
+			size_t ParseWAVFormatChunk(const void* data, size_t size, WAVFormatChunk& out);
 
-			size_t ParseWAVDataChunk(void* data, size_t size, WAVDataChunk& out);
+			size_t ParseWAVDataChunk(const void* data, size_t size, WAVDataChunk& out);
+
+			size_t GetWAVDataChunk(const void* dataChunk, size_t dataSize, size_t chunkSize, void* out);
 
 			void UnloadWAVDataChunk(WAVDataChunk& data);
 
-			size_t ParseWAVChunkHeader(void* data, size_t size, WAVChunkHeader& out);
+			size_t ParseWAVChunkHeader(const void* data, size_t size, WAVChunkHeader& out);
 		}
 	}
 }

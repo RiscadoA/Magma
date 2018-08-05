@@ -2,6 +2,7 @@
 
 #include "Importer.hpp"
 
+#include <Magma/Framework/Audio/WAVLoader.hpp>
 #include <Magma/Framework/Audio/RenderDevice.hpp>
 #include <Magma/Framework/Memory/PoolAllocator.hpp>
 
@@ -19,6 +20,7 @@ namespace Magma
 			Framework::Audio::Buffer* buffer;
 			std::atomic<bool> playing = false;
 			std::atomic<bool> loaded = false;
+			std::atomic<bool> end = false;
 		};
 
 		/// <summary>
@@ -29,14 +31,23 @@ namespace Magma
 		public:
 			using ResourceData::ResourceData;
 
-			inline const static size_t BufferCount = 4;
+			static const size_t BufferCount = 4;
+			static const size_t BufferSize = 65536;
 
 			Framework::Audio::Buffer* GetNextBuffer();
 
-			Framework::Audio::Format format;
 			std::atomic<size_t> bufferIndex;
-			AudioStreamBuffer buffers[BufferCount];
+			AudioStreamBuffer buffers[AudioStream::BufferCount];
 			bool repeating;
+
+			Framework::Audio::WAVFileHeader fileHeader;
+			Framework::Audio::WAVChunkHeader dataHeader;
+			Framework::Audio::WAVFormatChunk formatChunk;
+
+			size_t dataPosition;
+			size_t currentPosition;
+
+			void* file;
 		};
 
 		/// <summary>
@@ -55,9 +66,9 @@ namespace Magma
 			virtual ResourceMode GetMode(Resource* resources) final;
 
 		private:
-			void LoadBuffer(AudioStreamBuffer* buffer);
+			void LoadBuffer(AudioStreamBuffer* buffer, AudioStream* stream);
 
-			char m_bufferData[65536];
+			char m_bufferData[AudioStream::BufferSize];
 
 			Framework::Audio::RenderDevice* m_device;
 			Framework::Memory::PoolAllocator m_pool;

@@ -131,9 +131,18 @@ void Main(int argc, char** argv) try
 
 	LoadScene(scene);
 
+	auto src = scene.audioDevice->CreateSource();
+
+	auto rsc = Resources::Manager::GetResource("test-music-0");
+	src->QueueBuffer(rsc.Get().GetData<Resources::AudioStream>()->GetNextBuffer());
+	src->Play();
+
 	// Main loop
 	while (scene.running)
 	{
+		while (src->GetProcessedBuffers() > 0)
+			src->QueueBuffer(rsc.Get().GetData<Resources::AudioStream>()->GetNextBuffer());
+
 		// Poll events
 		scene.window->PollEvents();
 
