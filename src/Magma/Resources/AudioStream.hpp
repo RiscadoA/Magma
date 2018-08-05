@@ -7,6 +7,7 @@
 #include <Magma/Framework/Memory/PoolAllocator.hpp>
 
 #include <vector>
+#include <mutex>
 
 namespace Magma
 {
@@ -18,7 +19,6 @@ namespace Magma
 		struct AudioStreamBuffer
 		{
 			Framework::Audio::Buffer* buffer;
-			std::atomic<bool> playing = false;
 			std::atomic<bool> loaded = false;
 			std::atomic<bool> end = false;
 		};
@@ -36,6 +36,8 @@ namespace Magma
 
 			Framework::Audio::Buffer* GetNextBuffer();
 
+			void FillBuffer(Framework::Audio::Buffer* buffer);
+
 			std::atomic<size_t> bufferIndex;
 			AudioStreamBuffer buffers[AudioStream::BufferCount];
 			bool repeating;
@@ -46,6 +48,8 @@ namespace Magma
 
 			size_t dataPosition;
 			size_t currentPosition;
+
+			std::mutex mutex;
 
 			void* file;
 		};
@@ -74,6 +78,8 @@ namespace Magma
 			Framework::Memory::PoolAllocator m_pool;
 
 			std::vector<AudioStream*> m_streams;
+
+			std::mutex m_mutex;
 		};
 	}
 }

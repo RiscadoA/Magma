@@ -133,15 +133,28 @@ void Main(int argc, char** argv) try
 
 	auto src = scene.audioDevice->CreateSource();
 
+	Framework::Audio::Buffer* buffers[2];
+	buffers[0] = scene.audioDevice->CreateBuffer();
+	buffers[1] = scene.audioDevice->CreateBuffer();
+
 	auto rsc = Resources::Manager::GetResource("test-music-0");
-	src->QueueBuffer(rsc.Get().GetData<Resources::AudioStream>()->GetNextBuffer());
+	rsc.Get().GetData<Resources::AudioStream>()->repeating = true;
+	for (size_t i = 0; i < 2; ++i)
+	{
+		rsc.Get().GetData<Resources::AudioStream>()->FillBuffer(buffers[i]);
+		src->QueueBuffer(buffers[i]);
+	}
 	src->Play();
 
 	// Main loop
 	while (scene.running)
 	{
 		while (src->GetProcessedBuffers() > 0)
-			src->QueueBuffer(rsc.Get().GetData<Resources::AudioStream>()->GetNextBuffer());
+		{
+			auto buf = src->UnqueueBuffer();
+			rsc.Get().GetData<Resources::AudioStream>()->FillBuffer(buf);
+			src->QueueBuffer(buf);
+		}
 
 		// Poll events
 		scene.window->PollEvents();
