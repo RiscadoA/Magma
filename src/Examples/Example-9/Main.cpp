@@ -77,7 +77,7 @@ void LoadScene(Scene& scene)
 		Framework::Audio::WAVData data;
 		Framework::Audio::LoadWAV(fileData, fileSize, data);
 
-		scene.buffer = scene.audioDevice->CreateBuffer(data.pcmData, data.pcmSize, data.format, data.sampleRate);
+		scene.buffer = scene.audioDevice->CreateBuffer(data.dataChunk.pcmData, data.dataChunk.header.chunkSize, data.formatChunk.format, data.formatChunk.sampleRate);
 
 		Framework::Audio::UnloadWAV(data);
 	}

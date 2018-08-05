@@ -21,9 +21,32 @@ void Magma::Resources::Manager::Init(const ManagerSettings& settings)
 void Magma::Resources::Manager::Load()
 {
 	for (auto& r : s_manager->m_resources)
+	{
+		for (auto& i : s_manager->m_importers)
+			if (i->GetName() == r->GetType())
+			{
+				r->SetImporter(i);
+				break;
+			}
+
+		if (r->GetImporter() == nullptr)
+		{
+			std::stringstream ss;
+			ss << "Failed to load resources on Magma::Resources::Manager:" << std::endl;
+			ss << "Failed to load resource '" << r->GetName() << "' on path '" << r->GetDataPath().ToString() << "':" << std::endl;
+			ss << "No importer found with the type '" << r->GetType() << "'";
+			throw ManagerError(ss.str());
+		}
+
+		r->SetMode(r->GetImporter()->GetMode(r));
+
 		if (r->GetMode() == ResourceMode::CPUPermanent ||
 			r->GetMode() == ResourceMode::GPUPermanent)
 			s_manager->Import(r);
+	}
+
+	s_manager->m_active = true;
+	s_manager->m_updateThread = std::thread(&Manager::Update, s_manager);
 }
 
 void Magma::Resources::Manager::Terminate()
@@ -31,13 +54,38 @@ void Magma::Resources::Manager::Terminate()
 	if (s_manager == nullptr)
 	{
 		std::stringstream ss;
-		ss << "Failed to init Magma::Resources::Manager:" << std::endl;
+		ss << "Failed to terminate Magma::Resources::Manager:" << std::endl;
 		ss << "The manager is not initialized or was already terminated";
 		throw ManagerError(ss.str());
 	}
 
+	s_manager->m_active = false;
+	s_manager->m_updateThread.join();
+
 	delete s_manager;
 	s_manager = nullptr;
+}
+
+void Magma::Resources::Manager::Clean()
+{
+	// Clean temporary resources
+	for (auto& r : s_manager->m_resources)
+	{
+		if (r->GetMode() != ResourceMode::CPUTemporary &&
+			r->GetMode() != ResourceMode::GPUTemporary)
+			continue;
+
+		if (r->HasData() && r->GetReferenceCount() == 0)
+			s_manager->Destroy(r);
+	}
+}
+
+void Magma::Resources::Manager::Update()
+{
+	// Updates streaming resources
+	while (m_active)
+		for (auto& i : m_importers)
+			i->Update();
 }
 
 Magma::Resources::ResourceView Magma::Resources::Manager::GetResource(const std::string & name)
@@ -128,7 +176,18 @@ void Magma::Resources::Manager::CreateResources(const std::string& metaData)
 		std::string type = document.GetEntry(r.name, "type").value;
 		std::string path = document.GetEntry(r.name, "path").value;
 
-		m_resources.emplace_back(new Resource(name, type, path, ResourceMode::CPUPermanent));
+		auto resource = new Resource(name, type, path);
+
+		for (auto& e : r.entries)
+		{
+			if (e.name == "type" ||
+				e.name == "path")
+				continue;
+
+			resource->SetParam(e.name, e.value);
+		}
+
+		m_resources.push_back(resource);
 	}
 }
 
@@ -138,22 +197,12 @@ void Magma::Resources::Manager::Import(Resource * resource)
 	if (resource->HasData())
 		this->Destroy(resource);
 
-	// Search for importer
-	for (auto& i : this->m_importers)
-	{
-		// If the importer type matches the resource
-		if (i->GetName() == resource->GetType())
-		{
-			i->Import(resource);
-			return;
-		}
-	}
+	// Import it
+	resource->GetImporter()->Import(resource);
 
-	// Not found
-	std::stringstream ss;
-	ss << "Failed to import resource on Magma::Resources::Manager:" << std::endl;
-	ss << "No importer with name '" << resource->GetType() << "' found";
-	throw ManagerError(ss.str());
+#ifdef _DEBUG
+	printf("Imported resource '%s'\n", resource->GetName().c_str());
+#endif
 }
 
 void Magma::Resources::Manager::Destroy(Resource * resource)
@@ -162,20 +211,10 @@ void Magma::Resources::Manager::Destroy(Resource * resource)
 	if (resource->HasData())
 		return;
 
-	// Search for importer
-	for (auto& i : s_manager->m_importers)
-	{
-		// If the importer type matches the resource
-		if (i->GetName() == resource->GetType())
-		{
-			i->Destroy(resource);
-			return;
-		}
-	}
+	// Destroy it
+	resource->GetImporter()->Destroy(resource);
 
-	// Not found
-	std::stringstream ss;
-	ss << "Failed to destroy resource on Magma::Resources::Manager:" << std::endl;
-	ss << "No importer with name '" << resource->GetType() << "' found";
-	throw ManagerError(ss.str());
+#ifdef _DEBUG
+	printf("Destroyed resource '%s'\n", resource->GetName().c_str());
+#endif
 }

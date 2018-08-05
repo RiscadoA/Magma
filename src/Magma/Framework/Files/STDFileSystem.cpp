@@ -62,6 +62,28 @@ void Magma::Framework::Files::STDFileSystem::CloseFile(void * file)
 	}
 }
 
+void Magma::Framework::Files::STDFileSystem::Seek(void* file, size_t position)
+{
+	if (file == nullptr)
+	{
+		std::stringstream ss;
+		ss << "Failed seek position on file on STDFileSystem:" << std::endl;
+		ss << "File handle is null";
+		throw FileError(ss.str());
+	}
+
+	if (fseek((FILE*)file, position, SEEK_SET))
+	{
+		auto err = ferror((FILE*)file);
+		std::stringstream ss;
+		ss << "Failed to seek position on file on STDFileSystem:" << std::endl;
+		ss << "fseek didn't return 0:" << std::endl;
+		ss << "Error " << err << ":" << std::endl;
+		ss << strerror(err);
+		throw FileError(ss.str());
+	}
+}
+
 void Magma::Framework::Files::STDFileSystem::Read(void * file, void * buffer, size_t size)
 {
 	if (file == nullptr)

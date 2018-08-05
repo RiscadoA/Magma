@@ -14,6 +14,9 @@
 #include <Magma/GUI/Elements/Box.hpp>
 
 #include <Magma/Resources/Shader.hpp>
+#include <Magma/Resources/AudioStream.hpp>
+
+#include <Magma/Framework/Audio/OALRenderDevice.hpp>
 
 #define USE_GL
 
@@ -22,12 +25,9 @@ using namespace Magma;
 struct Scene
 {
 	Framework::Input::Window* window;
-	Framework::Graphics::RenderDevice* device;
+	Framework::Graphics::RenderDevice* graphicsDevice;
+	Framework::Audio::RenderDevice* audioDevice;
 	bool running;
-
-	Framework::Graphics::RasterState* rasterState;
-	Framework::Graphics::DepthStencilState* depthStencilState;
-	Framework::Graphics::BlendState* blendState;
 
 	GUI::Root* guiRoot;
 	GUI::Renderer* guiRenderer;
@@ -53,47 +53,30 @@ void LoadScene(Scene& scene)
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
 
-	// Create device
+	// Create graphics render device
 	{
 		Framework::Graphics::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.device = new Framework::Graphics::OGL410RenderDevice();
+		scene.graphicsDevice = new Framework::Graphics::OGL410RenderDevice();
 #else
-		scene.device = new Framework::Graphics::D3D11RenderDevice();
+		scene.graphicsDevice = new Framework::Graphics::D3D11RenderDevice();
 #endif
-		scene.device->Init(scene.window, settings);
+		scene.graphicsDevice->Init(scene.window, settings);
+	}
+
+	// Create audio render device
+	{
+		Framework::Audio::RenderDeviceSettings settings;
+		scene.audioDevice = new Framework::Audio::OALRenderDevice();
+		scene.audioDevice->Init(settings);
 	}
 
 	// Add resource importers
-	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.device);
+	Resources::Manager::AddImporter<Resources::AudioStreamImporter>(scene.audioDevice);
+	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.graphicsDevice);
 
 	// Load permament resources
 	Resources::Manager::Load();
-
-	// Create raster state
-	{
-		Framework::Graphics::RasterStateDesc desc;
-
-		desc.rasterMode = Framework::Graphics::RasterMode::Fill;
-		desc.cullEnabled = false;
-
-		scene.rasterState = scene.device->CreateRasterState(desc);
-	}
-
-	// Create depth stencil state
-	{
-		Framework::Graphics::DepthStencilStateDesc desc;
-		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
-	}
-
-	// Create blend state
-	{
-		Framework::Graphics::BlendStateDesc desc;
-		desc.blendEnabled = true;
-		desc.sourceFactor =	Framework::Graphics::BlendFactor::SourceAlpha;
-		desc.destinationFactor = Framework::Graphics::BlendFactor::InverseSourceAlpha;
-		scene.blendState = scene.device->CreateBlendState(desc);
-	}
 
 	// Create GUI Root
 	{
@@ -102,7 +85,7 @@ void LoadScene(Scene& scene)
 
 	// Create GUI Renderer
 	{
-		scene.guiRenderer = new GUI::Renderer(scene.device);
+		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
 	}
 
 	// Create GUI box element
@@ -133,13 +116,9 @@ void CleanScene(Scene& scene)
 	delete scene.guiRenderer;
 	delete scene.guiRoot;
 
-	// Clean render device objects
-	scene.device->DestroyBlendState(scene.blendState);
-	scene.device->DestroyDepthStencilState(scene.depthStencilState);
-	scene.device->DestroyRasterState(scene.rasterState);
-
-	// Destroy context, window and filesytem
-	delete scene.device;
+	// Destroy audio and graphics devices, window and filesytem
+	delete scene.audioDevice;
+	delete scene.graphicsDevice;
 	delete scene.window;
 
 	// Terminate resources manager
@@ -159,18 +138,13 @@ void Main(int argc, char** argv) try
 		scene.window->PollEvents();
 
 		// Clear screen
-		scene.device->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-
-		// Set raster and depth stencil states
-		scene.device->SetRasterState(scene.rasterState);
-		scene.device->SetDepthStencilState(scene.depthStencilState);
-		scene.device->SetBlendState(scene.blendState);
+		scene.graphicsDevice->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		// Draw GUI
 		scene.guiRenderer->Render(scene.guiRoot);
 
 		// Swap screen back and front buffers
-		scene.device->SwapBuffers();
+		scene.graphicsDevice->SwapBuffers();
 	}
 
 	CleanScene(scene);

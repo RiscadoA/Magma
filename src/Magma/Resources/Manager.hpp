@@ -8,6 +8,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <thread>
+#include <atomic>
 
 namespace Magma
 {
@@ -44,6 +46,11 @@ namespace Magma
 			static void Terminate();
 
 			/// <summary>
+			///		Cleans unused resources.
+			/// </summary>
+			static void Clean();
+
+			/// <summary>
 			///		Gets a resource from the resource manager.
 			/// </summary>
 			/// <param name="name">Resource name</param>
@@ -78,12 +85,16 @@ namespace Magma
 			void CreateResources(const std::string& metaData);
 			void Import(Resource* resource);
 			void Destroy(Resource* resource);
+			void Update();
 
 			ManagerSettings m_settings;
 			Framework::Files::FileSystem* m_fileSystem;
 
 			std::vector<Importer*> m_importers;
 			std::vector<Resource*> m_resources;
+
+			std::thread m_updateThread;
+			std::atomic<bool> m_active = false;
 		};
 
 		template <typename T, typename ... TArgs>

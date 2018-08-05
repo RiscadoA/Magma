@@ -99,6 +99,37 @@ void Magma::Resources::ShaderImporter::Import(Resource * resource)
 
 void Magma::Resources::ShaderImporter::Destroy(Resource * resource)
 {
-	m_pool.Deallocate(resource->GetData<Shader>());
+	auto data = resource->GetData<Shader>();
+	switch (data->type)
+	{
+		case Framework::Graphics::ShaderType::Vertex:
+			m_device->DestroyVertexShader(data->vertexShader);
+			break;
+
+		case Framework::Graphics::ShaderType::Pixel:
+			m_device->DestroyPixelShader(data->pixelShader);
+			break;
+	}
+
+	data->~Shader();
+	m_pool.Deallocate(data);
 	resource->SetData(nullptr);
+}
+
+Magma::Resources::ResourceMode Magma::Resources::ShaderImporter::GetMode(Resource * resource)
+{
+	auto mode = resource->GetParam("storage");
+
+	if (mode == "permanent")
+		return ResourceMode::GPUPermanent;
+	else if (mode == "temporary")
+		return ResourceMode::GPUTemporary;
+	else
+	{
+		std::stringstream ss;
+		ss << "Failed to get shader resource on path '" << resource->GetDataPath().ToString() << "' storage mode:" << std::endl;
+		ss << "Unsupported storage mode '" << mode << "':" << std::endl;
+		ss << "Supported storage modes: 'permament', 'temporary'";
+		throw ImporterError(ss.str());
+	}
 }

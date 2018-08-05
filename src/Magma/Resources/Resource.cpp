@@ -67,9 +67,11 @@ const Magma::Resources::Resource & Magma::Resources::ResourceView::Get() const
 	return *m_resource;
 }
 
-Magma::Resources::Resource::Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath, ResourceMode mode)
-	: m_name(name), m_type(type), m_dataPath(dataPath), m_mode(mode)
+Magma::Resources::Resource::Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath)
+	: m_name(name), m_type(type), m_dataPath(dataPath)
 {
+	m_mode = ResourceMode::Invalid;
+	m_importer = nullptr;
 	m_data = nullptr;
 	m_referenceCount = 0;
 }
@@ -77,6 +79,21 @@ Magma::Resources::Resource::Resource(const std::string& name, const std::string&
 Magma::Resources::Resource::~Resource()
 {
 
+}
+
+void Magma::Resources::Resource::RemoveParam(const std::string & name)
+{
+	m_params.erase(name);
+}
+
+void Magma::Resources::Resource::SetParam(const std::string & name, const std::string & value)
+{
+	m_params[name] = value;
+}
+
+const std::string & Magma::Resources::Resource::GetParam(const std::string & name)
+{
+	return m_params.at(name);
 }
 
 Magma::Resources::ResourceData::ResourceData(Resource * resource)

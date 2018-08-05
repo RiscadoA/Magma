@@ -1,0 +1,5 @@
+#!MNI!
+
+[test-music-0]
+type=audio-stream
+path=/Audio/test-music-0.wav

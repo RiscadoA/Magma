@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <string>
+#include <map>
 
 #include <Magma/Framework/Files/Path.hpp>
 
@@ -65,6 +66,7 @@ namespace Magma
 		};
 
 		class Resource;
+		class Importer;
 
 		/// <summary>
 		///		Holds resource data (abstract class)
@@ -97,7 +99,7 @@ namespace Magma
 		class Resource final
 		{
 		public:
-			Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath, ResourceMode mode);
+			Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath);
 			~Resource();
 
 			/// <summary>
@@ -153,17 +155,55 @@ namespace Magma
 			inline const Framework::Files::Path& GetDataPath() const { return m_dataPath; }
 
 			/// <summary>
+			///		Sets this resource's storage mode.
+			/// </summary>
+			/// <param name="mode">New storage mode</returns>
+			inline void SetMode(ResourceMode mode) { m_mode = mode; }
+
+			/// <summary>
 			///		Gets this resource's storage mode.
 			/// </summary>
 			/// <returns>This resource's storage mode</returns>
 			inline ResourceMode GetMode() const { return m_mode; }
 
+			/// <summary>
+			///		Sets the importer used for this resource
+			/// </summary>
+			inline void SetImporter(Importer* importer) { m_importer = importer; }
+
+			/// <summary>
+			///		Gets the importer used for this resource
+			/// </summary>
+			inline Importer* GetImporter() const { return m_importer; }
+
+			/// <summary>
+			///		Removes a parameter from this resource
+			/// </summary>
+			/// <param name="name">Parameter name</param>
+			void RemoveParam(const std::string& name);
+
+			/// <summary>
+			///		Sets a parameter on this resource
+			/// </summary>
+			/// <param name="name">Parameter name</param>
+			/// <param name="value">Parameter value</param>
+			void SetParam(const std::string& name, const std::string& value);
+
+			/// <summary>
+			///		Gets a parameter from this resource
+			/// </summary>
+			/// <param name="name">Param name</param>
+			/// <returns>Param value</returns>
+			const std::string& GetParam(const std::string& name);
+
 		private:
 			friend class ResourceView;
 
+			Importer* m_importer;
 			ResourceData* m_data;
 			std::atomic<size_t> m_referenceCount;
 
+			std::map<std::string, std::string> m_params;
 			std::string m_name;
 			std::string m_type;
 			Framework::Files::Path m_dataPath;

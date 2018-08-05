@@ -49,6 +49,7 @@ namespace Magma
 			virtual void Update() final;
 			virtual void Import(Resource * resource) final;
 			virtual void Destroy(Resource * resource) final;
+			virtual ResourceMode GetMode(Resource* resources) final;
 
 		private:
 			Framework::Graphics::RenderDevice* m_device;

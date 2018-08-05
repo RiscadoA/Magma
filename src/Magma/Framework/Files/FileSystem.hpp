@@ -52,6 +52,13 @@ namespace Magma
 				virtual void CloseFile(void* file) = 0;
 
 				/// <summary>
+				///		Changes the read/write position in a file.
+				/// </summary>
+				/// <param name="file">File handle</param>
+				/// <param name="position">Read/write position</param>
+				virtual void Seek(void* file, size_t position) = 0;
+
+				/// <summary>
 				///		Reads data from a file into a buffer.
 				/// </summary>
 				/// <param name="file">File handle</param>

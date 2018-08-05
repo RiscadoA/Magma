@@ -7,10 +7,65 @@
 
 void Magma::Framework::Audio::LoadWAV(void * data, size_t size, WAVData & out)
 {
-	if (size < 8)
+	size_t dataHead = 0;
+
+	// Load WAV header
+	dataHead += ParseWAVHeader((char*)data + dataHead, 12, out.fileHeader);
+
+	// Check WAV file type
+	if (out.fileHeader.type[0] != 'W' ||
+		out.fileHeader.type[1] != 'A' ||
+		out.fileHeader.type[2] != 'V' ||
+		out.fileHeader.type[3] != 'E')
 	{
 		std::stringstream ss;
 		ss << "Failed to load WAV:" << std::endl;
+		ss << "Invalid file:" << std::endl;
+		ss << "Invalid file type (only WAVE is supported for now)";
+		throw LoaderError(ss.str());
+	}
+	
+	while (dataHead < size)
+	{
+		auto oldHead = dataHead;
+
+		WAVChunkHeader header;
+		dataHead += ParseWAVChunkHeader((char*)data + dataHead, size - dataHead, header);
+
+		// Load format chunk
+		if (header.chunkName[0] == 'f' &&
+			header.chunkName[1] == 'm' &&
+			header.chunkName[2] == 't' &&
+			(header.chunkName[3] == ' ' || header.chunkName[3] == '\0'))
+		{
+			dataHead = oldHead;
+			dataHead += ParseWAVFormatChunk((char*)data + dataHead, size - dataHead, out.formatChunk);
+		}
+		// Load data chunk
+		else if (header.chunkName[0] == 'd' &&
+				 header.chunkName[1] == 'a' &&
+				 header.chunkName[2] == 't' &&
+				 header.chunkName[3] == 'a')
+		{
+			dataHead = oldHead;
+			dataHead += ParseWAVDataChunk((char*)data + dataHead, size - dataHead, out.dataChunk);
+		}
+		// Skip unknown chunk
+		else dataHead += header.chunkSize;
+	}
+}
+
+void Magma::Framework::Audio::UnloadWAV(WAVData & data)
+{
+	UnloadWAVDataChunk(data.dataChunk);
+}
+
+size_t Magma::Framework::Audio::ParseWAVHeader(void * data, size_t size, WAVFileHeader & out)
+{
+	if (size < 12)
+	{
+		std::stringstream ss;
+		ss << "Failed to parse WAV header:" << std::endl;
 		ss << "EOF encountered unexpectedly";
 		throw LoaderError(ss.str());
 	}
@@ -22,83 +77,87 @@ void Magma::Framework::Audio::LoadWAV(void * data, size_t size, WAVData & out)
 		((char*)data)[3] != 'F')
 	{
 		std::stringstream ss;
-		ss << "Failed to load WAV:" << std::endl;
+		ss << "Failed to parse WAV header:" << std::endl;
 		ss << "Invalid file:" << std::endl;
 		ss << "Invalid RIFF marker";
 		throw LoaderError(ss.str());
 	}
 
-	// Check file size (4-7)
+	// Get file size (4-7)
 	{
-		auto fileSize = *(int32_t*)((char*)data + 4);
-		Memory::FromLittleEndian4(&fileSize);
-		if (size < fileSize)
-		{
-			std::stringstream ss;
-			ss << "Failed to load WAV:" << std::endl;
-			ss << "WAV header file size doesn't match the size sent to the function";
-			throw LoaderError(ss.str());
-		}
+		out.fileSize = *(int32_t*)((char*)data + 4);
+		Memory::FromLittleEndian4(&out.fileSize);
 	}
 
-	// Check file type header (8-11)
-	if (((char*)data)[8] != 'W' ||
-		((char*)data)[9] != 'A' ||
-		((char*)data)[10] != 'V' ||
-		((char*)data)[11] != 'E')
+	// Get file type (8-11)
+	out.type[0] = ((char*)data)[8];
+	out.type[1] = ((char*)data)[9];
+	out.type[2] = ((char*)data)[10];
+	out.type[3] = ((char*)data)[11];
+
+	return 12;
+}
+
+size_t Magma::Framework::Audio::ParseWAVFormatChunk(void * data, size_t size, WAVFormatChunk & out)
+{
+	if (size < 18)
 	{
 		std::stringstream ss;
-		ss << "Failed to load WAV:" << std::endl;
-		ss << "Invalid file:" << std::endl;
-		ss << "Invalid file type header (should be WAVE)";
+		ss << "Failed to parse WAV format chunk:" << std::endl;
+		ss << "EOF encountered unexpectedly";
 		throw LoaderError(ss.str());
 	}
 
-	// Check format chunk marker (12-15)
-	if (((char*)data)[12] != 'f' ||
-		((char*)data)[13] != 'm' ||
-		((char*)data)[14] != 't' ||
-		(((char*)data)[15] != ' ' && ((char*)data)[15] != '\0'))
+	// Get chunk name
+	out.header.chunkName[0] = ((char*)data)[0];
+	out.header.chunkName[1] = ((char*)data)[1];
+	out.header.chunkName[2] = ((char*)data)[2];
+	out.header.chunkName[3] = ((char*)data)[3];
+
+	// Check format chunk name (0-3)
+	if (out.header.chunkName[0] != 'f' ||
+		out.header.chunkName[1] != 'm' ||
+		out.header.chunkName[2] != 't' ||
+		(out.header.chunkName[3] != ' ' && out.header.chunkName[3] != '\0'))
 	{
 		std::stringstream ss;
-		ss << "Failed to load WAV:" << std::endl;
-		ss << "Invalid file:" << std::endl;
+		ss << "Failed to parse WAV format chunk:" << std::endl;
 		ss << "Invalid format chunk marker";
 		throw LoaderError(ss.str());
 	}
 
-	// Length of format data (not needed) (16-19)
+	// Length of format data (4-7)
+	out.header.chunkSize = *(int32_t*)((char*)data + 4);
 
-	// Type of format (20-21)
+	// Type of format (8-9)
 	{
-		auto formatType = *(int16_t*)((char*)data + 20);
+		auto formatType = *(int16_t*)((char*)data + 8);
 		Memory::FromLittleEndian2(&formatType);
 
 		if (formatType != 1)
 		{
 			std::stringstream ss;
-			ss << "Failed to load WAV:" << std::endl;
-			ss << "Invalid file:" << std::endl;
+			ss << "Failed to parse WAV format chunk:" << std::endl;
 			ss << "Unsupported format type '" << formatType << "' (only supports '1' for now, which corresponds to raw PCM)";
 			throw LoaderError(ss.str());
 		}
 	}
 
-	// Number of channels (22-23)
+	// Number of channels (10-11)
 	{
-		out.channelCount = *(int16_t*)((char*)data + 22);
+		out.channelCount = *(int16_t*)((char*)data + 10);
 		Memory::FromLittleEndian2(&out.channelCount);
 	}
 
-	// Sample rate (24-27)
+	// Sample rate (12-15)
 	{
-		out.sampleRate = *(int32_t*)((char*)data + 24);
+		out.sampleRate = *(int32_t*)((char*)data + 12);
 		Memory::FromLittleEndian4(&out.sampleRate);
 	}
 
-	// Bits per sample (34-35)
+	// Bits per sample (22-23)
 	{
-		out.bitsPerSample = *(int16_t*)((char*)data + 34);
+		out.bitsPerSample = *(int16_t*)((char*)data + 22);
 		Memory::FromLittleEndian2(&out.bitsPerSample);
 	}
 
@@ -115,42 +174,76 @@ void Magma::Framework::Audio::LoadWAV(void * data, size_t size, WAVData & out)
 		else
 		{
 			std::stringstream ss;
-			ss << "Failed to load WAV:" << std::endl;
-			ss << "Invalid file:" << std::endl;
+			ss << "Failed to parse WAV format chunk:" << std::endl;
 			ss << "Unsupported format (bits per sample: " << out.bitsPerSample << "; channel count: " << out.channelCount << ")";
 			throw LoaderError(ss.str());
 		}
 	}
 
-	// Check data chunk marker (36-39)
-	size_t dataLoc = 36;
-
-	// Ignore other chunks
-	while (((char*)data)[dataLoc] != 'd' ||
-		((char*)data)[dataLoc + 1] != 'a' ||
-		((char*)data)[dataLoc + 2] != 't' ||
-		((char*)data)[dataLoc + 3] != 'a')
-	{
-		auto size = *(int32_t*)((char*)data + dataLoc + 4);
-		Memory::FromLittleEndian4(&size);
-		dataLoc += size + 8;
-	}
-
-	// Data size (40-43)
-	{
-		out.pcmSize = *(int32_t*)((char*)data + dataLoc + 4);
-		Memory::FromLittleEndian4(&out.pcmSize);
-	}
-
-	// Data (44-x)
-	out.pcmData = new char[out.pcmSize];
-	memcpy(out.pcmData, (char*)data + dataLoc + 8, out.pcmSize);
-
-	for (size_t i = 0; i < out.pcmSize / 4; ++i)
-		Memory::FromLittleEndian4((int32_t*)out.pcmData + i);
+	return out.header.chunkSize + 8;
 }
 
-void Magma::Framework::Audio::UnloadWAV(WAVData & data)
+size_t Magma::Framework::Audio::ParseWAVDataChunk(void * data, size_t size, WAVDataChunk & out)
 {
-	delete[] data.pcmData;
+	if (size < 8)
+	{
+		std::stringstream ss;
+		ss << "Failed to parse WAV data chunk:" << std::endl;
+		ss << "EOF encountered unexpectedly";
+		throw LoaderError(ss.str());
+	}
+
+	// Get chunk name
+	out.header.chunkName[0] = ((char*)data)[0];
+	out.header.chunkName[1] = ((char*)data)[1];
+	out.header.chunkName[2] = ((char*)data)[2];
+	out.header.chunkName[3] = ((char*)data)[3];
+
+	// Check data chunk name (0-3)
+	if (out.header.chunkName[0] != 'd' ||
+		out.header.chunkName[1] != 'a' ||
+		out.header.chunkName[2] != 't' ||
+		out.header.chunkName[3] != 'a')
+	{
+		std::stringstream ss;
+		ss << "Failed to parse WAV format chunk:" << std::endl;
+		ss << "Invalid format chunk marker";
+		throw LoaderError(ss.str());
+	}
+
+	// Length of data data (4-7)
+	out.header.chunkSize = *(int32_t*)((char*)data + 4);
+
+	// Store PCM data
+	out.pcmData = malloc(out.header.chunkSize);
+	memcpy(out.pcmData, (char*)data + 8, out.header.chunkSize);
+
+	return out.header.chunkSize + 8;
+}
+
+void Magma::Framework::Audio::UnloadWAVDataChunk(WAVDataChunk & data)
+{
+	free(data.pcmData);
+}
+
+size_t Magma::Framework::Audio::ParseWAVChunkHeader(void * data, size_t size, WAVChunkHeader & out)
+{
+	if (size < 8)
+	{
+		std::stringstream ss;
+		ss << "Failed to parse WAV chunk header:" << std::endl;
+		ss << "EOF encountered unexpectedly";
+		throw LoaderError(ss.str());
+	}
+
+	// Get chunk name
+	out.chunkName[0] = ((char*)data)[0];
+	out.chunkName[1] = ((char*)data)[1];
+	out.chunkName[2] = ((char*)data)[2];
+	out.chunkName[3] = ((char*)data)[3];
+
+	// Length of format data (not needed) (4-7)
+	out.chunkSize = *(int32_t*)((char*)data + 4);
+
+	return 8;
 }

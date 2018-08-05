@@ -43,6 +43,14 @@ namespace Magma
 			virtual void Destroy(Resource* resource) = 0;
 
 			/// <summary>
+			///		Gets a resource's storage mode
+			/// </summary>
+			/// <param name="resource">Resource to check</param>
+			/// <param name="mode">Resource's storage mode string read from its description</param>
+			/// <returns>Resource's storage mode</returns>
+			virtual ResourceMode GetMode(Resource* resource) = 0;
+
+			/// <summary>
 			///		Gets this importer's name.
 			/// </summary>
 			/// <returns>This importer's name</returns>
