@@ -77,6 +77,12 @@ namespace Magma
 				virtual void Pause() = 0;
 
 				/// <summary>
+				///		Checks if this source is playing audio.
+				/// </summary>
+				/// <returns>Returns true if playing, otherwise false</returns>
+				virtual bool IsPlaying() = 0;
+
+				/// <summary>
 				///		Gets the number of buffers that were processed since the last time this function was called
 				/// </summary>
 				/// <returns>Number of buffers processed</returns>

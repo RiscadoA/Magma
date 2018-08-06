@@ -120,6 +120,9 @@ void Main(int argc, char** argv) try
 			{
 				last = rsc->GetData<Resources::AudioStream>()->FillBuffer(buf);
 				src->QueueBuffer(buf);
+				
+				if (!src->IsPlaying())
+					src->Play();
 			}
 			else claimGuard.Unclaim();
 		}
