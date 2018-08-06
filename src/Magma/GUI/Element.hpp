@@ -5,6 +5,9 @@
 #include <string>
 #include <typeindex>
 
+#include <Magma/Framework/Input/Event.hpp>
+#include <Magma/Framework/Input/Mouse.hpp>
+
 namespace Magma
 {
 	namespace GUI
@@ -171,6 +174,40 @@ namespace Magma
 			/// </summary>
 			/// <returns>True if it is renderable, otherwise false</returns>
 			inline bool IsRenderable() const { return m_isRenderable; }
+
+			/// <summary>
+			///		Fired when the mouse enters the element bounding box.
+			/// </summary>
+			Framework::Input::Event<> OnMouseEnter;
+
+			/// <summary>
+			///		Fired when the mouse leaves the element bounding box.
+			/// </summary>
+			Framework::Input::Event<> OnMouseLeave;
+
+			/// <summary>
+			///		Fired when the mouse moves inside the element bounding box.
+			///		Params: { mouse position X relative to bounding box; mouse position Y relative to bounding box; }
+			/// </summary>
+			Framework::Input::Event<float, float> OnMouseMove;
+
+			/// <summary>
+			///		Fired when the mouse wheel is scrolled inside the element bounding box.
+			///		Params: { mouse scroll delta; }
+			/// </summary>
+			Framework::Input::Event<float> OnMouseScroll;
+
+			/// <summary>
+			///		Fired when a mouse button goes up inside the element bounding box.
+			///		Params: { mouse button; }
+			/// </summary>
+			Framework::Input::Event<Framework::Input::Mouse> OnMouseUp;
+
+			/// <summary>
+			///		Fired when a mouse button goes down inside the element bounding box.
+			///		Params: { mouse button; }
+			/// </summary>
+			Framework::Input::Event<Framework::Input::Mouse> OnMouseDown;
 
 		protected:
 			/// <summary>
