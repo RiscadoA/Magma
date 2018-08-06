@@ -88,7 +88,7 @@ void CleanScene(Scene& scene)
 void Main(int argc, char** argv) try
 {
 	Scene scene;
-	 
+	
 	LoadScene(scene);
 
 	auto src = scene.audioDevice->CreateSource();

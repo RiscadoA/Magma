@@ -656,15 +656,9 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 			}
 		}
 		else if (std::regex_match(v.name, match, positionNameRegex))
-		{
 			v.index = 0;
-			continue;
-		}
 		else if (std::regex_match(v.name, match, depthNameRegex))
-		{
 			v.index = 0;
-			continue;
-		}
 		else
 		{
 			std::stringstream ss;
@@ -674,7 +668,7 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 			throw ShaderError(ss.str());
 		}
 
-		if (v.index > data.rootScope->nextVarID)
+		if (v.index >= data.rootScope->nextVarID)
 			data.rootScope->nextVarID = v.index + 1;
 
 		ss << "OUTPUT VAR" << std::endl;
@@ -708,11 +702,9 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 			}
 		}
 		else
-		{
 			v.index = data.rootScope->nextVarID++;
-		}
 
-		if (v.index > data.rootScope->nextVarID)
+		if (v.index >= data.rootScope->nextVarID)
 			data.rootScope->nextVarID = v.index + 1;
 
 		ss << "INPUT VAR" << std::endl;
