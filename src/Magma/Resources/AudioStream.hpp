@@ -14,16 +14,6 @@ namespace Magma
 	namespace Resources
 	{
 		/// <summary>
-		///		Represents a buffer in the audio stream.
-		/// </summary>
-		struct AudioStreamBuffer
-		{
-			Framework::Audio::Buffer* buffer;
-			std::atomic<bool> loaded = false;
-			std::atomic<bool> end = false;
-		};
-
-		/// <summary>
 		///		Audio stream resource data.
 		/// </summary>
 		class AudioStream : public ResourceData
@@ -31,27 +21,102 @@ namespace Magma
 		public:
 			using ResourceData::ResourceData;
 
-			static const size_t BufferCount = 4;
+			/// <summary>
+			///		Audio stream buffer size.
+			/// </summary>
 			static const size_t BufferSize = 65536;
 
-			Framework::Audio::Buffer* GetNextBuffer();
+			/// <summary>
+			///		Claims this audio stream (this prevents it from being used in multiple places at the same time).
+			/// </summary>
+			void Claim();
 
-			void FillBuffer(Framework::Audio::Buffer* buffer);
+			/// <summary>
+			///		Unclaims this audio stream.
+			/// </summary>
+			void Unclaim();
 
-			std::atomic<size_t> bufferIndex;
-			AudioStreamBuffer buffers[AudioStream::BufferCount];
-			bool repeating;
+			/// <summary>
+			///		Sets the position of the stream in bytes.
+			/// </summary>
+			/// <param name="position">Position in bytes</param>
+			void SeekPositionBytes(size_t position);
 
+			/// <summary>
+			///		Sets the position of the stream in samples.
+			/// </summary>
+			/// <param name="position">Position in samples</param>
+			void SeekPositionSamples(size_t position);
+
+			/// <summary>
+			///		Sets the position of the stream in seconds.
+			/// </summary>
+			/// <param name="position">Position in seconds</param>
+			void SeekPositionSeconds(float position);
+
+			/// <summary>
+			///		Fills an audio buffer with next BufferSize bytes in the stream.
+			/// </summary>
+			/// <param name="buffer">Handle to an audio buffer.</param>
+			/// <returns>If this buffer was the last buffer in the stream, returns true, otherwise returns false.</returns>
+			bool FillBuffer(Framework::Audio::Buffer* buffer);
+
+			/// <summary>
+			///		WAV file header.
+			/// </summary>
 			Framework::Audio::WAVFileHeader fileHeader;
+
+			/// <summary>
+			///		WAV data header.
+			/// </summary>
 			Framework::Audio::WAVChunkHeader dataHeader;
+
+			/// <summary>
+			///		WAV format chunk.
+			/// </summary>
 			Framework::Audio::WAVFormatChunk formatChunk;
 
+		private:
+			friend class AudioStreamImporter;
+			
 			size_t dataPosition;
 			size_t currentPosition;
+			size_t nextBufferSize;
 
-			std::mutex mutex;
+			std::mutex m_mutex;
+			std::mutex m_claimMutex;
 
 			void* file;
+
+			char m_bufferData[BufferSize];
+			bool m_dataLoaded = false;
+			std::condition_variable m_dataLoadedCV;
+		};
+
+		/// <summary>
+		///		Audio stream claiming and unclaiming utility.
+		/// </summary>
+		class AudioStreamClaimGuard final
+		{
+		public:
+			/// <summary>
+			///		Claims an audio stream.
+			/// </summary>
+			inline AudioStreamClaimGuard(AudioStream* stream) : m_claimed(false), m_stream(stream) { m_stream->Claim(); m_claimed = true; }
+
+			/// <summary>
+			///		Unclaims an audio stream (if it was claimed).
+			/// </summary>
+			inline ~AudioStreamClaimGuard() { this->Unclaim(); }
+
+			/// <summary>
+			///		Unclaims the audio stream (if it was claimed).
+			/// </summary>
+			inline void Unclaim() { if (m_claimed) { m_stream->Unclaim(); m_claimed = false; } }
+
+		private:
+			AudioStream * m_stream;
+			bool m_claimed;
 		};
 
 		/// <summary>
@@ -70,10 +135,6 @@ namespace Magma
 			virtual ResourceMode GetMode(Resource* resources) final;
 
 		private:
-			void LoadBuffer(AudioStreamBuffer* buffer, AudioStream* stream);
-
-			char m_bufferData[AudioStream::BufferSize];
-
 			Framework::Audio::RenderDevice* m_device;
 			Framework::Memory::PoolAllocator m_pool;
 

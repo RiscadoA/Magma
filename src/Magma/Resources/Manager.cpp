@@ -93,6 +93,9 @@ Magma::Resources::ResourceView Magma::Resources::Manager::GetResource(const std:
 	// Search for resource
 	for (auto& r : s_manager->m_resources)
 	{
+		if (r->GetName() != name)
+			continue;
+
 		// If it wasn't imported yet, import it
 		if (!r->HasData())
 			s_manager->Import(r);

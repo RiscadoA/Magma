@@ -238,6 +238,10 @@ namespace Magma
 			///  <returns>Const resource pointer (guaranteed to never return nullptr)<returns>
 			const Resource& Get() const;
 
+			// Operator overloads
+			inline const Resource* operator->() const { return &this->Get(); }
+			inline Resource* operator->() { return &this->Get(); }
+
 		private:
 			Resource* m_resource;
 		};

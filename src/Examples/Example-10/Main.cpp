@@ -10,9 +10,6 @@
 
 #include <Magma/Resources/Manager.hpp>
 
-#include <Magma/GUI/Renderer.hpp>
-#include <Magma/GUI/Elements/Box.hpp>
-
 #include <Magma/Resources/Shader.hpp>
 #include <Magma/Resources/AudioStream.hpp>
 
@@ -28,9 +25,6 @@ struct Scene
 	Framework::Graphics::RenderDevice* graphicsDevice;
 	Framework::Audio::RenderDevice* audioDevice;
 	bool running;
-
-	GUI::Root* guiRoot;
-	GUI::Renderer* guiRenderer;
 };
 
 void LoadScene(Scene& scene)
@@ -77,44 +71,10 @@ void LoadScene(Scene& scene)
 
 	// Load permament resources
 	Resources::Manager::Load();
-
-	// Create GUI Root
-	{
-		scene.guiRoot = new GUI::Root();
-	}
-
-	// Create GUI Renderer
-	{
-		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
-	}
-
-	// Create GUI box element
-	{
-		auto element = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-
-		GUI::BoundingBox bb;
-
-		bb.left.absolute = 0.0f;
-		bb.left.relative = 0.5f;
-
-		bb.right.absolute = 50.0f;
-		bb.right.relative = 0.5f;
-
-		bb.bottom.absolute = 0.0f;
-		bb.bottom.relative = 0.5f;
-
-		bb.top.absolute = 50.0f;
-		bb.top.relative = 0.5f;
-
-		element->SetBox(bb);
-	}
 }
 
 void CleanScene(Scene& scene)
 {
-	// Delete GUI stuff
-	delete scene.guiRenderer;
-	delete scene.guiRoot;
 
 	// Destroy audio and graphics devices, window and filesytem
 	delete scene.audioDevice;
@@ -128,7 +88,7 @@ void CleanScene(Scene& scene)
 void Main(int argc, char** argv) try
 {
 	Scene scene;
-
+	 
 	LoadScene(scene);
 
 	auto src = scene.audioDevice->CreateSource();
@@ -137,14 +97,18 @@ void Main(int argc, char** argv) try
 	buffers[0] = scene.audioDevice->CreateBuffer();
 	buffers[1] = scene.audioDevice->CreateBuffer();
 
-	auto rsc = Resources::Manager::GetResource("test-music-0");
-	rsc.Get().GetData<Resources::AudioStream>()->repeating = true;
+	auto rsc = Resources::Manager::GetResource("test-music-1");
+	auto claimGuard = Resources::AudioStreamClaimGuard(rsc->GetData<Resources::AudioStream>());
+
 	for (size_t i = 0; i < 2; ++i)
 	{
-		rsc.Get().GetData<Resources::AudioStream>()->FillBuffer(buffers[i]);
+		rsc->GetData<Resources::AudioStream>()->FillBuffer(buffers[i]);
 		src->QueueBuffer(buffers[i]);
 	}
+
 	src->Play();
+
+	bool last = false;
 
 	// Main loop
 	while (scene.running)
@@ -152,8 +116,12 @@ void Main(int argc, char** argv) try
 		while (src->GetProcessedBuffers() > 0)
 		{
 			auto buf = src->UnqueueBuffer();
-			rsc.Get().GetData<Resources::AudioStream>()->FillBuffer(buf);
-			src->QueueBuffer(buf);
+			if (last == false)
+			{
+				last = rsc->GetData<Resources::AudioStream>()->FillBuffer(buf);
+				src->QueueBuffer(buf);
+			}
+			else claimGuard.Unclaim();
 		}
 
 		// Poll events
@@ -161,9 +129,6 @@ void Main(int argc, char** argv) try
 
 		// Clear screen
 		scene.graphicsDevice->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-
-		// Draw GUI
-		scene.guiRenderer->Render(scene.guiRoot);
 
 		// Swap screen back and front buffers
 		scene.graphicsDevice->SwapBuffers();

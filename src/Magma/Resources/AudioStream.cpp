@@ -1,56 +1,61 @@
 #include "AudioStream.hpp"
 #include "Manager.hpp"
 
-Magma::Framework::Audio::Buffer * Magma::Resources::AudioStream::GetNextBuffer()
+void Magma::Resources::AudioStream::Claim()
 {
-	std::lock_guard<std::mutex> lk(this->mutex);
-
-	// Mark old buffer as not loaded
-	if (bufferIndex != -1)
-		buffers[bufferIndex].loaded = false;
-
-	// Get next buffer
-	++bufferIndex;
-	if (bufferIndex == BufferCount)
-		bufferIndex = 0;
-	printf("Next buffer (%d)\n", bufferIndex.load());
-
-	// Wait for the buffer to be loaded before playing it
-	while (!buffers[bufferIndex].loaded)
-		;
-
-	// If the previous buffer was the last buffer return nullptr
-	if (buffers[bufferIndex].end == true && !repeating)
-		return nullptr;
-
-	// Return the next buffer
-	return buffers[bufferIndex].buffer;
+	if (!m_claimMutex.try_lock())
+	{
+		std::stringstream ss;
+		ss << "Failed to claim audio stream resource data:" << std::endl;
+		ss << "Resource was already claimed";
+		throw ResourceError(ss.str());
+	}
 }
 
-void Magma::Resources::AudioStream::FillBuffer(Framework::Audio::Buffer* buffer)
+void Magma::Resources::AudioStream::Unclaim()
 {
-	std::lock_guard<std::mutex> lk(this->mutex);
+	m_claimMutex.unlock();
+}
 
-	printf("Filling buffer\n");
+void Magma::Resources::AudioStream::SeekPositionBytes(size_t position)
+{
+	std::lock_guard<std::mutex> lk(m_mutex);
+}
 
-	auto fs = this->GetResource()->GetImporter()->GetManager()->GetFileSystem();
+void Magma::Resources::AudioStream::SeekPositionSamples(size_t position)
+{
+	std::lock_guard<std::mutex> lk(m_mutex);
+}
 
+void Magma::Resources::AudioStream::SeekPositionSeconds(float position)
+{
+	std::lock_guard<std::mutex> lk(m_mutex);
+}
+
+bool Magma::Resources::AudioStream::FillBuffer(Framework::Audio::Buffer* buffer)
+{
+	// Lock mutex
+	std::unique_lock<std::mutex> lk(m_mutex);
+
+	// Go back to the start if the stream had already ended before
 	if (currentPosition >= dataPosition + dataHeader.chunkSize)
 		currentPosition = dataPosition;
-	else
-	{
-		auto data = (char*)malloc(AudioStream::BufferSize);
 
-		auto bufferSize = BufferSize;
-		if (currentPosition + bufferSize >= dataPosition + dataHeader.chunkSize)
-			bufferSize = dataPosition + dataHeader.chunkSize - currentPosition;
-		fs->Seek(file, currentPosition);
-		fs->Read(file, data, bufferSize);
-		buffer->Update(data, bufferSize, formatChunk.format, formatChunk.sampleRate);
-		currentPosition += bufferSize;
+	// Wait for the data to be loaded
+	m_dataLoadedCV.wait(lk, [this] { return m_dataLoaded; });
 
-		free(data);
-	}
+	// Update audio buffer
+	buffer->Update(m_bufferData, nextBufferSize, formatChunk.format, formatChunk.sampleRate);
+
+	// Increment current position
+	currentPosition += nextBufferSize;
+
+	// Unlock and notify loader thread
+	m_dataLoaded = false;
+	lk.unlock();
+
+	// Check if we got to the end of the stream
+	return currentPosition >= dataPosition + dataHeader.chunkSize;
 }
 
 Magma::Resources::AudioStreamImporter::AudioStreamImporter(Manager * manager, Framework::Audio::RenderDevice * device)
@@ -66,41 +71,41 @@ Magma::Resources::AudioStreamImporter::~AudioStreamImporter()
 
 void Magma::Resources::AudioStreamImporter::Update()
 {
+	// Lock importer
 	std::lock_guard<std::mutex> lk(this->m_mutex);
-
-	/*for (auto& s : m_streams)
-	{
-		// Load buffers
-		for (size_t i = 0; i < s->BufferCount; ++i)
-			if (s->buffers[i].loaded == false)
-				LoadBuffer(&s->buffers[i], s);
-	}*/
-}
-
-void Magma::Resources::AudioStreamImporter::LoadBuffer(AudioStreamBuffer * buffer, AudioStream* stream)
-{
-	std::lock_guard<std::mutex> lk(stream->mutex);
-
-	printf("Loading buffer\n");
-
+	// Get file system
 	auto fs = this->GetManager()->GetFileSystem();
 
-	if (stream->currentPosition >= stream->dataPosition + stream->dataHeader.chunkSize)
+	// Update every stream
+	for (auto& s : m_streams)
 	{
-		stream->currentPosition = stream->dataPosition;
-		buffer->end = true;
-		buffer->loaded = true;
-	}
-	else
-	{
-		auto bufferSize = stream->BufferSize;
-		if (stream->currentPosition + bufferSize >= stream->dataPosition + stream->dataHeader.chunkSize)
-			bufferSize = stream->dataPosition + stream->dataHeader.chunkSize - stream->currentPosition;
-		fs->Seek(stream->file, stream->currentPosition);
-		fs->Read(stream->file, m_bufferData, bufferSize);
-		buffer->buffer->Update(m_bufferData, bufferSize, stream->formatChunk.format, stream->formatChunk.sampleRate);
-		stream->currentPosition += bufferSize;
-		buffer->loaded = true;
+		std::lock_guard<std::mutex> lk(s->m_mutex);
+		
+		// Data still loaded, skip this stream
+		if (s->m_dataLoaded)
+			continue;
+
+		// Read buffer
+		{	
+			// Get buffer size
+			s->nextBufferSize = s->BufferSize;
+			if (s->currentPosition + s->nextBufferSize >= s->dataPosition + s->dataHeader.chunkSize)
+				s->nextBufferSize = s->dataPosition + s->dataHeader.chunkSize - s->currentPosition;
+
+			// Seek buffer position and read it
+			fs->Seek(s->file, s->currentPosition);
+			fs->Read(s->file, s->m_bufferData, s->nextBufferSize);
+
+			// Set data as loaded
+			s->m_dataLoaded = true;
+		}
+		s->m_dataLoadedCV.notify_one();
+
+		// Wait for buffer to be used
+		/*{
+			std::unique_lock<std::mutex> lk(s->mutex);
+			s->m_dataLoadedCV.wait(lk, [s] { return !s->m_dataLoaded; });
+		}*/
 	}
 }
 
@@ -109,11 +114,9 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 	std::lock_guard<std::mutex> lk(this->m_mutex);
 
 	auto data = new (m_pool.Allocate(sizeof(AudioStream))) AudioStream(resource);
-	data->repeating = false;
-
 	auto path = resource->GetDataPath();
 
-	// Check extension
+	// WAV extension
 	if (path.GetExtension() == "wav")
 	{
 		// Read WAV file
@@ -159,23 +162,18 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 			}
 			// Unnecessary chunks
 			else
-			{
 				fs->Skip(data->file, header.chunkSize);
-			}
 		}
 
-		// Setup first data buffers
-		//data->bufferIndex = -1;
+		// Setup read position
 		data->currentPosition = data->dataPosition;
-		/*for (size_t i = 0; i < AudioStream::BufferCount; ++i)
-		{
-			data->buffers[i].buffer = m_device->CreateBuffer();
-			data->buffers[i].loaded = false;
-			LoadBuffer(&data->buffers[i], data);
-		}*/
 	}
+	// Unsupported extension
 	else
 	{
+		data->~AudioStream();
+		m_pool.Deallocate(data);
+
 		std::stringstream ss;
 		ss << "Failed to import audio stream resource on path '" << path.ToString() << "':" << std::endl;
 		ss << "Unsupported extension '" << path.GetExtension() << "':" << std::endl;
@@ -183,14 +181,19 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 		throw ImporterError(ss.str());
 	}
 
+	// Add the stream to the streams list
 	m_streams.push_back(data);
 	resource->SetData(data);
 }
 
 void Magma::Resources::AudioStreamImporter::Destroy(Resource * resource)
 {
+	// Get data
 	auto data = resource->GetData<AudioStream>();
+	// Get file system
+	auto fs = this->GetManager()->GetFileSystem();
 
+	// Remove it from the streams list
 	for (auto it = m_streams.begin(); it != m_streams.end(); ++it)
 		if (*it == data)
 		{
@@ -198,6 +201,10 @@ void Magma::Resources::AudioStreamImporter::Destroy(Resource * resource)
 			break;
 		}
 
+	// Close the stream file
+	fs->CloseFile(data->file);
+
+	// Deconstruct the stream and deallocate it
 	data->~AudioStream();
 	m_pool.Deallocate(data);
 	resource->SetData(nullptr);
