@@ -1,0 +1,11 @@
+#!MNI!
+
+[p-box]
+type=shader
+path=/Shaders/GUI/p-box.msl
+storage=permanent
+
+[v-box]
+type=shader
+path=/Shaders/GUI/v-box.msl
+storage=permanent

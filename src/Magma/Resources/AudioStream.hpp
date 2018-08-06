@@ -52,7 +52,43 @@ namespace Magma
 			///		Sets the position of the stream in seconds.
 			/// </summary>
 			/// <param name="position">Position in seconds</param>
-			void SeekPositionSeconds(float position);
+			void SeekPositionSeconds(double position);
+
+			/// <summary>
+			///		Gets the size of the stream in bytes.
+			/// </summary>
+			/// <returns>Size of the stream in bytes</returns>
+			size_t GetSizeInBytes();
+			
+			/// <summary>
+			///		Gets the size of the stream in samples.
+			/// </summary>
+			/// <returns>Size of the stream in samples</returns>
+			size_t GetSizeInSamples();
+
+			/// <summary>
+			///		Gets the size of the stream in seconds.
+			/// </summary>
+			/// <returns>Size of the stream in seconds</returns>
+			double GetSizeInSeconds();
+
+			/// <summary>
+			///		Gets the current stream position in bytes.
+			/// </summary>
+			/// <returns>Current stream position in bytes</returns>
+			size_t GetPositionInBytes();
+
+			/// <summary>
+			///		Gets the current stream position in samples.
+			/// </summary>
+			/// <returns>Current stream position in samples</returns>
+			size_t GetPositionInSamples();
+
+			/// <summary>
+			///		Gets the current stream position in seconds.
+			/// </summary>
+			/// <returns>Current stream position in seconds</returns>
+			double GetPositionInSeconds();
 
 			/// <summary>
 			///		Fills an audio buffer with next BufferSize bytes in the stream.
@@ -79,14 +115,14 @@ namespace Magma
 		private:
 			friend class AudioStreamImporter;
 			
-			size_t dataPosition;
-			size_t currentPosition;
-			size_t nextBufferSize;
+			size_t m_dataPosition;
+			size_t m_currentPosition;
+			size_t m_nextBufferSize;
 
 			std::mutex m_mutex;
 			std::mutex m_claimMutex;
 
-			void* file;
+			void* m_file;
 
 			char m_bufferData[BufferSize];
 			bool m_dataLoaded = false;

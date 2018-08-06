@@ -518,7 +518,7 @@ PixelBindingPoint * OGL410PixelShader::GetBindingPoint(const char * name)
 	for (auto& cv : data.GetShaderConstantBuffers())
 		if (cv.name == name)
 		{
-			auto index = glGetUniformBlockIndex(fragmentShader, name);
+			auto index = glGetUniformBlockIndex(fragmentShader, ("buf_" + std::to_string(cv.index)).c_str());
 			if (index == -1)
 			{
 				std::stringstream ss;

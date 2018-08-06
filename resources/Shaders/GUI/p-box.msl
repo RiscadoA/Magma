@@ -10,13 +10,16 @@ Output out
 	float4 color : ATTACHMENT_0;
 };
 
-ConstantBuffer buffer : BUFFER
+ConstantBuffer boxData : BOX_DATA
 {
-	float44 mvp;
+	float44 transform;
 	float4 backgroundColor;
+	float2 boxSize;
 };
 
 Shader
 {
-	out.color = buffer.backgroundColor;
+	out.color = boxData.backgroundColor;
+	out.color.r = 1.0f;
+	out.color.a = 1.0f;
 };

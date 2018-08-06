@@ -39,6 +39,8 @@ namespace Magma
 			size_t Clean();
 
 		private:
+			virtual void UpdateTransform() const final;
+
 			Element* Allocate(size_t size);
 
 			size_t m_poolSize;

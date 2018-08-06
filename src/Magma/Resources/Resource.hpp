@@ -219,7 +219,14 @@ namespace Magma
 			ResourceView(const ResourceView& rhs);
 			ResourceView(ResourceView&& rhs);
 			ResourceView(Resource& resource);
+			ResourceView();
 			~ResourceView();
+
+			/// <summary>
+			///		Changes the resource which this resource view points to.
+			/// </summary>
+			/// <param name="resource">New resource to point to</param>
+			void Set(Resource& resource);
 
 			/// <summary>
 			///		Releases this resource view (cannot be used again after this)
@@ -230,17 +237,12 @@ namespace Magma
 			///		Gets a pointer to the resource this view points to.
 			/// </summary>
 			///  <returns>Resource pointer (guaranteed to never return nullptr)<returns>
-			Resource& Get();
-
-			/// <summary>
-			///		Gets a const pointer to the resource this view points to.
-			/// </summary>
-			///  <returns>Const resource pointer (guaranteed to never return nullptr)<returns>
-			const Resource& Get() const;
+			Resource& Get() const;
 
 			// Operator overloads
-			inline const Resource* operator->() const { return &this->Get(); }
-			inline Resource* operator->() { return &this->Get(); }
+			inline ResourceView& operator=(const ResourceView& resource) { this->Set(resource.Get()); }
+			inline ResourceView& operator=(Resource& resource) { this->Set(resource); }
+			inline Resource* operator->() const { return &this->Get(); }
 
 		private:
 			Resource* m_resource;

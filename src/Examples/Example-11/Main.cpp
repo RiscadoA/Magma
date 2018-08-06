@@ -45,9 +45,9 @@ void LoadScene(Scene& scene)
 	// Create window
 	{
 #ifdef USE_GL
-		scene.window = new Framework::Input::GLWindow(800, 600, "Example-10", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::GLWindow(800, 600, "Example-11", Framework::Input::Window::Mode::Windowed);
 #else
-		scene.window = new Framework::Input::D3DWindow(800, 600, "Example-10", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::D3DWindow(800, 600, "Example-11", Framework::Input::Window::Mode::Windowed);
 #endif
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
@@ -72,35 +72,42 @@ void LoadScene(Scene& scene)
 	}
 
 	// Add resource importers
-	Resources::Manager::AddImporter<Resources::AudioStreamImporter>(scene.audioDevice);
 	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.graphicsDevice);
+	Resources::Manager::AddImporter<Resources::AudioStreamImporter>(scene.audioDevice);
 
-	// Load permament resources
+	// Load permament resources<
 	Resources::Manager::Load();
 
 	// Create GUI Root
 	{
 		scene.guiRoot = new GUI::Root();
+		GUI::BoundingBox bb;
+		bb.left.absolute = 0.0f;
+		bb.right.absolute = scene.window->GetWidth();
+		bb.top.absolute = scene.window->GetHeight();
+		bb.bottom.absolute = 0.0f;
+		scene.guiRoot->SetBox(bb);
 	}
 
 	// Create GUI Renderer
 	{
-		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
+		scene.guiRenderer = new GUI::Renderer();
+		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-box"));
 	}
 
 	// Create GUI box element
 	{
-		auto element = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		auto element = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
 
 		GUI::BoundingBox bb;
 
-		bb.left.absolute = 0.0f;
+		bb.left.absolute = -50.0f;
 		bb.left.relative = 0.5f;
 
 		bb.right.absolute = 50.0f;
 		bb.right.relative = 0.5f;
 
-		bb.bottom.absolute = 0.0f;
+		bb.bottom.absolute = -50.0f;
 		bb.bottom.relative = 0.5f;
 
 		bb.top.absolute = 50.0f;
@@ -128,60 +135,12 @@ void CleanScene(Scene& scene)
 void Main(int argc, char** argv) try
 {
 	Scene scene;
-	 
+	
 	LoadScene(scene);
-
-	auto src1 = scene.audioDevice->CreateSource();
-	auto src2 = scene.audioDevice->CreateSource();
-
-	Framework::Audio::Buffer* buffers[4];
-	buffers[0] = scene.audioDevice->CreateBuffer();
-	buffers[1] = scene.audioDevice->CreateBuffer();
-	buffers[2] = scene.audioDevice->CreateBuffer();
-	buffers[3] = scene.audioDevice->CreateBuffer();
-
-	auto rsc1 = Resources::Manager::GetResource("test-music-1");
-	for (size_t i = 0; i < 2; ++i)
-	{
-		rsc1.Get().GetData<Resources::AudioStream>()->FillBuffer(buffers[i]);
-		src1->QueueBuffer(buffers[i]);
-	}
-
-	auto rsc2 = Resources::Manager::GetResource("test-music-1");
-	for (size_t i = 2; i < 4; ++i)
-	{
-		rsc2.Get().GetData<Resources::AudioStream>()->FillBuffer(buffers[i]);
-		src2->QueueBuffer(buffers[i]);
-	}
-
-	src1->Play();
-	src2->Play();
-
-	bool last = false;
 
 	// Main loop
 	while (scene.running)
 	{
-		while (src1->GetProcessedBuffers() > 0)
-		{
-			auto buf = src1->UnqueueBuffer();
-			if (last == false)
-			{
-				last = rsc1.Get().GetData<Resources::AudioStream>()->FillBuffer(buf);
-				src1->QueueBuffer(buf);
-			}
-		}
-
-		while (src2->GetProcessedBuffers() > 0)
-		{
-			auto buf = src2->UnqueueBuffer();
-			if (last == false)
-			{
-				last = rsc2.Get().GetData<Resources::AudioStream>()->FillBuffer(buf);
-				src2->QueueBuffer(buf);
-			}
-		}
-
 		// Poll events
 		scene.window->PollEvents();
 
@@ -201,17 +160,23 @@ catch (Framework::Graphics::ShaderError& e)
 {
 	std::cout << "Shader error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
-	getchar();
+	abort();
 }
 catch (Framework::Graphics::RenderDeviceError& e)
 {
 	std::cout << "Render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
-	getchar();
+	abort();
 }
 catch (Framework::Graphics::TextError& e)
 {
 	std::cout << "Text error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
-	getchar();
+	abort();
+}
+catch (std::runtime_error& e)
+{
+	std::cout << "Runtime error caught:" << std::endl;
+	std::cout << e.what() << std::endl;
+	abort();
 }
