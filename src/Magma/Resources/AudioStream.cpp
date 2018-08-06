@@ -20,16 +20,57 @@ void Magma::Resources::AudioStream::Unclaim()
 void Magma::Resources::AudioStream::SeekPositionBytes(size_t position)
 {
 	std::lock_guard<std::mutex> lk(m_mutex);
+	m_currentPosition = m_dataPosition + position;
 }
 
 void Magma::Resources::AudioStream::SeekPositionSamples(size_t position)
 {
 	std::lock_guard<std::mutex> lk(m_mutex);
+	m_currentPosition = m_dataPosition + position * (formatChunk.bitsPerSample / 8);
 }
 
-void Magma::Resources::AudioStream::SeekPositionSeconds(float position)
+void Magma::Resources::AudioStream::SeekPositionSeconds(double position)
 {
+	if (position < 0.0f)
+	{
+		std::stringstream ss;
+		ss << "Failed to set audio stream position in seconds:" << std::endl;
+		ss << "The position (" << position << ") must not be negative";
+		throw ResourceError(ss.str());
+	}
+
 	std::lock_guard<std::mutex> lk(m_mutex);
+	m_currentPosition = m_dataPosition + floor(position * formatChunk.sampleRate * (formatChunk.bitsPerSample / 8) * formatChunk.channelCount);
+}
+
+size_t Magma::Resources::AudioStream::GetSizeInBytes()
+{
+	return dataHeader.chunkSize;
+}
+
+size_t Magma::Resources::AudioStream::GetSizeInSamples()
+{
+	return dataHeader.chunkSize / (formatChunk.bitsPerSample / 8);
+}
+
+double Magma::Resources::AudioStream::GetSizeInSeconds()
+{
+	return ((double)(dataHeader.chunkSize / (formatChunk.bitsPerSample / 8)) / (double)formatChunk.channelCount) / (double)formatChunk.sampleRate;
+}
+
+size_t Magma::Resources::AudioStream::GetPositionInBytes()
+{
+	return m_currentPosition - m_dataPosition;
+}
+
+size_t Magma::Resources::AudioStream::GetPositionInSamples()
+{
+	return (m_currentPosition - m_dataPosition) / (formatChunk.bitsPerSample / 8);
+}
+
+double Magma::Resources::AudioStream::GetPositionInSeconds()
+{
+	return (((m_currentPosition - m_dataPosition) / (formatChunk.bitsPerSample / 8)) / (double)formatChunk.channelCount) / formatChunk.sampleRate;
 }
 
 bool Magma::Resources::AudioStream::FillBuffer(Framework::Audio::Buffer* buffer)
@@ -38,24 +79,24 @@ bool Magma::Resources::AudioStream::FillBuffer(Framework::Audio::Buffer* buffer)
 	std::unique_lock<std::mutex> lk(m_mutex);
 
 	// Go back to the start if the stream had already ended before
-	if (currentPosition >= dataPosition + dataHeader.chunkSize)
-		currentPosition = dataPosition;
+	while (m_currentPosition >= m_dataPosition + dataHeader.chunkSize)
+		m_currentPosition -= dataHeader.chunkSize;
 
 	// Wait for the data to be loaded
 	m_dataLoadedCV.wait(lk, [this] { return m_dataLoaded; });
 
 	// Update audio buffer
-	buffer->Update(m_bufferData, nextBufferSize, formatChunk.format, formatChunk.sampleRate);
+	buffer->Update(m_bufferData, m_nextBufferSize, formatChunk.format, formatChunk.sampleRate);
 
 	// Increment current position
-	currentPosition += nextBufferSize;
+	m_currentPosition += m_nextBufferSize;
 
 	// Unlock and notify loader thread
 	m_dataLoaded = false;
 	lk.unlock();
 
 	// Check if we got to the end of the stream
-	return currentPosition >= dataPosition + dataHeader.chunkSize;
+	return m_currentPosition >= m_dataPosition + dataHeader.chunkSize;
 }
 
 Magma::Resources::AudioStreamImporter::AudioStreamImporter(Manager * manager, Framework::Audio::RenderDevice * device)
@@ -88,13 +129,13 @@ void Magma::Resources::AudioStreamImporter::Update()
 		// Read buffer
 		{	
 			// Get buffer size
-			s->nextBufferSize = s->BufferSize;
-			if (s->currentPosition + s->nextBufferSize >= s->dataPosition + s->dataHeader.chunkSize)
-				s->nextBufferSize = s->dataPosition + s->dataHeader.chunkSize - s->currentPosition;
+			s->m_nextBufferSize = s->BufferSize;
+			if (s->m_currentPosition + s->m_nextBufferSize >= s->m_dataPosition + s->dataHeader.chunkSize)
+				s->m_nextBufferSize = s->m_dataPosition + s->dataHeader.chunkSize - s->m_currentPosition;
 
 			// Seek buffer position and read it
-			fs->Seek(s->file, s->currentPosition);
-			fs->Read(s->file, s->m_bufferData, s->nextBufferSize);
+			fs->Seek(s->m_file, s->m_currentPosition);
+			fs->Read(s->m_file, s->m_bufferData, s->m_nextBufferSize);
 
 			// Set data as loaded
 			s->m_dataLoaded = true;
@@ -121,11 +162,11 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 	{
 		// Read WAV file
 		auto fs = this->GetManager()->GetFileSystem();
-		data->file = fs->OpenFile(Framework::Files::FileMode::Read, path);
+		data->m_file = fs->OpenFile(Framework::Files::FileMode::Read, path);
 
 		// Get header
 		char* memData = new char[256];
-		fs->Read(data->file, memData, 12);
+		fs->Read(data->m_file, memData, 12);
 		Framework::Audio::ParseWAVHeader(memData, 12, data->fileHeader);
 
 		bool hasFormat = false;
@@ -136,7 +177,7 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 		{
 			// Parse header
 			Framework::Audio::WAVChunkHeader header;
-			fs->Read(data->file, memData, 8);
+			fs->Read(data->m_file, memData, 8);
 			Framework::Audio::ParseWAVChunkHeader(memData, 8, header);
 
 			// If it is the format chunk, parse it
@@ -146,7 +187,7 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 				(header.chunkName[3] == ' ' || header.chunkName[3] == '\0'))
 			{
 				Framework::Audio::WAVFormatChunk chunk;
-				fs->Read(data->file, (char*)memData + 8, header.chunkSize);
+				fs->Read(data->m_file, (char*)memData + 8, header.chunkSize);
 				Framework::Audio::ParseWAVFormatChunk(memData, 256, data->formatChunk);
 				hasFormat = true;
 			}
@@ -157,16 +198,16 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 					 header.chunkName[3] == 'a')
 			{
 				data->dataHeader = header;
-				data->dataPosition = fs->GetPosition(data->file);
+				data->m_dataPosition = fs->GetPosition(data->m_file);
 				hasData = true;
 			}
 			// Unnecessary chunks
 			else
-				fs->Skip(data->file, header.chunkSize);
+				fs->Skip(data->m_file, header.chunkSize);
 		}
 
 		// Setup read position
-		data->currentPosition = data->dataPosition;
+		data->m_currentPosition = data->m_dataPosition;
 	}
 	// Unsupported extension
 	else
@@ -202,7 +243,7 @@ void Magma::Resources::AudioStreamImporter::Destroy(Resource * resource)
 		}
 
 	// Close the stream file
-	fs->CloseFile(data->file);
+	fs->CloseFile(data->m_file);
 
 	// Deconstruct the stream and deallocate it
 	data->~AudioStream();
