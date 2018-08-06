@@ -1,7 +1,6 @@
 #pragma once
 
 #include "BoundingBox.hpp"
-#include "Elements/Type.hpp"
 
 #include <string>
 #include <typeindex>
