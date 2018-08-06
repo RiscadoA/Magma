@@ -10,19 +10,75 @@ namespace Magma
 	{
 		namespace Audio
 		{
-			struct WAVData
+			/// <summary>
+			///		Holds data about the file header in a WAV file
+			/// </summary>
+			struct WAVFileHeader
 			{
+				char type[4];
+				int32_t fileSize;
+			};
+
+			/// <summary>
+			///		Holds data about a chunk header in a WAV file
+			/// </summary>
+			struct WAVChunkHeader
+			{
+				char chunkName[4];
+				int32_t chunkSize;
+			};
+
+			/// <summary>
+			///		Holds data about the format chunk in a WAV file
+			/// </summary>
+			struct WAVFormatChunk
+			{
+				WAVChunkHeader header;
+
 				Audio::Format format;
 				int32_t sampleRate;
 				int16_t channelCount;
 				int16_t bitsPerSample;
-				int32_t pcmSize;
+			};
+
+			/// <summary>
+			///		Holds data of a single chunk in a WAV file
+			/// </summary>
+			struct WAVDataChunk
+			{
+				WAVChunkHeader header;
+
+				/// <summary>
+				///		PCM data pointer
+				/// </summary>
 				void* pcmData;
 			};
 
-			void LoadWAV(void* data, size_t size, WAVData& out);
+			/// <summary>
+			///		Holds data of the whole WAV file
+			/// </summary>
+			struct WAVData
+			{
+				WAVFileHeader fileHeader;
+				WAVFormatChunk formatChunk;
+				WAVDataChunk dataChunk;
+			};
+
+			void LoadWAV(const void* data, size_t size, WAVData& out);
 
 			void UnloadWAV(WAVData& data);
+
+			size_t ParseWAVHeader(const void* data, size_t size, WAVFileHeader& out);
+
+			size_t ParseWAVFormatChunk(const void* data, size_t size, WAVFormatChunk& out);
+
+			size_t ParseWAVDataChunk(const void* data, size_t size, WAVDataChunk& out);
+
+			size_t GetWAVDataChunk(const void* dataChunk, size_t dataSize, size_t chunkSize, void* out);
+
+			void UnloadWAVDataChunk(WAVDataChunk& data);
+
+			size_t ParseWAVChunkHeader(const void* data, size_t size, WAVChunkHeader& out);
 		}
 	}
 }

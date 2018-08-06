@@ -195,9 +195,11 @@ public:
 #endif
 	}
 
-	virtual void QueueBuffer(Buffer * buffer) override
+	virtual size_t GetProcessedBuffers() override
 	{
-		alSourceQueueBuffers(m_object, 1, &static_cast<OALBuffer*>(buffer)->m_object);
+		ALint ret = 0;
+		alGetSourcei(m_object, AL_BUFFERS_PROCESSED, &ret);
+		return ret;
 
 #ifdef MAGMA_FRAMEWORK_DEBUG
 		auto err = alGetError();
@@ -209,6 +211,64 @@ public:
 			throw RenderDeviceError(ss.str());
 		}
 #endif
+	}
+	virtual void QueueBuffer(Buffer * buffer) override
+	{
+		m_queuedBuffers[m_nextSlot] = buffer;
+		alSourceQueueBuffers(m_object, 1, &static_cast<OALBuffer*>(buffer)->m_object);
+
+		++m_nextSlot;
+		if (m_nextSlot >= 256)
+			m_nextSlot = 0;
+
+		if (m_firstSlot == m_nextSlot)
+		{
+			std::stringstream ss;
+			ss << "Failed to queue buffer on OALSource:" << std::endl;
+			ss << "Maximum number of queued buffers achieved (256)";
+			throw RenderDeviceError(ss.str());
+		}
+
+#ifdef MAGMA_FRAMEWORK_DEBUG
+		auto err = alGetError();
+		if (err != AL_NO_ERROR)
+		{
+			std::stringstream ss;
+			ss << "Failed to queue buffer on OALSource:" << std::endl;
+			ss << "alGetError returned " << err;
+			throw RenderDeviceError(ss.str());
+		}
+#endif
+	}
+
+	virtual Buffer* UnqueueBuffer() override
+	{
+		if (m_nextSlot == m_firstSlot)
+		{
+			std::stringstream ss;
+			ss << "Failed to unqueue buffer from OALSource:" << std::endl;
+			ss << "No buffers were queued";
+			throw RenderDeviceError(ss.str());
+		}
+
+		ALuint buf;
+		alSourceUnqueueBuffers(m_object, 1, &buf);
+
+		if (buf != static_cast<OALBuffer*>(m_queuedBuffers[m_firstSlot])->m_object)
+		{
+			std::stringstream ss;
+			ss << "Failed to unqueue buffer from OALSource:" << std::endl;
+			ss << "Buffer returned from alSourceUnqueueBuffers does not match the buffer stored on the wrapper buffer queue";
+			throw RenderDeviceError(ss.str());
+		}
+
+		auto ret = m_queuedBuffers[m_firstSlot];
+
+		++m_firstSlot;
+		if (m_firstSlot == 256)
+			m_firstSlot = 0;
+
+		return ret;
 	}
 
 	virtual void SetPosition(float x, float y, float z) override
@@ -389,6 +449,10 @@ public:
 		}
 #endif
 	}
+
+	Buffer* m_queuedBuffers[256];
+	size_t m_firstSlot = 0;
+	size_t m_nextSlot = 0;
 };
 
 void Magma::Framework::Audio::OALRenderDevice::Init(const RenderDeviceSettings & settings)

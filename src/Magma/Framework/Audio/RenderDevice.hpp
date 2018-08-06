@@ -77,10 +77,22 @@ namespace Magma
 				virtual void Pause() = 0;
 
 				/// <summary>
+				///		Gets the number of buffers that were processed since the last time this function was called
+				/// </summary>
+				/// <returns>Number of buffers processed</returns>
+				virtual size_t GetProcessedBuffers() = 0;
+
+				/// <summary>
 				///		Queues an audio buffer to later play on this source
 				/// </summary>
 				/// <param name="buffer">Buffer handle</param>
 				virtual void QueueBuffer(Buffer* buffer) = 0;
+
+				/// <summary>
+				///		Unqueues an audio buffer that was played by this source
+				/// </summary>
+				/// <returns>Buffer handle</returns>
+				virtual Buffer* UnqueueBuffer() = 0;
 
 				/// <summary>
 				///		Sets the source position

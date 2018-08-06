@@ -1,7 +1,12 @@
 #pragma once
 
-/*
+#include <atomic>
+#include <string>
+#include <map>
 
+#include <Magma/Framework/Files/Path.hpp>
+
+/*
 RESOURCE TYPES:
 	- SOUND EFFECT;
 	- SOUND STREAM;
@@ -11,11 +16,6 @@ RESOURCE TYPES:
 	- TEXTURE;
 	- SKELETON;
 	- ANIMATION;
-
-RESOURCE MODES:
-	- STREAM;
-	- TEMPORARY;
-	- PERMANENT;
 */
 
 namespace Magma
@@ -38,6 +38,11 @@ namespace Magma
 			CPUTemporary,
 
 			/// <summary>
+			///		Loaded chunk by chunk on a stream.
+			/// </summary>
+			CPUStream,
+
+			/// <summary>
 			///		Only destroyed on program termination or when told to.
 			/// </summary>
 			CPUPermanent,
@@ -55,31 +60,190 @@ namespace Magma
 			GPUPermanent,
 
 			/// <summary>
-			///		Loaded chunk by chunk on a stream.
-			/// </summary>
-			Stream,
-
-			/// <summary>
 			///		Resource storage mode count.
 			/// </summary>
 			Count
 		};
 
+		class Resource;
+		class Importer;
+
 		/// <summary>
-		///		Abstract class for storing resource data
+		///		Holds resource data (abstract class)
 		/// </summary>
-		class Resource
+		class ResourceData
 		{
 		public:
-			Resource();
-			virtual ~Resource();
+			ResourceData(Resource* resource);
+			virtual ~ResourceData() = default;
 
-			void Import();
+			/// <summary>
+			///		Gets the resource which this data belongs to
+			/// </summary>
+			/// <returns>Pointer to resource<</returns>
+			inline Resource* GetResource() { return m_resource; }
+
+			/// <summary>
+			///		Gets the resource which this data belongs to
+			/// </summary>
+			/// <returns>Const pointer to resource<</returns>
+			inline const Resource* GetResource() const { return m_resource; }
 
 		private:
-			virtual void VirtualImport() = 0;
+			Resource* m_resource;
+		};
 
-			bool m_onMemory;
+		/// <summary>
+		///		Class used to represent a resource.
+		/// </summary>
+		class Resource final
+		{
+		public:
+			Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath);
+			~Resource();
+
+			/// <summary>
+			///		Sets this resource's data pointer.
+			/// </summary>
+			/// <param name="data">Resource's data pointer</param>
+			inline void SetData(ResourceData* data) { m_data = data; }
+
+			/// <summary>
+			///		Checks if this resource has data (if it has been imported)
+			/// </summary>
+			/// <returns>If it has, returns true, otherwise returns false</returns>
+			inline bool HasData() const { return m_data != nullptr; }
+
+			/// <summary>
+			///		Get this resource's data
+			/// </summary>
+			/// <typeparam name="T">Resource data type</typeparam>
+			/// <returns>Pointer to resource's data. Nullptr if type T doesn't match the resource data type.</returns>
+			template <typename T>
+			inline T* GetData() { return dynamic_cast<T*>(m_data); };
+
+			/// <summary>
+			///		Get this resource's data
+			/// </summary>
+			/// <typeparam name="T">Resource data type</typeparam>
+			/// <returns>Const pointer to resource's data. Nullptr if type T doesn't match the resource data type.</returns>
+			template <typename T>
+			inline const T* GetData() const { return dynamic_cast<const T*>(m_data); };
+
+			/// <summary>
+			///		Gets the current number of references this resource has.
+			/// </summary>
+			/// <returns>Resource's reference count</returns>
+			inline size_t GetReferenceCount() const { return m_referenceCount; }
+
+			/// <summary>
+			///		Gets this resource's name.
+			/// </summary>
+			/// <returns>This resource's name</returns>
+			inline const std::string& GetName() const { return m_name; }
+
+			/// <summary>
+			///		Gets this resource's type.
+			/// </summary>
+			/// <returns>This resource's type</returns>
+			inline const std::string& GetType() const { return m_type; }
+
+			/// <summary>
+			///		Gets this resource's data path.
+			/// </summary>
+			/// <returns>This resource's data path</returns>
+			inline const Framework::Files::Path& GetDataPath() const { return m_dataPath; }
+
+			/// <summary>
+			///		Sets this resource's storage mode.
+			/// </summary>
+			/// <param name="mode">New storage mode</returns>
+			inline void SetMode(ResourceMode mode) { m_mode = mode; }
+
+			/// <summary>
+			///		Gets this resource's storage mode.
+			/// </summary>
+			/// <returns>This resource's storage mode</returns>
+			inline ResourceMode GetMode() const { return m_mode; }
+
+			/// <summary>
+			///		Sets the importer used for this resource
+			/// </summary>
+			inline void SetImporter(Importer* importer) { m_importer = importer; }
+
+			/// <summary>
+			///		Gets the importer used for this resource
+			/// </summary>
+			inline Importer* GetImporter() const { return m_importer; }
+
+			/// <summary>
+			///		Removes a parameter from this resource
+			/// </summary>
+			/// <param name="name">Parameter name</param>
+			void RemoveParam(const std::string& name);
+
+			/// <summary>
+			///		Sets a parameter on this resource
+			/// </summary>
+			/// <param name="name">Parameter name</param>
+			/// <param name="value">Parameter value</param>
+			void SetParam(const std::string& name, const std::string& value);
+
+			/// <summary>
+			///		Gets a parameter from this resource
+			/// </summary>
+			/// <param name="name">Param name</param>
+			/// <returns>Param value</returns>
+			const std::string& GetParam(const std::string& name);
+
+		private:
+			friend class ResourceView;
+
+			Importer* m_importer;
+			ResourceData* m_data;
+			std::atomic<size_t> m_referenceCount;
+
+			std::map<std::string, std::string> m_params;
+			std::string m_name;
+			std::string m_type;
+			Framework::Files::Path m_dataPath;
+			ResourceMode m_mode;
+		};
+
+		/// <summary>
+		///		Used to reference a resource.
+		/// </summary>
+		class ResourceView final
+		{
+		public:
+			ResourceView(const ResourceView& rhs);
+			ResourceView(ResourceView&& rhs);
+			ResourceView(Resource& resource);
+			~ResourceView();
+
+			/// <summary>
+			///		Releases this resource view (cannot be used again after this)
+			/// </summary>
+			void Release();
+
+			/// <summary>
+			///		Gets a pointer to the resource this view points to.
+			/// </summary>
+			///  <returns>Resource pointer (guaranteed to never return nullptr)<returns>
+			Resource& Get();
+
+			/// <summary>
+			///		Gets a const pointer to the resource this view points to.
+			/// </summary>
+			///  <returns>Const resource pointer (guaranteed to never return nullptr)<returns>
+			const Resource& Get() const;
+
+			// Operator overloads
+			inline const Resource* operator->() const { return &this->Get(); }
+			inline Resource* operator->() { return &this->Get(); }
+
+		private:
+			Resource* m_resource;
 		};
 	}
 }

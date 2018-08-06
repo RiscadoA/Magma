@@ -19,6 +19,9 @@ namespace Magma
 				// Inherited via FileSystem
 				virtual void * OpenFile(FileMode mode, const Path & path) final;
 				virtual void CloseFile(void * file) final;
+				virtual size_t GetPosition(void* file) final;
+				virtual void Seek(void* file, size_t position) final;
+				virtual void Skip(void* file, size_t amount) final;
 				virtual void Read(void * file, void * buffer, size_t size) final;
 				virtual void Write(void * file, void * buffer, size_t size) final;
 				virtual void Create(const Path & path) final;

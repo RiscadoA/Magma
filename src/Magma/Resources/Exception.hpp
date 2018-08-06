@@ -14,5 +14,23 @@ namespace Magma
 		public:
 			using std::runtime_error::runtime_error;
 		};
+
+		/// <summary>
+		///		Thrown when there is a resource related error
+		/// </summary>
+		class ResourceError : public std::runtime_error
+		{
+		public:
+			using std::runtime_error::runtime_error;
+		};
+
+		/// <summary>
+		///		Thrown when there is an importer related error
+		/// </summary>
+		class ImporterError : public std::runtime_error
+		{
+		public:
+			using std::runtime_error::runtime_error;
+		};
 	}
 }
