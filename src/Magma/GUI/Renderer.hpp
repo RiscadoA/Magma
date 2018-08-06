@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Magma/Framework/Graphics/RenderDevice.hpp>
 #include <Magma/Resources/Shader.hpp>
 
 #include <vector>
@@ -39,8 +38,6 @@ namespace Magma
 
 		private:
 			void RenderRecursive(Element* element);
-
-			Framework::Graphics::RenderDevice* m_device;
 
 			std::vector<ElementRenderer*> m_renderers;
 		};
