@@ -118,29 +118,22 @@ bool Magma::GUI::Element::IsChild(Element * child) const
 
 Magma::GUI::BoundingBox Magma::GUI::Element::GetAbsoluteBoundingBox() const
 {
-	BoundingBox box;
+	BoundingBox box = m_box;
 
-	if (m_parent == nullptr)
-	{
-		box.left.relative = 0.0f;
-		box.right.relative = 0.0f;
-		box.top.relative = 0.0f;
-		box.bottom.relative = 0.0f;
-	}
-	else
+	if (m_parent != nullptr)
 	{
 		auto p = m_parent->GetAbsoluteBoundingBox();
 
-		box.left.absolute += box.left.relative * (p.right.absolute - p.left.absolute);
+		box.left.absolute += m_box.left.relative * (p.right.absolute - p.left.absolute);
 		box.left.relative = 0.0f;
 
-		box.right.absolute += box.right.relative * (p.right.absolute - p.left.absolute);
+		box.right.absolute += m_box.right.relative * (p.right.absolute - p.left.absolute);
 		box.right.relative = 0.0f;
 
-		box.top.absolute += box.top.relative * (p.top.absolute - p.bottom.absolute);
+		box.top.absolute += m_box.top.relative * (p.top.absolute - p.bottom.absolute);
 		box.top.relative = 0.0f;
 
-		box.bottom.absolute += box.bottom.relative * (p.top.absolute - p.bottom.absolute);
+		box.bottom.absolute += m_box.bottom.relative * (p.top.absolute - p.bottom.absolute);
 		box.bottom.relative = 0.0f;
 	}
 
@@ -178,11 +171,19 @@ bool Magma::GUI::Element::Contains(Point point, Element * relativeElement) const
 	else
 		return true;
 }
+
 void Magma::GUI::Element::UpdateTransform() const
 {
+	auto pTransform = this->m_parent->GetTransform();
+	auto abb = m_parent->GetAbsoluteBoundingBox();
+
+	float x = m_box.left.absolute + m_box.left.relative * (abb.right.absolute - abb.left.absolute);
+	float y = m_box.bottom.absolute + m_box.bottom.relative * (abb.top.absolute - abb.bottom.absolute);
+
+	m_transform = pTransform;
+	m_transform = glm::translate(pTransform, glm::vec3(x, y, 0.0f));
+
 	m_dirty = false;
-	auto b = this->GetAbsoluteBoundingBox();
-	m_transform = glm::translate(glm::mat4(1.0f), glm::vec3(b.left.absolute, b.bottom.absolute, 0.0f));
 }
 
 const glm::mat4 & Magma::GUI::Element::GetTransform() const

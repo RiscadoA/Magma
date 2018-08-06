@@ -173,6 +173,13 @@ namespace Magma
 			/// <returns>True if it is renderable, otherwise false</returns>
 			inline bool IsRenderable() const { return m_isRenderable; }
 
+		protected:
+			/// <summary>
+			///		Sets this element's transform matrix.
+			///		Only use this if you know what you are doing!
+			/// </summary>
+			inline void SetTransform(const glm::mat4& transform) const { m_transform = transform; m_dirty = false; }
+
 		private:
 			bool m_enabled;
 			bool m_valid;

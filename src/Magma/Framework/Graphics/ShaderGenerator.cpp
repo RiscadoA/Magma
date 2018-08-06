@@ -671,10 +671,13 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 		if (v.index >= data.rootScope->nextVarID)
 			data.rootScope->nextVarID = v.index + 1;
 
-		ss << "OUTPUT VAR" << std::endl;
-		ss << "\tINDEX \"" << v.index << "\"" << std::endl;
-		ss << "\tNAME \"" << v.name << "\"" << std::endl;
-		ss << "\tTYPE \"" << ShaderVariableTypeToString(v.type) << "\"" << std::endl << std::endl;
+		if (v.index != 0)
+		{
+			ss << "OUTPUT VAR" << std::endl;
+			ss << "\tINDEX \"" << v.index << "\"" << std::endl;
+			ss << "\tNAME \"" << v.name << "\"" << std::endl;
+			ss << "\tTYPE \"" << ShaderVariableTypeToString(v.type) << "\"" << std::endl << std::endl;
+		}
 	}
 
 	// Input vars

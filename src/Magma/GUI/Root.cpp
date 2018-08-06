@@ -2,6 +2,7 @@
 #include "Exception.hpp"
 
 #include <sstream>
+#include <glm/gtc/matrix_transform.hpp>
 
 Magma::GUI::Root::Root(size_t poolSize, size_t maxElementSize)
 	: Element(std::type_index(typeid(Root)), false)
@@ -66,4 +67,12 @@ Magma::GUI::Element * Magma::GUI::Root::Allocate(size_t size)
 	ss << "Failed to allocate Element on Magma::GUI::Root:" << std::endl;
 	ss << "Element pool is already full. Try increasing the pool size (" << m_poolSize << ")";
 	throw ElementError(ss.str());
+}
+
+void Magma::GUI::Root::UpdateTransform() const
+{
+	const auto& bb = this->GetBox();
+	glm::mat4 mat;
+	mat = glm::ortho(bb.left.absolute, bb.right.absolute, bb.bottom.absolute, bb.top.absolute);
+	this->SetTransform(mat);
 }

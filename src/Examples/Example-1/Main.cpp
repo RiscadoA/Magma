@@ -47,16 +47,6 @@ struct Scene
 	Graphics::DepthStencilState* depthStencilState;
 };
 
-struct Transform
-{
-	glm::mat4 mvp;
-};
-
-struct Material
-{
-	glm::vec4 diffuse;
-};
-
 void LoadScene(Scene& scene)
 {
 	// Create filesystem
@@ -283,31 +273,16 @@ void Main(int argc, char** argv) try
 	Scene scene;
 
 	LoadScene(scene);
-
-	// Create transformation matrices
-	glm::mat4 model, view, proj;
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(-10.0f, 0.0f, 0.0f));
-	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 20.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	proj = glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-	Transform transform;
 	
 	float x = 0.0f;
 
 	// Main loop
 	while (scene.running)
 	{
-		model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
 		// Poll events
 		scene.window->PollEvents();
 
-		// Update transform
-		transform.mvp = proj * view * model;
-		//scene.device->UpdateConstantBuffer(scene.transformCBuffer, &transform, 0, sizeof(transform));
-
 		// Clear screen
-		//scene.device->SetRenderTargets(nullptr, 0);
 		scene.device->Clear(glm::vec4(0.0f, 0.2f, 0.4f, 1.0f));
 
 		// Set raster and depth stencil states
@@ -328,14 +303,6 @@ void Main(int argc, char** argv) try
 
 		// Set shader pipeline
 		scene.device->SetPipeline(scene.pipeline);
-
-		// Bind texture and sampler
-		/*scene.context->BindTexture2D(scene.font->GetAtlas(0), scene.textureBP);
-		scene.context->BindSampler(scene.sampler, scene.textureBP);*/
-
-		// Bind transform and material
-		/*scene.context->BindConstantBuffer(scene.transformCBuffer, scene.transformBP);
-		scene.context->BindConstantBuffer(scene.materialCBuffer, scene.materialBP);*/
 
 		// Bind vertex array and the index buffer and draw
 		scene.device->SetVertexArray(scene.vertexArray);
