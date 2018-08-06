@@ -1,4 +1,10 @@
+#pragma once
+
 #include "../Element.hpp"
+#include "../ElementRenderer.hpp"
+
+#include <Magma/Framework/Graphics/RenderDevice.hpp>
+#include <Magma/Resources/Resource.hpp>
 
 namespace Magma
 {
@@ -7,7 +13,7 @@ namespace Magma
 		namespace Elements
 		{
 			/// <summary>
-			///		Box graphical user interface element
+			///		Box graphical user interface element.
 			/// </summary>
 			class Box : public Element
 			{
@@ -28,6 +34,28 @@ namespace Magma
 
 			private:
 				glm::vec4 m_backgroundColor;
+			};
+
+			/// <summary>
+			///		Used to render box elements.
+			/// </summary>
+			class BoxRenderer final : public ElementRenderer
+			{
+			public:
+				BoxRenderer(Framework::Graphics::RenderDevice* renderDevice, Resources::ResourceView vertexShader, Resources::ResourceView pixelShader);
+				virtual ~BoxRenderer() final;
+
+				virtual void Render(Element* element) final;
+
+			private:
+				Framework::Graphics::RenderDevice* m_renderDevice;
+
+				Framework::Graphics::VertexArray* m_va;
+				Framework::Graphics::VertexBuffer* m_vb;
+				Framework::Graphics::VertexLayout* m_vl;
+
+				Resources::ResourceView m_vs;
+				Resources::ResourceView m_ps;
 			};
 		}
 	}

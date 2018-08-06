@@ -21,6 +21,24 @@ Magma::Resources::ResourceView::ResourceView(Resource & resource)
 	++m_resource->m_referenceCount;
 }
 
+Magma::Resources::ResourceView::ResourceView()
+{
+	m_resource = nullptr;
+}
+
+
+void Magma::Resources::ResourceView::Set(Resource & resource)
+{
+	if (m_resource != nullptr)
+	{
+		--m_resource->m_referenceCount;
+		m_resource = nullptr;
+	}
+
+	m_resource = &resource;
+	++m_resource->m_referenceCount;
+}
+
 Magma::Resources::ResourceView::~ResourceView()
 {
 	if (m_resource != nullptr)
@@ -41,20 +59,7 @@ void Magma::Resources::ResourceView::Release()
 	m_resource = nullptr;
 }
 
-Magma::Resources::Resource & Magma::Resources::ResourceView::Get()
-{
-	if (m_resource == nullptr)
-	{
-		std::stringstream ss;
-		ss << "Failed to get resource from resource view:" << std::endl;
-		ss << "Resource view was released and its resource cannot be accessed again";
-		throw ResourceError(ss.str());
-	}
-
-	return *m_resource;
-}
-
-const Magma::Resources::Resource & Magma::Resources::ResourceView::Get() const
+Magma::Resources::Resource & Magma::Resources::ResourceView::Get() const
 {
 	if (m_resource == nullptr)
 	{

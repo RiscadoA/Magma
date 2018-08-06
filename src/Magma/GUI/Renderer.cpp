@@ -2,6 +2,9 @@
 #include "Exception.hpp"
 
 #include <sstream>
+#include <Magma/Resources/Manager.hpp>
+
+#include "Elements/Box.hpp"
 
 struct ElementConstantBuffer
 {
@@ -9,59 +12,61 @@ struct ElementConstantBuffer
 	glm::vec4 backgroundColor;
 };
 
-Magma::GUI::Renderer::Renderer(Framework::Graphics::RenderDevice * device)
-	: m_device(device)
+Magma::GUI::Renderer::Renderer()
 {
-	m_elementCB = m_device->CreateConstantBuffer(sizeof(ElementConstantBuffer));
+
 }
 
 Magma::GUI::Renderer::~Renderer()
 {
-	m_device->DestroyConstantBuffer(m_elementCB);
+	for (auto& r : m_renderers)
+		delete r;
+	m_renderers.clear();
 }
 
-void Magma::GUI::Renderer::Render(Element * element)
+void Magma::GUI::Renderer::Render(Root * root)
 {
-	switch (element->GetType())
+	// Render GUI tree elements
+	auto child = root->GetFirstChild();
+	while (child != nullptr)
 	{
-		case Elements::Type::Root:
-		case Elements::Type::Null:
-			break; // Do nothing
+		this->RenderRecursive(child);
+		child = child->GetNext();
+	}
+}
 
-		case Elements::Type::Box:
+void Magma::GUI::Renderer::RenderRecursive(Element * element)
+{
+	// If the element is renderable, render it
+	if (element->IsRenderable())
+	{
+		// If element doesn't have a renderer yet, search for one
+		if (element->GetRenderer() == nullptr)
 		{
-			break;
+			for (auto& r : m_renderers)
+				if (r->GetType() == element->GetType())
+					element->SetRenderer(r);
+			if (element->GetRenderer() == nullptr)
+			{
+				std::stringstream ss;
+				ss << "Failed to render GUI:" << std::endl;
+				ss << "Failed to render element:" << std::endl;
+				ss << "Couldn't find an element renderer with the type '" << element->GetType().name() << "'";
+				throw RenderingError(ss.str());
+			}
 		}
 
-		case Elements::Type::Text:
-		{
-			break;
-		}
-
-		case Elements::Type::Invalid:
-		{
-			std::stringstream ss;
-			ss << "Failed to render on GUI::Renderer:" << std::endl;
-			ss << "Invalid GUI element type";
-			throw ElementError(ss.str());
-			break;
-		}
-
-		default:
-		{
-			std::stringstream ss;
-			ss << "Failed to render on GUI::Renderer:" << std::endl;
-			ss << "Unknown GUI element type";
-			throw ElementError(ss.str());
-			break;
-		}		
+		// Render the element
+		auto renderer = element->GetRenderer();
+		if (renderer != nullptr)
+			renderer->Render(element);
 	}
 
-	// Render children
+	// Render the element's children
 	auto child = element->GetFirstChild();
 	while (child != nullptr)
 	{
-		this->Render(child);
+		this->RenderRecursive(child);
 		child = child->GetNext();
 	}
 }

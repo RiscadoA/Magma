@@ -4,7 +4,7 @@
 #include <sstream>
 
 Magma::GUI::Root::Root(size_t poolSize, size_t maxElementSize)
-	: Element(Elements::Type::Root)
+	: Element(std::type_index(typeid(Root)), false)
 {
 	m_poolSize = poolSize;
 	m_maxElementSize = maxElementSize;

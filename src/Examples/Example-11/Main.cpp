@@ -85,7 +85,8 @@ void LoadScene(Scene& scene)
 
 	// Create GUI Renderer
 	{
-		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
+		scene.guiRenderer = new GUI::Renderer();
+		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.graphicsDevice);
 	}
 
 	// Create GUI box element
@@ -164,6 +165,12 @@ catch (Framework::Graphics::RenderDeviceError& e)
 catch (Framework::Graphics::TextError& e)
 {
 	std::cout << "Text error caught:" << std::endl;
+	std::cout << e.what() << std::endl;
+	abort();
+}
+catch (std::runtime_error& e)
+{
+	std::cout << "Runtime error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	abort();
 }

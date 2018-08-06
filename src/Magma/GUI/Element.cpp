@@ -2,9 +2,12 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Magma::GUI::Element::Element(Elements::Type type)
-	: m_type(type)
+Magma::GUI::Element::Element(std::type_index type, bool isRenderable) :
+	m_type(type),
+	m_isRenderable(isRenderable)
 {
+	m_renderer = nullptr;
+
 	m_parent = nullptr;
 	m_child = nullptr;
 	m_next = nullptr;
