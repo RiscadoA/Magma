@@ -72,7 +72,8 @@ void Magma::Resources::Manager::Clean()
 	for (auto& r : s_manager->m_resources)
 	{
 		if (r->GetMode() != ResourceMode::CPUTemporary &&
-			r->GetMode() != ResourceMode::GPUTemporary)
+			r->GetMode() != ResourceMode::GPUTemporary &&
+			r->GetMode() != ResourceMode::CPUStream)
 			continue;
 
 		if (r->HasData() && r->GetReferenceCount() == 0)
