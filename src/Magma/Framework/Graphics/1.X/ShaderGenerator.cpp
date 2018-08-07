@@ -1,5 +1,4 @@
 #include "ShaderGenerator.hpp"
-#include "../String/Conversion.hpp"
 
 #include <regex>
 #include <sstream>
@@ -7,6 +6,7 @@
 
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::Version_1_X;
 
 std::string ShaderVariableTypeToBC(ShaderVariableType type)
 {
@@ -757,7 +757,7 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 	outMD = ss.str();
 }
 
-void Magma::Framework::Graphics::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
+void Magma::Framework::Graphics::Version_1_X::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
 {
 	GenerateMD(outMD, data);
 

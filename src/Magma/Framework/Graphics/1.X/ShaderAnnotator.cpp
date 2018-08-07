@@ -5,8 +5,9 @@
 
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::Version_1_X;
 
-std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
+std::vector<ShaderFunction> Magma::Framework::Graphics::Version_1_X::ShaderFunctions =
 {
 	{
 		"cos",
@@ -831,13 +832,13 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 	return ShaderVariableType::Invalid;
 }
 
-void Magma::Framework::Graphics::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
+void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
 {
 	Annotate(tree, data);
 	Check(tree, data);
 }
 
-void Magma::Framework::Graphics::ShaderAnnotator::Print(ShaderSTNode * node, size_t indentation)
+void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Print(ShaderSTNode * node, size_t indentation)
 {
 	ShaderParser::Print(node, indentation);
 }
