@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iostream>
 
-const int MinorVersion = 1;
+const int MinorVersion = 2;
 
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
@@ -11,6 +11,8 @@ using namespace Magma::Framework::Graphics::Version_1_X;
 
 std::vector<ShaderFunction> Magma::Framework::Graphics::Version_1_X::ShaderFunctions =
 {
+	// 1.0
+
 	{
 		"cos",
 		ShaderVariableType::Float1,
@@ -226,6 +228,9 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::Version_1_X::ShaderFunct
 			ShaderVariableType::Float1,
 		}
 	},
+
+	// 1.1
+
 	{
 		"lerp1",
 		ShaderVariableType::Float1,
@@ -260,6 +265,148 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::Version_1_X::ShaderFunct
 			ShaderVariableType::Float4,
 			ShaderVariableType::Float4,
 			ShaderVariableType::Float1,
+		}
+	},
+
+	// 1.2
+
+	{
+		"clampf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"clampi",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+		}
+	},
+	{
+		"dot2",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float2,
+			ShaderVariableType::Float2,
+		}
+	},
+	{
+		"dot3",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float3,
+		}
+	},
+	{
+		"dot4",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float4,
+			ShaderVariableType::Float4,
+		}
+	},
+	{
+		"cross",
+		ShaderVariableType::Float3,
+		{
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float3,
+		}
+	},
+	{
+		"normalize2",
+		ShaderVariableType::Float2,
+		{
+			ShaderVariableType::Float2,
+		}
+	},
+	{
+		"normalize3",
+		ShaderVariableType::Float3,
+		{
+			ShaderVariableType::Float3,
+		}
+	},
+	{
+		"normalize4",
+		ShaderVariableType::Float4,
+		{
+			ShaderVariableType::Float4,
+		}
+	},
+	{
+		"round",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"transpose2",
+		ShaderVariableType::Float22,
+		{
+			ShaderVariableType::Float22,
+		}
+	},
+	{
+		"transpose3",
+		ShaderVariableType::Float33,
+		{
+			ShaderVariableType::Float33,
+		}
+	},
+	{
+		"transpose4",
+		ShaderVariableType::Float44,
+		{
+			ShaderVariableType::Float44,
+		}
+	},
+	{
+		"reflect",
+		ShaderVariableType::Float3,
+		{
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float3,
+		}
+	},
+	{
+		"minf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"maxf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"mini",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+		}
+	},
+	{
+		"maxi",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
 		}
 	},
 };

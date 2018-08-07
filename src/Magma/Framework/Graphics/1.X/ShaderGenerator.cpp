@@ -4,7 +4,7 @@
 #include <sstream>
 #include <map>
 
-const int MinorVersion = 1;
+const int MinorVersion = 2;
 
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
@@ -502,9 +502,34 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 				 exp->child->attribute == "lerp2" ||
 				 exp->child->attribute == "lerp3" ||
 				 exp->child->attribute == "lerp4")
-		{
 			out << "LERP, db" << params[2] << "," << std::endl;
-		}
+		else if (exp->child->attribute == "clampf" ||
+				 exp->child->attribute == "clampi")
+			out << "CLAMP, db" << params[2] << "," << std::endl;
+		else if (exp->child->attribute == "dot2" ||
+				 exp->child->attribute == "dot3" ||
+				 exp->child->attribute == "dot4")
+			out << "DOT," << std::endl;
+		else if (exp->child->attribute == "cross")
+			out << "CROSS," << std::endl;
+		else if (exp->child->attribute == "normalize2" ||
+				 exp->child->attribute == "normalize3" || 
+				 exp->child->attribute == "normalize4")
+			out << "NRMLIZE," << std::endl;
+		else if (exp->child->attribute == "round")
+			out << "ROUND," << std::endl;
+		else if (exp->child->attribute == "transpose2" ||
+				 exp->child->attribute == "transpose3" ||
+				 exp->child->attribute == "transpose4")
+			out << "TRNSPSE," << std::endl;
+		else if (exp->child->attribute == "reflect")
+			out << "REFLECT," << std::endl;
+		else if (exp->child->attribute == "minf" ||
+				 exp->child->attribute == "mini")
+			out << "MIN," << std::endl;
+		else if (exp->child->attribute == "maxf" ||
+				 exp->child->attribute == "maxi")
+			out << "MAX," << std::endl;
 		else
 		{
 			std::stringstream ss;

@@ -910,6 +910,93 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 				i += 1;
 				ss << ");" << std::endl;
 				break;
+
+			case BytecodeOpCode::Clamp:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = clamp(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << " , ";
+				PutIndex(it[1]);
+				i += 1;
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Dot:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = dot(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Cross:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = cross(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Nrmlize:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = normalize(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Round:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = round(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Trnspse:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = transpose(";
+				PutIndex(varIn0);
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Reflect:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = reflect(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Min:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = min(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
+
+			case BytecodeOpCode::Max:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = max(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << ");" << std::endl;
+				break;
 			}
 
 			default:
