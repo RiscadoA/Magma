@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iostream>
 
+const int MinorVersion = 1;
+
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework::Graphics::Version_1_X;
@@ -834,6 +836,14 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 
 void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
 {
+	if (data.minorVersion > MinorVersion)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderAnnotator:" << std::endl;
+		ss << "Unsupported minor version '" << data.majorVersion << "." << data.minorVersion << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	Annotate(tree, data);
 	Check(tree, data);
 }

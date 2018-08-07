@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iostream>
 
+const int MinorVersion = 0;
+
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework::Graphics::Version_1_X;
@@ -766,6 +768,14 @@ ShaderSTNode* ParseScope(ParserInfo& info)
 
 void Magma::Framework::Graphics::Version_1_X::ShaderParser::Run(const std::vector<ShaderToken> & in, ShaderSTNode *& out, ShaderCompilerData& data)
 {
+	if (data.minorVersion > MinorVersion)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderParser:" << std::endl;
+		ss << "Unsupported minor version '" << data.majorVersion << "." << data.minorVersion << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	ParserInfo info
 	{
 		data,

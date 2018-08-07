@@ -4,6 +4,8 @@
 #include <sstream>
 #include <map>
 
+const int MinorVersion = 1;
+
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework::Graphics::Version_1_X;
@@ -759,6 +761,14 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 
 void Magma::Framework::Graphics::Version_1_X::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
 {
+	if (data.minorVersion > MinorVersion)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderGenerator:" << std::endl;
+		ss << "Unsupported minor version '" << data.majorVersion << "." << data.minorVersion << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	GenerateMD(outMD, data);
 
 	std::stringstream ss;
