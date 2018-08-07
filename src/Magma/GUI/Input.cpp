@@ -45,7 +45,7 @@ void Magma::GUI::Input::OnMouseMove(float x, float y)
 {
 	// Update mouse position
 	m_mX = x;
-	m_mY = y;
+	m_mY = m_window->GetHeight() - y;
 
 	// If the mouse is inside the GUI root element
 	Point mouse;
@@ -145,8 +145,15 @@ void Magma::GUI::Input::OnMouseMoveRecursive(Element* element, bool inside)
 				element->OnMouseEnter.Fire();
 				printf("Mouse entered \"%s\"\n", element->GetType().name());
 			}
+
+			auto bb = element->GetAbsoluteBoundingBox();
+			float mx = m_mX - bb.left.absolute;
+			float my = m_mY - bb.bottom.absolute;
+
 			// Trigger OnMouseMove event
-			element->OnMouseMove.Fire(m_mX, m_mY);
+			element->OnMouseMove.Fire(mx, my);
+
+			printf("Mouse moved (%f;%f) on element \"%s\"\n", mx, my, element->GetType().name());
 		}
 		else
 		{

@@ -122,7 +122,7 @@ namespace Magma
 			///		Sets the bounding box for this element.
 			/// </summary>
 			/// <param name="box">Bounding box</param>
-			inline void SetBox(const BoundingBox& box) { m_box = box; m_dirty = true; }
+			inline void SetBox(const BoundingBox& box) { m_box = box; this->SetDirty(); }
 
 			/// <summary>
 			///		Gets the bounding box being used by this element.
@@ -221,12 +221,30 @@ namespace Magma
 			/// <returns>True if it is, otherwise false</returns>
 			inline bool IsMouseOver() const { return m_mouseOver; }
 
+			/// <summary>
+			///		Sets this element and its children as dirty.
+			/// </summary>
+			void SetDirty() const;
+
 		protected:
 			/// <summary>
 			///		Sets this element's transform matrix.
 			///		Only use this if you know what you are doing!
 			/// </summary>
-			inline void SetTransform(const glm::mat4& transform) const { m_transform = transform; m_dirty = false; }
+			/// <param name="transform">New element's transform</param>
+			inline void SetTransform(const glm::mat4& transform) const { m_transform = transform; }
+
+			/// <summary>
+			///		Sets this element's absolute bounding box.
+			///		Only use this if you know what you are doing!
+			/// </summary>
+			/// <param name="abb">New element's absolute bounding box</param>
+			inline void SetAbsoluteBoundingBox(const BoundingBox& abb) const { m_abb = abb; }
+
+			/// <summary>
+			///		Cleans the dirty flag in this element.
+			/// </summary>
+			inline void SetClean() const { m_dirty = false; }
 
 		private:
 			bool m_enabled;
@@ -239,6 +257,7 @@ namespace Magma
 			bool m_mouseOver;
 
 			BoundingBox m_box;
+			mutable BoundingBox m_abb;
 
 			std::type_index m_type;
 			ElementRenderer* m_renderer;

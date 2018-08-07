@@ -93,7 +93,7 @@ void LoadScene(Scene& scene)
 
 	// Create GUI Renderer
 	{
-		scene.guiRenderer = new GUI::Renderer();
+		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
 		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-box"));
 	}
 
@@ -104,7 +104,7 @@ void LoadScene(Scene& scene)
 
 	// Create GUI box element
 	{
-		auto element = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
+		auto element1 = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
 
 		GUI::BoundingBox bb;
 
@@ -115,12 +115,28 @@ void LoadScene(Scene& scene)
 		bb.right.relative = 0.5f;
 
 		bb.bottom.absolute = -50.0f;
-		bb.bottom.relative = 0.5f;
+		bb.bottom.relative = 0.25f;
 
 		bb.top.absolute = 50.0f;
+		bb.top.relative = 0.25f;
+
+		element1->SetBox(bb);
+
+		auto element2 = scene.guiRoot->CreateElement<GUI::Elements::Box>(element1, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
+
+		bb.left.absolute = -25.0f;
+		bb.left.relative = 0.5f;
+
+		bb.right.absolute = 0.0f;
+		bb.right.relative = 1.0f;
+
+		bb.bottom.absolute = -25.0f;
+		bb.bottom.relative = 0.5f;
+
+		bb.top.absolute = 25.0f;
 		bb.top.relative = 0.5f;
 
-		element->SetBox(bb);
+		element2->SetBox(bb);
 	}
 }
 

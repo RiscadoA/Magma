@@ -12,13 +12,21 @@ struct ElementConstantBuffer
 	glm::vec4 backgroundColor;
 };
 
-Magma::GUI::Renderer::Renderer()
+Magma::GUI::Renderer::Renderer(Framework::Graphics::RenderDevice* device)
+	: m_device(device)
 {
-
+	// Create depth stencil state
+	{
+		Framework::Graphics::DepthStencilStateDesc desc;
+		desc.depthEnabled = false;
+		m_depthStencilState = m_device->CreateDepthStencilState(desc);
+	}
 }
 
 Magma::GUI::Renderer::~Renderer()
 {
+	m_device->DestroyDepthStencilState(m_depthStencilState);
+
 	for (auto& r : m_renderers)
 		delete r;
 	m_renderers.clear();
@@ -26,6 +34,8 @@ Magma::GUI::Renderer::~Renderer()
 
 void Magma::GUI::Renderer::Render(Root * root)
 {
+	m_device->SetDepthStencilState(m_depthStencilState);
+
 	// Render GUI tree elements
 	auto child = root->GetFirstChild();
 	while (child != nullptr)
@@ -33,6 +43,8 @@ void Magma::GUI::Renderer::Render(Root * root)
 		this->RenderRecursive(child);
 		child = child->GetNext();
 	}
+
+	m_device->SetDepthStencilState(nullptr);
 }
 
 void Magma::GUI::Renderer::RenderRecursive(Element * element)

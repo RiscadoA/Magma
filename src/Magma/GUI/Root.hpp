@@ -60,9 +60,9 @@ namespace Magma
 			
 			auto t = new (loc) T(args...);
 			if (parent == nullptr)
-				static_cast<Element*>(t)->SetParent(this);
+				t->SetParent(this);
 			else
-				static_cast<Element*>(t)->SetParent(parent);
+				t->SetParent(parent);
 			return t;
 		}
 	}

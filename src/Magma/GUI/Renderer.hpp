@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Magma/Resources/Shader.hpp>
+#include <Magma/Framework/Graphics/RenderDevice.hpp>
 
 #include <vector>
 
@@ -20,7 +21,7 @@ namespace Magma
 			/// <summary>
 			///		Constructs a new graphical user interface Renderer
 			/// </summary>
-			Renderer();
+			Renderer(Framework::Graphics::RenderDevice* device);
 			~Renderer();
 
 			/// <summary>
@@ -40,6 +41,9 @@ namespace Magma
 			void RenderRecursive(Element* element);
 
 			std::vector<ElementRenderer*> m_renderers;
+
+			Framework::Graphics::RenderDevice* m_device;
+			Framework::Graphics::DepthStencilState* m_depthStencilState;
 		};
 
 		template<typename T, typename ...TArgs>
