@@ -209,6 +209,18 @@ namespace Magma
 			/// </summary>
 			Framework::Input::Event<Framework::Input::Mouse> OnMouseDown;
 
+			/// <summary>
+			///		Sets the mouse as hovering or not this element.
+			/// </summary>
+			/// <param name="mouseOver">Is the mouse over this element?</param>
+			inline void SetMouseOver(bool mouseOver) { m_mouseOver = mouseOver; }
+
+			/// <summary>
+			///		Checks if the mouse is hovering this element.
+			/// </summary>
+			/// <returns>True if it is, otherwise false</returns>
+			inline bool IsMouseOver() const { return m_mouseOver; }
+
 		protected:
 			/// <summary>
 			///		Sets this element's transform matrix.
@@ -224,6 +236,7 @@ namespace Magma
 			Element* m_child; // First element child
 			Element* m_next; // Next child of the element's parent
 
+			bool m_mouseOver;
 
 			BoundingBox m_box;
 
@@ -234,6 +247,9 @@ namespace Magma
 
 			mutable bool m_dirty;
 			mutable glm::mat4 m_transform;
+
+			size_t m_evtOnMouseEnter;
+			size_t m_evtOnMouseLeave;
 		};
 	}
 }

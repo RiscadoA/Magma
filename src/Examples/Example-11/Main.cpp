@@ -11,6 +11,7 @@
 #include <Magma/Resources/Manager.hpp>
 
 #include <Magma/GUI/Renderer.hpp>
+#include <Magma/GUI/Input.hpp>
 #include <Magma/GUI/Elements/Box.hpp>
 
 #include <Magma/Resources/Shader.hpp>
@@ -31,6 +32,7 @@ struct Scene
 
 	GUI::Root* guiRoot;
 	GUI::Renderer* guiRenderer;
+	GUI::Input* guiInput;
 };
 
 void LoadScene(Scene& scene)
@@ -95,6 +97,11 @@ void LoadScene(Scene& scene)
 		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-box"));
 	}
 
+	// Create GUI Input
+	{
+		scene.guiInput = new GUI::Input(scene.window, scene.guiRoot);
+	}
+
 	// Create GUI box element
 	{
 		auto element = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
@@ -120,6 +127,7 @@ void LoadScene(Scene& scene)
 void CleanScene(Scene& scene)
 {
 	// Delete GUI stuff
+	delete scene.guiInput;
 	delete scene.guiRenderer;
 	delete scene.guiRoot;
 

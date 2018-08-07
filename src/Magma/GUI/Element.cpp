@@ -16,10 +16,18 @@ Magma::GUI::Element::Element(std::type_index type, bool isRenderable) :
 	m_valid = false;
 
 	m_dirty = true;
+
+	m_mouseOver = false;
+
+	m_evtOnMouseEnter = OnMouseEnter.AddListener([this]() { this->SetMouseOver(true); });
+	m_evtOnMouseLeave = OnMouseLeave.AddListener([this]() { this->SetMouseOver(false); });
 }
 
 Magma::GUI::Element::~Element()
 {
+	OnMouseEnter.RemoveListener(m_evtOnMouseEnter);
+	OnMouseLeave.RemoveListener(m_evtOnMouseLeave);
+
 	this->Destroy();
 }
 
