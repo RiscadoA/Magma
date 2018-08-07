@@ -75,4 +75,6 @@ void Magma::GUI::Root::UpdateTransform() const
 	glm::mat4 mat;
 	mat = glm::ortho(bb.left.absolute, bb.right.absolute, bb.bottom.absolute, bb.top.absolute);
 	this->SetTransform(mat);
+	this->SetAbsoluteBoundingBox(bb);
+	this->SetClean();
 }

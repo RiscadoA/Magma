@@ -11,14 +11,17 @@
 #include <Magma/Resources/Manager.hpp>
 
 #include <Magma/GUI/Renderer.hpp>
+#include <Magma/GUI/Input.hpp>
 #include <Magma/GUI/Elements/Box.hpp>
+#include <Magma/GUI/Elements/Text.hpp>
 
 #include <Magma/Resources/Shader.hpp>
 #include <Magma/Resources/AudioStream.hpp>
+#include <Magma/Resources/Font.hpp>
 
 #include <Magma/Framework/Audio/OALRenderDevice.hpp>
 
-#define USE_GL
+//#define USE_GL
 
 using namespace Magma;
 
@@ -31,6 +34,7 @@ struct Scene
 
 	GUI::Root* guiRoot;
 	GUI::Renderer* guiRenderer;
+	GUI::Input* guiInput;
 };
 
 void LoadScene(Scene& scene)
@@ -72,8 +76,9 @@ void LoadScene(Scene& scene)
 	}
 
 	// Add resource importers
-	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.graphicsDevice);
 	Resources::Manager::AddImporter<Resources::AudioStreamImporter>(scene.audioDevice);
+	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.graphicsDevice);
+	Resources::Manager::AddImporter<Resources::FontImporter>(scene.graphicsDevice);
 
 	// Load permament resources<
 	Resources::Manager::Load();
@@ -91,35 +96,84 @@ void LoadScene(Scene& scene)
 
 	// Create GUI Renderer
 	{
-		scene.guiRenderer = new GUI::Renderer();
+		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
 		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-box"));
+		scene.guiRenderer->AddRenderer<GUI::Elements::TextRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-text"));
+	}
+
+	// Create GUI Input
+	{
+		scene.guiInput = new GUI::Input(scene.window, scene.guiRoot);
 	}
 
 	// Create GUI box element
 	{
-		auto element = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
-
 		GUI::BoundingBox bb;
 
+		auto element1 = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), Resources::Manager::GetResource("p-box"));
 		bb.left.absolute = -50.0f;
 		bb.left.relative = 0.5f;
-
 		bb.right.absolute = 50.0f;
 		bb.right.relative = 0.5f;
-
 		bb.bottom.absolute = -50.0f;
-		bb.bottom.relative = 0.5f;
-
+		bb.bottom.relative = 0.25f;
 		bb.top.absolute = 50.0f;
-		bb.top.relative = 0.5f;
+		bb.top.relative = 0.25f;
+		element1->SetBox(bb);
+		element1->OnMouseDown.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse down on element 1\n");
+		});
+		element1->OnMouseUp.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse up on element 1\n");
+		});
+		element1->OnMouseScroll.AddListener([](float delta)
+		{
+			printf("Mouse scrolled (%f) on element 1\n", delta);
+		});
 
-		element->SetBox(bb);
+		auto element2 = scene.guiRoot->CreateElement<GUI::Elements::Text>(
+			element1,
+			U"",
+			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+			48.0f,
+			Resources::Manager::GetResource("arial"),
+			Resources::Manager::GetResource("p-text"));
+
+		bb.left.absolute = 0.0f;
+		bb.left.relative = 0.0f;
+		bb.bottom.absolute = 0.0f;
+		bb.bottom.relative = 0.0f;
+		element2->SetBox(bb);
+
+		element2->SetText(U"text");
+		element2->ResizeToFit();
+
+		element2->OnMouseDown.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse down on element 2\n");
+		});
+		element2->OnMouseUp.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse up on element 2\n");
+		});
+		element2->OnMouseScroll.AddListener([](float delta)
+		{
+			printf("Mouse scrolled (%f) on element 2\n", delta);
+		});
 	}
 }
 
 void CleanScene(Scene& scene)
 {
 	// Delete GUI stuff
+	delete scene.guiInput;
 	delete scene.guiRenderer;
 	delete scene.guiRoot;
 

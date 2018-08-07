@@ -897,6 +897,19 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 				PutIndex(varIn0);
 				ss << ");" << std::endl;
 				break;
+
+			case BytecodeOpCode::Lerp:
+				ss << "\t";
+				PutIndex(varOut);
+				ss << " = lerp(";
+				PutIndex(varIn0);
+				ss << " , ";
+				PutIndex(varIn1);
+				ss << " , ";
+				PutIndex(it[1]);
+				i += 1;
+				ss << ");" << std::endl;
+				break;
 			}
 
 			default:

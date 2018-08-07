@@ -30,13 +30,7 @@ void Magma::Resources::Manager::Load()
 			}
 
 		if (r->GetImporter() == nullptr)
-		{
-			std::stringstream ss;
-			ss << "Failed to load resources on Magma::Resources::Manager:" << std::endl;
-			ss << "Failed to load resource '" << r->GetName() << "' on path '" << r->GetDataPath().ToString() << "':" << std::endl;
-			ss << "No importer found with the type '" << r->GetType() << "'";
-			throw ManagerError(ss.str());
-		}
+			continue;
 
 		r->SetMode(r->GetImporter()->GetMode(r));
 
@@ -72,7 +66,8 @@ void Magma::Resources::Manager::Clean()
 	for (auto& r : s_manager->m_resources)
 	{
 		if (r->GetMode() != ResourceMode::CPUTemporary &&
-			r->GetMode() != ResourceMode::GPUTemporary)
+			r->GetMode() != ResourceMode::GPUTemporary &&
+			r->GetMode() != ResourceMode::CPUStream)
 			continue;
 
 		if (r->HasData() && r->GetReferenceCount() == 0)
@@ -199,6 +194,16 @@ void Magma::Resources::Manager::Import(Resource * resource)
 	// Destroy resource if it was already imported before
 	if (resource->HasData())
 		this->Destroy(resource);
+
+	// If the resource has no importer throw exception
+	if (resource->GetImporter() == nullptr)
+	{
+		std::stringstream ss;
+		ss << "Failed to import resource Magma::Resources::Manager:" << std::endl;
+		ss << "Failed to import resource '" << resource->GetName() << "' on path '" << resource->GetDataPath().ToString() << "':" << std::endl;
+		ss << "No importer found with the type '" << resource->GetType() << "'";
+		throw ManagerError(ss.str());
+	}
 
 	// Import it
 	resource->GetImporter()->Import(resource);

@@ -20,6 +20,4 @@ ConstantBuffer boxData : BOX_DATA
 Shader
 {
 	out.color = boxData.backgroundColor;
-	out.color.r = 1.0f;
-	out.color.a = 1.0f;
 };

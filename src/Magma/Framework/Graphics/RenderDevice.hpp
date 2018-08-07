@@ -415,7 +415,7 @@ namespace Magma
 				virtual void BindTexture2D(Texture2D* texture) = 0;
 
 				/// <summary>
-				///		Binds a 2D sampler to this vertex shader binding point
+				///		Binds a 2D sampler to this pixel shader binding point
 				/// </summary>
 				/// <param name="sampler">2D sampler handle</param>
 				virtual void BindSampler2D(Sampler2D* sampler) = 0;

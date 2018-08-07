@@ -66,23 +66,23 @@ void Magma::Framework::Graphics::TextRenderer::RenderU32(const String::U32Char *
 		{
 			auto chr = m_font->Get(*it);
 
-			float xpos = x + chr.bearing.x * scale;
-			float ypos = -y - chr.bearing.y * scale;
+			float xpos = x + (chr.bearing.x / (float)m_font->GetHeight()) * scale;
+			float ypos = -y - (chr.bearing.y / (float)m_font->GetHeight()) * scale;
 
-			float w = chr.size.x * scale;
-			float h = chr.size.y * scale;
+			float w = (chr.size.x / (float)m_font->GetHeight()) * scale;
+			float h = (chr.size.y / (float)m_font->GetHeight()) * scale;
 
 			auto data = (Vertex*)m_vertexBuffer->Map();
-			data[0] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y, };
+			data[0] = { xpos + w,	-ypos - h,	chr.endUVs.x,	chr.endUVs.y, };
 			data[1] = { xpos + w,	-ypos,		chr.endUVs.x,	chr.startUVs.y };
-			data[2] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };
+			data[2] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y };
 			data[3] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y };
 			data[4] = { xpos,		-ypos - h,	chr.startUVs.x,	chr.endUVs.y };
 			data[5] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };
 			m_vertexBuffer->Unmap();
 
-			x += (chr.advance.x / 64.0f) * scale;
-			y += (chr.advance.y / 64.0f) * scale;
+			x += ((chr.advance.x / 64.0f) / (float)m_font->GetHeight()) * scale;
+			y += ((chr.advance.y / 64.0f) / (float)m_font->GetHeight()) * scale;
 
 			textureBP->BindTexture2D(chr.texture);
 			m_device->SetVertexArray(m_vertexArray);

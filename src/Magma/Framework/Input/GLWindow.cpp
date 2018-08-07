@@ -206,6 +206,7 @@ Magma::Framework::Input::GLWindow::GLWindow(unsigned int width, unsigned int hei
 	glfwSetWindowCloseCallback(win, GLFWWindowCloseCallback);
 	glfwSetScrollCallback(win, GLFWMouseScroll);
 	glfwSetCursorEnterCallback(win, GLFWCursorEnterCallback);
+	glfwSetMouseButtonCallback(win, GLFWMouseButtonCallback);
 
 	m_glfwWindow = win;
 	glfwWindows[win] = this;

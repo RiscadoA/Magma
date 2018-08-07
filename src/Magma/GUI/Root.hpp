@@ -17,7 +17,7 @@ namespace Magma
 			/// </summary>
 			/// <param name="poolSize">Element pool allocator capacity</param>
 			/// <param name="maxElementSize">Maximum element size in bytes</param>
-			Root(size_t poolSize = 4096, size_t maxElementSize = 256);
+			Root(size_t poolSize = 4096, size_t maxElementSize = 1024);
 
 			/// <summary>
 			///		Deconstructs a GUI element tree
@@ -60,9 +60,9 @@ namespace Magma
 			
 			auto t = new (loc) T(args...);
 			if (parent == nullptr)
-				static_cast<Element*>(t)->SetParent(this);
+				t->SetParent(this);
 			else
-				static_cast<Element*>(t)->SetParent(parent);
+				t->SetParent(parent);
 			return t;
 		}
 	}

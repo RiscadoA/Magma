@@ -153,6 +153,7 @@ void Magma::GUI::Elements::BoxRenderer::Render(Element * element)
 
 	// Render box
 	m_cbBP->BindConstantBuffer(m_boxDataCB);
+	box->m_cbBP->BindConstantBuffer(m_boxDataCB);
 	m_renderDevice->SetPipeline(box->m_pp);
 	m_renderDevice->SetVertexArray(m_va);
 	m_renderDevice->DrawTriangles(0, 6);
