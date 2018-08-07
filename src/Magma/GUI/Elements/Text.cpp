@@ -6,11 +6,18 @@
 
 #include <sstream>
 
+struct TextDataCB
+{
+	glm::mat4 transform;
+	glm::vec4 backgroundColor;
+	glm::vec4 foregroundColor;
+};
+
 Magma::GUI::Elements::Text::Text(
-	const std::string & text,
+	const std::u32string & text,
 	glm::vec4 foregroundColor,
 	glm::vec4 backgroundColor, 
-	size_t size,
+	float scale,
 	Resources::ResourceView font,
 	Resources::ResourceView pixelShader) :
 
@@ -18,7 +25,7 @@ Magma::GUI::Elements::Text::Text(
 	m_text(text),
 	m_foregroundColor(foregroundColor),
 	m_backgroundColor(backgroundColor),
-	m_size(size),
+	m_scale(scale),
 	m_font(font),
 	m_ps(pixelShader),
 
@@ -43,6 +50,16 @@ Magma::GUI::Elements::Text::Text(
 		ss << "The pixel shader resource '" << m_ps->GetName() << "' must have a constant buffer named 'BOX_DATA'";
 		throw RenderingError(ss.str());
 	}
+
+	// Get font binding point
+	m_ftBP = m_ps->GetData<Resources::Shader>()->pixelShader->GetBindingPoint("TEXT_FONT");
+	if (m_ftBP == nullptr)
+	{
+		std::stringstream ss;
+		ss << "Failed to create Text element:" << std::endl;
+		ss << "The pixel shader resource '" << m_ps->GetName() << "' must have a texture named 'TEXT_FONT'";
+		throw RenderingError(ss.str());
+	}
 }
 
 Magma::GUI::Elements::TextRenderer::TextRenderer(
@@ -53,25 +70,97 @@ Magma::GUI::Elements::TextRenderer::TextRenderer(
 	m_renderDevice(renderDevice),
 	m_vs(vertexShader)
 {
+	// Check if the passed vertex shader is really a vertex shader
+	if (m_vs->GetData<Resources::Shader>()->type != Framework::Graphics::ShaderType::Vertex)
+	{
+		std::stringstream ss;
+		ss << "Failed to create TextRenderer:" << std::endl;
+		ss << "The vertex shader resource '" << m_vs->GetName() << "' is not a vertex shader";
+		throw RenderingError(ss.str());
+	}
 
+	// Create constant buffer
+	m_textDataCB = m_renderDevice->CreateConstantBuffer(sizeof(TextDataCB), nullptr, Framework::Graphics::BufferUsage::Dynamic);
+
+	// Get constant buffer binding point
+	m_cbBP = m_vs->GetData<Resources::Shader>()->vertexShader->GetBindingPoint("TEXT_DATA");
+	if (m_cbBP == nullptr)
+	{
+		std::stringstream ss;
+		ss << "Failed to create TextRenderer:" << std::endl;
+		ss << "The vertex shader resource '" << m_vs->GetName() << "' must have a constant buffer named 'TEXT_DATA'";
+		throw RenderingError(ss.str());
+	}
+
+	// Create sampler 2D for the font
+	{
+		Framework::Graphics::Sampler2DDesc desc;
+		desc.minFilter = Framework::Graphics::TextureFilter::Linear;
+		desc.magFilter = Framework::Graphics::TextureFilter::Linear;
+		m_sampler = m_renderDevice->CreateSampler2D(desc);
+	}
 }
 
 Magma::GUI::Elements::TextRenderer::~TextRenderer()
 {
+	for (auto& fonts : m_fonts)
+		delete fonts.renderer;
+	for (auto& pp : m_pps)
+		m_renderDevice->DestroyPipeline(pp.pp);
 
+	m_renderDevice->DestroySampler2D(m_sampler);
+	m_renderDevice->DestroyConstantBuffer(m_textDataCB);
 }
 
 void Magma::GUI::Elements::TextRenderer::Render(Element * element)
 {
+	auto text = static_cast<Text*>(element);
 
+	// If text still hasn't a shader pipeline, get one
+	if (text->m_pp == nullptr)
+		text->m_pp = GetPipeline(text);
+
+	// If text still hasn't a text renderer, get one
+	if (text->m_tr == nullptr)
+		text->m_tr = GetRenderer(text);
+
+	// Update box data constant buffer
+	auto textData = (TextDataCB*)m_textDataCB->Map();
+	textData->transform = text->GetTransform();
+	textData->backgroundColor = text->GetBackgroundColor();
+	textData->foregroundColor = text->GetForegroundColor();
+	m_textDataCB->Unmap();
+
+	// Render box
+	m_cbBP->BindConstantBuffer(m_textDataCB);
+	text->m_cbBP->BindConstantBuffer(m_textDataCB);
+	m_renderDevice->SetPipeline(text->m_pp);
+	text->m_ftBP->BindSampler2D(m_sampler);
+	text->m_tr->RenderU32(text->GetText().c_str(), text->m_ftBP, text->GetScale());
 }
 
 Magma::Framework::Graphics::Pipeline * Magma::GUI::Elements::TextRenderer::GetPipeline(Text * text)
 {
-	return nullptr;
+	for (auto& pp : m_pps)
+		if (pp.ps == text->m_ps->GetData<Resources::Shader>()->pixelShader &&
+			pp.vs == m_vs->GetData<Resources::Shader>()->vertexShader)
+			return pp.pp;
+
+	m_pps.emplace_back();
+	m_pps.back().ps = text->m_ps->GetData<Resources::Shader>()->pixelShader;
+	m_pps.back().vs = m_vs->GetData<Resources::Shader>()->vertexShader;
+	m_pps.back().pp = m_renderDevice->CreatePipeline(m_pps.back().vs, m_pps.back().ps);
+	return m_pps.back().pp;
 }
 
 Magma::Framework::Graphics::TextRenderer * Magma::GUI::Elements::TextRenderer::GetRenderer(Text * text)
 {
-	return nullptr;
+	for (auto& font : m_fonts)
+		if (font.font == &text->m_font->GetData<Resources::Font>()->font)
+			return font.renderer;
+
+	m_fonts.emplace_back();
+	m_fonts.back().font = &text->m_font->GetData<Resources::Font>()->font;
+	m_fonts.back().renderer = new Framework::Graphics::TextRenderer(m_renderDevice, m_fonts.back().font, m_vs->GetData<Resources::Shader>()->vertexShader);
+	return m_fonts.back().renderer;
 }

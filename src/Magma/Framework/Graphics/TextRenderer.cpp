@@ -73,9 +73,9 @@ void Magma::Framework::Graphics::TextRenderer::RenderU32(const String::U32Char *
 			float h = chr.size.y * scale;
 
 			auto data = (Vertex*)m_vertexBuffer->Map();
-			data[0] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y, };
+			data[0] = { xpos + w,	-ypos - h,	chr.endUVs.x,	chr.endUVs.y, };
 			data[1] = { xpos + w,	-ypos,		chr.endUVs.x,	chr.startUVs.y };
-			data[2] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };
+			data[2] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y };
 			data[3] = { xpos,		-ypos,		chr.startUVs.x,	chr.startUVs.y };
 			data[4] = { xpos,		-ypos - h,	chr.startUVs.x,	chr.endUVs.y };
 			data[5] = { xpos + w, -ypos - h,	chr.endUVs.x,	chr.endUVs.y };

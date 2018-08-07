@@ -20,7 +20,16 @@ namespace Magma
 			class Text : public Element
 			{
 			public:
-				Text(const std::string& text, glm::vec4 foregroundColor, glm::vec4 backgroundColor, size_t size, Resources::ResourceView font, Resources::ResourceView pixelShader);
+				/// <summary>
+				///		Creates a new graphical user interface text element.
+				/// </summary>
+				/// <param name="text">UTF-32 string to display</param>
+				/// <param name="foregroundColor">Text foreground color</param>
+				/// <param name="backgroundColor">Text background color</param>
+				/// <param name="scale">Text scale</param>
+				/// <param name="font">Text font resource</param>
+				/// <param name="pixelShader">Text pixel shader resource</param>
+				Text(const std::u32string& text, glm::vec4 foregroundColor, glm::vec4 backgroundColor, float scale, Resources::ResourceView font, Resources::ResourceView pixelShader);
 
 				/// <summary>
 				///		Sets this text background color.
@@ -47,41 +56,42 @@ namespace Magma
 				inline const glm::vec4& GetForegroundColor() const { return m_foregroundColor; }
 
 				/// <summary>
-				///		Sets this text current size.
+				///		Sets this text current scale.
 				/// </summary>
-				/// <param name="size">New text size</param>
-				inline void SetSize(size_t size) { m_size = size; }
+				/// <param name="size">New text scale</param>
+				inline void SetScale(float scale) { m_scale = scale; }
 
 				/// <summary>
-				///		Gets this text current size.
+				///		Gets this text current scale.
 				/// </summary>
-				/// <returns>Current text size</returns>
-				inline size_t GetSize() const { return m_size; }
+				/// <returns>Current text scale</returns>
+				inline size_t GetScale() const { return m_scale; }
 
 				/// <summary>
 				///		Sets the string to display in this text element.
 				/// </summary>
 				/// <param name="text">New string to display</param>
-				inline void SetText(const std::string& text) { m_text = text; }
+				inline void SetText(const std::u32string& text) { m_text = text; }
 
 				/// <summary>
 				///		Gets the string that is being displayed by this text element.
 				/// </summary>
 				/// <returns>Text element string</returns>
-				inline const std::string& GetText() const { return m_text; }
+				inline const std::u32string& GetText() const { return m_text; }
 
 			private:
 				friend class TextRenderer;
 
-				std::string m_text;
+				std::u32string m_text;
 				glm::vec4 m_backgroundColor;
 				glm::vec4 m_foregroundColor;
-				size_t m_size;
+				float m_scale;
 
 				Resources::ResourceView m_font;
 
 				Resources::ResourceView m_ps;
 				Framework::Graphics::PixelBindingPoint* m_cbBP;
+				Framework::Graphics::PixelBindingPoint* m_ftBP;
 				Framework::Graphics::Pipeline* m_pp;
 				Framework::Graphics::TextRenderer* m_tr;
 
@@ -90,13 +100,12 @@ namespace Magma
 			/// <summary>
 			///		Used to render text elements.
 			///		The vertex shader takes as input a float2 POSITION, a float2 UVS and the constant buffer TEXT_DATA.
-			///		The pixel shader takes as input the constant buffer TEXT_DATA and the texture TEXT_FONT.
-			///		s
+			///		The pixel shader takes as input the constant buffer TEXT_DATA and the grey scale texture TEXT_FONT (only has red component).
+			///		
 			///		Constant buffer TEXT_DATA:
 			///			float44 transform;
 			///			float4	backgroundColor;
 			///			float4  foregroundColor;
-			///			float2	boxSize;
 			/// </summary>
 			class TextRenderer final : public ElementRenderer
 			{
@@ -110,9 +119,11 @@ namespace Magma
 				Framework::Graphics::RenderDevice* m_renderDevice;
 
 				Framework::Graphics::ConstantBuffer* m_textDataCB;
+				Framework::Graphics::Sampler2D* m_sampler;
 
 				Resources::ResourceView m_vs;
 				Framework::Graphics::VertexBindingPoint* m_cbBP;
+				
 
 				struct PipelineData
 				{

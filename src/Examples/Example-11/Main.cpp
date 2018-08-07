@@ -137,10 +137,10 @@ void LoadScene(Scene& scene)
 
 		auto element2 = scene.guiRoot->CreateElement<GUI::Elements::Text>(
 			element1,
-			"sample text",
+			U"sample text",
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 			glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
-			24,
+			1.0f,
 			Resources::Manager::GetResource("arial"),
 			Resources::Manager::GetResource("p-text"));
 
