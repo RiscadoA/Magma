@@ -113,6 +113,8 @@ namespace Magma
 				Fract	= 0x50,	// Sets { VarOut } to the fractional part of { VarIn0 }
 
 				DeclB	= 0x51, // Declares a local boolean { variable index stored on param 1x1 }
+
+				Lerp	= 0x52, // Sets { VarOut } to the interpolation of { VarIn0 } and { VarIn1 } by { index on param 1x1 }
 			};
 
 			/// <summary>

@@ -878,6 +878,19 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 					PutIndex(varIn0);
 					ss << ");" << std::endl;
 					break;
+
+				case BytecodeOpCode::Lerp:
+					ss << "\t";
+					PutIndex(varOut);
+					ss << " = mix(";
+					PutIndex(varIn0);
+					ss << " , ";
+					PutIndex(varIn1);
+					ss << " , ";
+					PutIndex(it[1]);
+					i += 1;
+					ss << ");" << std::endl;
+					break;
 			}
 
 			default:

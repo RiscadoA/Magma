@@ -404,18 +404,18 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 	}
 	else if (exp->type == ShaderSTNodeType::Call)
 	{
-		size_t params[2];
+		size_t params[3];
 
 		auto p = exp->child->next;
 		size_t pCount = 0;
 		while (p != nullptr)
 		{
-			if (pCount >= 2)
+			if (pCount >= 3)
 			{
 				std::stringstream ss;
 				ss << "Failed to run ShaderGenerator:" << std::endl;
 				ss << "Failed to call function '" << exp->child->attribute << "'" << std::endl;
-				ss << "ShaderGenerator only supports functions with up to 2 parameters";
+				ss << "ShaderGenerator only supports functions with up to 3 parameters";
 				ss << "Line: " << exp->lineNumber;
 				throw ShaderError(ss.str());
 			}
@@ -439,7 +439,7 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 			out << "VARIN0, db" << params[0] << "," << std::endl;
 			out << "VAROUT, db" << outVar << "," << std::endl;
 		}
-		else if (pCount == 2)
+		else if (pCount >= 2)
 		{
 			out << "VARIN0, db" << params[0] << "," << std::endl;
 			out << "VARIN1, db" << params[1] << "," << std::endl;
@@ -496,6 +496,13 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 			out << "CEIL," << std::endl;
 		else if (exp->child->attribute == "fract")
 			out << "FRACT," << std::endl;
+		else if (exp->child->attribute == "lerp1" ||
+				 exp->child->attribute == "lerp2" ||
+				 exp->child->attribute == "lerp3" ||
+				 exp->child->attribute == "lerp4")
+		{
+			out << "LERP, db" << params[2] << "," << std::endl;
+		}
 		else
 		{
 			std::stringstream ss;

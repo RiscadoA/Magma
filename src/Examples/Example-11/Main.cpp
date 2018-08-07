@@ -21,7 +21,7 @@
 
 #include <Magma/Framework/Audio/OALRenderDevice.hpp>
 
-#define USE_GL
+//#define USE_GL
 
 using namespace Magma;
 
@@ -139,7 +139,7 @@ void LoadScene(Scene& scene)
 			element1,
 			U"",
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-			glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 			48.0f,
 			Resources::Manager::GetResource("arial"),
 			Resources::Manager::GetResource("p-text"));
@@ -150,7 +150,7 @@ void LoadScene(Scene& scene)
 		bb.bottom.relative = 0.0f;
 		element2->SetBox(bb);
 
-		element2->SetText(U"t");
+		element2->SetText(U"text");
 		element2->ResizeToFit();
 
 		element2->OnMouseDown.AddListener([](Framework::Input::Mouse button)

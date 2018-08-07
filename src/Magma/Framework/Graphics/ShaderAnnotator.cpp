@@ -223,6 +223,42 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 			ShaderVariableType::Float1,
 		}
 	},
+	{
+		"lerp1",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"lerp2",
+		ShaderVariableType::Float2,
+		{
+			ShaderVariableType::Float2,
+			ShaderVariableType::Float2,
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"lerp3",
+		ShaderVariableType::Float3,
+		{
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float1,
+		}
+	},
+	{
+		"lerp4",
+		ShaderVariableType::Float4,
+		{
+			ShaderVariableType::Float4,
+			ShaderVariableType::Float4,
+			ShaderVariableType::Float1,
+		}
+	},
 };
 
 void DestroyShaderNode(ShaderSTNode* node)

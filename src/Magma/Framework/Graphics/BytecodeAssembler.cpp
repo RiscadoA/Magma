@@ -101,6 +101,7 @@ std::map<std::string, BytecodeOpCode> instructionSet =
 	std::make_pair("floor", BytecodeOpCode::Floor),
 	std::make_pair("ceil", BytecodeOpCode::Ceil),
 	std::make_pair("fract", BytecodeOpCode::Fract),
+	std::make_pair("lerp", BytecodeOpCode::Lerp),
 };
 
 BytecodeOpCode GetOpCode(const std::string& str)

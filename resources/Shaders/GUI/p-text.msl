@@ -28,10 +28,5 @@ Texture2D font : TEXT_FONT;
 Shader
 {
 	float sampled = Sample2D(font, in.uvs).r;
-
-	if (sampled == 0.0f)
-		discard;
-
-	out.color = textData.foregroundColor;
-	out.color.a = sampled;
+	out.color = lerp4(textData.backgroundColor, textData.foregroundColor, sampled);
 };
