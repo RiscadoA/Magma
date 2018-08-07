@@ -535,7 +535,7 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 			std::stringstream ss;
 			ss << "Failed to run ShaderGenerator:" << std::endl;
 			ss << "Failed to call function '" << exp->child->attribute << "'" << std::endl;
-			ss << "ShaderGenerator doesn't support this function";
+			ss << "ShaderGenerator version '1." << data.minorVersion << "'doesn't support this function";
 			ss << "Line: " << exp->lineNumber;
 			throw ShaderError(ss.str());
 		}

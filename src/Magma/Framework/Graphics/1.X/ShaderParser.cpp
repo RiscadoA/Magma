@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iostream>
 
-const int MinorVersion = 0;
+const int MinorVersion = 2;
 
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;

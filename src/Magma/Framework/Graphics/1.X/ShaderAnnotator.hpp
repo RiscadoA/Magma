@@ -21,6 +21,7 @@ namespace Magma
 					std::string name;
 					ShaderVariableType returnType;
 					std::vector<ShaderVariableType> params;
+					size_t minorVersion = 0;
 				};
 
 				extern std::vector<ShaderFunction> ShaderFunctions;
