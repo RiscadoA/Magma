@@ -54,10 +54,7 @@ void Magma::GUI::Input::OnMouseMove(float x, float y)
 	if (m_root->Contains(mouse))
 	{
 		if (!m_root->IsMouseOver())
-		{
 			m_root->OnMouseEnter.Fire();
-			printf("Mouse entered \"%s\"\n", m_root->GetType().name());
-		}
 		m_root->OnMouseMove.Fire(m_mX, m_mY);
 
 		auto c = m_root->GetFirstChild();
@@ -71,10 +68,8 @@ void Magma::GUI::Input::OnMouseMove(float x, float y)
 	else
 	{
 		if (m_root->IsMouseOver())
-		{
+
 			m_root->OnMouseLeave.Fire();
-			printf("Mouse left \"%s\"\n", m_root->GetType().name());
-		}
 
 		auto c = m_root->GetFirstChild();
 		while (c != nullptr)
@@ -106,10 +101,7 @@ void Magma::GUI::Input::OnMouseEnterRecursive(Element* element)
 void Magma::GUI::Input::OnMouseLeaveRecursive(Element* element)
 {
 	if (element->IsMouseOver())
-	{
 		element->OnMouseLeave.Fire();
-		printf("Mouse left \"%s\"\n", m_root->GetType().name());
-	}
 
 	auto c = element->GetFirstChild();
 	while (c != nullptr)
@@ -130,10 +122,7 @@ void Magma::GUI::Input::OnMouseMoveRecursive(Element* element, bool inside)
 	{
 		// If mouse was hovering the element, trigger OnMouseLeave
 		if (element->IsMouseOver())
-		{
 			element->OnMouseLeave.Fire();
-			printf("Mouse left \"%s\"\n", element->GetType().name());
-		}
 	}
 	else
 	{
@@ -141,10 +130,7 @@ void Magma::GUI::Input::OnMouseMoveRecursive(Element* element, bool inside)
 		{
 			// If mouse wasn't hovering the element, trigger OnMouseEnter
 			if (!element->IsMouseOver())
-			{
 				element->OnMouseEnter.Fire();
-				printf("Mouse entered \"%s\"\n", element->GetType().name());
-			}
 
 			auto bb = element->GetAbsoluteBoundingBox();
 			float mx = m_mX - bb.left.absolute;
@@ -152,17 +138,12 @@ void Magma::GUI::Input::OnMouseMoveRecursive(Element* element, bool inside)
 
 			// Trigger OnMouseMove event
 			element->OnMouseMove.Fire(mx, my);
-
-			printf("Mouse moved (%f;%f) on element \"%s\"\n", mx, my, element->GetType().name());
 		}
 		else
 		{
 			// If mouse was hovering the element, trigger OnMouseLeave
 			if (element->IsMouseOver())
-			{
 				element->OnMouseLeave.Fire();
-				printf("Mouse left \"%s\"\n", element->GetType().name());
-			}
 			inside = false;
 		}
 	}
