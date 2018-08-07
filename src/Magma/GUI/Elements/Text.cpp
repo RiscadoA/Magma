@@ -22,7 +22,6 @@ Magma::GUI::Elements::Text::Text(
 	Resources::ResourceView pixelShader) :
 
 	Element(std::type_index(typeid(Text)), true),
-	m_text(text),
 	m_foregroundColor(foregroundColor),
 	m_backgroundColor(backgroundColor),
 	m_scale(scale),
@@ -60,6 +59,38 @@ Magma::GUI::Elements::Text::Text(
 		ss << "The pixel shader resource '" << m_ps->GetName() << "' must have a texture named 'TEXT_FONT'";
 		throw RenderingError(ss.str());
 	}
+
+	this->SetText(text);
+	this->ResizeToFit();
+}
+
+void Magma::GUI::Elements::Text::SetText(const std::u32string & text)
+{
+	m_text = text;
+}
+
+void Magma::GUI::Elements::Text::ResizeToFit()
+{
+	// Get size of string and resize box accordingly
+	size_t width = 0;
+	size_t height = 0;
+	for (auto& c : m_text)
+	{
+		auto chr = m_font->GetData<Resources::Font>()->font.Get(c);
+		width += ((chr.advance.x / 64.0f) / (float)m_font->GetData<Resources::Font>()->font.GetHeight()) * m_scale;
+		height += ((chr.advance.y / 64.0f) / (float)m_font->GetData<Resources::Font>()->font.GetHeight()) * m_scale;
+		if (height < (chr.size.y / (float)m_font->GetData<Resources::Font>()->font.GetHeight()) * m_scale)
+			height = (chr.size.y / (float)m_font->GetData<Resources::Font>()->font.GetHeight()) * m_scale;
+		if (width < (chr.size.x / (float)m_font->GetData<Resources::Font>()->font.GetHeight()) * m_scale)
+			width = (chr.size.x / (float)m_font->GetData<Resources::Font>()->font.GetHeight()) * m_scale;
+	}
+
+	auto box = this->GetBox();
+	box.right.relative = box.left.relative;
+	box.right.absolute = box.left.absolute + width;
+	box.top.relative = box.bottom.relative;
+	box.top.absolute = box.bottom.absolute + height;
+	this->SetBox(box);
 }
 
 Magma::GUI::Elements::TextRenderer::TextRenderer(
@@ -95,8 +126,15 @@ Magma::GUI::Elements::TextRenderer::TextRenderer(
 	// Create sampler 2D for the font
 	{
 		Framework::Graphics::Sampler2DDesc desc;
+		
+		desc.addressU = Framework::Graphics::TextureAdressMode::Repeat;
+		desc.addressV = Framework::Graphics::TextureAdressMode::Repeat;
 		desc.minFilter = Framework::Graphics::TextureFilter::Linear;
 		desc.magFilter = Framework::Graphics::TextureFilter::Linear;
+		desc.mipmapFilter = Framework::Graphics::TextureFilter::Linear;
+		desc.border = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		desc.maxAnisotropy = m_renderDevice->GetMaxAnisotropyLimit();
+
 		m_sampler = m_renderDevice->CreateSampler2D(desc);
 	}
 }
@@ -124,18 +162,18 @@ void Magma::GUI::Elements::TextRenderer::Render(Element * element)
 	if (text->m_tr == nullptr)
 		text->m_tr = GetRenderer(text);
 
-	// Update box data constant buffer
+	// Update text data constant buffer
 	auto textData = (TextDataCB*)m_textDataCB->Map();
 	textData->transform = text->GetTransform();
 	textData->backgroundColor = text->GetBackgroundColor();
 	textData->foregroundColor = text->GetForegroundColor();
 	m_textDataCB->Unmap();
 
-	// Render box
+	// Render text
 	m_cbBP->BindConstantBuffer(m_textDataCB);
 	text->m_cbBP->BindConstantBuffer(m_textDataCB);
-	m_renderDevice->SetPipeline(text->m_pp);
 	text->m_ftBP->BindSampler2D(m_sampler);
+	m_renderDevice->SetPipeline(text->m_pp);
 	text->m_tr->RenderU32(text->GetText().c_str(), text->m_ftBP, text->GetScale());
 }
 

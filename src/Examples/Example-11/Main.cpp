@@ -137,22 +137,22 @@ void LoadScene(Scene& scene)
 
 		auto element2 = scene.guiRoot->CreateElement<GUI::Elements::Text>(
 			element1,
-			U"sample text",
+			U"",
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 			glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
-			1.0f,
+			48.0f,
 			Resources::Manager::GetResource("arial"),
 			Resources::Manager::GetResource("p-text"));
 
-		bb.left.absolute = -25.0f;
-		bb.left.relative = 0.5f;
-		bb.right.absolute = 0.0f;
-		bb.right.relative = 1.0f;
-		bb.bottom.absolute = -25.0f;
-		bb.bottom.relative = 0.5f;
-		bb.top.absolute = 25.0f;
-		bb.top.relative = 0.5f;
+		bb.left.absolute = 0.0f;
+		bb.left.relative = 0.0f;
+		bb.bottom.absolute = 0.0f;
+		bb.bottom.relative = 0.0f;
 		element2->SetBox(bb);
+
+		element2->SetText(U"t");
+		element2->ResizeToFit();
+
 		element2->OnMouseDown.AddListener([](Framework::Input::Mouse button)
 		{
 			if (button == Framework::Input::Mouse::Left)

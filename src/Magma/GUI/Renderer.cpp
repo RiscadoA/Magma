@@ -21,6 +21,15 @@ Magma::GUI::Renderer::Renderer(Framework::Graphics::RenderDevice* device)
 		desc.depthEnabled = false;
 		m_depthStencilState = m_device->CreateDepthStencilState(desc);
 	}
+
+	// Create blend state
+	{
+		Framework::Graphics::BlendStateDesc desc;
+		desc.blendEnabled = true;
+		desc.sourceFactor = Framework::Graphics::BlendFactor::SourceAlpha;
+		desc.destinationFactor = Framework::Graphics::BlendFactor::InverseSourceAlpha;
+		m_blendState = m_device->CreateBlendState(desc);
+	}
 }
 
 Magma::GUI::Renderer::~Renderer()
@@ -35,6 +44,7 @@ Magma::GUI::Renderer::~Renderer()
 void Magma::GUI::Renderer::Render(Root * root)
 {
 	m_device->SetDepthStencilState(m_depthStencilState);
+	m_device->SetBlendState(m_blendState);
 
 	// Render GUI tree elements
 	auto child = root->GetFirstChild();
@@ -44,6 +54,7 @@ void Magma::GUI::Renderer::Render(Root * root)
 		child = child->GetNext();
 	}
 
+	m_device->SetBlendState(nullptr);
 	m_device->SetDepthStencilState(nullptr);
 }
 

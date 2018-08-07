@@ -299,7 +299,7 @@ public:
 			default: throw RenderDeviceError("Failed to create D3D11ConstantBuffer:\nUnknown buffer usage mode"); break;
 		}
 
-		desc.ByteWidth = size;
+		desc.ByteWidth = ceil(float(size) / 16) * 16;
 		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		desc.MiscFlags = 0;
 
@@ -1697,6 +1697,11 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 	m_rasterState = rasterState;
 	m_renderTargetCount = 1;
 
+	// Create default states
+	m_defaultBlendState = this->CreateBlendState(BlendStateDesc());
+	m_defaultDepthStencilState = this->CreateDepthStencilState(DepthStencilStateDesc());
+	m_defaultRasterState = this->CreateRasterState(RasterStateDesc());
+
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -1705,7 +1710,9 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 void Magma::Framework::Graphics::D3D11RenderDevice::Terminate()
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	
+	this->DestroyBlendState(m_defaultBlendState);
+	this->DestroyDepthStencilState(m_defaultDepthStencilState);
+	this->DestroyRasterState(m_defaultRasterState);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -1927,7 +1934,12 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyRasterState(RasterSta
 void Magma::Framework::Graphics::D3D11RenderDevice::SetRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	((ID3D11DeviceContext*)m_deviceContext)->RSSetState(static_cast<D3D11RasterState*>(rasterState)->state);
+	if (rasterState == nullptr)
+		m_currentRasterState = m_defaultRasterState;
+	else
+		m_currentRasterState = rasterState;
+
+	((ID3D11DeviceContext*)m_deviceContext)->RSSetState(static_cast<D3D11RasterState*>(m_currentRasterState)->state);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -1954,7 +1966,12 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyDepthStencilState(Dep
 void Magma::Framework::Graphics::D3D11RenderDevice::SetDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	((ID3D11DeviceContext*)m_deviceContext)->OMSetDepthStencilState(static_cast<D3D11DepthStencilState*>(depthStencilState)->state, static_cast<D3D11DepthStencilState*>(depthStencilState)->stencilRef);
+	if (depthStencilState == nullptr)
+		m_currentDepthStencilState = m_defaultDepthStencilState;
+	else
+		m_currentDepthStencilState = depthStencilState;
+
+	((ID3D11DeviceContext*)m_deviceContext)->OMSetDepthStencilState(static_cast<D3D11DepthStencilState*>(m_currentDepthStencilState)->state, static_cast<D3D11DepthStencilState*>(m_currentDepthStencilState)->stencilRef);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif
@@ -2039,9 +2056,13 @@ void Magma::Framework::Graphics::D3D11RenderDevice::DestroyBlendState(BlendState
 void Magma::Framework::Graphics::D3D11RenderDevice::SetBlendState(BlendState * blendState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
-	auto bs = static_cast<D3D11BlendState*>(blendState);
+	if (blendState == nullptr)
+		m_currentBlendState = m_defaultBlendState;
+	else
+		m_currentBlendState = blendState;
+	
 	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	((ID3D11DeviceContext*)m_deviceContext)->OMSetBlendState(bs->state, color, 0xFFFFFFFF);
+	((ID3D11DeviceContext*)m_deviceContext)->OMSetBlendState(static_cast<D3D11BlendState*>(m_currentBlendState)->state, color, 0xFFFFFFFF);
 #else
 	throw RenderDeviceError("Failed to call function on D3D11RenderDevice:\nMAGMA_FRAMEWORK_USE_DIRECTX must be defined");
 #endif

@@ -44,6 +44,7 @@ namespace Magma
 
 			Framework::Graphics::RenderDevice* m_device;
 			Framework::Graphics::DepthStencilState* m_depthStencilState;
+			Framework::Graphics::BlendState* m_blendState;
 		};
 
 		template<typename T, typename ...TArgs>

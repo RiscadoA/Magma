@@ -71,7 +71,12 @@ namespace Magma
 				///		Sets the string to display in this text element.
 				/// </summary>
 				/// <param name="text">New string to display</param>
-				inline void SetText(const std::u32string& text) { m_text = text; }
+				void SetText(const std::u32string& text);
+
+				/// <summary>
+				///		Resizes the bounding box to fit the text.
+				/// </summary>
+				void ResizeToFit();
 
 				/// <summary>
 				///		Gets the string that is being displayed by this text element.
