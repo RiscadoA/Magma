@@ -1,12 +1,14 @@
 #include "ShaderGenerator.hpp"
-#include "../String/Conversion.hpp"
 
 #include <regex>
 #include <sstream>
 #include <map>
 
+const int MinorVersion = 2;
+
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::Version_1_X;
 
 std::string ShaderVariableTypeToBC(ShaderVariableType type)
 {
@@ -500,15 +502,40 @@ size_t GenerateExpression(const ShaderSTNode* exp, std::stringstream& out, Shade
 				 exp->child->attribute == "lerp2" ||
 				 exp->child->attribute == "lerp3" ||
 				 exp->child->attribute == "lerp4")
-		{
 			out << "LERP, db" << params[2] << "," << std::endl;
-		}
+		else if (exp->child->attribute == "clampf" ||
+				 exp->child->attribute == "clampi")
+			out << "CLAMP, db" << params[2] << "," << std::endl;
+		else if (exp->child->attribute == "dot2" ||
+				 exp->child->attribute == "dot3" ||
+				 exp->child->attribute == "dot4")
+			out << "DOT," << std::endl;
+		else if (exp->child->attribute == "cross")
+			out << "CROSS," << std::endl;
+		else if (exp->child->attribute == "normalize2" ||
+				 exp->child->attribute == "normalize3" || 
+				 exp->child->attribute == "normalize4")
+			out << "NRMLIZE," << std::endl;
+		else if (exp->child->attribute == "round")
+			out << "ROUND," << std::endl;
+		else if (exp->child->attribute == "transpose2" ||
+				 exp->child->attribute == "transpose3" ||
+				 exp->child->attribute == "transpose4")
+			out << "TRNSPSE," << std::endl;
+		else if (exp->child->attribute == "reflect")
+			out << "REFLECT," << std::endl;
+		else if (exp->child->attribute == "minf" ||
+				 exp->child->attribute == "mini")
+			out << "MIN," << std::endl;
+		else if (exp->child->attribute == "maxf" ||
+				 exp->child->attribute == "maxi")
+			out << "MAX," << std::endl;
 		else
 		{
 			std::stringstream ss;
 			ss << "Failed to run ShaderGenerator:" << std::endl;
 			ss << "Failed to call function '" << exp->child->attribute << "'" << std::endl;
-			ss << "ShaderGenerator doesn't support this function";
+			ss << "ShaderGenerator version '1." << data.minorVersion << "'doesn't support this function";
 			ss << "Line: " << exp->lineNumber;
 			throw ShaderError(ss.str());
 		}
@@ -757,8 +784,16 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 	outMD = ss.str();
 }
 
-void Magma::Framework::Graphics::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
+void Magma::Framework::Graphics::Version_1_X::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
 {
+	if (data.minorVersion > MinorVersion)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderGenerator:" << std::endl;
+		ss << "Unsupported minor version '" << data.majorVersion << "." << data.minorVersion << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	GenerateMD(outMD, data);
 
 	std::stringstream ss;

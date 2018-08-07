@@ -31,8 +31,11 @@
 	};
 */
 
+const int MinorVersion = 2;
+
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::Version_1_X;
 
 const std::vector<std::tuple<std::string, ShaderTokenType, ShaderVariableType, ShaderOperatorType, ShaderPunctuationType>> ShaderTokens =
 {
@@ -107,8 +110,16 @@ const std::vector<std::tuple<std::string, ShaderTokenType, ShaderVariableType, S
 	std::make_tuple(R"(\b([a-zA-Z]\w*)\b)",ShaderTokenType::Identifier, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
 };
 
-void Magma::Framework::Graphics::ShaderLexer::Run(const std::vector<ShaderLine>& in, std::vector<ShaderToken>& out, ShaderCompilerData& data)
+void Magma::Framework::Graphics::Version_1_X::ShaderLexer::Run(const std::vector<ShaderLine>& in, std::vector<ShaderToken>& out, ShaderCompilerData& data)
 {
+	if (data.minorVersion > MinorVersion)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderLexer:" << std::endl;
+		ss << "Unsupported minor version '" << data.majorVersion << "." << data.minorVersion << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	// Get regexes
 	const static auto tokenRegexes = []()
 	{

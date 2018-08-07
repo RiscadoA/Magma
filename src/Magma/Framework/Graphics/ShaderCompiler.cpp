@@ -1,10 +1,10 @@
 #include "ShaderCompiler.hpp"
 
 #include "ShaderPreprocessor.hpp"
-#include "ShaderLexer.hpp"
-#include "ShaderParser.hpp"
-#include "ShaderAnnotator.hpp"
-#include "ShaderGenerator.hpp"
+#include "1.X/ShaderLexer.hpp"
+#include "1.X/ShaderParser.hpp"
+#include "1.X/ShaderAnnotator.hpp"
+#include "1.X/ShaderGenerator.hpp"
 
 #include "BytecodeAssembler.hpp"
 #include "MetaDataAssembler.hpp"
@@ -14,52 +14,77 @@
 void Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, std::string& outBC, std::string& outMD)
 {
 	ShaderCompilerData data;
-
 	std::vector<ShaderLine> preprocessed;
-	std::vector<ShaderToken> tokens;
-	ShaderSTNode* tree;
 	
 	// Preprocessor
 	ShaderPreprocessor::Run(in, preprocessed, data);
 
-	// Lexer
-	ShaderLexer::Run(preprocessed, tokens, data);
+	// Version 1.X
+	if (data.majorVersion == 1)
+	{
+		std::vector<ShaderToken> tokens;
+		ShaderSTNode* tree;
 
-	// Parser
-	ShaderParser::Run(tokens, tree, data);
+		// Lexer
+		Version_1_X::ShaderLexer::Run(preprocessed, tokens, data);
 
-	// Annotator
-	ShaderAnnotator::Run(tree, data);
+		// Parser
+		Version_1_X::ShaderParser::Run(tokens, tree, data);
 
-	// Generator
-	ShaderGenerator::Run(tree, outBC, outMD, data);
-	ShaderParser::Clean(tree);
+		// Annotator
+		Version_1_X::ShaderAnnotator::Run(tree, data);
+
+		// Generator
+		Version_1_X::ShaderGenerator::Run(tree, outBC, outMD, data);
+		Version_1_X::ShaderParser::Clean(tree);
+	}
+	// No other versions supported
+	else
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderCompiler:" << std::endl;
+		ss << "Unsupported MSL major version: '" << data.majorVersion << "." << data.minorVersion << "'";
+		throw ShaderError(ss.str());
+	}
 }
 
 size_t Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, char * binaryObject, size_t maxSize)
 {
-	ShaderCompilerData data;
+	std::string bc, md;
 
+	ShaderCompilerData data;
 	std::vector<ShaderLine> preprocessed;
-	std::vector<ShaderToken> tokens;
-	ShaderSTNode* tree;
 
 	// Preprocessor
 	ShaderPreprocessor::Run(in, preprocessed, data);
 
-	// Lexer
-	ShaderLexer::Run(preprocessed, tokens, data);
+	// Version 1.X
+	if (data.majorVersion == 1)
+	{
+		std::vector<ShaderToken> tokens;
+		ShaderSTNode* tree;
 
-	// Parser
-	ShaderParser::Run(tokens, tree, data);
+		// Lexer
+		Version_1_X::ShaderLexer::Run(preprocessed, tokens, data);
 
-	// Annotator
-	ShaderAnnotator::Run(tree, data);
+		// Parser
+		Version_1_X::ShaderParser::Run(tokens, tree, data);
 
-	// Generator
-	std::string bc, md;
-	ShaderGenerator::Run(tree, bc, md, data);
-	ShaderParser::Clean(tree);
+		// Annotator
+		Version_1_X::ShaderAnnotator::Run(tree, data);
+
+		// Generator
+		Version_1_X::ShaderGenerator::Run(tree, bc, md, data);
+		Version_1_X::ShaderParser::Clean(tree);
+	}
+	// No other versions supported
+	else
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderCompiler:" << std::endl;
+		ss << "Unsupported MSL major version: '" << data.majorVersion << "." << data.minorVersion << "'";
+		throw ShaderError(ss.str());
+	}
 
 	// Assemble bytecode and meta data
 	char bytecode[4096];

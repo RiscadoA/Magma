@@ -3,8 +3,11 @@
 #include <sstream>
 #include <iostream>
 
+const int MinorVersion = 2;
+
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::Version_1_X;
 
 struct ParserInfo
 {
@@ -763,8 +766,16 @@ ShaderSTNode* ParseScope(ParserInfo& info)
 	return node;
 }
 
-void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken> & in, ShaderSTNode *& out, ShaderCompilerData& data)
+void Magma::Framework::Graphics::Version_1_X::ShaderParser::Run(const std::vector<ShaderToken> & in, ShaderSTNode *& out, ShaderCompilerData& data)
 {
+	if (data.minorVersion > MinorVersion)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderParser:" << std::endl;
+		ss << "Unsupported minor version '" << data.majorVersion << "." << data.minorVersion << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	ParserInfo info
 	{
 		data,
@@ -899,12 +910,12 @@ void Magma::Framework::Graphics::ShaderParser::Run(const std::vector<ShaderToken
 	out = info.root;
 }
 
-void Magma::Framework::Graphics::ShaderParser::Clean(ShaderSTNode * node)
+void Magma::Framework::Graphics::Version_1_X::ShaderParser::Clean(ShaderSTNode * node)
 {
 	DestroyNode(node);
 }
 
-void Magma::Framework::Graphics::ShaderParser::Print(ShaderSTNode * node, size_t indentation)
+void Magma::Framework::Graphics::Version_1_X::ShaderParser::Print(ShaderSTNode * node, size_t indentation)
 {
 	for (size_t i = 0; i < indentation; ++i)
 		std::cout << "  ";

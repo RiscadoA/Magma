@@ -3,80 +3,95 @@
 #include <sstream>
 #include <iostream>
 
+const int MinorVersion = 2;
+
 using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::Version_1_X;
 
-std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
+std::vector<ShaderFunction> Magma::Framework::Graphics::Version_1_X::ShaderFunctions =
 {
+	// 1.0
+
 	{
 		"cos",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"sin",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"tan",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"acos",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"asin",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"atan",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"degrees",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"radians",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"asin",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"atan",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"mulvec",
@@ -84,7 +99,8 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 		{
 			ShaderVariableType::Float44,
 			ShaderVariableType::Float4,
-		}
+		},
+		0,
 	},
 	{
 		"mulmat",
@@ -92,7 +108,8 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 		{
 			ShaderVariableType::Float44,
 			ShaderVariableType::Float44,
-		}
+		},
+		0,
 	},
 	{
 		"Sample2D",
@@ -100,7 +117,8 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 		{
 			ShaderVariableType::Texture2D,
 			ShaderVariableType::Float2,
-		}
+		},
+		0,
 	},
 	{
 		"powf",
@@ -108,7 +126,8 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 		{
 			ShaderVariableType::Float1,
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"powi",
@@ -116,113 +135,132 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 		{
 			ShaderVariableType::Int1,
 			ShaderVariableType::Int1,
-		}
+		},
+		0,
 	},
 	{
 		"exp",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"log",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"exp2",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"log2",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"sqrt",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"isqrt",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"absf",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"absi",
 		ShaderVariableType::Int1,
 		{
 			ShaderVariableType::Int1,
-		}
+		},
+		0,
 	},
 	{
 		"signf",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"signi",
 		ShaderVariableType::Int1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"floorf",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"floori",
 		ShaderVariableType::Int1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"ceilf",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"ceili",
 		ShaderVariableType::Int1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
 	{
 		"fract",
 		ShaderVariableType::Float1,
 		{
 			ShaderVariableType::Float1,
-		}
+		},
+		0,
 	},
+
+	// 1.1
+
 	{
 		"lerp1",
 		ShaderVariableType::Float1,
@@ -230,7 +268,8 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 			ShaderVariableType::Float1,
 			ShaderVariableType::Float1,
 			ShaderVariableType::Float1,
-		}
+		},
+		1,
 	},
 	{
 		"lerp2",
@@ -239,7 +278,8 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 			ShaderVariableType::Float2,
 			ShaderVariableType::Float2,
 			ShaderVariableType::Float1,
-		}
+		},
+		1,
 	},
 	{
 		"lerp3",
@@ -248,7 +288,8 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 			ShaderVariableType::Float3,
 			ShaderVariableType::Float3,
 			ShaderVariableType::Float1,
-		}
+		},
+		1,
 	},
 	{
 		"lerp4",
@@ -257,7 +298,168 @@ std::vector<ShaderFunction> Magma::Framework::Graphics::ShaderFunctions =
 			ShaderVariableType::Float4,
 			ShaderVariableType::Float4,
 			ShaderVariableType::Float1,
-		}
+		},
+		1,
+	},
+
+	// 1.2
+
+	{
+		"clampf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		},
+		2,
+	},
+	{
+		"clampi",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+		},
+		2,
+	},
+	{
+		"dot2",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float2,
+			ShaderVariableType::Float2,
+		},
+		2,
+	},
+	{
+		"dot3",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float3,
+		},
+		2,
+	},
+	{
+		"dot4",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float4,
+			ShaderVariableType::Float4,
+		},
+		2,
+	},
+	{
+		"cross",
+		ShaderVariableType::Float3,
+		{
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float3,
+		},
+		2,
+	},
+	{
+		"normalize2",
+		ShaderVariableType::Float2,
+		{
+			ShaderVariableType::Float2,
+		},
+		2,
+	},
+	{
+		"normalize3",
+		ShaderVariableType::Float3,
+		{
+			ShaderVariableType::Float3,
+		},
+		2,
+	},
+	{
+		"normalize4",
+		ShaderVariableType::Float4,
+		{
+			ShaderVariableType::Float4,
+		},
+		2,
+	},
+	{
+		"round",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+		},
+		2,
+	},
+	{
+		"transpose2",
+		ShaderVariableType::Float22,
+		{
+			ShaderVariableType::Float22,
+		},
+		2,
+	},
+	{
+		"transpose3",
+		ShaderVariableType::Float33,
+		{
+			ShaderVariableType::Float33,
+		},
+		2,
+	},
+	{
+		"transpose4",
+		ShaderVariableType::Float44,
+		{
+			ShaderVariableType::Float44,
+		},
+		2,
+	},
+	{
+		"reflect",
+		ShaderVariableType::Float3,
+		{
+			ShaderVariableType::Float3,
+			ShaderVariableType::Float3,
+		},
+		2,
+	},
+	{
+		"minf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		},
+		2,
+	},
+	{
+		"maxf",
+		ShaderVariableType::Float1,
+		{
+			ShaderVariableType::Float1,
+			ShaderVariableType::Float1,
+		},
+		2,
+	},
+	{
+		"mini",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+		},
+		2,
+	},
+	{
+		"maxi",
+		ShaderVariableType::Int1,
+		{
+			ShaderVariableType::Int1,
+			ShaderVariableType::Int1,
+		},
+		2,
 	},
 };
 
@@ -586,6 +788,16 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 		for (auto& f : ShaderFunctions)
 			if (f.name == node->child->attribute)
 			{
+				if (f.minorVersion > data.minorVersion)
+				{
+					std::stringstream ss;
+					ss << "Failed to run ShaderAnnotator:" << std::endl;
+					ss << "Failed to call function '" << node->child->attribute << "'" << std::endl;
+					ss << "This function is only supported on version '1." << f.minorVersion << "', the current shader version is '1." << data.minorVersion << "'" << std::endl;
+					ss << "Line: " << node->lineNumber;
+					throw ShaderError(ss.str());
+				}
+
 				auto pc = node->child->next;
 				size_t pi = 1;
 				for (auto& p : f.params)
@@ -831,13 +1043,21 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 	return ShaderVariableType::Invalid;
 }
 
-void Magma::Framework::Graphics::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
+void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
 {
+	if (data.minorVersion > MinorVersion)
+	{
+		std::stringstream ss;
+		ss << "Failed to run ShaderAnnotator:" << std::endl;
+		ss << "Unsupported minor version '" << data.majorVersion << "." << data.minorVersion << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	Annotate(tree, data);
 	Check(tree, data);
 }
 
-void Magma::Framework::Graphics::ShaderAnnotator::Print(ShaderSTNode * node, size_t indentation)
+void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Print(ShaderSTNode * node, size_t indentation)
 {
 	ShaderParser::Print(node, indentation);
 }
