@@ -19,35 +19,46 @@ namespace Magma
 			Input(Framework::Input::Window* window, Root* root);
 			~Input();
 
-			void OnMouseEnter();
-
+			/// <summary>
+			///		Called when the mouse leaves the window.
+			/// </summary>
 			void OnMouseLeave();
 
+			/// <summary>
+			///		Called when the mouse moves.
+			/// </summary>
+			/// <param name="x">Mouse X coordinate</param>
+			/// <param name="y">Mouse Y coordinate</param>
 			void OnMouseMove(float x, float y);
 
+			/// <summary>
+			///		Called when the mouse wheel is scrolled.
+			/// </summary>
+			/// <param name="x">Mouse wheel delta</param>
 			void OnMouseScroll(float x);
 
+			/// <summary>
+			///		Called when a mouse button is down.
+			/// </summary>
+			/// <param name="button">Mouse button code</param>
 			void OnMouseDown(Framework::Input::Mouse button);
 
+			/// <summary>
+			///		Called when a mouse button is up.
+			/// </summary>
+			/// <param name="button">Mouse button code</param>
 			void OnMouseUp(Framework::Input::Mouse button);
 
 		private:
-			void OnMouseEnterRecursive(Element* element);
-
 			void OnMouseLeaveRecursive(Element* element);
-
 			void OnMouseMoveRecursive(Element* element, bool inside);
-
 			bool OnMouseScrollRecursive(Element* element, float x);
-
 			bool OnMouseDownRecursive(Element* element, Framework::Input::Mouse button);
-
 			bool OnMouseUpRecursive(Element* element, Framework::Input::Mouse button);
 
 			Framework::Input::Window* m_window;
 			Root* m_root;
 
-			size_t m_evtOnMouseEnter;
 			size_t m_evtOnMouseLeave;
 			size_t m_evtOnMouseMove;
 			size_t m_evtOnMouseScroll;

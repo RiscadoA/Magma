@@ -8,7 +8,6 @@ Magma::GUI::Input::Input(
 	m_root(root)
 {
 	// Init events
-	m_evtOnMouseEnter = m_window->OnMouseEnter.AddListener(std::bind(&Input::OnMouseEnter, this));
 	m_evtOnMouseLeave = m_window->OnMouseLeave.AddListener(std::bind(&Input::OnMouseLeave, this));
 	m_evtOnMouseMove = m_window->OnMouseMove.AddListener(std::bind(&Input::OnMouseMove, this, std::placeholders::_1, std::placeholders::_2));
 	m_evtOnMouseScroll = m_window->OnMouseScroll.AddListener(std::bind(&Input::OnMouseScroll, this, std::placeholders::_1));
@@ -22,18 +21,11 @@ Magma::GUI::Input::Input(
 
 Magma::GUI::Input::~Input()
 {
-	m_window->OnMouseEnter.RemoveListener(m_evtOnMouseEnter);
 	m_window->OnMouseLeave.RemoveListener(m_evtOnMouseLeave);
 	m_window->OnMouseMove.RemoveListener(m_evtOnMouseMove);
 	m_window->OnMouseScroll.RemoveListener(m_evtOnMouseScroll);
 	m_window->OnMouseDown.RemoveListener(m_evtOnMouseDown);
 	m_window->OnMouseUp.RemoveListener(m_evtOnMouseUp);
-}
-
-
-void Magma::GUI::Input::OnMouseEnter()
-{
-	// Do nothing (still not needed)
 }
 
 void Magma::GUI::Input::OnMouseLeave()
@@ -82,20 +74,17 @@ void Magma::GUI::Input::OnMouseMove(float x, float y)
 
 void Magma::GUI::Input::OnMouseScroll(float x)
 {
+	// TO DO
 }
 
 void Magma::GUI::Input::OnMouseDown(Framework::Input::Mouse button)
 {
+	// TO DO
 }
 
 void Magma::GUI::Input::OnMouseUp(Framework::Input::Mouse button)
 {
-}
-
-
-void Magma::GUI::Input::OnMouseEnterRecursive(Element* element)
-{
-	// Do nothing (still not needed)
+	// TO DO
 }
 
 void Magma::GUI::Input::OnMouseLeaveRecursive(Element* element)
