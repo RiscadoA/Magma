@@ -56,14 +56,14 @@ namespace Magma
 			bool OnMouseDownRecursive(Element* element, Framework::Input::Mouse button);
 			bool OnMouseUpRecursive(Element* element, Framework::Input::Mouse button);
 
-			Framework::Input::Window* m_window;
-			Root* m_root;
-
 			size_t m_evtOnMouseLeave;
 			size_t m_evtOnMouseMove;
 			size_t m_evtOnMouseScroll;
 			size_t m_evtOnMouseDown;
 			size_t m_evtOnMouseUp;
+
+			Framework::Input::Window* m_window;
+			Root* m_root;	
 
 			float m_mX;
 			float m_mY;

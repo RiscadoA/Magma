@@ -74,17 +74,17 @@ void Magma::GUI::Input::OnMouseMove(float x, float y)
 
 void Magma::GUI::Input::OnMouseScroll(float x)
 {
-	// TO DO
+	OnMouseScrollRecursive(m_root, x);
 }
 
 void Magma::GUI::Input::OnMouseDown(Framework::Input::Mouse button)
 {
-	// TO DO
+	OnMouseDownRecursive(m_root, button);
 }
 
 void Magma::GUI::Input::OnMouseUp(Framework::Input::Mouse button)
 {
-	// TO DO
+	OnMouseUpRecursive(m_root, button);
 }
 
 void Magma::GUI::Input::OnMouseLeaveRecursive(Element* element)
@@ -147,15 +147,96 @@ void Magma::GUI::Input::OnMouseMoveRecursive(Element* element, bool inside)
 
 bool Magma::GUI::Input::OnMouseScrollRecursive(Element* element, float x)
 {
-	return true;
+	Point mouse;
+	mouse.x.absolute = m_mX;
+	mouse.y.absolute = m_mY;
+
+	// If this element contains the mouse
+	if (element->Contains(mouse))
+	{
+		//	Check if its children contain it
+		bool childrenHave = false;
+		auto c = element->GetFirstChild();
+		while (c != nullptr)
+		{
+			if (OnMouseScrollRecursive(c, x))
+			{
+				childrenHave = true;
+				break;
+			}
+			c = c->GetNext();
+		}
+
+		if (!childrenHave)
+		{
+			element->OnMouseScroll.Fire(x);
+		}
+
+		return true;
+	}
+	else return false;
 }
 
 bool Magma::GUI::Input::OnMouseDownRecursive(Element* element, Framework::Input::Mouse button)
 {
-	return true;
+	Point mouse;
+	mouse.x.absolute = m_mX;
+	mouse.y.absolute = m_mY;
+
+	// If this element contains the mouse
+	if (element->Contains(mouse))
+	{
+		//	Check if its children contain it
+		bool childrenHave = false;
+		auto c = element->GetFirstChild();
+		while (c != nullptr)
+		{
+			if (OnMouseDownRecursive(c, button))
+			{
+				childrenHave = true;
+				break;
+			}
+			c = c->GetNext();
+		}
+
+		if (!childrenHave)
+		{
+			element->OnMouseDown.Fire(button);
+		}
+
+		return true;
+	}
+	else return false;
 }
 
 bool Magma::GUI::Input::OnMouseUpRecursive(Element* element, Framework::Input::Mouse button)
 {
-	return true;
+	Point mouse;
+	mouse.x.absolute = m_mX;
+	mouse.y.absolute = m_mY;
+
+	// If this element contains the mouse
+	if (element->Contains(mouse))
+	{
+		//	Check if its children contain it
+		bool childrenHave = false;
+		auto c = element->GetFirstChild();
+		while (c != nullptr)
+		{
+			if (OnMouseUpRecursive(c, button))
+			{
+				childrenHave = true;
+				break;
+			}
+			c = c->GetNext();
+		}
+
+		if (!childrenHave)
+		{
+			element->OnMouseUp.Fire(button);
+		}
+
+		return true;
+	}
+	else return false;
 }

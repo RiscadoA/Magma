@@ -104,39 +104,57 @@ void LoadScene(Scene& scene)
 
 	// Create GUI box element
 	{
-		auto element1 = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
-
 		GUI::BoundingBox bb;
 
+		auto element1 = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
 		bb.left.absolute = -50.0f;
 		bb.left.relative = 0.5f;
-
 		bb.right.absolute = 50.0f;
 		bb.right.relative = 0.5f;
-
 		bb.bottom.absolute = -50.0f;
 		bb.bottom.relative = 0.25f;
-
 		bb.top.absolute = 50.0f;
 		bb.top.relative = 0.25f;
-
 		element1->SetBox(bb);
+		element1->OnMouseDown.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse down on element 1\n");
+		});
+		element1->OnMouseUp.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse up on element 1\n");
+		});
+		element1->OnMouseScroll.AddListener([](float delta)
+		{
+			printf("Mouse scrolled (%f) on element 1\n", delta);
+		});
 
 		auto element2 = scene.guiRoot->CreateElement<GUI::Elements::Box>(element1, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
-
 		bb.left.absolute = -25.0f;
 		bb.left.relative = 0.5f;
-
 		bb.right.absolute = 0.0f;
 		bb.right.relative = 1.0f;
-
 		bb.bottom.absolute = -25.0f;
 		bb.bottom.relative = 0.5f;
-
 		bb.top.absolute = 25.0f;
 		bb.top.relative = 0.5f;
-
 		element2->SetBox(bb);
+		element2->OnMouseDown.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse down on element 2\n");
+		});
+		element2->OnMouseUp.AddListener([](Framework::Input::Mouse button)
+		{
+			if (button == Framework::Input::Mouse::Left)
+				printf("Mouse up on element 2\n");
+		});
+		element2->OnMouseScroll.AddListener([](float delta)
+		{
+			printf("Mouse scrolled (%f) on element 2\n", delta);
+		});
 	}
 }
 
