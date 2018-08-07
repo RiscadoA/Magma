@@ -1,0 +1,37 @@
+#version 1.0
+#type PIXEL
+
+/*
+	Simple 2D text pixel shader.
+	Compatible with the Magma::Framework::Graphics::TextRenderer class.
+*/
+
+Input in
+{
+	float2 uvs : IN_0;
+};
+
+Output out
+{
+	float4 color : ATTACHMENT_0;
+};
+
+ConstantBuffer textData : TEXT_DATA
+{
+	float44 transform;
+	float4 backgroundColor;
+	float4 foregroundColor;
+};
+
+Texture2D texture : TEXT_FONT;
+
+Shader
+{
+	float sampled = Sample2D(texture, in.uvs).r;
+
+	if (sampled == 0.0f)
+		discard;
+
+	out.color = textData.foregroundColor;
+	out.color.a = sampled;
+};

@@ -1,11 +1,11 @@
 #!MNI!
 
-[p-basic]
+[p-basic-text]
 type=shader
-path=/Shaders/Text/p-basic.msl
+path=/Shaders/Text/p-basic-text.msl
 storage=permanent
 
-[v-default]
+[v-default-text]
 type=shader
-path=/Shaders/Text/v-default.msl
+path=/Shaders/Text/v-default-text.msl
 storage=temporary

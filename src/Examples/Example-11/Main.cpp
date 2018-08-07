@@ -13,9 +13,11 @@
 #include <Magma/GUI/Renderer.hpp>
 #include <Magma/GUI/Input.hpp>
 #include <Magma/GUI/Elements/Box.hpp>
+#include <Magma/GUI/Elements/Text.hpp>
 
 #include <Magma/Resources/Shader.hpp>
 #include <Magma/Resources/AudioStream.hpp>
+#include <Magma/Resources/Font.hpp>
 
 #include <Magma/Framework/Audio/OALRenderDevice.hpp>
 
@@ -74,8 +76,9 @@ void LoadScene(Scene& scene)
 	}
 
 	// Add resource importers
-	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.graphicsDevice);
 	Resources::Manager::AddImporter<Resources::AudioStreamImporter>(scene.audioDevice);
+	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.graphicsDevice);
+	Resources::Manager::AddImporter<Resources::FontImporter>(scene.graphicsDevice);
 
 	// Load permament resources<
 	Resources::Manager::Load();
@@ -95,6 +98,7 @@ void LoadScene(Scene& scene)
 	{
 		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
 		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-box"));
+		scene.guiRenderer->AddRenderer<GUI::Elements::TextRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-text"));
 	}
 
 	// Create GUI Input
@@ -106,7 +110,7 @@ void LoadScene(Scene& scene)
 	{
 		GUI::BoundingBox bb;
 
-		auto element1 = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
+		auto element1 = scene.guiRoot->CreateElement<GUI::Elements::Box>(nullptr, glm::vec4(0.3f, 0.3f, 0.3f, 1.0f), Resources::Manager::GetResource("p-box"));
 		bb.left.absolute = -50.0f;
 		bb.left.relative = 0.5f;
 		bb.right.absolute = 50.0f;
@@ -131,7 +135,15 @@ void LoadScene(Scene& scene)
 			printf("Mouse scrolled (%f) on element 1\n", delta);
 		});
 
-		auto element2 = scene.guiRoot->CreateElement<GUI::Elements::Box>(element1, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), Resources::Manager::GetResource("p-box"));
+		auto element2 = scene.guiRoot->CreateElement<GUI::Elements::Text>(
+			element1,
+			"sample text",
+			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+			glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
+			24,
+			Resources::Manager::GetResource("arial"),
+			Resources::Manager::GetResource("p-text"));
+
 		bb.left.absolute = -25.0f;
 		bb.left.relative = 0.5f;
 		bb.right.absolute = 0.0f;
