@@ -115,6 +115,16 @@ namespace Magma
 				DeclB	= 0x51, // Declares a local boolean { variable index stored on param 1x1 }
 
 				Lerp	= 0x52, // Sets { VarOut } to the interpolation of { VarIn0 } and { VarIn1 } by { index on param 1x1 }
+				Clamp	= 0x53,	// Sets { VarOut } to the clamped value of { index on param 1x1 } between { VarIn0 } (min) and { VarIn1 } (max)
+				Dot		= 0x54,	// Sets { VarOut } to the dot between two vectors { VarIn0 } and { VarIn1 }
+				Cross	= 0x55,	// Sets { VarOut } to the cross between two vectors { VarIn0 } and { VarIn1 }
+				Nrmlize = 0x56,	// Sets { VarOut } to the normalized value of the vector { VarIn0 }
+				Round	= 0x57,	// Sets { VarOut } to the rounded value of { VarIn0 }
+				Trnspse = 0x58, // Sets { VarOut } to the transposed value of the { VarIn0 } matrix
+				Inverse = 0x59, // Sets { VarOut } to the inverse value of the { VarIn0 } matrix
+				Reflect = 0x5A, // Sets { VarOut } to reflection vector of { VarIn0 } incident vector and { VarIn1 } surface normal
+				Min		= 0x5B, // Sets { VarOut } to the minimum value of { VarIn0 } or { VarIn1 }
+				Max		= 0x5c, // Sets { VarOut } to the maximum value of { VarIn0 } or { VarIn1 }
 			};
 
 			/// <summary>

@@ -102,6 +102,16 @@ std::map<std::string, BytecodeOpCode> instructionSet =
 	std::make_pair("ceil", BytecodeOpCode::Ceil),
 	std::make_pair("fract", BytecodeOpCode::Fract),
 	std::make_pair("lerp", BytecodeOpCode::Lerp),
+	std::make_pair("clamp", BytecodeOpCode::Clamp),
+	std::make_pair("dot", BytecodeOpCode::Dot),
+	std::make_pair("cross", BytecodeOpCode::Cross),
+	std::make_pair("nrmlize", BytecodeOpCode::Nrmlize),
+	std::make_pair("round", BytecodeOpCode::Round),
+	std::make_pair("trnspse", BytecodeOpCode::Trnspse),
+	std::make_pair("inverse", BytecodeOpCode::Inverse),
+	std::make_pair("reflect", BytecodeOpCode::Reflect),
+	std::make_pair("min", BytecodeOpCode::Min),
+	std::make_pair("max", BytecodeOpCode::Max),
 };
 
 BytecodeOpCode GetOpCode(const std::string& str)
