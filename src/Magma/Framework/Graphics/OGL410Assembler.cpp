@@ -7,6 +7,8 @@
 #include <stack>
 #include <map>
 
+const int MinorVersion = 2;
+
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
@@ -41,6 +43,14 @@ void TOGL410(ShaderDataVariableType type, std::stringstream& out)
 
 void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & data, std::string & out)
 {
+	if (data.GetMinorVersion() > MinorVersion || data.GetMajorVersion() != 1)
+	{
+		std::stringstream ss;
+		ss << "Failed to assemble binary bytecode on D3D11Assembler:" << std::endl;
+		ss << "Unsupported shader version '" << data.GetMajorVersion() << "." << data.GetMinorVersion() << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	std::stringstream ss;
 	
 	ss << "#version 410 core" << std::endl << std::endl;
