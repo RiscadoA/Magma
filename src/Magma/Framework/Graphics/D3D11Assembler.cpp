@@ -7,6 +7,8 @@
 #include <stack>
 #include <map>
 
+const int MinorVersion = 2;
+
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
@@ -41,6 +43,14 @@ void ToHLSL(ShaderDataVariableType type, std::stringstream& out)
 
 void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & data, std::string & out)
 {
+	if (data.GetMinorVersion() > MinorVersion || data.GetMajorVersion() != 1)
+	{
+		std::stringstream ss;
+		ss << "Failed to assemble binary bytecode on D3D11Assembler:" << std::endl;
+		ss << "Unsupported shader version '" << data.GetMajorVersion() << "." << data.GetMinorVersion() << "' (the current version is '1." << MinorVersion << "')";
+		throw ShaderError(ss.str());
+	}
+
 	std::stringstream ss;
 
 	ss << "// This shader was automatically generated from binary bytecode by the D3D11Assembler::Assemble function" << std::endl;

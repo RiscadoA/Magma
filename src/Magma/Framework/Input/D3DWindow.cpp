@@ -338,6 +338,18 @@ LRESULT CALLBACK WindowProc(
 			{
 				(window->second)->OnMouseDown.Fire(Mouse::Right);
 			} break;
+			case WM_LBUTTONUP:
+			{
+				(window->second)->OnMouseUp.Fire(Mouse::Left);
+			} break;
+			case WM_MBUTTONUP:
+			{
+				(window->second)->OnMouseUp.Fire(Mouse::Middle);
+			} break;
+			case WM_RBUTTONUP:
+			{
+				(window->second)->OnMouseUp.Fire(Mouse::Right);
+			} break;
 			default:
 			{
 				return DefWindowProc(hWnd, message, wParam, lParam);
