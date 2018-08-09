@@ -53,7 +53,6 @@ extern "C"
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="chr">chr</paramref> or <paramref name="up">up</paramref> are NULL.
 	///		Returns MFS_ERROR_INVALID_UTF8 if the UTF-8 character at <paramref name="chr">chr</paramref> is invalid UTF-8.
-	///		Returns MFS_ERROR_INVALID_UNICODE if the unicode point value encoded is invalid.
 	/// </returns>
 	mfsError mfsGetUTF8Char(const mfsUTF8CodeUnit* chr, mfsUnicodePoint* up);
 

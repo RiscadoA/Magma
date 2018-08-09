@@ -75,30 +75,37 @@ mfmU64 Magma::Framework::String::GetU8CharSize(UnicodePoint up)
 
 UnicodePoint Magma::Framework::String::GetU8Char(const U8CodePoint * src)
 {
-	mfmU64 size;
-	auto err = mfsGetSizeAsUTF8(up, &size);
+	mfsUnicodePoint up;
+	auto err = mfsGetUTF8Char(src, &up);
 	switch (err)
 	{
 		case MFS_ERROR_OKAY:
 			break;
-		case MFS_ERROR_INVALID_UNICODE:
+		case MFS_ERROR_INVALID_ARGUMENTS:
 		{
 			std::stringstream ss;
-			ss << "Failed to get unicode point value size as UTF-8:" << std::endl;
+			ss << "Failed to get unicode point value from UTF-8 character:" << std::endl;
+			ss << "Invalid arguments:" << std::endl;
+			ss << "mfsGetUTF8Char returned MFS_ERROR_INVALID_ARGUMENTS";
+			throw StringError(ss.str());
+		}
+		case MFS_ERROR_INVALID_UTF8:
+		{
+			std::stringstream ss;
+			ss << "Failed to get unicode point value from UTF-8 character:" << std::endl;
 			ss << "Invalid unicode point value:" << std::endl;
-			ss << "mfsGetSizeAsUTF8 returned MFS_ERROR_INVALID_UNICODE";
+			ss << "mfsGetUTF8Char returned MFS_ERROR_INVALID_UTF8";
 			throw StringError(ss.str());
 		}
 		default:
 		{
 			std::stringstream ss;
 			ss << "Failed to get unicode point value size as UTF-8:" << std::endl;
-			ss << "mfsGetSizeAsUTF8 returned '" << err << "'";
+			ss << "mfsGetUTF8Char returned '" << err << "'";
 			throw StringError(ss.str());
 		}
 	}
-
-	return size;
+	return up;
 }
 
 mfmU64 Magma::Framework::String::SetU8Char(U8CodePoint * dst, UnicodePoint up, mfmU64 maxSize)
