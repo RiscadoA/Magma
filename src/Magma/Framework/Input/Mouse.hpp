@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Mouse.h"
+
 namespace Magma
 {
 	namespace Framework
@@ -11,13 +13,13 @@ namespace Magma
 			/// </summary>
 			enum class Mouse
 			{
-				Invalid = -1,
+				Invalid = MFI_MOUSE_INVALID,
 
-				Left,
-				Right,
-				Middle,
+				Left = MFI_MOUSE_LEFT,
+				Right = MFI_MOUSE_RIGHT,
+				Middle = MFI_MOUSE_MIDDLE,
 
-				Count
+				Max = MFI_MOUSE_MAX,
 			};
 		}
 	}

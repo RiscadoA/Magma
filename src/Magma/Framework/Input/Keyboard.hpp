@@ -85,7 +85,7 @@ namespace Magma
 				PageUp = MFI_KEYBOARD_PAGEUP,
 				PageDown = MFI_KEYBOARD_PAGEDOWN,
 
-				Max
+				Max = MFI_KEYBOARD_MAX,
 			};
 
 			/// <summary>

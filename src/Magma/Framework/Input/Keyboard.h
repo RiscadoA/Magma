@@ -83,6 +83,7 @@ extern "C"
 #define MFI_KEYBOARD_RIGHT		0x44
 #define MFI_KEYBOARD_UP			0x45
 #define MFI_KEYBOARD_DOWN		0x46
+#define MFI_KEYBOARD_MAX		0x46		
 
 #define MFI_KEY_MOD_NONE		0x00
 #define MFI_KEY_MOD_SHIFT		0x01
