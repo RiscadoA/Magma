@@ -2,6 +2,8 @@
 
 # Get all files
 file(GLOB_RECURSE Example_C_1_Source
+	"*.hpp"
+    "*.cpp"
     "*.h"
     "*.c"
 )
