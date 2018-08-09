@@ -88,7 +88,7 @@ size_t Magma::Framework::Audio::ParseWAVHeader(const void * data, size_t size, W
 	// Get file size (4-7)
 	{
 		out.fileSize = *(int32_t*)((char*)data + 4);
-		Memory::FromLittleEndian4(&out.fileSize);
+		Memory::FromLittleEndian4(&out.fileSize, &out.fileSize);
 	}
 
 	// Get file type (8-11)
@@ -134,7 +134,7 @@ size_t Magma::Framework::Audio::ParseWAVFormatChunk(const void * data, size_t si
 	// Type of format (8-9)
 	{
 		auto formatType = *(int16_t*)((char*)data + 8);
-		Memory::FromLittleEndian2(&formatType);
+		Memory::FromLittleEndian2(&formatType, &formatType);
 
 		if (formatType != 1)
 		{
@@ -148,19 +148,19 @@ size_t Magma::Framework::Audio::ParseWAVFormatChunk(const void * data, size_t si
 	// Number of channels (10-11)
 	{
 		out.channelCount = *(int16_t*)((char*)data + 10);
-		Memory::FromLittleEndian2(&out.channelCount);
+		Memory::FromLittleEndian2(&out.channelCount, &out.channelCount);
 	}
 
 	// Sample rate (12-15)
 	{
 		out.sampleRate = *(int32_t*)((char*)data + 12);
-		Memory::FromLittleEndian4(&out.sampleRate);
+		Memory::FromLittleEndian4(&out.sampleRate, &out.sampleRate);
 	}
 
 	// Bits per sample (22-23)
 	{
 		out.bitsPerSample = *(int16_t*)((char*)data + 22);
-		Memory::FromLittleEndian2(&out.bitsPerSample);
+		Memory::FromLittleEndian2(&out.bitsPerSample, &out.bitsPerSample);
 	}
 
 	// Get format
@@ -215,7 +215,7 @@ size_t Magma::Framework::Audio::ParseWAVDataChunk(const void * data, size_t size
 
 	// Length of data data (4-7)
 	out.header.chunkSize = *(int32_t*)((char*)data + 4);
-	Memory::FromLittleEndian4(&out.header.chunkSize);
+	Memory::FromLittleEndian4(&out.header.chunkSize, &out.header.chunkSize);
 
 	// Store PCM data
 	out.pcmData = malloc(out.header.chunkSize);
@@ -255,7 +255,7 @@ size_t Magma::Framework::Audio::ParseWAVChunkHeader(const void * data, size_t si
 
 	// Length of format data (not needed) (4-7)
 	out.chunkSize = *(int32_t*)((char*)data + 4);
-	Memory::FromLittleEndian4(&out.chunkSize);
+	Memory::FromLittleEndian4(&out.chunkSize, &out.chunkSize);
 
 	return 8;
 }

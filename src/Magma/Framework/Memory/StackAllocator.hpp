@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Exception.hpp"
+#include "StackAllocator.h"
 
 namespace Magma
 {
@@ -9,7 +10,7 @@ namespace Magma
 		namespace Memory
 		{
 			/// <summary>
-			///		Encapsulates a simple stack allocator
+			///		Encapsulates the magma framework C stack allocator declared on StackAllocator.h.
 			/// </summary>
 			class StackAllocator final
 			{
@@ -18,7 +19,7 @@ namespace Magma
 				///		Creates a simple stack allocator
 				/// </summary>
 				/// <param name="size">Stack allocator size in bytes</param>
-				StackAllocator(size_t size);
+				StackAllocator(mfmU64 size);
 
 				/// <summary>
 				///		Destroys a simple stack allocator
@@ -30,24 +31,16 @@ namespace Magma
 				/// </summary>
 				/// <param name="size">Allocation size</param>
 				/// <returns>Returns the allocated memory pointer</returns>
-				void* Allocate(size_t size);
+				void* Allocate(mfmU64 size);
 
 				/// <summary>
-				///		Gets the stack head of the allocator
+				///		Sets the stack head of the allocator.
 				/// </summary>
-				/// <returns>Returns the stack head of the allocator</returns>
-				size_t GetHead();
-
-				/// <summary>
-				///		Sets the stack head of the allocator
-				/// </summary>
-				/// <param name="size">New allocator stack head</param>
-				void SetHead(size_t head);
+				/// <param name="head">New allocator stack head</param>
+				void SetHead(void* head);
 
 			private:
-				size_t m_size;
-				size_t m_head;
-				void* m_memory;
+				::mfmStackAllocator* m_stack;
 			};
 		}
 	}
