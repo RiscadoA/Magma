@@ -208,7 +208,7 @@ void Magma::Framework::Graphics::D3D11Assembler::Assemble(const ShaderData & dat
 	{
 		union
 		{
-			String::U32Char chr;
+			String::UnicodePoint chr;
 			float flt;
 		} convert;
 		convert.flt = flt;

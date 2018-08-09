@@ -145,7 +145,7 @@ void Magma::Framework::Graphics::Font::Set(Magma::Framework::Graphics::Character
 	m_chars.push_back(character);
 }
 
-Magma::Framework::Graphics::Character Magma::Framework::Graphics::Font::Get(Magma::Framework::String::U32Char codePoint) const
+Magma::Framework::Graphics::Character Magma::Framework::Graphics::Font::Get(Magma::Framework::String::UnicodePoint codePoint) const
 {
 	for (const auto& c : m_chars)
 		if (c.codePoint == codePoint)

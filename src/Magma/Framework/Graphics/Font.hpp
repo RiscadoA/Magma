@@ -20,7 +20,7 @@ namespace Magma
 				/// <summary>
 				///		Character unicode code point value.
 				/// </summary>
-				String::U32Char codePoint;
+				String::UnicodePoint codePoint;
 
 				/// <summary>
 				///		Character texture handle.
@@ -84,7 +84,7 @@ namespace Magma
 				/// </summary>
 				/// <param name="codePoint">Character unicode code point value</param>
 				/// <returns>Character info</returns>
-				Character Get(String::U32Char codePoint) const;
+				Character Get(String::UnicodePoint codePoint) const;
 
 				/// <summary>
 				///		Gets one of the atlas used by this font

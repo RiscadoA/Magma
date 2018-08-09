@@ -8,7 +8,7 @@ int main()
 
 	// Valid chars
 	{
-		U32Char valid[] =
+		UnicodePoint valid[] =
 		{
 			0xE1,
 			0x1374,
@@ -22,7 +22,7 @@ int main()
 
 	// Invalid chars
 	{
-		U32Char invalid[] =
+		UnicodePoint invalid[] =
 		{
 			0x110000,
 			0xD800,

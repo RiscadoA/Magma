@@ -31,7 +31,7 @@ namespace Magma
 			/// </summary>
 			/// <param name="up">Unicode point value</param>
 			/// <returns>The UTF-8 character size in bytes</returns>
-			mfmU64 GetU8CharSize(U32Char up);
+			mfmU64 GetU8CharSize(UnicodePoint up);
 
 			/// <summary>
 			///		Gets the unicode point of a UTF-8 character
@@ -39,7 +39,7 @@ namespace Magma
 			/// <param name="src">UTF-8 char pointer</param>
 			/// <returns>UTF-8 character unicode point value</returns>
 			/// <exception cref="Magma::Framework::String::StringError">Thrown if the character is invalid UTF-8</exception>
-			U32Char GetU8Char(const U8CodePoint* src);
+			UnicodePoint GetU8Char(const U8CodePoint* src);
 
 			/// <summary>
 			///		Sets a UTF-8 character value
@@ -48,7 +48,7 @@ namespace Magma
 			/// <param name="up">Unicode point value</param>
 			/// <param name="maxSize">Maximum UTF-8 character size</param>
 			/// <returns>The size of the character</returns>
-			mfmU64 SetU8Char(U8CodePoint* dst, U32Char up, mfmU64 maxSize = 4);
+			mfmU64 SetU8Char(U8CodePoint* dst, UnicodePoint up, mfmU64 maxSize = 4);
 
 			/// <summary>
 			///		Gets the next UTF-8 character pointer in a string

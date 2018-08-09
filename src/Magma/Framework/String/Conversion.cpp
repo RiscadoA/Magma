@@ -2,7 +2,7 @@
 
 #include <cctype>
 
-size_t Magma::Framework::String::ConvertU8ToU32(const U8CodePoint * src, U32Char * dst, size_t maxSize)
+size_t Magma::Framework::String::ConvertU8ToU32(const U8CodePoint * src, UnicodePoint * dst, size_t maxSize)
 {
 	if (maxSize == 0)
 		return 0;
@@ -23,7 +23,7 @@ size_t Magma::Framework::String::ConvertU8ToU32(const U8CodePoint * src, U32Char
 	return s + 1;
 }
 
-size_t Magma::Framework::String::ConvertU32ToU8(const U32Char * src, U8CodePoint * dst, size_t maxSize)
+size_t Magma::Framework::String::ConvertU32ToU8(const UnicodePoint * src, U8CodePoint * dst, size_t maxSize)
 {
 	if (maxSize == 0)
 		return 0;

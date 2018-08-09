@@ -28,7 +28,7 @@ namespace Magma
 				/// </summary>
 				/// <param name="str">UTF-32 null terminated string pointer</param>
 				/// <param name="textureBP">Character texture binding point</param>
-				void RenderU32(const String::U32Char* str, PixelBindingPoint* textureBP, float scale = 24.0f);
+				void RenderU32(const String::UnicodePoint* str, PixelBindingPoint* textureBP, float scale = 24.0f);
 
 			private:
 				RenderDevice* m_device;

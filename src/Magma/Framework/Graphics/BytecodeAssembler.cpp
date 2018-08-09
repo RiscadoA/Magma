@@ -241,7 +241,7 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 
 						union
 						{
-							String::U32Char chr;
+							String::UnicodePoint chr;
 							float flt;
 						} convertFloat;
 

@@ -14,7 +14,7 @@ namespace Magma
 			/// <param name="dst">UTF-32 destination string</param>
 			/// <param name="maxSize">Max UTF-32 string size (in characters, including the null character)</param>
 			/// <returns>UTF-32 string size in characters, including the null character</returns>
-			size_t ConvertU8ToU32(const U8CodePoint* src, U32Char* dst, size_t maxSize);
+			size_t ConvertU8ToU32(const U8CodePoint* src, UnicodePoint* dst, size_t maxSize);
 
 			/// <summary>
 			///		Converts a UTF-32 string to a UTF-8 string.
@@ -23,7 +23,7 @@ namespace Magma
 			/// <param name="dst">UTF-8 destination string</paramref>
 			/// <param name="maxSize">Max UTF-8 string size (in bytes, including the null character)</param>
 			/// <returns>UTF-8 string size in characters, including the null character</returns>
-			size_t ConvertU32ToU8(const U32Char* src, U8CodePoint* dst, size_t maxSize);
+			size_t ConvertU32ToU8(const UnicodePoint* src, U8CodePoint* dst, size_t maxSize);
 
 			/// <summary>
 			///		Makes an ASCII string lower case

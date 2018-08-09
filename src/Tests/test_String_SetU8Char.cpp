@@ -6,7 +6,7 @@ int main()
 {
 	using namespace Magma::Framework::String;
 
-	U32Char chrs[] =
+	UnicodePoint chrs[] =
 	{
 		0x24, 1,
 		0xA2, 2,
@@ -25,7 +25,7 @@ int main()
 	};
 
 	U8CodePoint dst[4];
-	U32Char* chr = &chrs[0];
+	UnicodePoint* chr = &chrs[0];
 	auto exp = &expectedChrs[0];
 	while (*chr != 0)
 	{

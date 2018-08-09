@@ -15,7 +15,7 @@ int main()
 		0x00,
 	};
 
-	U32Char dstStr[256];
+	UnicodePoint dstStr[256];
 
 	TEST_REQUIRE_PASS(ConvertU8ToU32(srcStr, dstStr, 256) == 5);
 	TEST_REQUIRE_PASS(dstStr[0] == 0x24);

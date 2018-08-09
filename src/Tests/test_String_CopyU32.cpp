@@ -6,7 +6,7 @@ int main()
 {
 	using namespace Magma::Framework::String;
 
-	U32Char srcStr[] =
+	UnicodePoint srcStr[] =
 	{
 		0x10FFFF,
 		0xe1,
@@ -15,7 +15,7 @@ int main()
 		0x0
 	};
 
-	U32Char dstStr[256];
+	UnicodePoint dstStr[256];
 
 	TEST_REQUIRE_PASS(CopyU32(srcStr, dstStr, 256) == 5);
 	for (size_t i = 0; i < 5; ++i)

@@ -6,13 +6,13 @@ int main()
 {
 	using namespace Magma::Framework::String;
 
-	U32Char srcStr[] =
+	UnicodePoint srcStr[] =
 	{
 		0xdeadbeef,
 		0xefbeadde,
 		0x00,
 	};
-	U32Char dstStr[256];
+	UnicodePoint dstStr[256];
 
 	TEST_REQUIRE_PASS(U32FromLE(srcStr, dstStr, 0) == 0);
 	TEST_REQUIRE_PASS(U32FromLE(srcStr, dstStr, 1) == 1);
