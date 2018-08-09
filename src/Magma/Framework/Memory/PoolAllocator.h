@@ -44,7 +44,7 @@ extern "C"
 	/// <param name="desc">Pointer to pool allocator description</param>
 	/// <returns>
 	///		Returns MFM_ERROR_OKAY if there were no errors.
-	///		Returns MFM_ALLOCATION_ERROR if the function couldn't allocate memory for the pool.
+	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the pool.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the pool description or allocator pointers are NULL.
 	/// </returns>
 	mfmError mfmCreatePoolAllocator(mfmPoolAllocator** poolAllocator, mfmPoolAllocatorDesc* desc);
@@ -64,7 +64,7 @@ extern "C"
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if the pool has no free slots.
 	///		Returns MFM_ERROR_ALLOCATION_TOO_BIG if the allocation size is bigger than the pool slot's size.
-	///		Returns MFM_ALLOCATION_ERROR if the pool failed to expand.
+	///		Returns MFM_ERROR_ALLOCATION_FAILED if the pool failed to expand.
 	/// </returns>
 	mfmError mfmPoolAllocate(void** memory, mfmPoolAllocator* allocator, mfmU64 size);
 
@@ -75,7 +75,7 @@ extern "C"
 	/// <param name="allocator">Magma framework memory pool allocator</param>
 	/// <returns>
 	///		Returns MFM_ERROR_OKAY if there were no errors.
-	///		Returns MFM_ERROR_MEMORY_OUT_OF_BOUNDS if the memory is out of the pool bounds.
+	///		Returns MFM_ERROR_OUT_OF_BOUNDS if the memory is out of the pool bounds.
 	/// </returns>
 	mfmError mfmPoolDeallocate(void* memory, mfmPoolAllocator* allocator);
 
