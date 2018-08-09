@@ -52,6 +52,7 @@ extern "C"
 	/// <summary>
 	///		Destroys a magma framework memory pool allocator.
 	/// </summary>
+	/// <param name="poolAllocator">Pool allocator to destroy</param>
 	void mfmDestroyPoolAllocator(void * poolAllocator);
 
 	/// <summary>

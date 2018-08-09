@@ -5,7 +5,7 @@ mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 siz
 	// Check if the arguments are valid
 	if (stackAllocator == NULL || size == 0)
 		return MFM_ERROR_INVALID_ARGUMENTS;
-		return
+	
 	// Allocate memory for the stack allocator
 	mfmU8* memory = (mfmU8*)malloc(sizeof(mfmStackAllocator) + size);
 	if (memory == NULL)
@@ -18,9 +18,9 @@ mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 siz
 	(*stackAllocator)->stackHead = memory + sizeof(mfmStackAllocator);
 
 	// Set destructor function
-	(*mfmStackAllocator)->object.destructorFunc = &mfmDestroyStackAllocator;
+	(*stackAllocator)->object.destructorFunc = &mfmDestroyStackAllocator;
 
-	// Successfully created a pool allocator
+	// Successfully created a stack allocator
 	return MFM_ERROR_OKAY;
 }
 

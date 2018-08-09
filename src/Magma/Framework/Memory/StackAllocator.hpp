@@ -40,7 +40,7 @@ namespace Magma
 				void SetHead(void* head);
 
 			private:
-				mfmStackAllocator* m_stack;
+				::mfmStackAllocator* m_stack;
 			};
 		}
 	}

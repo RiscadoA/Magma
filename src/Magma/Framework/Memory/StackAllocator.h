@@ -35,6 +35,7 @@ extern "C"
 	/// <summary>
 	///		Destroys a magma framework memory stack allocator.
 	/// </summary>
+	/// <param name="stackAllocator">Stack allocator to destroy</param>
 	void mfmDestroyStackAllocator(void * stackAllocator);
 
 	/// <summary>
@@ -45,7 +46,7 @@ extern "C"
 	/// <param name="size">Memory allocation size in bytes</param>
 	/// <returns>
 	///		Returns MFM_ERROR_OKAY if there were no errors.
-	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if stack overflowed.
+	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if the stack overflowed.
 	/// </returns>
 	mfmError mfmStackAllocate(mfmStackAllocator* allocator, void** memory, mfmU64 size);
 
