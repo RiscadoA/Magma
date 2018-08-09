@@ -1,35 +1,91 @@
 #include "StackAllocator.hpp"
 
-#include <cstdlib>
+#include <sstream>
 
-Magma::Framework::Memory::StackAllocator::StackAllocator(size_t size)
+Magma::Framework::Memory::StackAllocator::StackAllocator(mfmU64 size)
 {
-	m_size = size;
-	m_head = 0;
-	m_memory = malloc(m_size);
+	m_stack = nullptr;
+	auto err = ::mfmCreateStackAllocator(&m_stack, size);
+	switch (err)
+	{
+		case MFM_ERROR_OKAY:
+			break;
+		case MFM_ERROR_ALLOCATION_FAILED:
+		{
+			std::stringstream ss;
+			ss << "Failed to create StackAllocator:" << std::endl;
+			ss << "mfmCreateStackAllocator returned MFM_ERROR_ALLOCATION_FAILED";
+			throw AllocationError(ss.str());
+		}
+		case MFM_ERROR_INVALID_ARGUMENTS:
+		{
+			std::stringstream ss;
+			ss << "Failed to create StackAllocator:" << std::endl;
+			ss << "mfmCreateStackAllocator returned MFM_ERROR_INVALID_ARGUMENTS";
+			throw AllocationError(ss.str());
+		}
+		default:
+		{
+			std::stringstream ss;
+			ss << "Failed to create StackAllocator:" << std::endl;
+			ss << "mfmCreateStackAllocator returned '" << err << "'";
+			throw AllocationError(ss.str());
+		}
+	}
 }
 
 Magma::Framework::Memory::StackAllocator::~StackAllocator()
 {
-	free(m_memory);
+	if (m_stack != nullptr)
+		::mfmDestroyStackAllocator(m_stack);
 }
 
-void * Magma::Framework::Memory::StackAllocator::Allocate(size_t size)
+void * Magma::Framework::Memory::StackAllocator::Allocate(mfmU64 size)
 {
-	if (m_size < m_head + size)
-		throw AllocationError("Failed to allocate on StackAllocator:\nAllocator overflow");
-	m_head += size;
-	return (char*)m_memory + m_head - size;
+	void* memory;
+	auto err = ::mfmStackAllocate(m_stack, &memory, size);
+	switch (err)
+	{
+		case MFM_ERROR_OKAY:
+			break;
+		case MFM_ERROR_ALLOCATOR_OVERFLOW:
+		{
+			std::stringstream ss;
+			ss << "Failed to allocate on StackAllocator:" << std::endl;
+			ss << "mfmStackAllocate returned MFM_ERROR_ALLOCATOR_OVERFLOW";
+			throw AllocationError(ss.str());
+		}
+		default:
+		{
+			std::stringstream ss;
+			ss << "Failed to allocate on StackAllocator:" << std::endl;
+			ss << "mfmStackAllocate returned '" << err << "'";
+			throw AllocationError(ss.str());
+		}
+	}
+	return memory;
 }
 
-size_t Magma::Framework::Memory::StackAllocator::GetHead()
+void Magma::Framework::Memory::StackAllocator::SetHead(void* head)
 {
-	return m_head;
-}
-
-void Magma::Framework::Memory::StackAllocator::SetHead(size_t head)
-{
-	if (head > m_size)
-		throw AllocationError("Failed to set head on StackAllocator:\nNew head out of bounds");
-	m_head = head;
+	auto err = ::mfmStackSetHead(m_stack, head);
+	switch (err)
+	{
+		case MFM_ERROR_OKAY:
+			break;
+		case MFM_ERROR_OUT_OF_BOUNDS:
+		{
+			std::stringstream ss;
+			ss << "Failed to set stack head on StackAllocator:" << std::endl;
+			ss << "mfmStackSetHead returned MFM_ERROR_OUT_OF_BOUNDS";
+			throw AllocationError(ss.str());
+		}
+		default:
+		{
+			std::stringstream ss;
+			ss << "Failed to set stack head on StackAllocator:" << std::endl;
+			ss << "mfmStackSetHead returned '" << err << "'";
+			throw AllocationError(ss.str());
+		}
+	}
 }

@@ -27,7 +27,7 @@ void Main(int argc, char** argv)
 	// Allocate and deallocate value
 	{
 		mfmU8* value;
-		err = mfmPoolAllocate((void**)&value, pool, sizeof(mfmU32));
+		err = mfmPoolAllocate(pool, (void**)&value, sizeof(mfmU32));
 		if (err != MFM_ERROR_OKAY)
 			abort();
 
@@ -50,7 +50,7 @@ void Main(int argc, char** argv)
 
 	{
 		mfmU8* value;
-		err = mfmPoolAllocate((void**)&value, pool, sizeof(mfmU32));
+		err = mfmPoolAllocate(pool, (void**)&value, sizeof(mfmU32));
 		if (err != MFM_ERROR_OKAY)
 			abort();
 	}
@@ -63,7 +63,7 @@ void Main(int argc, char** argv)
 
 	{
 		mfmU8* value;
-		err = mfmPoolAllocate((void**)&value, pool, sizeof(mfmU32));
+		err = mfmPoolAllocate(pool, (void**)&value, sizeof(mfmU32));
 		if (err != MFM_ERROR_OKAY)
 			abort();
 	}

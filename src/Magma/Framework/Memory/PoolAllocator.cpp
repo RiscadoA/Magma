@@ -4,6 +4,8 @@
 
 Magma::Framework::Memory::PoolAllocator::PoolAllocator(mfmU64 slotSize, mfmU64 slotCount, bool expandable)
 {
+	m_pool = nullptr;
+
 	mfmPoolAllocatorDesc desc;
 	desc.slotSize = slotSize;
 	desc.slotCount = slotCount;
@@ -39,13 +41,14 @@ Magma::Framework::Memory::PoolAllocator::PoolAllocator(mfmU64 slotSize, mfmU64 s
 
 Magma::Framework::Memory::PoolAllocator::~PoolAllocator()
 {
-	::mfmDestroyPoolAllocator(m_pool);
+	if (m_pool != nullptr)
+		::mfmDestroyPoolAllocator(m_pool);
 }
 
 void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 {
 	void* memory;
-	auto err = ::mfmPoolAllocate(&memory, m_pool, size);
+	auto err = ::mfmPoolAllocate(m_pool, &memory, size);
 	switch (err)
 	{
 		case MFM_ERROR_OKAY:

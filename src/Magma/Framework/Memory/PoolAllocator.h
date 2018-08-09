@@ -57,8 +57,8 @@ extern "C"
 	/// <summary>
 	///		Allocates on a magma framework memory pool allocator.
 	/// </summary>
-	/// <param name="memory">Pointer to allocated memory pointer</param>
 	/// <param name="allocator">Magma framework memory pool allocator</param>
+	/// <param name="memory">Pointer to allocated memory pointer</param>
 	/// <param name="size">Memory allocation size in bytes</param>
 	/// <returns>
 	///		Returns MFM_ERROR_OKAY if there were no errors.
@@ -66,7 +66,7 @@ extern "C"
 	///		Returns MFM_ERROR_ALLOCATION_TOO_BIG if the allocation size is bigger than the pool slot's size.
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the pool failed to expand.
 	/// </returns>
-	mfmError mfmPoolAllocate(void** memory, mfmPoolAllocator* allocator, mfmU64 size);
+	mfmError mfmPoolAllocate(mfmPoolAllocator* allocator, void** memory, mfmU64 size);
 
 	/// <summary>
 	///		Deallocates on a magma framework memory pool allocator.

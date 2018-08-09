@@ -83,7 +83,7 @@ mfmError mfmExpandPoolAllocator(mfmPoolAllocator* poolAllocator, mfmPoolAllocato
 	return MFM_ERROR_OKAY;
 }
 
-mfmError mfmPoolChunkAllocate(void ** memory, mfmPoolAllocator * allocator, mfmPoolAllocatorChunk * chunk, mfmU64 size)
+mfmError mfmPoolChunkAllocate(mfmPoolAllocator * allocator, mfmPoolAllocatorChunk * chunk, void ** memory, mfmU64 size)
 {
 	// Check if the allocation size fits on a pool slot
 	if (size > allocator->desc.slotSize)
@@ -119,7 +119,7 @@ mfmError mfmPoolChunkDeallocate(void * memory, mfmPoolAllocator * allocator, mfm
 	return MFM_ERROR_OKAY;
 }
 
-mfmError mfmPoolAllocate(void ** memory, mfmPoolAllocator * allocator, mfmU64 size)
+mfmError mfmPoolAllocate(mfmPoolAllocator * allocator, void ** memory, mfmU64 size)
 {
 	// Check if the allocation size fits on a pool slot
 	if (size > allocator->desc.slotSize)
@@ -129,7 +129,7 @@ mfmError mfmPoolAllocate(void ** memory, mfmPoolAllocator * allocator, mfmU64 si
 	mfmPoolAllocatorChunk* ck = allocator->firstChunk;
 	while (ck != NULL)
 	{
-		mfmError err = mfmPoolChunkAllocate(memory, allocator, ck, size);
+		mfmError err = mfmPoolChunkAllocate(allocator, ck, memory, size);
 		if (err == MFM_ERROR_OKAY)
 			return MFM_ERROR_OKAY;
 		else if (err != MFM_ERROR_ALLOCATOR_OVERFLOW)
@@ -145,7 +145,7 @@ mfmError mfmPoolAllocate(void ** memory, mfmPoolAllocator * allocator, mfmU64 si
 		if (err != MFM_ERROR_OKAY)
 			return err;
 		else
-			return mfmPoolChunkAllocate(memory, allocator, ck, size);
+			return mfmPoolChunkAllocate(allocator, ck, memory, size);
 	}
 	// Otherwise return error
 	else return MFM_ERROR_ALLOCATOR_OVERFLOW;
