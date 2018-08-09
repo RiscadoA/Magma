@@ -6,6 +6,8 @@
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
 
+#include "Window.h"
+
 namespace Magma
 {
 	namespace Framework
@@ -23,12 +25,8 @@ namespace Magma
 				/// </summary>
 				enum class Mode
 				{
-					Invalid = -1,
-
-					Windowed,
-					Fullscreen,
-
-					Count
+					Windowed = MFI_WINDOWED,
+					Fullscreen = MFI_FULLSCREEN,
 				};
 				
 				/// <summary>
