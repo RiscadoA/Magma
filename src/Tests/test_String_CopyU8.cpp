@@ -6,7 +6,7 @@ int main()
 {
 	using namespace Magma::Framework::String;
 
-	U8Char srcStr[] =
+	U8CodePoint srcStr[] =
 	{
 		0x24,
 		0xC2, 0xA2,
@@ -15,7 +15,7 @@ int main()
 		0x00,
 	};
 
-	U8Char dstStr[256];
+	U8CodePoint dstStr[256];
 
 	TEST_REQUIRE_PASS(CopyU8(srcStr, dstStr, 256) == 11);
 	for (size_t i = 0; i < 11; ++i)

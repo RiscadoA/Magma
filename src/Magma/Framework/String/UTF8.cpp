@@ -4,51 +4,48 @@
 
 using namespace Magma::Framework::String;
 
-bool Magma::Framework::String::IsValidU8Char(const U8Char * src)
+bool Magma::Framework::String::IsValidU8Char(const U8CodePoint * src)
 {
-	if ((*src & 0b1000'0000) == 0b0000'0000)
-		return IsValidU32Char(GetU8Char(src));
-	else if ((*src & 0b1110'0000) == 0b1100'0000)
-	{
-		if ((*(src + 1) & 0b1100'0000) != 0b1000'0000)
-			return false;
-		return IsValidU32Char(GetU8Char(src));
-	}
-	else if ((*src & 0b1111'0000) == 0b1110'0000)
-	{
-		if ((*(src + 1) & 0b1100'0000) != 0b1000'0000)
-			return false;
-		if ((*(src + 2) & 0b1100'0000) != 0b1000'0000)
-			return false;
-		return IsValidU32Char(GetU8Char(src));
-	}
-	else if ((*src & 0b1111'1000) == 0b1111'0000)
-	{
-		if ((*(src + 1) & 0b1100'0000) != 0b1000'0000)
-			return false;
-		if ((*(src + 2) & 0b1100'0000) != 0b1000'0000)
-			return false;
-		if ((*(src + 3) & 0b1100'0000) != 0b1000'0000)
-			return false;
-		return IsValidU32Char(GetU8Char(src));
-	}
-	else return false;
+	return mfsIsValidUTF8Char(src) != MFM_FALSE;
 }
 
-size_t Magma::Framework::String::GetU8CharSize(const U8Char * src)
+mfmU64 Magma::Framework::String::GetU8CharSize(const U8CodePoint * src)
 {
-	if ((*src & 0b1000'0000) == 0b0000'0000)
-		return 1;
-	else if ((*src & 0b1110'0000) == 0b1100'0000)
-		return 2;
-	else if ((*src & 0b1111'0000) == 0b1110'0000)
-		return 3;
-	else if ((*src & 0b1111'1000) == 0b1111'0000)
-		return 4;
-	else throw StringError("Failed to get UTF-8 character size:\nInvalid character first byte");
+	mfmU64 size;
+	auto err = mfsGetUTF8CharSize(src, &size);
+	switch (err)
+	{
+		case MFS_ERROR_OKAY:
+			break;
+		case MFS_ERROR_INVALID_ARGUMENTS:
+		{
+			std::stringstream ss;
+			ss << "Failed to get UTF-8 character size:" << std::endl;
+			ss << "Invalid arguments:" << std::endl;
+			ss << "mfsGetUTF8CharSize returned MFS_ERROR_INVALID_ARGUMENTS";
+			throw StringError(ss.str());
+		}
+		case MFS_ERROR_INVALID_UTF8:
+		{
+			std::stringstream ss;
+			ss << "Failed to get UTF-8 character size:" << std::endl;
+			ss << "Invalid UTF-8:" << std::endl;
+			ss << "mfsGetUTF8CharSize returned MFS_ERROR_INVALID_UTF8";
+			throw StringError(ss.str());
+		}
+		default:
+		{
+			std::stringstream ss;
+			ss << "Failed to get UTF-8 character size:" << std::endl;
+			ss << "mfsGetUTF8CharSize returned '" << err << "'";
+			throw StringError(ss.str());
+		}
+	}
+
+	return size;
 }
 
-size_t Magma::Framework::String::GetU8CharSize(U32Char up)
+mfmU64 Magma::Framework::String::GetU8CharSize(U32Char up)
 {
 	if (up <= 0x007F)
 		return 1;
@@ -61,7 +58,7 @@ size_t Magma::Framework::String::GetU8CharSize(U32Char up)
 	throw StringError("Failed to get UTF-8 character size:\nInvalid unicode point value");
 }
 
-U32Char Magma::Framework::String::GetU8Char(const U8Char * src)
+U32Char Magma::Framework::String::GetU8Char(const U8CodePoint * src)
 {
 	auto s = GetU8CharSize(src);
 	U32Char up = 0;
@@ -89,7 +86,7 @@ U32Char Magma::Framework::String::GetU8Char(const U8Char * src)
 	return up;
 }
 
-size_t Magma::Framework::String::SetU8Char(U8Char * dst, U32Char up, size_t maxSize)
+mfmU64 Magma::Framework::String::SetU8Char(U8CodePoint * dst, U32Char up, mfmU64 maxSize)
 {
 	size_t sz = GetU8CharSize(up);
 	if (sz > maxSize)
@@ -118,17 +115,17 @@ size_t Magma::Framework::String::SetU8Char(U8Char * dst, U32Char up, size_t maxS
 	return sz;
 }
 
-U8Char * Magma::Framework::String::NextU8Char(U8Char * chr)
+U8CodePoint * Magma::Framework::String::NextU8Char(U8CodePoint * chr)
 {
 	return chr + GetU8CharSize(chr);
 }
 
-const U8Char * Magma::Framework::String::NextU8Char(const U8Char * chr)
+const U8CodePoint * Magma::Framework::String::NextU8Char(const U8CodePoint * chr)
 {
 	return chr + GetU8CharSize(chr);
 }
 
-size_t Magma::Framework::String::CopyU8(const U8Char * src, U8Char * dst, size_t size)
+mfmU64 Magma::Framework::String::CopyU8(const U8CodePoint * src, U8CodePoint * dst, mfmU64 size)
 {
 	if (size == 0)
 		return 0;
@@ -152,7 +149,7 @@ size_t Magma::Framework::String::CopyU8(const U8Char * src, U8Char * dst, size_t
 	return s + 1;
 }
 
-size_t Magma::Framework::String::GetU8StringSize(const U8Char * str)
+mfmU64 Magma::Framework::String::GetU8StringSize(const U8CodePoint * str)
 {
 	size_t size = 1;
 	while (*str != 0)
@@ -164,7 +161,7 @@ size_t Magma::Framework::String::GetU8StringSize(const U8Char * str)
 	return size;
 }
 
-size_t Magma::Framework::String::GetU8StringLength(const U8Char * str)
+mfmU64 Magma::Framework::String::GetU8StringLength(const U8CodePoint * str)
 {
 	size_t length = 0;
 	while (*str != 0)

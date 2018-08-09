@@ -25,7 +25,7 @@ int main()
 		0x00
 	*/
 
-	U8Char dstStr[256];
+	U8CodePoint dstStr[256];
 
 	TEST_REQUIRE_PASS(ConvertU32ToU8(srcStr, dstStr, 256) == 11);
 	TEST_REQUIRE_PASS(dstStr[0] == (char)0x24);

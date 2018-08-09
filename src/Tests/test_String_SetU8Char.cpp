@@ -15,7 +15,7 @@ int main()
 		0x00,
 	};
 
-	U8Char expectedChrs[][4] =
+	U8CodePoint expectedChrs[][4] =
 	{
 		{ 0x24, 0x00, 0x00, 0x00 },
 		{ 0xC2, 0xA2, 0x00, 0x00 },
@@ -24,7 +24,7 @@ int main()
 		{ 0x00, 0x00, 0x00, 0x00 },
 	};
 
-	U8Char dst[4];
+	U8CodePoint dst[4];
 	U32Char* chr = &chrs[0];
 	auto exp = &expectedChrs[0];
 	while (*chr != 0)
