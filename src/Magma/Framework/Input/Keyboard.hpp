@@ -93,11 +93,11 @@ namespace Magma
 			/// </summary>
 			enum class KeyModifiers
 			{
-				None = 0x00,
-				Shift = 0x01,
-				Control = 0x02,
-				Alt = 0x04,
-				System = 0x08,
+				None = MFI_KEY_MOD_NONE,
+				Shift = MFI_KEY_MOD_SHIFT,
+				Control = MFI_KEY_MOD_CONTROL,
+				Alt = MFI_KEY_MOD_ALT,
+				System = MFI_KEY_MOD_SYSTEM,
 			};
 
 			inline KeyModifiers operator|(KeyModifiers lhs, KeyModifiers rhs) { return (KeyModifiers)((size_t)lhs | (size_t)rhs); }

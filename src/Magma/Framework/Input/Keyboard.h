@@ -84,7 +84,14 @@ extern "C"
 #define MFI_KEYBOARD_UP			0x45
 #define MFI_KEYBOARD_DOWN		0x46
 
+#define MFI_KEY_MOD_NONE		0x00
+#define MFI_KEY_MOD_SHIFT		0x01
+#define MFI_KEY_MOD_CONTROL		0x02
+#define MFI_KEY_MOD_ALT			0x04
+#define MFI_KEY_MOD_SYSTEM		0x08
+
 	typedef mfmU32 mfiKeyCode;
+	typedef mfmU32 mfiKeyMods;
 
 #ifdef __cplusplus
 }
