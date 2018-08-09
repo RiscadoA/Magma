@@ -72,7 +72,7 @@ namespace Magma
 				inline mfmU64 GetChunkCount() const { return mfmPoolGetChunkCount(m_pool); }
 
 			private:
-				mfmPoolAllocator* m_pool;
+				::mfmPoolAllocator* m_pool;
 			};
 		}
 	}

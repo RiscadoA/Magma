@@ -8,7 +8,7 @@ Magma::Framework::Memory::PoolAllocator::PoolAllocator(mfmU64 slotSize, mfmU64 s
 	desc.slotSize = slotSize;
 	desc.slotCount = slotCount;
 	desc.expandable = expandable ? MFM_TRUE : MFM_FALSE;
-	auto err = mfmCreatePoolAllocator(&m_pool, &desc);
+	auto err = ::mfmCreatePoolAllocator(&m_pool, &desc);
 	switch (err)
 	{
 		case MFM_ERROR_OKAY:
@@ -39,13 +39,13 @@ Magma::Framework::Memory::PoolAllocator::PoolAllocator(mfmU64 slotSize, mfmU64 s
 
 Magma::Framework::Memory::PoolAllocator::~PoolAllocator()
 {
-	mfmDestroyPoolAllocator(m_pool);
+	::mfmDestroyPoolAllocator(m_pool);
 }
 
 void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 {
 	void* memory;
-	auto err = mfmPoolAllocate(&memory, m_pool, size);
+	auto err = ::mfmPoolAllocate(&memory, m_pool, size);
 	switch (err)
 	{
 		case MFM_ERROR_OKAY:
@@ -87,7 +87,7 @@ void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 
 void Magma::Framework::Memory::PoolAllocator::Deallocate(void * ptr)
 {
-	auto err = mfmPoolDeallocate(ptr, m_pool);
+	auto err = ::mfmPoolDeallocate(ptr, m_pool);
 	switch (err)
 	{
 		case MFM_ERROR_OKAY:
