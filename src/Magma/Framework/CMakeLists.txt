@@ -4,6 +4,8 @@
 file(GLOB_RECURSE Magma_Framework_Source
     "*.hpp"
     "*.cpp"
+	"*.h"
+	"*.c"
 )
 
 # Generate config file

@@ -61,6 +61,14 @@ extern "C"
 	/// </summary>
 	typedef double mfmF64;
 
+	/// <summary>
+	///		Used to store a boolean value (can be either MFM_TRUE or MFM_FALSE).
+	/// </summary>
+	typedef mfmU8 mfmBool;
+
+#define MFM_FALSE 0
+#define MFM_TRUE 1
+
 #ifdef __cplusplus
 }
 #endif
