@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <sstream>
 #include <map>
+#include "GLWindow.h"
 
 static std::map<GLFWwindow*, Magma::Framework::Input::GLWindow*> glfwWindows;
 
@@ -273,3 +274,4 @@ void Magma::Framework::Input::GLWindow::WaitForEvents()
 	throw std::runtime_error("Failed to wait for events on GLWindow: the project wasn't built for OpenGL (MAGMA_FRAMEWORK_USE_OPENGL must be defined)");
 }
 #endif
+

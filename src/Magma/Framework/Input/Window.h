@@ -18,49 +18,51 @@ extern "C"
 #define MFI_WINDOWED		0x01
 #define MFI_FULLSCREEN		0x02
 
-typedef mfmU32(*mfiGetWindowWidthFunc)(void*);
-typedef mfmU32(*mfiGetWindowHeightFunc)(void*);
-typedef mfmU32(*mfiGetWindowModeFunc)(void*);
+	typedef mfmU32 mfiWindowMode;
 
-typedef void(*mfiMakeWindowCurrentFunc)(void*);
-typedef void(*mfiWindowPollEventsFunc)(void*);
-typedef void(*mfiWindowWaitForEventsFunc)(void*);
+	typedef mfmU32(*mfiGetWindowWidthFunc)(void*);
+	typedef mfmU32(*mfiGetWindowHeightFunc)(void*);
+	typedef mfiWindowMode(*mfiGetWindowModeFunc)(void*);
 
-typedef void(*mfiOnCloseCallback)(void*);
-typedef void(*mfiOnMouseEnterCallback)(void*);
-typedef void(*mfiOnMouseLeaveCallback)(void*);
-typedef void(*mfiOnMouseMoveCallback)(void*, mfmF32, mfmF32);
-typedef void(*mfiOnMouseScrollCallback)(void*, mfmF32);
-typedef void(*mfiOnKeyUpCallback)(void*, mfiKeyCode, mfiKeyMods);
-typedef void(*mfiOnKeyDownCallback)(void*, mfiKeyCode, mfiKeyMods);
-typedef void(*mfiOnMouseUpCallback)(void*, mfiMouseButton);
-typedef void(*mfiOnMouseDownCallback)(void*, mfiMouseButton);
+	typedef void(*mfiMakeWindowCurrentFunc)(void*);
+	typedef void(*mfiWindowPollEventsFunc)(void*);
+	typedef void(*mfiWindowWaitForEventsFunc)(void*);
 
-typedef struct
-{
-	mfmObject object;
+	typedef void(*mfiOnCloseCallback)(void*);
+	typedef void(*mfiOnMouseEnterCallback)(void*);
+	typedef void(*mfiOnMouseLeaveCallback)(void*);
+	typedef void(*mfiOnMouseMoveCallback)(void*, mfmF32, mfmF32);
+	typedef void(*mfiOnMouseScrollCallback)(void*, mfmF32);
+	typedef void(*mfiOnKeyUpCallback)(void*, mfiKeyCode, mfiKeyMods);
+	typedef void(*mfiOnKeyDownCallback)(void*, mfiKeyCode, mfiKeyMods);
+	typedef void(*mfiOnMouseUpCallback)(void*, mfiMouseButton);
+	typedef void(*mfiOnMouseDownCallback)(void*, mfiMouseButton);
 
-	// Other functions
-	mfiMakeWindowCurrentFunc makeCurrent;
-	mfiWindowPollEventsFunc pollEvents;
-	mfiWindowWaitForEventsFunc waitForEvents;
+	typedef struct
+	{
+		mfmObject object;
 
-	// Getters
-	mfiGetWindowWidthFunc getWidth;
-	mfiGetWindowHeightFunc getHeight;
-	mfiGetWindowModeFunc getMode;
+		// Other functions
+		mfiMakeWindowCurrentFunc makeCurrent;
+		mfiWindowPollEventsFunc pollEvents;
+		mfiWindowWaitForEventsFunc waitForEvents;
+
+		// Getters
+		mfiGetWindowWidthFunc getWidth;
+		mfiGetWindowHeightFunc getHeight;
+		mfiGetWindowModeFunc getMode;
 	
-	// Callbacks
-	mfiOnCloseCallback onClose;
-	mfiOnMouseEnterCallback onMouseEnter;
-	mfiOnMouseLeaveCallback onMouseLeave;
-	mfiOnMouseMoveCallback onMouseMove;
-	mfiOnMouseScrollCallback onMouseScroll;
-	mfiOnKeyUpCallback onKeyUp;
-	mfiOnKeyDownCallback onKeyDown;
-	mfiOnMouseUpCallback onMouseUp;
-	mfiOnMouseDownCallback onMouseDown;
-} mfiWindow;
+		// Callbacks
+		mfiOnCloseCallback onClose;
+		mfiOnMouseEnterCallback onMouseEnter;
+		mfiOnMouseLeaveCallback onMouseLeave;
+		mfiOnMouseMoveCallback onMouseMove;
+		mfiOnMouseScrollCallback onMouseScroll;
+		mfiOnKeyUpCallback onKeyUp;
+		mfiOnKeyDownCallback onKeyDown;
+		mfiOnMouseUpCallback onMouseUp;
+		mfiOnMouseDownCallback onMouseDown;
+	} mfiWindow;
 
 #ifdef __cplusplus
 }
