@@ -68,7 +68,7 @@ void LoadScene(Scene& scene)
 {
 	// Create filesystem
 	{
-		scene.fileSystem = new Files::STDFileSystem("../../../../../resources/");
+		scene.fileSystem = new Files::STDFileSystem("../../../../../../resources/");
 	}
 
 	// Create window

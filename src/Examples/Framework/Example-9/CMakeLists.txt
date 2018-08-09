@@ -16,8 +16,8 @@ endif()
 set_target_properties (Example-9 PROPERTIES FOLDER Examples)
 
 # Include magma libraries
-include_directories(../../)
-include_directories(../../../extern/glm/)
+include_directories(../../../)
+include_directories(../../../../extern/glm/)
 
 # Link magma libraries
 target_link_libraries(Example-9 Magma-Framework)

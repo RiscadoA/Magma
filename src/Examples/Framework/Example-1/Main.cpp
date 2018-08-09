@@ -51,7 +51,7 @@ void LoadScene(Scene& scene)
 {
 	// Create filesystem
 	{
-		scene.fileSystem = new Framework::Files::STDFileSystem("../../../../../resources/");
+		scene.fileSystem = new Framework::Files::STDFileSystem("../../../../../../resources/");
 	}
 
 	// Create window

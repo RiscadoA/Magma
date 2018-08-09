@@ -3,14 +3,14 @@
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
 #include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
-#include <Magma/Framework/Graphics/D3D11Assembler.hpp>
+#include <Magma/Framework/Graphics/OGL410Assembler.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
 
 using namespace Magma::Framework;
 
 void Main(int argc, char** argv)
 {
-	Files::FileSystem* fileSystem = new Files::STDFileSystem("../../../../../resources/");
+	Files::FileSystem* fileSystem = new Files::STDFileSystem("../../../../../../resources/");
 
 	{
 		char bytecode[2048];
@@ -64,7 +64,7 @@ void Main(int argc, char** argv)
 		Graphics::ShaderData data(binaryObject, binaryObjectSize);
 
 		std::string compiled;
-		Graphics::D3D11Assembler::Assemble(data, compiled);
+		Graphics::OGL410Assembler::Assemble(data, compiled);
 
 		std::cout << compiled << std::endl;
 	}
@@ -121,7 +121,7 @@ void Main(int argc, char** argv)
 		Graphics::ShaderData data(binaryObject, binaryObjectSize);
 
 		std::string compiled;
-		Graphics::D3D11Assembler::Assemble(data, compiled);
+		Graphics::OGL410Assembler::Assemble(data, compiled);
 
 		std::cout << compiled << std::endl;
 	}

@@ -14,7 +14,7 @@ void Main(int argc, char** argv)
 {
 	try
 	{
-		Files::FileSystem* fileSystem = new Files::STDFileSystem("../../../../../resources/");
+		Files::FileSystem* fileSystem = new Files::STDFileSystem("../../../../../../resources/");
 
 		// Vertex shader
 		{
