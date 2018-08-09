@@ -74,6 +74,8 @@ mfmError mfmExpandPoolAllocator(mfmPoolAllocator* poolAllocator, mfmPoolAllocato
 		ck = ck->next;
 	ck->next = chunk;
 	++poolAllocator->currentChunkCount;
+	poolAllocator->currentFreeSlotCount += poolAllocator->desc.slotCount;
+	poolAllocator->currentSlotCount += poolAllocator->desc.slotCount;
 
 	// Set out chunk
 	if (newChunk != NULL)

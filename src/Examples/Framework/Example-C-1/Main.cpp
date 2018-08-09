@@ -48,12 +48,6 @@ void Main(int argc, char** argv)
 		printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
 	}
 
-	printf("Allocated on pool, stats:\n");
-	printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool));
-	printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool));
-	printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool));
-	printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
-
 	{
 		mfmU8* value;
 		err = mfmPoolAllocate((void**)&value, pool, sizeof(mfmU32));
