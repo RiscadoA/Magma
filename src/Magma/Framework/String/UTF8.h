@@ -11,7 +11,7 @@
 extern "C"
 {
 #endif
-	typedef mfmU8 mfsUTF8CodeUnit;
+	typedef mfmI8 mfsUTF8CodeUnit;
 
 	/// <summary>
 	///		Checks if a UTF-8 character is valid.

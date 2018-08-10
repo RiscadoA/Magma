@@ -120,8 +120,8 @@ mfsError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit * chr, mfmU64 * chrS
 	if (chr == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 
-	mfmU64 sz;
-	mfsError err = mfsGetUTF8CharSize(chr, &sz);
+	mfmU64 sz; 
+	mfsError err = mfsGetSizeAsUTF8(up, &sz);
 	if (err != MFS_ERROR_OKAY)
 		return err;
 	if (sz > maxChrSize)
@@ -148,7 +148,7 @@ mfsError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit * chr, mfmU64 * chrS
 			chr[3] = (0b1000'0000 | ((up >> 0) & 0b0011'1111));
 			break;
 		default:
-			return MFS_ERROR_INVALID_UTF8;
+			return MFS_ERROR_INVALID_UNICODE;
 	}
 
 	if (chrSize != NULL)

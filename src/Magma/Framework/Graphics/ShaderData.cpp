@@ -189,6 +189,7 @@ void Magma::Framework::Graphics::ShaderData::Load()
 		unsigned long nameSize = 0;
 		ss.read((char*)&nameSize, sizeof(unsigned long));
 		Memory::FromBigEndian4(&nameSize, &nameSize);
+		m_texture2DVars[i].name.resize(nameSize);
 		ss.read(&m_texture2DVars[i].name[0], nameSize);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read 2D texture var name:\nStream read EOF (invalid meta data?)");
