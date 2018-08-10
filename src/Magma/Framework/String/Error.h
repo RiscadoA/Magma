@@ -12,7 +12,7 @@ extern "C"
 #define MFS_ERROR_INVALID_UTF8			0x02
 #define MFS_ERROR_INVALID_UTF16			0x03
 #define MFS_ERROR_INVALID_UNICODE		0x04
-#define MFS_CHARACTER_TOO_BIG			0x05
+#define MFS_ERROR_CHARACTER_TOO_BIG			0x05
 
 	typedef mfmI32 mfsError;
 

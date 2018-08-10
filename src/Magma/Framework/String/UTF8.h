@@ -11,7 +11,7 @@
 extern "C"
 {
 #endif
-	typedef mfmU8 mfsUTF8CodeUnit;
+	typedef char mfsUTF8CodeUnit;
 
 	/// <summary>
 	///		Checks if a UTF-8 character is valid.
@@ -67,7 +67,7 @@ extern "C"
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="chr">chr</paramref> is NULL.
 	///		Returns MFS_ERROR_INVALID_UNICODE if the character unicode point value is invalid.
-	///		Returns MFS_CHARACTER_TOO_BIG if the character size as UTF-8 is bigger than <paramref name="maxChrSize">maxChrSize</paramref>.
+	///		Returns MFS_ERROR_CHARACTER_TOO_BIG if the character size as UTF-8 is bigger than <paramref name="maxChrSize">maxChrSize</paramref>.
 	/// </returns>
 	mfsError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit* chr, mfmU64* chrSize, mfmU64 maxChrSize);
 

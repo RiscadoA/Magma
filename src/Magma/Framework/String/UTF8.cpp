@@ -100,7 +100,7 @@ UnicodePoint Magma::Framework::String::GetU8Char(const U8CodePoint * src)
 		default:
 		{
 			std::stringstream ss;
-			ss << "Failed to get unicode point value size as UTF-8:" << std::endl;
+			ss << "Failed to get unicode point value from UTF-8 character:" << std::endl;
 			ss << "mfsGetUTF8Char returned '" << err << "'";
 			throw StringError(ss.str());
 		}
@@ -110,31 +110,45 @@ UnicodePoint Magma::Framework::String::GetU8Char(const U8CodePoint * src)
 
 mfmU64 Magma::Framework::String::SetU8Char(U8CodePoint * dst, UnicodePoint up, mfmU64 maxSize)
 {
-	size_t sz = GetU8CharSize(up);
-	if (sz > maxSize)
-		return 0;
-	switch (sz)
+	mfmU64 size;
+	auto err = mfsSetUTF8Char(up, dst, &size, maxSize);
+	switch (err)
 	{
-		case 1:
-			dst[0] = (0b0000'0000 | ((up >> 0) & 0b0111'1111));
+		case MFS_ERROR_OKAY:
 			break;
-		case 2:
-			dst[0] = (0b1100'0000 | ((up >> 6) & 0b0001'1111));
-			dst[1] = (0b1000'0000 | ((up >> 0) & 0b0011'1111));
-			break;
-		case 3:
-			dst[0] = (0b1110'0000 | ((up >> 12) & 0b0000'1111));
-			dst[1] = (0b1000'0000 | ((up >> 6) & 0b0011'1111));
-			dst[2] = (0b1000'0000 | ((up >> 0) & 0b0011'1111));
-			break;
-		case 4:
-			dst[0] = (0b1111'0000 | ((up >> 18) & 0b0000'0111));
-			dst[1] = (0b1000'0000 | ((up >> 12) & 0b0011'1111));
-			dst[2] = (0b1000'0000 | ((up >> 6) & 0b0011'1111));
-			dst[3] = (0b1000'0000 | ((up >> 0) & 0b0011'1111));
-			break;
+		case MFS_ERROR_INVALID_ARGUMENTS:
+		{
+			std::stringstream ss;
+			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
+			ss << "Invalid arguments:" << std::endl;
+			ss << "mfsSetUTF8Char returned MFS_ERROR_INVALID_ARGUMENTS";
+			throw StringError(ss.str());
+		}
+		case MFS_ERROR_INVALID_UNICODE:
+		{
+			std::stringstream ss;
+			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
+			ss << "Invalid unicode point value:" << std::endl;
+			ss << "mfsSetUTF8Char returned MFS_ERROR_INVALID_UNICODE";
+			throw StringError(ss.str());
+		}
+		case MFS_ERROR_CHARACTER_TOO_BIG:
+		{
+			std::stringstream ss;
+			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
+			ss << "The character is bigger than the passed max size:" << std::endl;
+			ss << "mfsSetUTF8Char returned MFS_ERROR_CHARACTER_TOO_BIG";
+			throw StringError(ss.str());
+		}
+		default:
+		{
+			std::stringstream ss;
+			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
+			ss << "mfsSetUTF8Char returned '" << err << "'";
+			throw StringError(ss.str());
+		}
 	}
-	return sz;
+	return size;
 }
 
 U8CodePoint * Magma::Framework::String::NextU8Char(U8CodePoint * chr)

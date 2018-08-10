@@ -292,7 +292,10 @@ void Main(int argc, char** argv) try
 			scene.transformBuffer->Unmap();
 			scene.transformBP->BindConstantBuffer(scene.transformBuffer);
 
-			scene.textRenderer->RenderU32(U"Sãmplè téxt", scene.textureBP, 1.0f);
+			const String::U8CodePoint* u8str = u8"Samplé tèxt";
+			String::UnicodePoint u32str[64];
+			String::ConvertU8ToU32(u8str, u32str, 64);
+			scene.textRenderer->RenderU32(u32str, scene.textureBP, 48.0f);
 		}
 
 		// Swap screen back and front buffers

@@ -125,7 +125,7 @@ mfsError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit * chr, mfmU64 * chrS
 	if (err != MFS_ERROR_OKAY)
 		return err;
 	if (sz > maxChrSize)
-		return MFS_CHARACTER_TOO_BIG;
+		return MFS_ERROR_CHARACTER_TOO_BIG;
 
 	switch (sz)
 	{

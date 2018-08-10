@@ -10,8 +10,8 @@
 extern "C"
 {
 #endif
-	typedef mfmU32 mfsUTF32CodeUnit;
-	typedef mfmU32 mfsUnicodePoint;
+	typedef mfmI32 mfsUTF32CodeUnit;
+	typedef mfmI32 mfsUnicodePoint;
 
 	/// <summary>
 	///		Checks if a unicode point value is valid unicode.
