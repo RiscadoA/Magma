@@ -9,7 +9,7 @@
 #include "BytecodeAssembler.hpp"
 #include "MetaDataAssembler.hpp"
 
-#include "../String/Conversion.hpp"
+#include "../Memory/Endianness.hpp"
 
 void Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, std::string& outBC, std::string& outMD)
 {
@@ -88,9 +88,9 @@ size_t Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, c
 
 	// Assemble bytecode and meta data
 	char bytecode[4096];
-	unsigned long bytecodeSize = BytecodeAssembler::Assemble(bc, bytecode, sizeof(bytecode));
+	mfmU32 bytecodeSize = BytecodeAssembler::Assemble(bc, bytecode, sizeof(bytecode));
 	char metaData[4096];
-	unsigned long metaDataSize = MetaDataAssembler::Assemble(md, metaData, sizeof(metaData));
+	mfmU32 metaDataSize = MetaDataAssembler::Assemble(md, metaData, sizeof(metaData));
 
 	// Assemble binary object
 	if ((bytecodeSize + metaDataSize + sizeof(unsigned long) * 2) > maxSize)
@@ -102,8 +102,11 @@ size_t Magma::Framework::Graphics::ShaderCompiler::Run(const std::string & in, c
 		throw ShaderError(ss.str());
 	}
 
-	auto beBCSize = String::U32ToBE(bytecodeSize);
-	auto beMDSize = String::U32ToBE(metaDataSize);
+	mfmU32 beBCSize;
+	mfmU32 beMDSize;
+	Memory::ToBigEndian4(&bytecodeSize, &beBCSize);
+	Memory::ToBigEndian4(&metaDataSize, &beMDSize);
+
 	memcpy(binaryObject, &beBCSize, sizeof(unsigned long));
 	memcpy(binaryObject + sizeof(unsigned long), bytecode, bytecodeSize);
 	memcpy(binaryObject + bytecodeSize + sizeof(unsigned long), &beMDSize, sizeof(unsigned long));

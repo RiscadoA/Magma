@@ -6,7 +6,7 @@ int main()
 {
 	using namespace Magma::Framework::String;
 
-	U8CodePoint srcStr[] =
+	UTF8CodeUnit srcStr[] =
 	{
 		0x24,
 		0xC2, 0xA2,

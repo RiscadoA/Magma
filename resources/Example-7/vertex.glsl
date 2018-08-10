@@ -6,11 +6,11 @@
 
 layout (std140) uniform buf_0
 {
-	mat4 buf_0_32; // Constant buffer variable ""; index 32; buffer index 0
+	mat4 buf_0_11; // Constant buffer variable ""; index 11; buffer index 0
 };
 
-layout (location = 16) in vec4 in_16; // Input variable "POSITION"; index 16
-layout (location = 17) in vec4 in_17; // Input variable "COLOR"; index 17
+layout (location = 9) in vec4 in_9; // Input variable "POSITION"; index 9
+layout (location = 10) in vec4 in_10; // Input variable "COLOR"; index 10
 
 layout (location = 8) out vec4 out_8; // Output variable "OUT_0"; index 8
 
@@ -23,30 +23,30 @@ void main()
 {
 {
 {
-	vec4 local_33;
-	local_33 = buf_0_32 * in_16;
-	gl_Position = local_33;
+	vec4 local_12;
+	local_12 = buf_0_11 * in_9;
+	gl_Position = local_12;
 }
 {
-	out_8 = in_17;
+	out_8 = in_10;
 }
 {
-	float local_34;
-	float local_35;
-	local_35 = 1;
-	local_34 = cos(local_35);
-	out_8.x = local_34;
+	float local_13;
+	float local_14;
+	local_14 = 1;
+	local_13 = cos(local_14);
+	out_8.x = local_13;
 }
 {
-	float local_36;
+	float local_15;
 {
-	float local_37;
-	local_37 = 1;
-	float local_38;
-	local_38 = out_8.z;
-	local_36 = local_39 + local_37;
+	float local_16;
+	local_16 = 1;
+	float local_17;
+	local_17 = out_8.z;
+	local_15 = local_16 + local_17;
 }
-	out_8.y = local_36;
+	out_8.y = local_15;
 }
 }
 }

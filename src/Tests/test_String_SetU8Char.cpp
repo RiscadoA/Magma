@@ -15,7 +15,7 @@ int main()
 		0x00,
 	};
 
-	U8CodePoint expectedChrs[][4] =
+	UTF8CodeUnit expectedChrs[][4] =
 	{
 		{ 0x24, 0x00, 0x00, 0x00 },
 		{ 0xC2, 0xA2, 0x00, 0x00 },
@@ -24,7 +24,7 @@ int main()
 		{ 0x00, 0x00, 0x00, 0x00 },
 	};
 
-	U8CodePoint dst[4];
+	UTF8CodeUnit dst[4];
 	UnicodePoint* chr = &chrs[0];
 	auto exp = &expectedChrs[0];
 	while (*chr != 0)

@@ -17,7 +17,7 @@ int main()
 		};
 
 		for (int i = 0; valid[i] != 0x00; ++i)
-			TEST_REQUIRE_PASS(IsValidU32Char(valid[i]));
+			TEST_REQUIRE_PASS(IsValidUnicode(valid[i]));
 	}
 
 	// Invalid chars
@@ -31,7 +31,7 @@ int main()
 		};
 
 		for (int i = 0; invalid[i] != 0x00; ++i)
-			TEST_REQUIRE_FAIL(IsValidU32Char(invalid[i]));
+			TEST_REQUIRE_FAIL(IsValidUnicode(invalid[i]));
 	}
 
 	EXIT_PASS();

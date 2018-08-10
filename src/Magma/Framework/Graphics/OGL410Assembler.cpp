@@ -1,7 +1,7 @@
 #include "OGL410Assembler.hpp"
 #include "BytecodeAssembler.hpp"
 
-#include "../String/Conversion.hpp"
+#include "../Memory/Endianness.hpp"
 
 #include <sstream>
 #include <stack>
@@ -193,14 +193,9 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 
 	auto FloatFromBE = [&](float flt) -> float
 	{
-		union
-		{
-			String::UnicodePoint chr;
-			float flt;
-		} convert;
-		convert.flt = flt;
-		convert.chr = String::U32FromBE(convert.chr);
-		return convert.flt;
+		mfmF32 value;
+		Memory::FromBigEndian4(&flt, &value);
+		return value;
 	};
 
 	auto GetFloat = [&](const char* it) -> void
@@ -221,14 +216,15 @@ void Magma::Framework::Graphics::OGL410Assembler::Assemble(const ShaderData & da
 	{
 		union
 		{
-			char chr[4];
-			int integer;
+			mfmU8 chr[4];
+			mfmI32 integer;
 		} conversion;
 		conversion.chr[0] = it[0];
 		conversion.chr[1] = it[1];
 		conversion.chr[2] = it[2];
 		conversion.chr[3] = it[3];
-		ss << (int)String::U32FromBE(conversion.integer);
+		Memory::FromBigEndian4(&conversion.integer, &conversion.integer);
+		ss << conversion.integer;
 	};
 
 	// Add main function (shader bytecode)
