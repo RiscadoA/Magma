@@ -24,7 +24,6 @@ extern "C"
 	typedef mfmU32(*mfiGetWindowHeightFunc)(void*);
 	typedef mfiWindowMode(*mfiGetWindowModeFunc)(void*);
 
-	typedef void(*mfiMakeWindowCurrentFunc)(void*);
 	typedef void(*mfiWindowPollEventsFunc)(void*);
 	typedef void(*mfiWindowWaitForEventsFunc)(void*);
 
@@ -42,8 +41,10 @@ extern "C"
 	{
 		mfmObject object;
 
+		// Reserved for the user to use
+		mfmU64 userAttribute;
+
 		// Other functions
-		mfiMakeWindowCurrentFunc makeCurrent;
 		mfiWindowPollEventsFunc pollEvents;
 		mfiWindowWaitForEventsFunc waitForEvents;
 
@@ -63,6 +64,8 @@ extern "C"
 		mfiOnMouseUpCallback onMouseUp;
 		mfiOnMouseDownCallback onMouseDown;
 	} mfiWindow;
+
+	extern void Main(int argc, char** argv);
 
 #ifdef __cplusplus
 }

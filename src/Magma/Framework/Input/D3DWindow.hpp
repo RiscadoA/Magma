@@ -29,11 +29,6 @@ namespace Magma
 				~D3DWindow();
 
 				/// <summary>
-				///		Sets this window as the current for rendering.
-				/// </summary>
-				virtual void MakeCurrent() final;
-
-				/// <summary>
 				///		Polls events from this window.
 				/// </summary>
 				virtual void PollEvents() final;

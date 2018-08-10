@@ -1,6 +1,6 @@
 #include "D3DWindow.hpp"
 
-#include <Config.hpp>
+#include <Config.h>
 
 #if defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
 #include <Windows.h>
@@ -197,11 +197,6 @@ Magma::Framework::Input::D3DWindow::~D3DWindow()
 {
 	DestroyWindow((HWND)m_hwnd);
 	winWindows.erase((HWND)m_hwnd);
-}
-
-void Magma::Framework::Input::D3DWindow::MakeCurrent()
-{
-	ShowWindow((HWND)m_hwnd, 0);
 }
 
 void Magma::Framework::Input::D3DWindow::PollEvents()

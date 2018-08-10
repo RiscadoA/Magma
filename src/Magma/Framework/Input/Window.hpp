@@ -40,11 +40,6 @@ namespace Magma
 				virtual ~Window() = default;
 
 				/// <summary>
-				///		Sets this window as the current for rendering.
-				/// </summary>
-				virtual void MakeCurrent() = 0;
-
-				/// <summary>
 				///		Polls events from this window.
 				/// </summary>
 				virtual void PollEvents() = 0;
@@ -126,5 +121,3 @@ namespace Magma
 		}
 	}
 }
-
-extern void Main(int argc, char** argv);

@@ -53,10 +53,10 @@ else()
 	message(STATUS "Magma-Framework with STD FileSystem disabled")
 endif()
 
-configure_file(Config.hpp.in Config.hpp)
+configure_file(Config.h.in Config.h)
 
 # Add files as library
-add_library(Magma-Framework ${Magma_Framework_Source} ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp)
+add_library(Magma-Framework ${Magma_Framework_Source} ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
 set_target_properties (Magma-Framework PROPERTIES FOLDER Magma)
 
 # Include config file

@@ -1,6 +1,9 @@
 #include "GLWindow.h"
+#include "Config.h"
 
 #include <stdio.h>
+
+#ifdef MAGMA_FRAMEWORK_USE_OPENGL
 
 #include <GLFW/glfw3.h>
 
@@ -103,12 +106,6 @@ mfiKeyCode mfiGLFWToMFIKey(int key)
 	}
 }
 
-void mfiMakeGLWindowCurrent(void* window)
-{
-	mfiGLWindow* glWindow = (mfiGLWindow*)window;
-	glfwMakeContextCurrent(glWindow->glfwWindow);
-}
-
 void mfiGLWindowPollEvents(void* window)
 {
 	glfwPollEvents();
@@ -144,18 +141,31 @@ void mfiGLFWErrorCallback(int err, const char* errMsg)
 
 void mfiGLFWWindowCloseCallback(GLFWwindow* window)
 {
-	currentWindow->base.onClose(currentWindow);
+	if (currentWindow->base.onClose != NULL)
+		currentWindow->base.onClose(currentWindow);
 }
 
 void mfiGLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	currentWindow->base.onClose(currentWindow);
-}
+	mfiKeyCode keyCode = mfiGLFWToMFIKey(key);
 
+	switch (action)
+	{
+		case GLFW_PRESS:
+			if (currentWindow->base.onKeyDown != NULL)
+				currentWindow->base.onKeyDown(currentWindow, keyCode, mods);
+			break;
+		case GLFW_RELEASE:
+			if (currentWindow->base.onKeyUp != NULL)
+				currentWindow->base.onKeyUp(currentWindow, keyCode, mods);
+			break;
+	}
+}
 
 void mfiGLFWMousePositionCallback(GLFWwindow* window, double x, double y)
 {
-	currentWindow->base.onMouseMove(currentWindow, (mfmF32)x, (mfmF32)y);
+	if (currentWindow->base.onMouseMove != NULL)
+		currentWindow->base.onMouseMove(currentWindow, (mfmF32)x, (mfmF32)y);
 }
 
 void mfiGLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -178,29 +188,41 @@ void mfiGLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int 
 	switch (action)
 	{
 		case GLFW_PRESS:
-			currentWindow->base.onMouseDown(currentWindow, mouseButton);
+			if (currentWindow->base.onMouseDown != NULL)
+				currentWindow->base.onMouseDown(currentWindow, mouseButton);
 			break;
 		case GLFW_RELEASE:
-			currentWindow->base.onMouseUp(currentWindow, mouseButton);
+			if (currentWindow->base.onMouseUp != NULL)
+				currentWindow->base.onMouseUp(currentWindow, mouseButton);
 			break;
 	}
 }
 
 void mfiGLFWMouseScroll(GLFWwindow* window, double x, double y)
 {
-	currentWindow->base.onMouseScroll(currentWindow, (mfmF32)y);
+	if (currentWindow->base.onMouseScroll != NULL)
+		currentWindow->base.onMouseScroll(currentWindow, (mfmF32)y);
 }
 
 void mfiGLFWCursorEnterCallback(GLFWwindow* window, int enter)
 {
 	if (enter == GLFW_TRUE)
-		currentWindow->base.onMouseEnter(currentWindow);
+	{
+		if (currentWindow->base.onMouseEnter != NULL)
+			currentWindow->base.onMouseEnter(currentWindow);
+	}
 	else
-		currentWindow->base.onMouseLeave(currentWindow);
+	{
+		if (currentWindow->base.onMouseLeave != NULL)
+			currentWindow->base.onMouseLeave(currentWindow);
+	}
 }
+
+#endif
 
 mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
 {
+#ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	if (currentWindow != NULL)
 		return MFI_ERROR_ALREADY_INITIALIZED;
 
@@ -226,7 +248,6 @@ mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	glWindow->base.object.destructorFunc = &mfiDestroyGLWindow;
 
 	// Set functions
-	glWindow->base.makeCurrent = &mfiMakeGLWindowCurrent;
 	glWindow->base.pollEvents = &mfiGLWindowPollEvents;
 	glWindow->base.waitForEvents = &mfiGLWindowWaitForEvents;
 
@@ -285,10 +306,14 @@ mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	currentWindow = glWindow;
 
 	return MFI_ERROR_OKAY;
+#else
+	return MFI_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 void mfiDestroyGLWindow(void * window)
 {
+#ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	// Destroy window
 	mfiGLWindow* glWindow = (mfiGLWindow*)window;
 	glfwDestroyWindow(glWindow->glfwWindow);
@@ -297,4 +322,22 @@ void mfiDestroyGLWindow(void * window)
 
 	// Terminate GLFW
 	glfwTerminate();
+#endif
 }
+
+void * mfiGetGLWindowGLFWHandle(void * window)
+{
+#ifdef MAGMA_FRAMEWORK_USE_OPENGL
+	mfiGLWindow* glWindow = (mfiGLWindow*)window;
+	return glWindow->glfwWindow;
+#else
+	return NULL;
+#endif
+}
+
+#if !defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
+int main(int argc, char** argv)
+{
+	Main(argc, argv);
+}
+#endif

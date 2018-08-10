@@ -4,7 +4,7 @@
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
-#include <Config.hpp>
+#include <Config.h>
 #include <sstream>
 #include <string>
 #include <map>
@@ -1082,7 +1082,6 @@ void Magma::Framework::Graphics::OGL410RenderDevice::Init(Input::Window * window
 		throw RenderDeviceError("Failed to init OGL410RenderDevice:\nCouldn't cast from Magma::Framework::Input::Window* to Magma::Framework::Input::GLWindow*");
 
 	// Init glew
-	window->MakeCurrent();
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
@@ -1511,7 +1510,8 @@ void Magma::Framework::Graphics::OGL410RenderDevice::DrawTrianglesIndexed(size_t
 void Magma::Framework::Graphics::OGL410RenderDevice::SwapBuffers()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	m_window->SwapBuffers();
+	auto glfwWin = (GLFWwindow*)mfiGetGLWindowGLFWHandle(m_window->GetWindow());
+	glfwSwapBuffers(glfwWin);
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif

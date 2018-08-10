@@ -49,9 +49,9 @@ void LoadScene(Scene& scene)
 	// Create window
 	{
 #ifdef USE_GL
-		scene.window = new Framework::Input::GLWindow(800, 600, "Example-11", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::GLWindow(800, 600, u8"Example-11"_ms, Framework::Input::Window::Mode::Windowed);
 #else
-		scene.window = new Framework::Input::D3DWindow(800, 600, "Example-11", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::D3DWindow(800, 600, u8"Example-11"_ms, Framework::Input::Window::Mode::Windowed);
 #endif
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });

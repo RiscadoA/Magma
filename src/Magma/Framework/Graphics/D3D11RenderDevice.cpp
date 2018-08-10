@@ -4,7 +4,7 @@
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
-#include <Config.hpp>
+#include <Config.h>
 #include <sstream>
 #include <string>
 #include <map>

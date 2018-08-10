@@ -1,6 +1,6 @@
 #include "OALRenderDevice.hpp"
 
-#include <Config.hpp>
+#include <Config.h>
 #include <sstream>
 
 #if defined(MAGMA_FRAMEWORK_USE_OPENAL)
