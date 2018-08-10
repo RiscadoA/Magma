@@ -88,16 +88,16 @@ Magma::Framework::Input::Keyboard GLFWToMagmaKey(int key)
 	}
 }
 
-void GLFWWindowCloseCallback(GLFWwindow* window)
-{
-	glfwWindows[window]->OnClose.Fire();
-}
-
 void GLFWErrorCallback(int err, const char* errMsg)
 {
 	std::stringstream ss;
 	ss << "GLFW error caught (" << err << "): " << errMsg;
 	throw std::runtime_error(ss.str());
+}
+
+void GLFWWindowCloseCallback(GLFWwindow* window)
+{
+	glfwWindows[window]->OnClose.Fire();
 }
 
 void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
