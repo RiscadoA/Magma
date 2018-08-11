@@ -31,11 +31,6 @@ namespace Magma
 				~GLWindow();
 
 				/// <summary>
-				///		Sets this window as the current for rendering.
-				/// </summary>
-				virtual void MakeCurrent() final;
-
-				/// <summary>
 				///		Polls events from this window.
 				/// </summary>
 				virtual void PollEvents() final;
@@ -49,13 +44,13 @@ namespace Magma
 				///		Gets the width of the window.
 				/// </summary>
 				/// <returns>Window width</returns>
-				inline virtual unsigned int GetWidth() final { return m_window->getWidth(m_window); }
+				inline virtual mfmU32 GetWidth() final { return m_window->getWidth(m_window); }
 
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
 				/// <returns>Window height</returns>
-				inline virtual unsigned int GetHeight() final { return m_window->getHeight(m_window); }
+				inline virtual mfmU32 GetHeight() final { return m_window->getHeight(m_window); }
 
 				/// <summary>
 				///		Gets the window mode

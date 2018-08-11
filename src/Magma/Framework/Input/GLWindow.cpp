@@ -6,7 +6,6 @@
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 
 #include <sstream>
-#include <map>
 
 void mfiWindowCloseCallback(void* window)
 {
@@ -73,6 +72,8 @@ Magma::Framework::Input::GLWindow::GLWindow(mfmU32 width, mfmU32 height, const S
 		ss << "mfiCreateGLWindow returned '" << err << "'";
 		throw WindowError(ss.str());
 	}
+
+	m_window->userAttribute = reinterpret_cast<mfmU64>(this);
 
 	m_window->onClose = &mfiWindowCloseCallback;
 	m_window->onKeyDown = &mfiWindowKeyDownCallback;

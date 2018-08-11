@@ -20,9 +20,9 @@ typedef struct
 	HWND hwnd;
 } mfiD3DWindow;
 
-mfiD3DWindow* currentWindow = NULL;
-HINSTANCE ghInstance = NULL;
-int gnCmdShow = 0;
+static mfiD3DWindow* currentWindow = NULL;
+static HINSTANCE ghInstance = NULL;
+static int gnCmdShow = 0;
 
 mfiKeyCode mfiWindowsToKeyCode(int key)
 {
@@ -273,6 +273,9 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 
 	ShowWindow(d3dWindow->hwnd, gnCmdShow);
 	currentWindow = d3dWindow;
+	*window = d3dWindow;
+
+	return MFI_ERROR_OKAY;
 #else
 	return MFI_ERROR_NOT_SUPPORTED;
 #endif
@@ -300,7 +303,6 @@ void * mfiGetD3DWindowHandle(void * window)
 }
 
 #if defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
-
 
 LRESULT CALLBACK WindowProc(
 	HWND hWnd,
@@ -347,73 +349,83 @@ LRESULT CALLBACK WindowProc(
 		case WM_MOUSELEAVE:
 		{
 			tracking = MFM_FALSE;
-			(window->second)->OnMouseLeave.Fire();
+			if (currentWindow->base.onMouseLeave != NULL)
+				currentWindow->base.onMouseLeave(currentWindow);
 		} break;
 		case WM_MOUSEWHEEL:
 		{
-			(window->second)->OnMouseScroll.Fire(GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? 1 : -1);
+			if (currentWindow->base.onMouseScroll != NULL)
+				currentWindow->base.onMouseScroll(currentWindow, GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? 1.0f : -1.0f);
 		} break;
 		case WM_KEYDOWN:
 		{
-			if (WindowsToMagmaKey(wParam) == Keyboard::LShift || WindowsToMagmaKey(wParam) == Keyboard::RShift)
-				shift = true;
-			else if (WindowsToMagmaKey(wParam) == Keyboard::Alt)
-				alt = true;
-			else if (WindowsToMagmaKey(wParam) == Keyboard::LControl || WindowsToMagmaKey(wParam) == Keyboard::RControl)
-				control = true;
+			if (mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_LSHIFT || mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_RSHIFT)
+				shift = MFM_TRUE;
+			else if (mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_ALT)
+				alt = MFM_TRUE;
+			else if (mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_LCONTROL || mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_RCONTROL)
+				control = MFM_TRUE;
 			else if (wParam == VK_LWIN || wParam == VK_RWIN)
-				system = true;
+				system = MFM_TRUE;
 
-			KeyModifiers mods = KeyModifiers::None;
-			if (alt) mods |= KeyModifiers::Alt;
-			if (control) mods |= KeyModifiers::Control;
-			if (system) mods |= KeyModifiers::System;
-			if (shift) mods |= KeyModifiers::Shift;
+			mfiKeyMods mods = MFI_KEY_MOD_NONE;
+			if (alt) mods |= MFI_KEY_MOD_ALT;
+			if (control) mods |= MFI_KEY_MOD_CONTROL;
+			if (system) mods |= MFI_KEY_MOD_SYSTEM;
+			if (shift) mods |= MFI_KEY_MOD_SHIFT;
 
-			(window->second)->OnKeyDown.Fire(WindowsToMagmaKey(wParam), mods);
+			if (currentWindow->base.onKeyDown != NULL)
+				currentWindow->base.onKeyDown(currentWindow, mfiWindowsToKeyCode(wParam), mods);
 		} break;
 		case WM_KEYUP:
 		{
-			if (WindowsToMagmaKey(wParam) == Keyboard::LShift || WindowsToMagmaKey(wParam) == Keyboard::RShift)
-				shift = false;
-			else if (WindowsToMagmaKey(wParam) == Keyboard::Alt)
-				alt = false;
-			else if (WindowsToMagmaKey(wParam) == Keyboard::LControl || WindowsToMagmaKey(wParam) == Keyboard::RControl)
-				control = false;
+			if (mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_LSHIFT || mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_RSHIFT)
+				shift = MFM_FALSE;
+			else if (mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_ALT)
+				alt = MFM_FALSE;
+			else if (mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_LCONTROL || mfiWindowsToKeyCode(wParam) == MFI_KEYBOARD_RCONTROL)
+				control = MFM_FALSE;
 			else if (wParam == VK_LWIN || wParam == VK_RWIN)
-				system = false;
+				system = MFM_FALSE;
 
-			KeyModifiers mods = KeyModifiers::None;
-			if (alt) mods |= KeyModifiers::Alt;
-			if (control) mods |= KeyModifiers::Control;
-			if (system) mods |= KeyModifiers::System;
-			if (shift) mods |= KeyModifiers::Shift;
+			mfiKeyMods mods = MFI_KEY_MOD_NONE;
+			if (alt) mods |= MFI_KEY_MOD_ALT;
+			if (control) mods |= MFI_KEY_MOD_CONTROL;
+			if (system) mods |= MFI_KEY_MOD_SYSTEM;
+			if (shift) mods |= MFI_KEY_MOD_SHIFT;
 
-			(window->second)->OnKeyUp.Fire(WindowsToMagmaKey(wParam), mods);
+			if (currentWindow->base.onKeyUp != NULL)
+				currentWindow->base.onKeyUp(currentWindow, mfiWindowsToKeyCode(wParam), mods);
 		} break;
 		case WM_LBUTTONDOWN:
 		{
-			(window->second)->OnMouseDown.Fire(Mouse::Left);
+			if (currentWindow->base.onMouseDown != NULL)
+				currentWindow->base.onMouseDown(currentWindow, MFI_MOUSE_LEFT);
 		} break;
 		case WM_MBUTTONDOWN:
 		{
-			(window->second)->OnMouseDown.Fire(Mouse::Middle);
+			if (currentWindow->base.onMouseDown != NULL)
+				currentWindow->base.onMouseDown(currentWindow, MFI_MOUSE_MIDDLE);
 		} break;
 		case WM_RBUTTONDOWN:
 		{
-			(window->second)->OnMouseDown.Fire(Mouse::Right);
+			if (currentWindow->base.onMouseDown != NULL)
+				currentWindow->base.onMouseDown(currentWindow, MFI_MOUSE_RIGHT);
 		} break;
 		case WM_LBUTTONUP:
 		{
-			(window->second)->OnMouseUp.Fire(Mouse::Left);
+			if (currentWindow->base.onMouseUp != NULL)
+				currentWindow->base.onMouseUp(currentWindow, MFI_MOUSE_LEFT);
 		} break;
 		case WM_MBUTTONUP:
 		{
-			(window->second)->OnMouseUp.Fire(Mouse::Middle);
+			if (currentWindow->base.onMouseUp != NULL)
+				currentWindow->base.onMouseUp(currentWindow, MFI_MOUSE_MIDDLE);
 		} break;
 		case WM_RBUTTONUP:
 		{
-			(window->second)->OnMouseUp.Fire(Mouse::Right);
+			if (currentWindow->base.onMouseUp != NULL)
+				currentWindow->base.onMouseUp(currentWindow, MFI_MOUSE_RIGHT);
 		} break;
 		default:
 		{

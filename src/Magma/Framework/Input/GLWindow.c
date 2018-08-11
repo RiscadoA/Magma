@@ -21,7 +21,7 @@ typedef struct
 	GLFWwindow* glfwWindow;
 } mfiGLWindow;
 
-mfiGLWindow* currentWindow = NULL;
+static mfiGLWindow* currentWindow = NULL;
 
 mfiKeyCode mfiGLFWToMFIKey(int key)
 {

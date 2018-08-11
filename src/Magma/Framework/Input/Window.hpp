@@ -104,13 +104,13 @@ namespace Magma
 				///		Gets the width of the window.
 				/// </summary>
 				/// <returns>Window width</returns>
-				virtual unsigned int GetWidth() = 0;
+				virtual mfmU32 GetWidth() = 0;
 
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
 				/// <returns>Window height</returns>
-				virtual unsigned int GetHeight() = 0;
+				virtual mfmU32 GetHeight() = 0;
 
 				/// <summary>
 				///		Gets the window mode
