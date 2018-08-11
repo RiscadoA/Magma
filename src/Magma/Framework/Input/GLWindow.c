@@ -338,6 +338,6 @@ void * mfiGetGLWindowGLFWHandle(void * window)
 #if !defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
 int main(int argc, char** argv)
 {
-	Main(argc, argv);
+	mfEntry(argc, argv);
 }
 #endif
