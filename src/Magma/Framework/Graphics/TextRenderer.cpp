@@ -43,7 +43,7 @@ Magma::Framework::Graphics::TextRenderer::~TextRenderer()
 	m_device->DestroyVertexLayout(m_vertexLayout);
 }
 
-void Magma::Framework::Graphics::TextRenderer::RenderU32(const String::U32Char * str, PixelBindingPoint * textureBP, float scale)
+void Magma::Framework::Graphics::TextRenderer::RenderU32(const String::UnicodePoint * str, PixelBindingPoint * textureBP, float scale)
 {
 	float x = 0.0f;
 	float y = 0.0f;

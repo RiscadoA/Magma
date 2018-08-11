@@ -1,6 +1,7 @@
 #include "BytecodeAssembler.hpp"
 
 #include "../String/Conversion.hpp"
+#include "../Memory/Endianness.hpp"
 
 #include <sstream>
 #include <map>
@@ -180,7 +181,7 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 						}
 
 						auto value = std::stol(name.substr(2), 0, 16);
-						value = String::U32ToBE(value);
+						Memory::ToBigEndian4(&value, &value);
 						memcpy(out + size, &value, 4);
 						size += 4;
 					}
@@ -210,7 +211,7 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 						}
 
 						auto value = std::stol(name.substr(2), 0, 10);
-						value = String::U32ToBE(value);
+						Memory::ToBigEndian4(&value, &value);
 						memcpy(out + size, &value, 4);
 						size += 4;
 					}
@@ -239,15 +240,10 @@ size_t Magma::Framework::Graphics::BytecodeAssembler::Assemble(const std::string
 							throw ShaderError(ss.str());
 						}
 
-						union
-						{
-							String::U32Char chr;
-							float flt;
-						} convertFloat;
-
-						convertFloat.flt = std::stof(name.substr(1));
-						convertFloat.chr = String::U32ToBE(convertFloat.chr);
-						memcpy(out + size, &convertFloat.flt, 4);
+					
+						mfmF32 value = std::stof(name.substr(1));
+						Memory::ToBigEndian4(&value, &value);
+						memcpy(out + size, &value, 4);
 						size += 4;
 					}
 					else

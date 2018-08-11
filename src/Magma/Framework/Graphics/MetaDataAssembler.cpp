@@ -1,7 +1,7 @@
 #include "MetaDataAssembler.hpp"
 #include "ShaderData.hpp"
 
-#include "../String/Conversion.hpp"
+#include "../Memory/Endianness.hpp"
 
 #include <sstream>
 #include <regex>
@@ -157,17 +157,17 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space for meta data header");
 
 	// Write major version
-	majorVersion = String::U32ToBE(majorVersion);
+	Memory::ToBigEndian4(&majorVersion, &majorVersion);
 	memcpy(out + size, &majorVersion, sizeof(unsigned long));
 	size += 4;
 
 	// Write minor version
-	minorVersion = String::U32ToBE(minorVersion);
+	Memory::ToBigEndian4(&minorVersion, &minorVersion);
 	memcpy(out + size, &minorVersion, sizeof(unsigned long));
 	size += 4;
 
 	// Write shader type
-	shaderType = (ShaderType)String::U32ToBE((unsigned long)shaderType);
+	Memory::ToBigEndian4(&shaderType, &shaderType);
 	memcpy(out + size, &shaderType, sizeof(unsigned long));
 	size += 4;
 
@@ -176,7 +176,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 	for (auto& o : objects)
 		if (o.objType == Object::Type_Input_Var)
 			inputVarCount++;
-	inputVarCount = String::U32ToBE(inputVarCount);
+	Memory::ToBigEndian4(&inputVarCount, &inputVarCount);
 	if (size + 4 > maxSize)
 		throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 	memcpy(out + size, &inputVarCount, sizeof(unsigned long));
@@ -187,14 +187,15 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		if (o.objType == Object::Type_Input_Var)
 		{
 			// Write index
-			o.index = String::U32ToBE(o.index);
+			Memory::ToBigEndian4(&o.index, &o.index);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.index, sizeof(unsigned long));
 			size += 4;
 
 			// Write name size
-			auto nameSize = String::U32ToBE(o.name.size());
+			unsigned long nameSize = o.name.size();
+			Memory::ToBigEndian4(&nameSize, &nameSize);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &nameSize, sizeof(unsigned long));
@@ -207,7 +208,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 			size += o.name.size();
 
 			// Write type
-			o.varType = (ShaderDataVariableType)String::U32ToBE((unsigned long)o.varType);
+			Memory::ToBigEndian4(&o.varType, &o.varType);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.varType, sizeof(unsigned long));
@@ -219,7 +220,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 	for (auto& o : objects)
 		if (o.objType == Object::Type_Output_Var)
 			outputVarCount++;
-	outputVarCount = String::U32ToBE(outputVarCount);
+	Memory::ToBigEndian4(&outputVarCount, &outputVarCount);
 	if (size + 4 > maxSize)
 		throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 	memcpy(out + size, &outputVarCount, sizeof(unsigned long));
@@ -230,14 +231,15 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		if (o.objType == Object::Type_Output_Var)
 		{
 			// Write index
-			o.index = String::U32ToBE(o.index);
+			Memory::ToBigEndian4(&o.index, &o.index);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.index, sizeof(unsigned long));
 			size += 4;
 
 			// Write name size
-			auto nameSize = String::U32ToBE(o.name.size());
+			unsigned long nameSize = o.name.size();
+			Memory::ToBigEndian4(&nameSize, &nameSize);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &nameSize, sizeof(unsigned long));
@@ -250,7 +252,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 			size += o.name.size();
 
 			// Write type
-			o.varType = (ShaderDataVariableType)String::U32ToBE((unsigned long)o.varType);
+			Memory::ToBigEndian4(&o.varType, &o.varType);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.varType, sizeof(unsigned long));
@@ -262,7 +264,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 	for (auto& o : objects)
 		if (o.objType == Object::Type_Texture_2D)
 			texture2DVarCount++;
-	texture2DVarCount = String::U32ToBE(texture2DVarCount);
+	Memory::ToBigEndian4(&texture2DVarCount, &texture2DVarCount);
 	if (size + 4 > maxSize)
 		throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 	memcpy(out + size, &texture2DVarCount, sizeof(unsigned long));
@@ -273,14 +275,15 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		if (o.objType == Object::Type_Texture_2D)
 		{
 			// Write index
-			o.index = String::U32ToBE(o.index);
+			Memory::ToBigEndian4(&o.index, &o.index);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.index, sizeof(unsigned long));
 			size += 4;
 
 			// Write name size
-			auto nameSize = String::U32ToBE(o.name.size());
+			unsigned long nameSize = o.name.size();
+			Memory::ToBigEndian4(&nameSize, &nameSize);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &nameSize, sizeof(unsigned long));
@@ -298,7 +301,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 	for (auto& o : objects)
 		if (o.objType == Object::Type_Constant_Buffer)
 			constantBufferCount++;
-	constantBufferCount = String::U32ToBE(constantBufferCount);
+	Memory::ToBigEndian4(&constantBufferCount, &constantBufferCount);
 	if (size + 4 > maxSize)
 		throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 	memcpy(out + size, &constantBufferCount, sizeof(unsigned long));
@@ -309,14 +312,15 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		if (o.objType == Object::Type_Constant_Buffer)
 		{
 			// Write index
-			o.index = String::U32ToBE(o.index);
+			Memory::ToBigEndian4(&o.index, &o.index);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.index, sizeof(unsigned long));
 			size += 4;
 
 			// Write name size
-			auto nameSize = String::U32ToBE(o.name.size());
+			unsigned long nameSize = o.name.size();
+			Memory::ToBigEndian4(&nameSize, &nameSize);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &nameSize, sizeof(unsigned long));
@@ -334,7 +338,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 	for (auto& o : objects)
 		if (o.objType == Object::Type_Constant_Buffer_Var)
 			constantBufferVarCount++;
-	constantBufferVarCount = String::U32ToBE(constantBufferVarCount);
+	Memory::ToBigEndian4(&constantBufferVarCount, &constantBufferVarCount);
 	if (size + 4 > maxSize)
 		throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 	memcpy(out + size, &constantBufferVarCount, sizeof(unsigned long));
@@ -345,28 +349,29 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 		if (o.objType == Object::Type_Constant_Buffer_Var)
 		{
 			// Write buffer index
-			o.bufferIndex = String::U32ToBE(o.bufferIndex);
+			Memory::ToBigEndian4(&o.bufferIndex, &o.bufferIndex);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.bufferIndex, sizeof(unsigned long));
 			size += 4;
 
 			// Write buffer offset
-			o.bufferOffset = String::U32ToBE(o.bufferOffset);
+			Memory::ToBigEndian4(&o.bufferOffset, &o.bufferOffset);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.bufferOffset, sizeof(unsigned long));
 			size += 4;
 
 			// Write index
-			o.index = String::U32ToBE(o.index);
+			Memory::ToBigEndian4(&o.index, &o.index);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.index, sizeof(unsigned long));
 			size += 4;
 
 			// Write name size
-			auto nameSize = String::U32ToBE(o.name.size());
+			unsigned long nameSize = o.name.size();
+			Memory::ToBigEndian4(&nameSize, &nameSize);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &nameSize, sizeof(unsigned long));
@@ -379,7 +384,7 @@ size_t Magma::Framework::Graphics::MetaDataAssembler::Assemble(const std::string
 			size += o.name.size();
 
 			// Write type
-			o.varType = (ShaderDataVariableType)String::U32ToBE((unsigned long)o.varType);
+			Memory::ToBigEndian4(&o.varType, &o.varType);
 			if (size + 4 > maxSize)
 				throw ShaderError("Failed to assemble binary shader meta data:\nNot enough space");
 			memcpy(out + size, &o.varType, sizeof(unsigned long));

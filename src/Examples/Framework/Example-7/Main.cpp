@@ -6,7 +6,8 @@
 #include <Magma/Framework/Graphics/D3D11Assembler.hpp>
 #include <Magma/Framework/Graphics/OGL410Assembler.hpp>
 #include <Magma/Framework/Graphics/ShaderCompiler.hpp>
-#include <Magma/Framework/String/Conversion.hpp>
+#include <Magma/Framework/Memory/Endianness.hpp>
+#include <Magma/Framework/Input/Entry.h>
 
 using namespace Magma::Framework;
 
@@ -58,11 +59,13 @@ void Main(int argc, char** argv)
 			// Write binary MSL shader object
 			{
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/vertex.mslbo");
-				auto bytecodeSizeBE = String::U32ToBE(bytecodeSize);
+				mfmU32 bytecodeSizeBE;
+				Memory::ToBigEndian4(&bytecodeSize, &bytecodeSizeBE);
 				fileSystem->Write(file, &bytecodeSizeBE, sizeof(unsigned long));
 				fileSystem->Write(file, bytecode, bytecodeSize);
 
-				auto metaDataSizeBE = String::U32ToBE(metaDataSize);
+				mfmU32 metaDataSizeBE;
+				Memory::ToBigEndian4(&metaDataSize, &metaDataSizeBE);
 				fileSystem->Write(file, &metaDataSizeBE, sizeof(unsigned long));
 				fileSystem->Write(file, metaData, metaDataSize);
 				fileSystem->CloseFile(file);
@@ -133,11 +136,13 @@ void Main(int argc, char** argv)
 			// Write binary MSL shader object
 			{
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/pixel.mslbo");
-				auto bytecodeSizeBE = String::U32ToBE(bytecodeSize);
+				mfmU32 bytecodeSizeBE;
+				Memory::ToBigEndian4(&bytecodeSize, &bytecodeSizeBE);
 				fileSystem->Write(file, &bytecodeSizeBE, sizeof(unsigned long));
 				fileSystem->Write(file, bytecode, bytecodeSize);
 
-				auto metaDataSizeBE = String::U32ToBE(metaDataSize);
+				mfmU32 metaDataSizeBE;
+				Memory::ToBigEndian4(&metaDataSize, &metaDataSizeBE);
 				fileSystem->Write(file, &metaDataSizeBE, sizeof(unsigned long));
 				fileSystem->Write(file, metaData, metaDataSize);
 				fileSystem->CloseFile(file);

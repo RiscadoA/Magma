@@ -174,7 +174,7 @@ void Magma::GUI::Elements::TextRenderer::Render(Element * element)
 	text->m_cbBP->BindConstantBuffer(m_textDataCB);
 	text->m_ftBP->BindSampler2D(m_sampler);
 	m_renderDevice->SetPipeline(text->m_pp);
-	text->m_tr->RenderU32(text->GetText().c_str(), text->m_ftBP, text->GetScale());
+	text->m_tr->RenderU32(reinterpret_cast<const Framework::String::UnicodePoint*>(text->GetText().c_str()), text->m_ftBP, text->GetScale());
 }
 
 Magma::Framework::Graphics::Pipeline * Magma::GUI::Elements::TextRenderer::GetPipeline(Text * text)

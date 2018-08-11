@@ -1,5 +1,5 @@
 #include "ShaderData.hpp"
-#include "../String/Conversion.hpp"
+#include "../Memory/Endianness.hpp"
 
 #include <sstream>
 
@@ -11,7 +11,7 @@ Magma::Framework::Graphics::ShaderData::ShaderData(const char * binaryObject, si
 		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {1}");
 	unsigned long bytecodeSize;
 	memcpy(&bytecodeSize, binaryObject, sizeof(unsigned long));
-	m_bytecodeSize = String::U32FromBE(bytecodeSize);
+	Memory::FromBigEndian4(&bytecodeSize, &m_bytecodeSize);
 	if (4 + m_bytecodeSize > binaryObjectSize)
 		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {2}");
 	m_bytecode = (char*)malloc(m_bytecodeSize);
@@ -21,7 +21,7 @@ Magma::Framework::Graphics::ShaderData::ShaderData(const char * binaryObject, si
 		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {3}");
 	unsigned long metaDataSize;
 	memcpy(&metaDataSize, binaryObject + 4 + m_bytecodeSize, sizeof(unsigned long));
-	m_metaDataSize = String::U32FromBE(metaDataSize);
+	Memory::FromBigEndian4(&metaDataSize, &m_metaDataSize);
 	if (8 + m_bytecodeSize + m_metaDataSize > binaryObjectSize)
 		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {4}");
 	m_metaData = (char*)malloc(m_metaDataSize);
@@ -104,42 +104,42 @@ void Magma::Framework::Graphics::ShaderData::Load()
 	ss.read((char*)&m_majorVersion, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read major version:\nStream read EOF (invalid meta data?)");
-	m_majorVersion = String::U32FromBE(m_majorVersion); // Convert from big endian to native format
+	Memory::FromBigEndian4(&m_majorVersion, &m_majorVersion);
 
 	ss.read((char*)&m_minorVersion, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read minor version:\nStream read EOF (invalid meta data?)");
-	m_minorVersion = String::U32FromBE(m_minorVersion); // Convert from big endian to native format
+	Memory::FromBigEndian4(&m_minorVersion, &m_minorVersion);
 
 	ss.read((char*)&m_shaderType, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read shader type:\nStream read EOF (invalid meta data?)");
-	m_shaderType = (ShaderType)String::U32FromBE((String::U32Char)m_shaderType); // Convert from big endian to native format
+	Memory::FromBigEndian4(&m_shaderType, &m_shaderType);
 
 	// Get input vars
 	size_t inputVarCount = 0;
 	ss.read((char*)&inputVarCount, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read input var count:\nStream read EOF (invalid meta data?)");
-	inputVarCount = String::U32FromBE(inputVarCount); // Convert from big endian to native format
+	Memory::FromBigEndian4(&inputVarCount, &inputVarCount);
 	m_inputVars.resize(inputVarCount);
 	for (size_t i = 0; i < inputVarCount; ++i)
 	{
 		ss.read((char*)&m_inputVars[i].index, sizeof(unsigned long));
-		m_inputVars[i].index = String::U32FromBE(m_inputVars[i].index);
+		Memory::FromBigEndian4(&m_inputVars[i].index, &m_inputVars[i].index);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read input var index:\nStream read EOF (invalid meta data?)");
 
 		unsigned long nameSize = 0;
 		ss.read((char*)&nameSize, sizeof(unsigned long));
-		nameSize = String::U32FromBE(nameSize);
+		Memory::FromBigEndian4(&nameSize, &nameSize);
 		m_inputVars[i].name.resize(nameSize);
 		ss.read(&m_inputVars[i].name[0], nameSize);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read input var name:\nStream read EOF (invalid meta data?)");
 
 		ss.read((char*)&m_inputVars[i].type, sizeof(unsigned long));
-		m_inputVars[i].type = (ShaderDataVariableType)String::U32FromBE((String::U32Char)m_inputVars[i].type);
+		Memory::FromBigEndian4(&m_inputVars[i].type, &m_inputVars[i].type);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read input var type:\nStream read EOF (invalid meta data?)");
 	}
@@ -149,25 +149,25 @@ void Magma::Framework::Graphics::ShaderData::Load()
 	ss.read((char*)&outputVarCount, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read output var count:\nStream read EOF (invalid meta data?)");
-	outputVarCount = String::U32FromBE(outputVarCount); // Convert from big endian to native format
+	Memory::FromBigEndian4(&outputVarCount, &outputVarCount);
 	m_outputVars.resize(outputVarCount);
 	for (size_t i = 0; i < outputVarCount; ++i)
 	{
 		ss.read((char*)&m_outputVars[i].index, sizeof(unsigned long));
-		m_outputVars[i].index = String::U32FromBE(m_outputVars[i].index);
+		Memory::FromBigEndian4(&m_outputVars[i].index, &m_outputVars[i].index);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read output var index:\nStream read EOF (invalid meta data?)");
 
 		unsigned long nameSize = 0;
 		ss.read((char*)&nameSize, sizeof(unsigned long));
-		nameSize = String::U32FromBE(nameSize);
+		Memory::FromBigEndian4(&nameSize, &nameSize);
 		m_outputVars[i].name.resize(nameSize);
 		ss.read(&m_outputVars[i].name[0], nameSize);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read output var name:\nStream read EOF (invalid meta data?)");
 	
 		ss.read((char*)&m_outputVars[i].type, sizeof(unsigned long));
-		m_outputVars[i].type = (ShaderDataVariableType)String::U32FromBE((String::U32Char)m_outputVars[i].type);
+		Memory::FromBigEndian4(&m_outputVars[i].type, &m_outputVars[i].type);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read output var type:\nStream read EOF (invalid meta data?)");
 	}
@@ -177,18 +177,18 @@ void Magma::Framework::Graphics::ShaderData::Load()
 	ss.read((char*)&texture2DVarCount, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read 2D texture var count:\nStream read EOF (invalid meta data?)");
-	texture2DVarCount = String::U32FromBE(texture2DVarCount); // Convert from big endian to native format
+	Memory::FromBigEndian4(&texture2DVarCount, &texture2DVarCount);
 	m_texture2DVars.resize(texture2DVarCount);
 	for (size_t i = 0; i < texture2DVarCount; ++i)
 	{
 		ss.read((char*)&m_texture2DVars[i].index, sizeof(unsigned long));
-		m_texture2DVars[i].index = String::U32FromBE(m_texture2DVars[i].index);
+		Memory::FromBigEndian4(&m_texture2DVars[i].index, &m_texture2DVars[i].index);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read 2D texture var index:\nStream read EOF (invalid meta data?)");
 
 		unsigned long nameSize = 0;
 		ss.read((char*)&nameSize, sizeof(unsigned long));
-		nameSize = String::U32FromBE(nameSize);
+		Memory::FromBigEndian4(&nameSize, &nameSize);
 		m_texture2DVars[i].name.resize(nameSize);
 		ss.read(&m_texture2DVars[i].name[0], nameSize);
 		if (ss.eof())
@@ -200,18 +200,18 @@ void Magma::Framework::Graphics::ShaderData::Load()
 	ss.read((char*)&constantBufferCount, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read constant buffer count:\nStream read EOF (invalid meta data?)");
-	constantBufferCount = String::U32FromBE(constantBufferCount); // Convert from big endian to native format
+	Memory::FromBigEndian4(&constantBufferCount, &constantBufferCount);
 	m_constantBuffers.resize(constantBufferCount);
 	for (size_t i = 0; i < constantBufferCount; ++i)
 	{
 		ss.read((char*)&m_constantBuffers[i].index, sizeof(unsigned long));
-		m_constantBuffers[i].index = String::U32FromBE(m_constantBuffers[i].index);
+		Memory::FromBigEndian4(&m_constantBuffers[i].index, &m_constantBuffers[i].index);;
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer index:\nStream read EOF (invalid meta data?)");
 
 		unsigned long nameSize = 0;
 		ss.read((char*)&nameSize, sizeof(unsigned long));
-		nameSize = String::U32FromBE(nameSize);
+		Memory::FromBigEndian4(&nameSize, &nameSize);
 		m_constantBuffers[i].name.resize(nameSize);
 		ss.read(&m_constantBuffers[i].name[0], nameSize);
 		if (ss.eof())
@@ -223,35 +223,35 @@ void Magma::Framework::Graphics::ShaderData::Load()
 	ss.read((char*)&constantBufferVarCount, sizeof(unsigned long));
 	if (ss.eof())
 		throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var count:\nStream read EOF (invalid meta data?)");
-	constantBufferVarCount = String::U32FromBE(constantBufferVarCount); // Convert from big endian to native format
+	Memory::FromBigEndian4(&constantBufferVarCount, &constantBufferVarCount);
 	m_constantBufferVars.resize(constantBufferVarCount);
 	for (size_t i = 0; i < constantBufferVarCount; ++i)
 	{
 		ss.read((char*)&m_constantBufferVars[i].bufferIndex, sizeof(unsigned long));
-		m_constantBufferVars[i].bufferIndex = String::U32FromBE(m_constantBufferVars[i].bufferIndex);
+		Memory::FromBigEndian4(&m_constantBufferVars[i].bufferIndex, &m_constantBufferVars[i].bufferIndex);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var buffer index:\nStream read EOF (invalid meta data?)");
 
 		ss.read((char*)&m_constantBufferVars[i].offset, sizeof(unsigned long));
-		m_constantBufferVars[i].offset = String::U32FromBE(m_constantBufferVars[i].offset);
+		Memory::FromBigEndian4(&m_constantBufferVars[i].offset, &m_constantBufferVars[i].offset);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var buffer offset:\nStream read EOF (invalid meta data?)");
 
 		ss.read((char*)&m_constantBufferVars[i].index, sizeof(unsigned long));
-		m_constantBufferVars[i].index = String::U32FromBE(m_constantBufferVars[i].index);
+		Memory::FromBigEndian4(&m_constantBufferVars[i].index, &m_constantBufferVars[i].index);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var index:\nStream read EOF (invalid meta data?)");
 
 		unsigned long nameSize = 0;
 		ss.read((char*)&nameSize, sizeof(unsigned long));
-		nameSize = String::U32FromBE(nameSize);
+		Memory::FromBigEndian4(&nameSize, &nameSize);
 		m_constantBufferVars[i].name.resize(nameSize);
 		ss.read(&m_constantBufferVars[i].name[0], nameSize);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var name:\nStream read EOF (invalid meta data?)");
 		
 		ss.read((char*)&m_constantBufferVars[i].type, sizeof(unsigned long));
-		m_constantBufferVars[i].type = (ShaderDataVariableType)String::U32FromBE((String::U32Char)m_constantBufferVars[i].type);
+		Memory::FromBigEndian4(&m_constantBufferVars[i].type, &m_constantBufferVars[i].type);
 		if (ss.eof())
 			throw ShaderError("Failed to load shader data:\nFailed to read constant buffer var type:\nStream read EOF (invalid meta data?)");
 	}

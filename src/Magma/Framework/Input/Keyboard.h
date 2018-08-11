@@ -1,0 +1,99 @@
+#pragma once
+
+#include "../Memory/Type.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#define MFI_KEYBOARD_INVALID	0x00
+
+#define MFI_KEYBOARD_Q			0x01
+#define MFI_KEYBOARD_W			0x02
+#define MFI_KEYBOARD_E			0x03
+#define MFI_KEYBOARD_R			0x04
+#define MFI_KEYBOARD_T			0x05
+#define MFI_KEYBOARD_Y			0x06
+#define MFI_KEYBOARD_U			0x07
+#define MFI_KEYBOARD_I			0x08
+#define MFI_KEYBOARD_O			0x09
+#define MFI_KEYBOARD_P			0x0A
+#define MFI_KEYBOARD_A			0x0B
+#define MFI_KEYBOARD_S			0x0C
+#define MFI_KEYBOARD_D			0x0D
+#define MFI_KEYBOARD_F			0x0E
+#define MFI_KEYBOARD_G			0x0F
+#define MFI_KEYBOARD_H			0x10
+#define MFI_KEYBOARD_J			0x11
+#define MFI_KEYBOARD_K			0x12
+#define MFI_KEYBOARD_L			0x13
+#define MFI_KEYBOARD_Z			0x14
+#define MFI_KEYBOARD_X			0x15
+#define MFI_KEYBOARD_C			0x16
+#define MFI_KEYBOARD_V			0x17
+#define MFI_KEYBOARD_B			0x18
+#define MFI_KEYBOARD_N			0x19
+#define MFI_KEYBOARD_M			0x1A
+
+#define MFI_KEYBOARD_NUM1		0x1B
+#define MFI_KEYBOARD_NUM2		0x1C
+#define MFI_KEYBOARD_NUM3		0x1D
+#define MFI_KEYBOARD_NUM4		0x1E
+#define MFI_KEYBOARD_NUM5		0x1F
+#define MFI_KEYBOARD_NUM6		0x20
+#define MFI_KEYBOARD_NUM7		0x21
+#define MFI_KEYBOARD_NUM8		0x22
+#define MFI_KEYBOARD_NUM9		0x23
+#define MFI_KEYBOARD_NUM0		0x24
+
+#define MFI_KEYBOARD_F1			0x25
+#define MFI_KEYBOARD_F2			0x26
+#define MFI_KEYBOARD_F3			0x27
+#define MFI_KEYBOARD_F4			0x28
+#define MFI_KEYBOARD_F5			0x29
+#define MFI_KEYBOARD_F6			0x2A
+#define MFI_KEYBOARD_F7			0x2B
+#define MFI_KEYBOARD_F8			0x2C
+#define MFI_KEYBOARD_F9			0x2D
+#define MFI_KEYBOARD_F10		0x2E
+#define MFI_KEYBOARD_F11		0x2F
+#define MFI_KEYBOARD_F12		0x30
+
+#define MFI_KEYBOARD_ESCAPE		0x31
+#define MFI_KEYBOARD_TAB		0x32
+#define MFI_KEYBOARD_CAPS		0x33
+#define MFI_KEYBOARD_LSHIFT		0x34
+#define MFI_KEYBOARD_RSHIFT		0x35
+#define MFI_KEYBOARD_LCONTROL	0x36
+#define MFI_KEYBOARD_RCONTROL	0x37
+#define MFI_KEYBOARD_ALT		0x38
+#define MFI_KEYBOARD_ALTGR		0x39
+#define MFI_KEYBOARD_ENTER		0x3A
+#define MFI_KEYBOARD_SPACE		0x3B
+#define MFI_KEYBOARD_BACKSPACE	0x3C
+#define MFI_KEYBOARD_INSERT		0x3D
+#define MFI_KEYBOARD_DELETE		0x3E
+#define MFI_KEYBOARD_HOME		0x3F
+#define MFI_KEYBOARD_END		0x40
+#define MFI_KEYBOARD_PAGEUP		0x41
+#define MFI_KEYBOARD_PAGEDOWN	0x42
+
+#define MFI_KEYBOARD_LEFT		0x43
+#define MFI_KEYBOARD_RIGHT		0x44
+#define MFI_KEYBOARD_UP			0x45
+#define MFI_KEYBOARD_DOWN		0x46
+#define MFI_KEYBOARD_MAX		0x46		
+
+#define MFI_KEY_MOD_NONE		0x00
+#define MFI_KEY_MOD_SHIFT		0x01
+#define MFI_KEY_MOD_CONTROL		0x02
+#define MFI_KEY_MOD_ALT			0x04
+#define MFI_KEY_MOD_SYSTEM		0x08
+
+	typedef mfmU32 mfiKeyCode;
+	typedef mfmU32 mfiKeyMods;
+
+#ifdef __cplusplus
+}
+#endif

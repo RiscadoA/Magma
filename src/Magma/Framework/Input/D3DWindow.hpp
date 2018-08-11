@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Window.hpp"
+#include "D3DWindow.h"
+#include "../String/UTF8.hpp"
 
 namespace Magma
 {
@@ -21,17 +23,12 @@ namespace Magma
 				/// <param name="height">Window height</param>
 				/// <param name="title">Window title</param>
 				/// <param name="mode">Window mode</param>
-				D3DWindow(unsigned int width, unsigned int height, const std::string& title, Window::Mode mode = Window::Mode::Windowed);
+				D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, Window::Mode mode = Window::Mode::Windowed);
 
 				/// <summary>
 				///		Closes a window.
 				/// </summary>
 				~D3DWindow();
-
-				/// <summary>
-				///		Sets this window as the current for rendering.
-				/// </summary>
-				virtual void MakeCurrent() final;
 
 				/// <summary>
 				///		Polls events from this window.
@@ -44,34 +41,31 @@ namespace Magma
 				virtual void WaitForEvents() final;
 
 				/// <summary>
-				///		Gets the windows API handle of this window.
-				/// </summary>
-				/// <returns>Window windows API handle</returns>
-				inline void* GetHWND() const { return m_hwnd; }
-
-				/// <summary>
 				///		Gets the width of the window.
 				/// </summary>
 				/// <returns>Window width</returns>
-				virtual unsigned int GetWidth() final;
+				inline virtual mfmU32 GetWidth() final { return m_window->getWidth(m_window); }
 
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
 				/// <returns>Window height</returns>
-				virtual unsigned int GetHeight() final;
+				inline virtual mfmU32 GetHeight() final { return m_window->getHeight(m_window); }
 
 				/// <summary>
 				///		Gets the window mode
 				/// </summary>
 				/// <returns>Window mode</returns>
-				virtual Window::Mode GetMode() final;
+				inline virtual Window::Mode GetMode() final { return (Window::Mode)m_window->getMode(m_window); }
+
+				/// <summary>
+				///		Returns a pointer to the underlying C window
+				/// </summary>
+				/// <returns>C window pinter</returns>
+				inline mfiWindow* GetWindow() const { return m_window; }
 
 			private:
-				void* m_hwnd;
-				unsigned int m_width;
-				unsigned int m_height;
-				Window::Mode m_mode;
+				mfiWindow * m_window;
 			};
 		}
 	}

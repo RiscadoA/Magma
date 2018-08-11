@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Window.hpp"
+#include "GLWindow.h"
+#include "../String/UTF8.hpp"
 
 namespace Magma
 {
@@ -21,17 +23,12 @@ namespace Magma
 				/// <param name="height">Window height</param>
 				/// <param name="title">Window title</param>
 				/// <param name="mode">Window mode</param>
-				GLWindow(unsigned int width, unsigned int height, const std::string& title, Window::Mode mode = Window::Mode::Windowed);
+				GLWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, Window::Mode mode = Window::Mode::Windowed);
 
 				/// <summary>
 				///		Closes a window.
 				/// </summary>
 				~GLWindow();
-
-				/// <summary>
-				///		Sets this window as the current for rendering.
-				/// </summary>
-				virtual void MakeCurrent() final;
 
 				/// <summary>
 				///		Polls events from this window.
@@ -44,39 +41,31 @@ namespace Magma
 				virtual void WaitForEvents() final;
 
 				/// <summary>
-				///		Swaps the GLFW window buffers
-				/// </summary>
-				void SwapBuffers();
-
-				/// <summary>
 				///		Gets the width of the window.
 				/// </summary>
 				/// <returns>Window width</returns>
-				inline virtual unsigned int GetWidth() final { return m_width; }
+				inline virtual mfmU32 GetWidth() final { return m_window->getWidth(m_window); }
 
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
 				/// <returns>Window height</returns>
-				inline virtual unsigned int GetHeight() final { return m_height; }
+				inline virtual mfmU32 GetHeight() final { return m_window->getHeight(m_window); }
 
 				/// <summary>
 				///		Gets the window mode
 				/// </summary>
 				/// <returns>Window mode</returns>
-				inline virtual Window::Mode GetMode() final { return m_mode; }
+				inline virtual Window::Mode GetMode() final { return (Window::Mode)m_window->getMode(m_window); }
 
 				/// <summary>
-				///		Returns a pointer to the underlying GLFW window
+				///		Returns a pointer to the underlying C window
 				/// </summary>
-				/// <returns>GLFW window pinter</returns>
-				inline void* GetGLFWWindow() const { return m_glfwWindow; }
+				/// <returns>C window pinter</returns>
+				inline mfiWindow* GetWindow() const { return m_window; }
 
 			private:
-				void* m_glfwWindow;
-				unsigned int m_width;
-				unsigned int m_height;
-				Window::Mode m_mode;
+				mfiWindow* m_window;
 			};
 		}
 	}

@@ -8,7 +8,7 @@ int main()
 
 	// Valid chars
 	{
-		U8Char valid[][4] =
+		UTF8CodeUnit valid[][4] =
 		{
 			{ 0x24, 0x00, 0x00, 0x00 },
 			{ 0xC2, 0xA2, 0x00, 0x00 },
@@ -24,7 +24,7 @@ int main()
 
 	// Invalid chars
 	{
-		U8Char invalid[][4] =
+		UTF8CodeUnit invalid[][4] =
 		{
 			{ 0xED, 0xA0, 0x80, 0x00 },
 			{ 0xC0, 0x00, 0x00, 0x00 },

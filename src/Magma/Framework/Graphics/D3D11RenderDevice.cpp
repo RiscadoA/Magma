@@ -4,7 +4,7 @@
 using namespace Magma::Framework::Graphics;
 using namespace Magma::Framework;
 
-#include <Config.hpp>
+#include <Config.h>
 #include <sstream>
 #include <string>
 #include <map>
@@ -1529,7 +1529,7 @@ void Magma::Framework::Graphics::D3D11RenderDevice::Init(Input::Window * window,
 		scd.BufferCount = 1;
 		scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		scd.OutputWindow = (HWND)m_window->GetHWND();
+		scd.OutputWindow = (HWND)mfiGetD3DWindowHandle(m_window->GetWindow());
 		scd.SampleDesc.Count = 1;
 		scd.SampleDesc.Quality = 0;
 		scd.Windowed = (window->GetMode() == Input::Window::Mode::Fullscreen) ? FALSE : TRUE;

@@ -6,6 +6,8 @@
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
 
+#include "Window.h"
+
 namespace Magma
 {
 	namespace Framework
@@ -23,12 +25,8 @@ namespace Magma
 				/// </summary>
 				enum class Mode
 				{
-					Invalid = -1,
-
-					Windowed,
-					Fullscreen,
-
-					Count
+					Windowed = MFI_WINDOWED,
+					Fullscreen = MFI_FULLSCREEN,
 				};
 				
 				/// <summary>
@@ -40,11 +38,6 @@ namespace Magma
 				///		Closes a window.
 				/// </summary>
 				virtual ~Window() = default;
-
-				/// <summary>
-				///		Sets this window as the current for rendering.
-				/// </summary>
-				virtual void MakeCurrent() = 0;
 
 				/// <summary>
 				///		Polls events from this window.
@@ -111,13 +104,13 @@ namespace Magma
 				///		Gets the width of the window.
 				/// </summary>
 				/// <returns>Window width</returns>
-				virtual unsigned int GetWidth() = 0;
+				virtual mfmU32 GetWidth() = 0;
 
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
 				/// <returns>Window height</returns>
-				virtual unsigned int GetHeight() = 0;
+				virtual mfmU32 GetHeight() = 0;
 
 				/// <summary>
 				///		Gets the window mode
@@ -128,5 +121,3 @@ namespace Magma
 		}
 	}
 }
-
-extern void Main(int argc, char** argv);

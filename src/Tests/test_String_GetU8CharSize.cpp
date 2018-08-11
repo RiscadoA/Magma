@@ -6,7 +6,7 @@ int main()
 {
 	using namespace Magma::Framework::String;
 
-	U8Char chars[][5] =
+	UTF8CodeUnit chars[][5] =
 	{
 		{ 0x24, 0x00, 0x00, 0x00, 1 },
 		{ 0xC2, 0xA2, 0x00, 0x00, 2 },

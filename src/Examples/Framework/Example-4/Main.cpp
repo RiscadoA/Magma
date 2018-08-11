@@ -4,7 +4,8 @@
 #include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
 #include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
 #include <Magma/Framework/Graphics/OGL410Assembler.hpp>
-#include <Magma/Framework/String/Conversion.hpp>
+#include <Magma/Framework/Memory/Endianness.hpp>
+#include <Magma/Framework/Input/Entry.h>
 
 using namespace Magma::Framework;
 
@@ -40,11 +41,13 @@ void Main(int argc, char** argv)
 
 		{
 			auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-4-5/vertex.mslbo");
-			auto bytecodeSizeBE = String::U32ToBE(bytecodeSize);
+			mfmU32 bytecodeSizeBE;
+			Memory::ToBigEndian4(&bytecodeSize, &bytecodeSizeBE);
 			fileSystem->Write(file, &bytecodeSizeBE, sizeof(unsigned long));
 			fileSystem->Write(file, bytecode, bytecodeSize);
 
-			auto metaDataSizeBE = String::U32ToBE(metaDataSize);
+			mfmU32 metaDataSizeBE;
+			Memory::ToBigEndian4(&metaDataSize, &metaDataSizeBE);
 			fileSystem->Write(file, &metaDataSizeBE, sizeof(unsigned long));
 			fileSystem->Write(file, metaData, metaDataSize);
 			fileSystem->CloseFile(file);
@@ -97,11 +100,13 @@ void Main(int argc, char** argv)
 
 		{
 			auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-4-5/pixel.mslbo");
-			auto bytecodeSizeBE = String::U32ToBE(bytecodeSize);
+			mfmU32 bytecodeSizeBE;
+			Memory::ToBigEndian4(&bytecodeSize, &bytecodeSizeBE);
 			fileSystem->Write(file, &bytecodeSizeBE, sizeof(unsigned long));
 			fileSystem->Write(file, bytecode, bytecodeSize);
 
-			auto metaDataSizeBE = String::U32ToBE(metaDataSize);
+			mfmU32 metaDataSizeBE;
+			Memory::ToBigEndian4(&metaDataSize, &metaDataSizeBE);
 			fileSystem->Write(file, &metaDataSizeBE, sizeof(unsigned long));
 			fileSystem->Write(file, metaData, metaDataSize);
 			fileSystem->CloseFile(file);

@@ -8,7 +8,7 @@ int main()
 
 	// Valid chars
 	{
-		U32Char valid[] =
+		UnicodePoint valid[] =
 		{
 			0xE1,
 			0x1374,
@@ -17,12 +17,12 @@ int main()
 		};
 
 		for (int i = 0; valid[i] != 0x00; ++i)
-			TEST_REQUIRE_PASS(IsValidU32Char(valid[i]));
+			TEST_REQUIRE_PASS(IsValidUnicode(valid[i]));
 	}
 
 	// Invalid chars
 	{
-		U32Char invalid[] =
+		UnicodePoint invalid[] =
 		{
 			0x110000,
 			0xD800,
@@ -31,7 +31,7 @@ int main()
 		};
 
 		for (int i = 0; invalid[i] != 0x00; ++i)
-			TEST_REQUIRE_FAIL(IsValidU32Char(invalid[i]));
+			TEST_REQUIRE_FAIL(IsValidUnicode(invalid[i]));
 	}
 
 	EXIT_PASS();

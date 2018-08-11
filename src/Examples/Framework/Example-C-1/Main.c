@@ -1,6 +1,7 @@
 ﻿#include <Magma/Framework/Memory/PoolAllocator.h>
-#include <cstdio>
-#include <cstdlib>
+#include <Magma/Framework/Input/Entry.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void Main(int argc, char** argv)
 {
@@ -10,7 +11,7 @@ void Main(int argc, char** argv)
 	// Create pool
 	{
 		mfmPoolAllocatorDesc desc;
-		desc.expandable = true;
+		desc.expandable = MFM_TRUE;
 		desc.slotCount = 1;
 		desc.slotSize = sizeof(mfmU32);
 		err = mfmCreatePoolAllocator(&pool, &desc);
