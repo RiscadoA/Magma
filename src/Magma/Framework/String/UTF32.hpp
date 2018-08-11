@@ -1,9 +1,6 @@
 #pragma once
 
 #include "UTF32.h"
-
-#include <cstdint>
-
 #include "Exception.hpp"
 
 namespace Magma
@@ -33,5 +30,3 @@ namespace Magma
 		}
 	}
 }
-
-inline const Magma::Framework::String::UTF32CodeUnit* operator "" _ms(const char32_t* str, size_t) { return reinterpret_cast<const  Magma::Framework::String::UTF32CodeUnit*>(str); }

@@ -11,7 +11,7 @@ namespace Magma
 			/// <summary>
 			///		Assembles binary bytecode into GLSL (version 4.0.0)
 			/// </summary>
-			static class OGL410Assembler
+			class OGL410Assembler
 			{
 			public:
 				OGL410Assembler() = delete;

@@ -74,9 +74,9 @@ void LoadScene(Scene& scene)
 	// Create window
 	{
 #ifdef USE_GL
-		scene.window = new Framework::Input::GLWindow(800, 600, u8"Example-8"_ms, Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::GLWindow(800, 600, u8"Example-8", Framework::Input::Window::Mode::Windowed);
 #else
-		scene.window = new Framework::Input::D3DWindow(800, 600, u8"Example-8"_ms, Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::D3DWindow(800, 600, u8"Example-8", Framework::Input::Window::Mode::Windowed);
 #endif
 		scene.running = true;
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
@@ -292,7 +292,7 @@ void Main(int argc, char** argv) try
 			scene.transformBuffer->Unmap();
 			scene.transformBP->BindConstantBuffer(scene.transformBuffer);
 
-			scene.textRenderer->RenderU32(U"Samplé tèxt"_ms, scene.textureBP, 48.0f);
+			scene.textRenderer->RenderU32(U"Samplé tèxt", scene.textureBP, 48.0f);
 		}
 
 		// Swap screen back and front buffers

@@ -2,6 +2,8 @@
 
 #include "../Memory/Type.h"
 
+#include <uchar.h>
+
 /*
 	UTF-32 string manipulation functions.
 */
@@ -10,8 +12,8 @@
 extern "C"
 {
 #endif
-	typedef mfmI32 mfsUTF32CodeUnit;
-	typedef mfmI32 mfsUnicodePoint;
+	typedef char32_t mfsUTF32CodeUnit;
+	typedef char32_t mfsUnicodePoint;
 
 	/// <summary>
 	///		Checks if a unicode point value is valid unicode.

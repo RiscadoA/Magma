@@ -87,5 +87,3 @@ namespace Magma
 		}
 	}
 }
-
-inline const Magma::Framework::String::UTF8CodeUnit* operator "" _ms(const char* str, size_t) { return reinterpret_cast<const  Magma::Framework::String::UTF8CodeUnit*>(str); }

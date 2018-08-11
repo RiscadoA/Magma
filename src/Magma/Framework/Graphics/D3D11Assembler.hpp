@@ -11,7 +11,7 @@ namespace Magma
 			/// <summary>
 			///		Assembles binary bytecode into HLSL (shader model 5)
 			/// </summary>
-			static class D3D11Assembler
+			class D3D11Assembler
 			{
 			public:
 				D3D11Assembler() = delete;
