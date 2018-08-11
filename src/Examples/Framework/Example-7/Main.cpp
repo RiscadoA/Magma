@@ -7,6 +7,7 @@
 #include <Magma/Framework/Graphics/OGL410Assembler.hpp>
 #include <Magma/Framework/Graphics/ShaderCompiler.hpp>
 #include <Magma/Framework/Memory/Endianness.hpp>
+#include <Magma/Framework/Input/Entry.h>
 
 using namespace Magma::Framework;
 

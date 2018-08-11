@@ -1,4 +1,5 @@
 ﻿#include <Magma/Framework/Memory/PoolAllocator.h>
+#include <Magma/Framework/Input/Entry.h>
 #include <cstdio>
 #include <cstdlib>
 

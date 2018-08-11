@@ -5,6 +5,7 @@
 
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Entry.h"
 
 /*
 	Abstract C window type.
@@ -64,8 +65,6 @@ extern "C"
 		mfiOnMouseUpCallback onMouseUp;
 		mfiOnMouseDownCallback onMouseDown;
 	} mfiWindow;
-
-	extern void Main(int argc, char** argv);
 
 #ifdef __cplusplus
 }

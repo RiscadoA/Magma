@@ -5,6 +5,7 @@
 #include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
 #include <Magma/Framework/Graphics/D3D11Assembler.hpp>
 #include <Magma/Framework/Memory/Endianness.hpp>
+#include <Magma/Framework/Input/Entry.h>
 
 using namespace Magma::Framework;
 
