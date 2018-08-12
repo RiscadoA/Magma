@@ -8,7 +8,7 @@ extern "C"
 {
 #endif
 
-	void mfgD3D11Assemble(const mfmU8* );
+	void mfgD3D11Assemble(const mfmU8* data, mfmU64 dataSize);
 
 #ifdef __cplusplus
 }

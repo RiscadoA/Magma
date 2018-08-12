@@ -10,7 +10,7 @@
 		- Added array support;
 		- Added some instructions;
 
-	Literals are stored in big endianness.
+	All values are stored in big endianness.
 	"param 1x1" means the first parameter is 1 byte long;
 	"param 2x4" means the second parameter is 4 bytes long;
 */
@@ -22,6 +22,24 @@ extern "C"
 
 	// MSL Bytecode version 2.0
 
+	// ---------------- VARIABLE TYPES ----------------
+#define MFG_INT1						0x00	// Integer scalar
+#define MFG_INT2						0x01	// Integer 2 component vector
+#define MFG_INT3						0x02	// Integer 3 component vector
+#define MFG_INT4						0x03	// Integer 4 component vector
+#define MFG_INT22						0x04	// Integer 2x2 matrix
+#define MFG_INT33						0x05	// Integer 3x3 matrix
+#define MFG_INT44						0x06	// Integer 4x4 matrix
+
+#define MFG_FLOAT1						0x07	// Floating point scalar
+#define MFG_FLOAT2						0x08	// Floating point 2 component vector
+#define MFG_FLOAT3						0x09	// Floating point 3 component vector
+#define MFG_FLOAT4						0x0A	// Floating point 4 component vector
+#define MFG_FLOAT22						0x0B	// Floating point 2x2 matrix
+#define MFG_FLOAT33						0x0C	// Floating point 3x3 matrix
+#define MFG_FLOAT44						0x0D	// Floating point 4x4 matrix
+
+	// File structure:
 	// -------------------- HEADER --------------------
 
 	// Starts with a 4 byte long ASCII marker to identify a bytecode file.
@@ -30,8 +48,13 @@ extern "C"
 #define MFG_BYTECODE_HEADER_MARKER_2	'c'		// Header marker byte 3.
 #define MFG_BYTECODE_HEADER_MARKER_3	'd'		// Header marker byte 4.
 
-	// The 5th byte (mfmU8) represents the bytecode major version (the minimum for this format is 2).
-	// The 6th byte (mfmU8) represents the bytecode minor version.
+	// Byte		0x04		: (mfmU8)	represents the bytecode major version (the minimum for this format is 2).
+	// Byte		0x05		: (mfmU8)	represents the bytecode minor version.
+
+	// Byte		0x06		: (mfmU8)	represents the number of input variables that this shader has
+
+	// The 
+
 	// The 7th, 8th, 9th and 10th bytes compose the bytecode instructions size (mfmU64).
 	// The next bytes contain the bytecode instructions.
 
