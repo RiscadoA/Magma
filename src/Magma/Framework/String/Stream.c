@@ -76,6 +76,7 @@ mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSize)
 	mfsFileStream* stream = (mfsFileStream*)malloc(sizeof(mfsFileStream));
 
 	stream->base.object.destructorFunc = &mfsDestroyFileStream;
+	stream->base.object.referenceCount = 0;
 
 	stream->base.buffer = buffer;
 	stream->base.bufferSize = bufferSize;

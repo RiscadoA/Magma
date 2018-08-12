@@ -4,9 +4,7 @@
 	Implementation of a pool allocator in C.
 */
 
-#include "Object.h"
-#include "Type.h"
-#include "Error.h"
+#include "Allocator.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -29,7 +27,7 @@ extern "C"
 
 	typedef struct
 	{
-		mfmObject object;
+		mfmAllocator base;
 		mfmPoolAllocatorDesc desc;
 		mfmPoolAllocatorChunk* firstChunk;
 		mfmU64 currentSlotCount;
@@ -72,13 +70,13 @@ extern "C"
 	/// <summary>
 	///		Deallocates on a magma framework memory pool allocator.
 	/// </summary>
-	/// <param name="memory">Pointer to the allocated memory</param>
 	/// <param name="allocator">Magma framework memory pool allocator</param>
+	/// <param name="memory">Pointer to the allocated memory</param>
 	/// <returns>
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_OUT_OF_BOUNDS if the memory is out of the pool bounds.
 	/// </returns>
-	mfmError mfmPoolDeallocate(void* memory, mfmPoolAllocator* allocator);
+	mfmError mfmPoolDeallocate(mfmPoolAllocator* allocator, void* memory);
 
 	/// <summary>
 	///		Gets the number of slots in a pool allocator.

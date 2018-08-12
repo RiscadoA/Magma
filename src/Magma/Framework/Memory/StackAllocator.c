@@ -1,5 +1,15 @@
 #include "StackAllocator.h"
 
+mfmError mfmInternalStackAllocate(void* allocator, void** memory, mfmU64 size)
+{
+	return mfmStackAllocate((mfmStackAllocator*)allocator, memory, size);
+}
+
+mfmError mfmInternalStackDeallocate(void* allocator, void* memory)
+{
+	return mfmStackSetHead(allocator, memory);
+}
+
 mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size)
 {
 	// Check if the arguments are valid
@@ -17,8 +27,12 @@ mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 siz
 	(*stackAllocator)->stackBegin = memory + sizeof(mfmStackAllocator);
 	(*stackAllocator)->stackHead = memory + sizeof(mfmStackAllocator);
 
+	// Set functions
+	(*stackAllocator)->base.allocate = &mfmInternalStackAllocate;
+	(*stackAllocator)->base.deallocate = &mfmInternalStackDeallocate;
+
 	// Set destructor function
-	(*stackAllocator)->object.destructorFunc = &mfmDestroyStackAllocator;
+	(*stackAllocator)->base.object.destructorFunc = &mfmDestroyStackAllocator;
 
 	// Successfully created a stack allocator
 	return MFM_ERROR_OKAY;

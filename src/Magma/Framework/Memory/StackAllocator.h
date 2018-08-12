@@ -4,9 +4,7 @@
 	Implementation of a stack allocator in C.
 */
 
-#include "Object.h"
-#include "Type.h"
-#include "Error.h"
+#include "Allocator.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -14,7 +12,7 @@ extern "C"
 #endif
 	typedef struct
 	{
-		mfmObject object;
+		mfmAllocator base;
 		mfmU64 stackSize;
 		mfmU8* stackBegin;
 		mfmU8* stackHead;

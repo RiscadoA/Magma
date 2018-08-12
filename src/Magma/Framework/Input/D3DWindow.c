@@ -168,6 +168,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 
 	// Set destructor
 	d3dWindow->base.object.destructorFunc = &mfiDestroyD3DWindow;
+	d3dWindow->base.object.referenceCount = 0;
 
 	// Set functions
 	d3dWindow->base.pollEvents = &mfiD3DWindowPollEvents;

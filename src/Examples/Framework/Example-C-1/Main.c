@@ -38,7 +38,7 @@ void Main(int argc, char** argv)
 		printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool));
 		printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
 
-		err = mfmPoolDeallocate(value, pool);
+		err = mfmPoolDeallocate(pool, value);
 		if (err != MFM_ERROR_OKAY)
 			abort();
 

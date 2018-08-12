@@ -3,6 +3,16 @@
 #include <string.h>
 #include <stdlib.h>
 
+mfmError mfmInternalPoolAllocate(void* allocator, void** memory, mfmU64 size)
+{
+	return mfmPoolAllocate((mfmPoolAllocator*)allocator, memory, size);
+}
+
+mfmError mfmInternalPoolDeallocate(void* allocator, void* memory)
+{
+	return mfmPoolDeallocate((mfmPoolAllocator*)allocator, memory);
+}
+
 mfmError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, mfmPoolAllocatorDesc* desc)
 {
 	// Check if the arguments are valid
@@ -27,8 +37,12 @@ mfmError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, mfmPoolAlloca
 	// Get description
 	memcpy(&(*poolAllocator)->desc, desc, sizeof(mfmPoolAllocatorDesc));
 
+	// Set functions
+	(*poolAllocator)->base.allocate = &mfmInternalPoolAllocate;
+	(*poolAllocator)->base.deallocate = &mfmInternalPoolDeallocate;
+
 	// Set destructor function
-	(*poolAllocator)->object.destructorFunc = &mfmDestroyPoolAllocator;
+	(*poolAllocator)->base.object.destructorFunc = &mfmDestroyPoolAllocator;
 
 	// Initialize slot states to empty
 	memset((*poolAllocator)->firstChunk->slotStatesPtr, MFM_FALSE, desc->slotCount * sizeof(mfmBool));
@@ -151,7 +165,7 @@ mfmError mfmPoolAllocate(mfmPoolAllocator * allocator, void ** memory, mfmU64 si
 	else return MFM_ERROR_ALLOCATOR_OVERFLOW;
 }
 
-mfmError mfmPoolDeallocate(void * memory, mfmPoolAllocator * allocator)
+mfmError mfmPoolDeallocate(mfmPoolAllocator * allocator, void * memory)
 {
 	// Search for the chunk where the memory was allocated on
 	mfmPoolAllocatorChunk* ck = allocator->firstChunk;

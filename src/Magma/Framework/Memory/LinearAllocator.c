@@ -1,5 +1,15 @@
 #include "LinearAllocator.h"
 
+mfmError mfmInternalLinearAllocate(void* allocator, void** memory, mfmU64 size)
+{
+	return mfmLinearAllocate((mfmLinearAllocator*)allocator, memory, size);
+}
+
+mfmError mfmInternalLinearDeallocate(void* allocator, void* memory)
+{
+	return MFM_ERROR_UNSUPPORTED_FUNCTION;
+}
+
 mfmError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 size)
 {
 	// Check if the arguments are valid
@@ -17,8 +27,12 @@ mfmError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 
 	(*linearAllocator)->begin = memory + sizeof(mfmLinearAllocator);
 	(*linearAllocator)->head = memory + sizeof(mfmLinearAllocator);
 
+	// Set functions
+	(*linearAllocator)->base.allocate = &mfmInternalLinearAllocate;
+	(*linearAllocator)->base.deallocate = &mfmInternalLinearDeallocate;
+
 	// Set destructor function
-	(*linearAllocator)->object.destructorFunc = &mfmDestroyLinearAllocator;
+	(*linearAllocator)->base.object.destructorFunc = &mfmDestroyLinearAllocator;
 
 	// Successfully created a linear allocator
 	return MFM_ERROR_OKAY;
