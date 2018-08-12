@@ -9,6 +9,10 @@
 		- Changed the way vector and matrix components are handled;
 		- Added array support;
 		- Added some instructions;
+
+	Literals are stored in big endianness.
+	"param 1x1" means the first parameter is 1 byte long;
+	"param 2x4" means the second parameter is 4 bytes long;
 */
 
 #ifdef __cplusplus
@@ -17,6 +21,21 @@ extern "C"
 #endif
 
 	// MSL Bytecode version 2.0
+
+	// -------------------- HEADER --------------------
+
+	// Starts with a 4 byte long ASCII marker to identify a bytecode file.
+#define MFG_BYTECODE_HEADER_MARKER_0	'b'		// Header marker byte 1 (marks the beginning of the bytecode file).
+#define MFG_BYTECODE_HEADER_MARKER_1	'y'		// Header marker byte 2.
+#define MFG_BYTECODE_HEADER_MARKER_2	'c'		// Header marker byte 3.
+#define MFG_BYTECODE_HEADER_MARKER_3	'd'		// Header marker byte 4.
+
+	// The 5th byte (mfmU8) represents the bytecode major version (the minimum for this format is 2).
+	// The 6th byte (mfmU8) represents the bytecode minor version.
+	// The 7th, 8th, 9th and 10th bytes compose the bytecode instructions size (mfmU64).
+	// The next bytes contain the bytecode instructions.
+
+	// ---------------- INSTRUCTIONS ------------------
 
 	// Boolean.
 #define MFG_BYTECODE_DECLB1				0x00	// Declares a boolean variable { variable index stored on param 1x2 }.
@@ -153,9 +172,6 @@ extern "C"
 	// Functions 3
 #define MFG_BYTECODE_MIN				0xB0	// Sets the variable on the index on { param 1x2 } to the minimum value passed (either { param 2x2 } or { param 3x2 }).
 #define MFG_BYTECODE_MAX				0xB1	// Sets the variable on the index on { param 1x2 } to the maximum value passed (either { param 2x2 } or { param 3x2 }).
-
-	// Special
-#define MFG_BYTECODE_VERSION			0xF0	// Specifies the bytecode version { major on param 1x1, minor on param 2x1 } 
 
 #ifdef __cplusplus
 }
