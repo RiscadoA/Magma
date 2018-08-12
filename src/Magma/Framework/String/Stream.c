@@ -1,6 +1,7 @@
 #include "Stream.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 
 mfsStream* mfsIn = NULL;
 mfsStream* mfsOut = NULL;
@@ -180,4 +181,115 @@ void mfsCloseFile(mfsStream * stream)
 {
 	fclose(((mfsFileStream*)stream)->file);
 	mfsDestroyFileStream(stream);
+}
+
+mfsError mfsGetByte(mfsStream * stream, mfmU8 * byte)
+{
+	if (stream == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+
+	if (byte == NULL)
+	{
+		mfmU8 temp;
+		mfmU64 readSize = 0;
+		mfsError err = stream->read(stream, &temp, sizeof(mfmU8), &readSize);
+		if (err != MFS_ERROR_OKAY)
+			return err;
+		if (readSize != sizeof(mfmU8))
+			return MFS_ERROR_FAILED_TO_READ_ALL;
+		return MFS_ERROR_OKAY;
+	}
+	else
+	{
+		mfmU64 readSize = 0;
+		mfsError err = stream->read(stream, byte, sizeof(mfmU8), &readSize);
+		if (err != MFS_ERROR_OKAY)
+			return err;
+		if (readSize != sizeof(mfmU8))
+			return MFS_ERROR_FAILED_TO_READ_ALL;
+		return MFS_ERROR_OKAY;
+	}
+}
+
+mfsError mfsPutByte(mfsStream * stream, mfmU8 byte)
+{
+	if (stream == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+
+	mfmU64 writeSize = 0;
+	mfsError err = stream->write(stream, &byte, sizeof(mfmU8), &writeSize);
+	if (err != MFS_ERROR_OKAY)
+		return err;
+	if (writeSize != sizeof(mfmU8))
+		return MFS_ERROR_FAILED_TO_WRITE_ALL;
+	return MFS_ERROR_OKAY;
+}
+
+mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, ...)
+{
+	va_list args;
+	va_start(args, format);
+
+	mfsUTF8CodeUnit tempBuf[64];
+
+	mfmBool escape = MFM_FALSE;
+	while (*format != '\0')
+	{
+		if (escape == MFM_TRUE)
+		{
+			mfsError err = mfsPutByte(stream, *format);
+			escape = MFM_FALSE;
+			if (err != MFS_ERROR_OKAY)
+				return err;
+		}
+		else
+		{
+			if (*format == '\\')
+				escape = MFM_TRUE;
+			else if (*format == '%')
+			{
+				++format;
+				if (*format == 'd')
+				{
+					int ret = snprintf(tempBuf, sizeof(tempBuf), "%d", va_arg(args, mfmI32));
+					if (ret < 0)
+						return MFS_ERROR_INTERNAL;
+					else
+						for (int i = 0; i < ret; ++i)
+						{
+							mfsError err = mfsPutByte(stream, tempBuf[i]);
+							escape = MFM_FALSE;
+							if (err != MFS_ERROR_OKAY)
+								return err;
+						}
+				}
+				else if (*format == 'f')
+				{
+					int ret = snprintf(tempBuf, sizeof(tempBuf), "%f", va_arg(args, mfmF64));
+					if (ret < 0)
+						return MFS_ERROR_INTERNAL;
+					else
+						for (int i = 0; i < ret; ++i)
+						{
+							mfsError err = mfsPutByte(stream, tempBuf[i]);
+							escape = MFM_FALSE;
+							if (err != MFS_ERROR_OKAY)
+								return err;
+						}
+				}
+				else return MFS_ERROR_INVALID_ARGUMENTS;
+			}
+			else
+			{
+				mfsError err = mfsPutByte(stream, *format);
+				escape = MFM_FALSE;
+				if (err != MFS_ERROR_OKAY)
+					return err;
+			}
+		}
+
+		++format;
+	}
+
+	return MFS_ERROR_OKAY;
 }

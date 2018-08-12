@@ -15,6 +15,8 @@ extern "C"
 #define MFS_ERROR_CHARACTER_TOO_BIG		0x05
 #define MFS_ERROR_EOF					0x06
 #define MFS_ERROR_INTERNAL				0x07
+#define MFS_ERROR_FAILED_TO_READ_ALL	0x08
+#define MFS_ERROR_FAILED_TO_WRITE_ALL	0x09
 
 	typedef mfmI32 mfsError;
 

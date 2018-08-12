@@ -119,6 +119,45 @@ extern "C"
 	/// <param name="stream">File stream</param>
 	void mfsCloseFile(mfsStream* stream);
 
+	/// <summary>
+	///		Reads a byte from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="byte">Pointer to byte( (set to NULL to ignore)</param>
+	/// <returns>
+	///		MFS_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_EOF if the stream got to EOF.
+	///		MFS_ERROR_FAILED_TO_READ_ALL if the stream couldn't read the byte.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfsError mfsGetByte(mfsStream* stream, mfmU8* byte);
+
+	/// <summary>
+	///		Writes a byte to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="byte">Byte to write</param>
+	/// <returns>
+	///		MFS_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_FAILED_TO_WRITE_ALL if the stream couldn't write the byte.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfsError mfsPutByte(mfsStream* stream, mfmU8 byte);
+
+	/// <summary>
+	///		Prints a formatted UTF-8 string to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="format">Format UTF-8 string</param>
+	/// <returns>
+	///		MFS_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream or format are NULL.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfsError mfsPrintFormatUTF8(mfsStream* stream, const mfsUTF8CodeUnit* format, ...);
+
 #ifdef __cplusplus
 }
 #endif
