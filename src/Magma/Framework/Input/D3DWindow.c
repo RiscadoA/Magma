@@ -451,7 +451,7 @@ int WINAPI WinMain(
 	gnCmdShow = nCmdShow;
 
 	// Run program
-	Main(0, NULL);
+	mfEntry(0, NULL);
 
 	return 0;
 }
