@@ -140,22 +140,22 @@ extern "C"
 #define MFG_BYTECODE_SIGN				0xA4	// Sets the variable on the index on { param 1x2 } to the sign value of the variable on index { param 2x2 } (-1.0 when negative, 0.0 when zero and 1.0 when positive).
 #define MFG_BYTECODE_FLOOR				0xA5	// Sets the variable on the index on { param 1x2 } to the floored value of the variable on index { param 2x2 }.
 #define MFG_BYTECODE_CEIL				0xA6	// Sets the variable on the index on { param 1x2 } to the ceiled value of the variable on index { param 2x2 }.
-#define MFG_BYTECODE_FRACT				0xA7	// Sets the variable on the index on { param 1x2 } to the fractional part of the variable on index { param 2x2 }.
-#define MFG_BYTECODE_LERP				0xA8	// Sets the variable on the index on { param 1x2 } to the interpolation of the variable on index { param 2x2 } and the variable on index { param 3x2 } by the variable on index { param 4x2 }.
-#define MFG_BYTECODE_CLAMP				0xA9	// Sets the variable on the index on { param 1x2 } to the clamped value of the variable on index { param 4x2 } between the minimum on the variable on index { param 2x2 } and the maximum on the variable on index { param 3x2 }.
-#define MFG_BYTECODE_DOT				0xAA	// Sets the variable on the index on { param 1x2 } to the dot of the vector on index { param 2x2 } and the vector on index { param 3x2 }.
-#define MFG_BYTECODE_CROSS				0xAB
-#define MFG_BYTECODE_NORMALIZE			0xAC
-#define MFG_BYTECODE_ROUND				0xAD
-#define MFG_BYTECODE_TRANSPOSE			0xAE
-#define MFG_BYTECODE_REFLECT			0xAF
+#define MFG_BYTECODE_ROUND				0xA7	// Sets the variable on the index on { param 1x2 } to the rounded value of the variable on index { param 2x2 }.
+#define MFG_BYTECODE_FRACT				0xA8	// Sets the variable on the index on { param 1x2 } to the fractional part of the variable on index { param 2x2 }.
+#define MFG_BYTECODE_LERP				0xA9	// Sets the variable on the index on { param 1x2 } to the interpolation of the variable on index { param 2x2 } and the variable on index { param 3x2 } by the variable on index { param 4x2 }.
+#define MFG_BYTECODE_CLAMP				0xAA	// Sets the variable on the index on { param 1x2 } to the clamped value of the variable on index { param 4x2 } between the minimum on the variable on index { param 2x2 } and the maximum on the variable on index { param 3x2 }.
+#define MFG_BYTECODE_DOT				0xAB	// Sets the variable on the index on { param 1x2 } to the dot of the vector on index { param 2x2 } and the vector on index { param 3x2 }.
+#define MFG_BYTECODE_CROSS				0xAC	// Sets the variable on the index on { param 1x2 } to the cross of the vector on index { param 2x2 } and the vector on index { param 3x2 }.
+#define MFG_BYTECODE_NORMALIZE			0xAD	// Sets the variable on the index on { param 1x2 } to the normalized value the vector on index { param 2x2 }.
+#define MFG_BYTECODE_TRANSPOSE			0xAE	// Sets the variable on the index on { param 1x2 } to the transposed matrix of the variable on index { param 2x2 }.
+#define MFG_BYTECODE_REFLECT			0xAF	// Sets the variable on the index on { param 1x2 } to the reflection vector of the incident vector on index { param 2x2 } and the normal vector on index { param 3x2 }.
 
 	// Functions 3
-#define MFG_BYTECODE_MIN				0xB0
-#define MFG_BYTECODE_MAX				0xB1
+#define MFG_BYTECODE_MIN				0xB0	// Sets the variable on the index on { param 1x2 } to the minimum value passed (either { param 2x2 } or { param 3x2 }).
+#define MFG_BYTECODE_MAX				0xB1	// Sets the variable on the index on { param 1x2 } to the maximum value passed (either { param 2x2 } or { param 3x2 }).
 
-
-#define MFG_BYTECODE_VERSION			0xFF	// Specifies the bytecode version 
+	// Special
+#define MFG_BYTECODE_VERSION			0xF0	// Specifies the bytecode version { major on param 1x1, minor on param 2x1 } 
 
 #ifdef __cplusplus
 }
