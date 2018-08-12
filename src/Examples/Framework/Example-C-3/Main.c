@@ -7,33 +7,26 @@ void Main(int argc, char** argv)
 {
 	mfsUTF8CodeUnit data[] =
 	{
-		'o',
-		'l',
-		'a',
-		'\n',
+		't',
+		'e',
+		's',
+		't',
 	};
 
 	mfsError err;
 
-	err = mfsWrite(mfsOut, data, sizeof(data), NULL);
+	mfsStream* file;
+	err = mfsOpenFile(&file, MFS_FILE_WRITE, u8"../../../../../../resources/Example-C-3/test.txt");
 	if (err != MFS_ERROR_OKAY)
 		abort();
 
-	err = mfsFlush(mfsOut);
+	err = mfsWrite(file, data, sizeof(data), NULL);
 	if (err != MFS_ERROR_OKAY)
 		abort();
 
-	err = mfsRead(mfsIn, data, 3, NULL);
+	err = mfsFlush(file);
 	if (err != MFS_ERROR_OKAY)
 		abort();
 
-	err = mfsWrite(mfsOut, data, 3, NULL);
-	if (err != MFS_ERROR_OKAY)
-		abort();
-
-	err = mfsFlush(mfsOut);
-	if (err != MFS_ERROR_OKAY)
-		abort();
-
-	for (;;);
+	mfsCloseFile(file);
 }

@@ -2,6 +2,7 @@
 
 #include "../Memory/Type.h"
 #include "../Memory/Object.h"
+#include "UTF8.h"
 #include "Error.h"
 
 /*
@@ -13,11 +14,14 @@ extern "C"
 {
 #endif
 
+#define MFS_FILE_READ	0x01
+#define MFS_FILE_WRITE	0x02
+
 	typedef mfsError(*mfsStreamReadFunction)(void*, mfmU8*, mfmU64, mfmU64*);
 	typedef mfsError(*mfsStreamWriteFunction)(void*, const mfmU8*, mfmU64, mfmU64*);
 	typedef mfsError(*mfsStreamFlushFunction)(void*);
 	typedef mfsError(*mfsStreamSetBufferFunction)(void*, mfmU8*, mfmU64);
-
+	
 	typedef struct
 	{
 		mfmObject object;
@@ -97,16 +101,23 @@ extern "C"
 	mfsError mfsSetBuffer(mfsStream* stream, mfmU8* buffer, mfmU64 bufferSize);
 
 	/// <summary>
-	///		Gets the buffer that is currently being used for internal stream operations.
+	///		Opens a file stream using the stdio.h library.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
-	/// <param name="buffer">Pointer to buffer pointer to set (set to NULL to ignore)</param>
-	/// <param name="bufferSize">Pointer to buffer size (set to NULL to ignore)</param>
+	/// <param name="stream">Pointer to stream pointer</param>
+	/// <param name="mode">Open mode (MFS_FILE_READ or MFS_FILE_WRITE)</param>
+	/// <param name="path">File path</param>
 	/// <returns>
 	///		MFS_ERROR_OKAY if there were no errors.
-	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream or path are NULL or if the <paramref name="mode">file mode</paramref> is invalid.
+	///		MFS_ERROR_INTERNAL if the system couldn't open the file on the specified <paramref name="path">path</paramref>.
 	/// </returns>
-	mfsError mfsGetBuffer(mfsStream* stream, mfmU8** buffer, mfmU64* bufferSize);
+	mfsError mfsOpenFile(mfsStream** stream, mfmU32 mode, const mfsUTF8CodeUnit* path);
+
+	/// <summary>
+	///		Closes a file stream opened by mfsOpenFile.
+	/// </summary>
+	/// <param name="stream">File stream</param>
+	void mfsCloseFile(mfsStream* stream);
 
 #ifdef __cplusplus
 }

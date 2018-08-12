@@ -154,15 +154,30 @@ mfsError mfsSetBuffer(mfsStream * stream, mfmU8 * buffer, mfmU64 bufferSize)
 		return stream->setBuffer(stream, buffer, bufferSize);
 }
 
-mfsError mfsGetBuffer(mfsStream * stream, mfmU8 ** buffer, mfmU64 * bufferSize)
+mfsError mfsOpenFile(mfsStream ** stream, mfmU32 mode, const mfsUTF8CodeUnit * path)
 {
-	if (stream == NULL)
+	if (stream == NULL || path == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 
-	if (buffer != NULL)
-		*buffer = stream->buffer;
-	if (bufferSize != NULL)
-		*bufferSize = stream->bufferSize;
+	FILE* file;
+	errno_t err;
+	if (mode == MFS_FILE_READ)
+		err = fopen_s(&file, path, "rb");
+	else if (mode == MFS_FILE_WRITE)
+		err = fopen_s(&file, path, "wb");
+	else
+		return MFS_ERROR_INVALID_ARGUMENTS;
+
+	if (err != 0)
+		return MFS_ERROR_INTERNAL;
+
+	*stream = mfsCreateFileStream(file, NULL, 0);
 
 	return MFS_ERROR_OKAY;
+}
+
+void mfsCloseFile(mfsStream * stream)
+{
+	fclose(((mfsFileStream*)stream)->file);
+	mfsDestroyFileStream(stream);
 }
