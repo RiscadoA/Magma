@@ -240,7 +240,10 @@ mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, 
 			mfsError err = mfsPutByte(stream, *format);
 			escape = MFM_FALSE;
 			if (err != MFS_ERROR_OKAY)
+			{
+				va_end(args);
 				return err;
+			}
 		}
 		else
 		{
@@ -260,7 +263,10 @@ mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, 
 							mfsError err = mfsPutByte(stream, tempBuf[i]);
 							escape = MFM_FALSE;
 							if (err != MFS_ERROR_OKAY)
+							{
+								va_end(args);
 								return err;
+							}
 						}
 				}
 				else if (*format == 'f')
@@ -274,22 +280,51 @@ mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, 
 							mfsError err = mfsPutByte(stream, tempBuf[i]);
 							escape = MFM_FALSE;
 							if (err != MFS_ERROR_OKAY)
+							{
+								va_end(args);
 								return err;
+							}
 						}
 				}
-				else return MFS_ERROR_INVALID_ARGUMENTS;
+				else if (*format == 'c')
+				{
+					int ret = snprintf(tempBuf, sizeof(tempBuf), "%c", va_arg(args, mfsUnicodePoint));
+					if (ret < 0)
+						return MFS_ERROR_INTERNAL;
+					else
+						for (int i = 0; i < ret; ++i)
+						{
+							mfsError err = mfsPutByte(stream, tempBuf[i]);
+							escape = MFM_FALSE;
+							if (err != MFS_ERROR_OKAY)
+							{
+								va_end(args);
+								return err;
+							}
+						}
+				}
+				else
+				{
+					va_end(args);
+					return MFS_ERROR_INVALID_ARGUMENTS;
+				}
 			}
 			else
 			{
 				mfsError err = mfsPutByte(stream, *format);
 				escape = MFM_FALSE;
 				if (err != MFS_ERROR_OKAY)
+				{
+					va_end(args);
 					return err;
+				}
 			}
 		}
 
 		++format;
 	}
+	
+	va_end(args);
 
 	return MFS_ERROR_OKAY;
 }
