@@ -2,6 +2,7 @@
 
 #include "Error.h"
 #include "../Memory/Object.h"
+#include "../String/UTF8.h"
 
 
 /*
@@ -32,7 +33,7 @@ extern "C"
 		mfsUTF8CodeUnit name[16];
 		mfmU16 id;
 		mfmU8 type;
-		mfgMetaDataInputVariable* next;
+		void* next;
 	} mfgMetaDataInputVariable;
 
 	typedef struct
@@ -40,7 +41,7 @@ extern "C"
 		mfsUTF8CodeUnit name[16];
 		mfmU16 id;
 		mfmU8 type;
-		mfgMetaDataOutputVariable* next;
+		void* next;
 	} mfgMetaDataOutputVariable;
 
 	typedef struct
@@ -48,14 +49,14 @@ extern "C"
 		mfmU64 size;
 		mfsUTF8CodeUnit name[16];
 		mfmU8 type;
-		mfgMetaDataBindingPoint* next;
+		void* next;
 	} mfgMetaDataBindingPoint;
 
 	typedef struct
 	{
 		mfmU16 id;
 		mfmU8 type;
-		mfgMetaDataConstantBufferVariable* next;
+		void* next;
 	} mfgMetaDataConstantBufferVariable;
 
 	typedef struct
@@ -85,9 +86,71 @@ extern "C"
 		mfmU8 inputVarCount;
 		mfmU8 outputVarCount;
 		mfmU8 bindingPointCount;
+		void* allocator;
+		mfgMetaDataInputVariable* firstInputVar;
+		mfgMetaDataOutputVariable* firstOutputVar;
+		mfgMetaDataBindingPoint* firstBindingPoint;
 	} mfgMetaData;
 
-	mfgError mfgLoadMetaData(mfgMetaData** metaData, void* allocator);
+	/// <summary>
+	///		Loads shader meta data from binary meta data. 
+	/// </summary>
+	/// <param name="metaData">Binary meta data</param>
+	/// <param name="size">Binary meta data size</param>
+	/// <param name="outData">Out shader meta data</param>
+	/// <param name="allocator">Allocator to use</param>
+	/// <returns>
+	///		Returns MFG_ERROR_OKAY if there were no errors.
+	///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
+	///		Returns MFG_ALLOCATION_FAILED if there was an allocation error.
+	///		Returns MFG_ERROR_INVALID_DATA if the binary meta data is invalid (if it has no marker, or if the data is too small, etc).
+	/// </returns>
+	mfgError mfgLoadMetaData(const mfmU8* metaData, mfmU64 size, mfgMetaData** outData, void* allocator);
+
+	/// <summary>
+	///		Unloads shader meta data that was loaded by mfgLoadMetaData.
+	/// </summary>
+	/// <param name="metaData">Shader meta data pointer</param>
+	void mfgUnloadMetaData(void* metaData);
+
+	/// <summary>
+	///		Gets a meta data input variable from a shader meta data object.
+	/// </summary>
+	/// <param name="metaData">Pointer to shader meta data</param>
+	/// <param name="name">Variable name</param>
+	/// <param name="inputVar">Pointer to input var pointer</param>
+	/// <returns>
+	///		Returns MFG_ERROR_OKAY if there were no errors.
+	///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
+	///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
+	/// </returns>
+	mfgError mfgGetMetaDataInput(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataInputVariable** inputVar);
+
+	/// <summary>
+	///		Gets a meta data output variable from a shader meta data object.
+	/// </summary>
+	/// <param name="metaData">Pointer to shader meta data</param>
+	/// <param name="name">Variable name</param>
+	/// <param name="inputVar">Pointer to output var pointer</param>
+	/// <returns>
+	///		Returns MFG_ERROR_OKAY if there were no errors.
+	///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
+	///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
+	/// </returns>
+	mfgError mfgGetMetaDataOutput(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataOutputVariable** outputVar);
+
+	/// <summary>
+	///		Gets a meta data binding point from a shader meta data object.
+	/// </summary>
+	/// <param name="metaData">Pointer to shader meta data</param>
+	/// <param name="name">Variable name</param>
+	/// <param name="inputVar">Pointer to output var pointer</param>
+	/// <returns>
+	///		Returns MFG_ERROR_OKAY if there were no errors.
+	///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
+	///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
+	/// </returns>
+	mfgError mfgGetMetaDataBindingPoint(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataBindingPoint** bindingPoint);
 
 	// ----------------- SHADER TYPES -----------------
 #define MFG_VERTEX_SHADER				0x01	// Vertex shader
@@ -122,11 +185,8 @@ extern "C"
 #define MFG_METADATA_HEADER_MARKER_2	'd'		// Header marker byte 3.
 #define MFG_METADATA_HEADER_MARKER_3	't'		// Header marker byte 4.
 
-	// Byte		0x04		: (mfmU8)	number of input variables
-	// Byte		0x05		: (mfmU8)	number of output variables
-	// Byte		0x06		: (mfmU8)	number of binding points
-
 	// 'm' 't' 'd' 't'
+	// (mfmU8) shader type
 	// (mfmU8) number of input variables
 	// (mfmU8) number of output variables
 	// (mfmU8) number of binding points

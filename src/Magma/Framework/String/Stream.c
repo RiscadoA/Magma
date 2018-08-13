@@ -231,7 +231,7 @@ mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, 
 	va_list args;
 	va_start(args, format);
 
-	mfsUTF8CodeUnit tempBuf[64];
+	mfsUTF8CodeUnit tempBuf[256];
 
 	mfmBool escape = MFM_FALSE;
 	while (*format != '\0')
@@ -290,6 +290,23 @@ mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, 
 				else if (*format == 'c')
 				{
 					int ret = snprintf(tempBuf, sizeof(tempBuf), "%c", va_arg(args, mfsUnicodePoint));
+					if (ret < 0)
+						return MFS_ERROR_INTERNAL;
+					else
+						for (int i = 0; i < ret; ++i)
+						{
+							mfsError err = mfsPutByte(stream, tempBuf[i]);
+							escape = MFM_FALSE;
+							if (err != MFS_ERROR_OKAY)
+							{
+								va_end(args);
+								return err;
+							}
+						}
+				}
+				else if (*format == 's')
+				{
+					int ret = snprintf(tempBuf, sizeof(tempBuf), "%s", va_arg(args, const mfsUTF8CodeUnit*));
 					if (ret < 0)
 						return MFS_ERROR_INTERNAL;
 					else
