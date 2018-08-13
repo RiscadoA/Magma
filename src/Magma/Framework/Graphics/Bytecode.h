@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../Memory/Type.h"
+#include "Error.h"
+#include "../Memory/Object.h"
+
 
 /*
 	MSL Bytecode version 2.0.
@@ -24,6 +26,72 @@ extern "C"
 	// Binary bytecode shaders are composed of two files:
 	// - the binary bytecode instruction file (.mbb)
 	// - the binary meta data file (.mbd)
+
+	typedef  struct
+	{
+		mfsUTF8CodeUnit name[16];
+		mfmU16 id;
+		mfmU8 type;
+		mfgMetaDataInputVariable* next;
+	} mfgMetaDataInputVariable;
+
+	typedef struct
+	{
+		mfsUTF8CodeUnit name[16];
+		mfmU16 id;
+		mfmU8 type;
+		mfgMetaDataOutputVariable* next;
+	} mfgMetaDataOutputVariable;
+
+	typedef struct
+	{
+		mfmU64 size;
+		mfsUTF8CodeUnit name[16];
+		mfmU8 type;
+		mfgMetaDataBindingPoint* next;
+	} mfgMetaDataBindingPoint;
+
+	typedef struct
+	{
+		mfmU16 id;
+		mfmU8 type;
+		mfgMetaDataConstantBufferVariable* next;
+	} mfgMetaDataConstantBufferVariable;
+
+	typedef struct
+	{
+		mfgMetaDataBindingPoint base;
+		mfgMetaDataConstantBufferVariable* variable;
+	} mfgMetaDataConstantBuffer;
+
+	typedef struct
+	{
+		mfgMetaDataBindingPoint base;
+	} mfgMetaDataTexture1D;
+
+	typedef struct
+	{
+		mfgMetaDataBindingPoint base;
+	} mfgMetaDataTexture2D;
+
+	typedef struct
+	{
+		mfgMetaDataBindingPoint base;
+	} mfgMetaDataTexture3D;
+
+	typedef struct
+	{
+		mfmObject object;
+		mfmU8 inputVarCount;
+		mfmU8 outputVarCount;
+		mfmU8 bindingPointCount;
+	} mfgMetaData;
+
+	mfgError mfgLoadMetaData(mfgMetaData** metaData, void* allocator);
+
+	// ----------------- SHADER TYPES -----------------
+#define MFG_VERTEX_SHADER				0x01	// Vertex shader
+#define MFG_PIXEL_SHADER				0x02	// Pixel shader
 
 	// ---------------- VARIABLE TYPES ----------------
 #define MFG_INT1						0x00	// Integer scalar
