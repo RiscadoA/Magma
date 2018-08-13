@@ -4,11 +4,15 @@
 
 void Main(int argc, char** argv)
 {
-	mfsUTF8CodeUnit data[] =
+	mfmU8 bytecode[] =
 	{
 		't',
 		'e',
 		's',
 		't',
 	};
+
+
+
+	mfgD3D11Assemble(bytecode, sizeof(bytecode));
 }

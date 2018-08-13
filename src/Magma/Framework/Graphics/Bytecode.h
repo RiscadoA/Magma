@@ -21,6 +21,9 @@ extern "C"
 #endif
 
 	// MSL Bytecode version 2.0
+	// Binary bytecode shaders are composed of two files:
+	// - the binary bytecode instruction file (.mbb)
+	// - the binary meta data file (.mbd)
 
 	// ---------------- VARIABLE TYPES ----------------
 #define MFG_INT1						0x00	// Integer scalar
@@ -39,7 +42,50 @@ extern "C"
 #define MFG_FLOAT33						0x0C	// Floating point 3x3 matrix
 #define MFG_FLOAT44						0x0D	// Floating point 4x4 matrix
 
-	// File structure:
+	// ------------ BINDING POINT TYPES ------------
+#define MFG_CONSTANT_BUFFER				0x10	// Constant buffer binding point
+#define MFG_TEXTURE_1D					0x11	// Texture 1D binding point
+#define MFG_TEXTURE_2D					0x12	// Texture 2D binding point
+#define MFG_TEXTURE_3D					0x13	// Texture 3D binding point
+
+	// Binary meta data file structure:
+#define MFG_METADATA_HEADER_MARKER_0	'm'		// Header marker byte 1 (marks the beginning of the meta data file).
+#define MFG_METADATA_HEADER_MARKER_1	't'		// Header marker byte 2.
+#define MFG_METADATA_HEADER_MARKER_2	'd'		// Header marker byte 3.
+#define MFG_METADATA_HEADER_MARKER_3	't'		// Header marker byte 4.
+
+	// Byte		0x04		: (mfmU8)	number of input variables
+	// Byte		0x05		: (mfmU8)	number of output variables
+	// Byte		0x06		: (mfmU8)	number of binding points
+
+	// 'm' 't' 'd' 't'
+	// (mfmU8) number of input variables
+	// (mfmU8) number of output variables
+	// (mfmU8) number of binding points
+	// [number of input variables]
+	//		- 16 bytes for variable name with null terminator.
+	//		- (mfmU16) variable index.
+	//		- (mfmU8) variable type.
+	// [number of output variables]
+	//		- 16 bytes for variable name with null terminator.
+	//		- (mfmU16) variable index.
+	//		- (mfmU8) variable type.
+	// [number of binding points]
+	//		- 16 bytes for binding point name with null terminator.
+	//		- (mfmU8) binding point type.
+	//		if type = MFG_CONSTANT_BUFFER then
+	//			- (mfmU16) variable count.
+	//			[variable count]
+	//				- (mfmU16) variable index.
+	//				- (mfmU8) variable type.
+	//		else if type = MFG_TEXTURE_1D then
+	//			- (mfmU16) variable index.
+	//		else if type = MFG_TEXTURE_2D then
+	//			- (mfmU16) variable index.
+	//		else if type = MFG_TEXTURE_3D then
+	//			- (mfmU16) variable index.
+
+	// Binary bytecode instruction file structure:
 	// -------------------- HEADER --------------------
 
 	// Starts with a 4 byte long ASCII marker to identify a bytecode file.
@@ -50,13 +96,9 @@ extern "C"
 
 	// Byte		0x04		: (mfmU8)	represents the bytecode major version (the minimum for this format is 2).
 	// Byte		0x05		: (mfmU8)	represents the bytecode minor version.
+	// Byte		0x06-0x09	: (mfmU64)	bytecode instructions size in bytes.
 
-	// Byte		0x06		: (mfmU8)	represents the number of input variables that this shader has
-
-	// The 
-
-	// The 7th, 8th, 9th and 10th bytes compose the bytecode instructions size (mfmU64).
-	// The next bytes contain the bytecode instructions.
+	// The remaining bytes contain the bytecode instructions.
 
 	// ---------------- INSTRUCTIONS ------------------
 
