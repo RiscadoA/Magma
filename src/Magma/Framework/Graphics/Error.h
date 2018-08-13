@@ -11,7 +11,7 @@ extern "C"
 #define MFG_ERROR_INVALID_ARGUMENTS		0x01
 #define MFG_ERROR_ALLOCATION_FAILED		0X02
 #define MFG_ERROR_NOT_FOUND				0x03
-#define MFG_ERROR_INVALID_DATA				0x04
+#define MFG_ERROR_INVALID_DATA			0x04
 
 typedef mfmI32 mfgError;
 

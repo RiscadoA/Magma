@@ -46,7 +46,6 @@ extern "C"
 
 	typedef struct
 	{
-		mfmU64 size;
 		mfsUTF8CodeUnit name[16];
 		mfmU8 type;
 		void* next;
@@ -62,22 +61,26 @@ extern "C"
 	typedef struct
 	{
 		mfgMetaDataBindingPoint base;
-		mfgMetaDataConstantBufferVariable* variable;
+		mfmU8 variableCount;
+		mfgMetaDataConstantBufferVariable* firstVariable;
 	} mfgMetaDataConstantBuffer;
 
 	typedef struct
 	{
 		mfgMetaDataBindingPoint base;
+		mfmU16 id;
 	} mfgMetaDataTexture1D;
 
 	typedef struct
 	{
 		mfgMetaDataBindingPoint base;
+		mfmU16 id;
 	} mfgMetaDataTexture2D;
 
 	typedef struct
 	{
 		mfgMetaDataBindingPoint base;
+		mfmU16 id;
 	} mfgMetaDataTexture3D;
 
 	typedef struct

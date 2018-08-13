@@ -96,13 +96,13 @@ void Main(int argc, char** argv)
 	err = mfgGetMetaDataBindingPoint(loadedData, u8"buf1", &bp);
 	if (err != MFG_ERROR_OKAY)
 		abort();
-	mfsPrintFormatUTF8(mfsOut, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\Name: \"%s\"\n", bp->type, bp->name);
+	mfsPrintFormatUTF8(mfsOut, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\nName: \"%s\"\n", bp->type, bp->name);
 
 	// Get texture
 	err = mfgGetMetaDataBindingPoint(loadedData, u8"texture", &bp);
 	if (err != MFG_ERROR_OKAY)
 		abort();
-	mfsPrintFormatUTF8(mfsOut, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\Name: \"%s\"\n", bp->type, bp->name);
+	mfsPrintFormatUTF8(mfsOut, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\nName: \"%s\"\n", bp->type, bp->name);
 
 	// Unload
 	mfgUnloadMetaData(loadedData);

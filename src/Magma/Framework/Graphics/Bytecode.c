@@ -172,7 +172,89 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 
 	// Get binding points
 	{
+		mfgMetaDataBindingPoint* prevBP = NULL;
+		for (mfmU64 i = 0; i < bindingPointCount; ++i)
+		{
+			// Get binding point
+			mfgMetaDataBindingPoint* bp = (mfgMetaDataBindingPoint*)(memory + writePtr);
+			bp->next = NULL;
+			if (prevBP != NULL)
+				prevBP->next = bp;
+			else
+				(*outData)->firstBindingPoint = bp;
+			prevBP = bp;
 
+			// Get binding point name
+			memcpy(bp->name, metaData + readPtr, 16);
+			readPtr += 16;
+
+			// Get type
+			bp->type = metaData[readPtr++];
+
+			if (bp->type == MFG_CONSTANT_BUFFER)
+			{
+				mfgMetaDataConstantBuffer* cb = (mfgMetaDataConstantBuffer*)bp;
+				writePtr += sizeof(mfgMetaDataConstantBuffer);
+
+				// Get var count
+				mfmFromBigEndian2(metaData + readPtr, &cb->variableCount);
+				readPtr += 2;
+				cb->firstVariable = NULL;
+
+				mfgMetaDataConstantBufferVariable* prevVar = NULL;
+
+				for (mfmU8 i = 0; i < cb->variableCount; ++i)
+				{
+					mfgMetaDataConstantBufferVariable* var = (mfgMetaDataConstantBufferVariable*)(memory + writePtr);
+					writePtr += sizeof(mfgMetaDataConstantBufferVariable);
+					var->next = NULL;
+					if (prevVar != NULL)
+						prevVar->next = var;
+					else
+						cb->firstVariable = var;
+					prevVar = var;
+
+					// Get index
+					mfmFromBigEndian2(metaData + readPtr, &var->id);
+					readPtr += 2;
+
+					// Get type
+					var->type = metaData[readPtr++];
+				}
+			}
+			else if (bp->type == MFG_TEXTURE_1D)
+			{
+				mfgMetaDataTexture1D* tex = (mfgMetaDataTexture1D*)bp;
+				writePtr += sizeof(mfgMetaDataTexture1D);
+
+				// Get index
+				mfmFromBigEndian2(metaData + readPtr, &tex->id);
+				readPtr += 2;
+			}
+			else if (bp->type == MFG_TEXTURE_2D)
+			{
+				mfgMetaDataTexture2D* tex = (mfgMetaDataTexture2D*)bp;
+				writePtr += sizeof(mfgMetaDataTexture2D);
+
+				// Get index
+				mfmFromBigEndian2(metaData + readPtr, &tex->id);
+				readPtr += 2;
+			}
+			else if (bp->type == MFG_TEXTURE_3D)
+			{
+				mfgMetaDataTexture3D* tex = (mfgMetaDataTexture3D*)bp;
+				writePtr += sizeof(mfgMetaDataTexture3D);
+
+				// Get index
+				mfmFromBigEndian2(metaData + readPtr, &tex->id);
+				readPtr += 2;
+			}
+			else
+			{
+				mfmDeallocate(allocator, memory);
+				return MFG_ERROR_INVALID_DATA;
+			}
+		}
 	}
 
 	return MFG_ERROR_OKAY;
@@ -253,5 +335,33 @@ mfgError mfgGetMetaDataOutput(const mfgMetaData * metaData, const mfsUTF8CodeUni
 
 mfgError mfgGetMetaDataBindingPoint(const mfgMetaData * metaData, const mfsUTF8CodeUnit * name, const mfgMetaDataBindingPoint ** bindingPoint)
 {
+	if (metaData == NULL || name == NULL || bindingPoint == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfgMetaDataBindingPoint* bp = metaData->firstBindingPoint;
+	while (bp != NULL)
+	{
+		mfmBool found = MFM_TRUE;
+		for (mfmU64 i = 0; i < 16; ++i)
+		{
+			if (bp->name[i] != name[i])
+			{
+				found = MFM_FALSE;
+				break;
+			}
+
+			if (bp->name[i] == '\0')
+				break;
+		}
+
+		if (found == MFM_TRUE)
+		{
+			*bindingPoint = bp;
+			return MFG_ERROR_OKAY;
+		}
+		else
+			bp = bp->next;
+	}
+
 	return MFG_ERROR_NOT_FOUND;
 }
