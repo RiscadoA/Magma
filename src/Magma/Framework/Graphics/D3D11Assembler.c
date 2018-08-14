@@ -1,4 +1,5 @@
 #include "D3D11Assembler.h"
+#include "../Memory/Endianness.h"
 
 const static mfmU8 mfgD3D11AssemblerMinorVersion = 0x00;
 
@@ -47,146 +48,95 @@ mfgError mfgD3D11WriteType(mfmU8 type, mfsStream* out)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11WriteDeclType(mfmU8 type, mfsStream* out, mfmBool* isArray)
-{
-	if (out == NULL)
-		return MFG_ERROR_INVALID_ARGUMENTS;
-
-	const mfsUTF8CodeUnit* str = NULL;
-
-	if (isArray != NULL)
-		*isArray = MFM_FALSE;
-
-	if (type == MFG_BYTECODE_DECLB1)
-		str = u8"bool";
-
-	else if (MFG_BYTECODE_DECLI1)
-		str = u8"int";
-	else if (MFG_BYTECODE_DECLI2)
-		str = u8"int2";
-	else if (MFG_BYTECODE_DECLI3)
-		str = u8"int3";
-	else if (MFG_BYTECODE_DECLI4)
-		str = u8"int4";
-	else if (MFG_BYTECODE_DECLI22)
-		str = u8"int2x2";
-	else if (MFG_BYTECODE_DECLI33)
-		str = u8"int3x3";
-	else if (MFG_BYTECODE_DECLI44)
-		str = u8"int4x4";
-
-	else if (MFG_BYTECODE_DECLF1)
-		str = u8"float";
-	else if (MFG_BYTECODE_DECLF2)
-		str = u8"float2";
-	else if (MFG_BYTECODE_DECLF3)
-		str = u8"float3";
-	else if (MFG_BYTECODE_DECLF4)
-		str = u8"float4";
-	else if (MFG_BYTECODE_DECLF22)
-		str = u8"float2x2";
-	else if (MFG_BYTECODE_DECLF33)
-		str = u8"float3x3";
-	else if (MFG_BYTECODE_DECLF44)
-		str = u8"float4x4";
-
-	else if (type == MFG_BYTECODE_DECLI1A)
-	{
-		str = u8"int";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLI2A)
-	{
-		str = u8"int2";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLI3A)
-	{
-		str = u8"int3";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLI4A)
-	{
-		str = u8"int4";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLI22A)
-	{
-		str = u8"int2x2";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLI33A)
-	{
-		str = u8"int3x3";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLI44A)
-	{
-		str = u8"int4x4";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-
-	else if (type == MFG_BYTECODE_DECLF1A)
-	{
-		str = u8"float";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLF2A)
-	{
-		str = u8"float2";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLF3A)
-	{
-		str = u8"float3";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLF4A)
-	{
-		str = u8"float4";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLF22A)
-	{
-		str = u8"float2x2";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLF33A)
-	{
-		str = u8"float3x3";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-	else if (type == MFG_BYTECODE_DECLF44A)
-	{
-		str = u8"float4x4";
-		if (isArray != NULL)
-			*isArray = MFM_TRUE;
-	}
-
-	else return MFG_ERROR_INVALID_DATA;
-
-	mfsError err = mfsPrintFormatUTF8(out, str);
-	if (err != MFS_ERROR_OKAY)
-		return MFG_ERROR_FAILED_TO_WRITE;
-	return MFG_ERROR_OKAY;
-}
-
 mfgError mfgD3D11PutID(mfmU16 id, const mfgMetaData* metaData, mfsStream* out)
 {
-	// TO DO
+	// Check if it is an input variable
+	{
+		mfgMetaDataInputVariable* var = metaData->firstInputVar;
+		while (var != NULL)
+		{
+			if (var->id == id)
+			{
+				if (mfsPrintFormatUTF8(out, u8"input.in_%d", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				return MFG_ERROR_OKAY;
+			}
+			var = var->next;
+		}
+	}
+
+	// Check if it is an output variable
+	{
+		mfgMetaDataOutputVariable* var = metaData->firstOutputVar;
+		while (var != NULL)
+		{
+			if (var->id == id)
+			{
+				if (mfsPrintFormatUTF8(out, u8"output.out_%d", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				return MFG_ERROR_OKAY;
+			}
+			var = var->next;
+		}
+	}
+
+	// Check if it is a binding point
+	{
+		mfgMetaDataBindingPoint* bp = metaData->firstBindingPoint;
+		while (bp != NULL)
+		{
+			if (bp->type == MFG_CONSTANT_BUFFER)
+			{
+				mfgMetaDataConstantBuffer* cb = bp;
+				mfgMetaDataConstantBufferVariable* var = cb->firstVariable;
+				while (var != NULL)
+				{
+					if (var->id == id)
+					{
+						if (mfsPrintFormatUTF8(out, u8"buf_%s_%d", bp->name, id) != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					var = var->next;
+				}
+			}
+			else if (bp->type == MFG_TEXTURE_1D)
+			{
+				mfgMetaDataTexture1D* tex = bp;
+				if (tex->id == id)
+				{
+					if (mfsPrintFormatUTF8(out, u8"tex1d_%d", id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+			}
+			else if (bp->type == MFG_TEXTURE_2D)
+			{
+				mfgMetaDataTexture1D* tex = bp;
+				if (tex->id == id)
+				{
+					if (mfsPrintFormatUTF8(out, u8"tex2d_%d", id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+			}
+			else if (bp->type == MFG_TEXTURE_3D)
+			{
+				mfgMetaDataTexture1D* tex = bp;
+				if (tex->id == id)
+				{
+					if (mfsPrintFormatUTF8(out, u8"tex3d_%d", id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+			}
+
+			bp = bp->next;
+		}
+	}
+
+	if (mfsPrintFormatUTF8(out, u8"local_%d", id) != MFS_ERROR_OKAY)
+		return MFG_ERROR_FAILED_TO_WRITE;
 	return MFG_ERROR_OKAY;
 }
 
@@ -375,22 +325,346 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 			return MFG_ERROR_FAILED_TO_WRITE;
 	}
 
-	/*const mfmU8* it = bytecode + 6;
+	// Write entry function
+	if (metaData->shaderType == MFG_VERTEX_SHADER)
+	{
+		const mfsUTF8CodeUnit str[] =
+			u8"ShaderOutput VS(ShaderInput input)\n"
+			u8"{\n"
+			u8"\tShaderOutput output;\n";
+		mfsError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
+		if (err != MFS_ERROR_OKAY)
+			return MFG_ERROR_FAILED_TO_WRITE;
+	}
+	else if (metaData->shaderType == MFG_PIXEL_SHADER)
+	{
+		const mfsUTF8CodeUnit str[] =
+			u8"ShaderOutput PS(ShaderInput input)\n"
+			u8"{\n"
+			u8"\tShaderOutput output;\n";
+		mfsError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
+		if (err != MFS_ERROR_OKAY)
+			return MFG_ERROR_FAILED_TO_WRITE;
+	}
+
+	// Convert bytecode to HLSL
+	const mfmU8* it = bytecode + 6;
+	mfmU64 tabs = 1;
 	while (it < bytecode + bytecodeSize)
 	{
+		for (mfmU64 i = 0; i < tabs; ++i)
+			if (mfsPutByte(outputStream, '\t') != MFS_ERROR_OKAY)
+				return MFG_ERROR_FAILED_TO_WRITE;
+
 		switch (*it)
 		{
-			// TO DO
 			case MFG_BYTECODE_DECLB1:
 			{
-				++it;
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"bool local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
 			} break;
-			default:
-			{
 
+			case MFG_BYTECODE_DECLI1:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
 			} break;
+			case MFG_BYTECODE_DECLI2:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int2 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLI3:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int3 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLI4:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int4 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLI22:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int22 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLI33:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int33 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLI44:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int44 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+
+			case MFG_BYTECODE_DECLI1A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"int local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLI2A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"int2 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLI3A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"int3 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLI4A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"int4 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLI22A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"int22 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLI33A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"int33 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLI44A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"int44 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+
+			case MFG_BYTECODE_DECLF1:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLF2:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int2 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLF3:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int3 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLF4:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int4 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLF22:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int22 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLF33:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int33 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+			case MFG_BYTECODE_DECLF44:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				if (mfsPrintFormatUTF8(outputStream, u8"int44 local_%d;\n", id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 3;
+			} break;
+
+			case MFG_BYTECODE_DECLF1A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"float local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLF2A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"float2 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLF3A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"float3 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLF4A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"float4 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLF22A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"float22 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLF33A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"float33 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+			case MFG_BYTECODE_DECLF44A:
+			{
+				mfmU16 id = 0;
+				mfmFromBigEndian2(it + 1, &id);
+				mfmU16 count = 0;
+				mfmFromBigEndian2(it + 3, &count);
+				for (mfmU16 i = 0; i < count; ++i)
+					if (mfsPrintFormatUTF8(outputStream, u8"float44 local_%d;\n", id++) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+			} break;
+
+			case MFG_BYTECODE_ASSIGN:
+			{
+				mfmU16 id1 = 0;
+				mfmFromBigEndian2(it + 1, &id1);
+				mfmU16 id2 = 0;
+				mfmFromBigEndian2(it + 3, &id2);
+				mfgError err = mfgD3D11PutID(id1, metaData, outputStream);
+				if (err != MFG_ERROR_OKAY)
+					return err;
+				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				err = mfgD3D11PutID(id2, metaData, outputStream);
+				if (err != MFG_ERROR_OKAY)
+					return err;
+				if (mfsPrintFormatUTF8(outputStream, u8";\n") != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 5;
+				break;
+			}
+
+			default:
+				return MFG_ERROR_INVALID_DATA;
+				break;
 		}
-	}*/
+	}
 	
+	if (mfsPrintFormatUTF8(outputStream, u8"\treturn output;\n}\n") != MFS_ERROR_OKAY)
+		return MFG_ERROR_FAILED_TO_WRITE;
+
 	return MFG_ERROR_OKAY;
 }
