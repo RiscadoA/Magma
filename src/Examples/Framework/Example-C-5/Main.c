@@ -37,7 +37,7 @@ void Main(int argc, char** argv)
 		ptr += 16;
 		metaDataB[ptr++] = 0x00;
 		metaDataB[ptr++] = 0x00;	// ID 0
-		metaDataB[ptr++] = MFG_FLOAT4;
+		metaDataB[ptr++] = MFG_FLOAT2;
 		
 		// Load
 		err = mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL);

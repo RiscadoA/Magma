@@ -16,6 +16,9 @@
 	All values are stored in big endianness.
 	"param 1x1" means the first parameter is 1 byte long;
 	"param 2x4" means the second parameter is 4 bytes long;
+
+	Vertex shader ID '0' is reserved for the out screen position;
+	Pixel shader ID '0' is reserved for the out depth component;
 */
 
 #ifdef __cplusplus

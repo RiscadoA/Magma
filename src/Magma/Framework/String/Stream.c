@@ -270,6 +270,23 @@ mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, 
 							}
 						}
 				}
+				else if (*format == 'x')
+				{
+					int ret = snprintf(tempBuf, sizeof(tempBuf), "%x", va_arg(args, mfmI32));
+					if (ret < 0)
+						return MFS_ERROR_INTERNAL;
+					else
+						for (int i = 0; i < ret; ++i)
+						{
+							mfsError err = mfsPutByte(stream, tempBuf[i]);
+							escape = MFM_FALSE;
+							if (err != MFS_ERROR_OKAY)
+							{
+								va_end(args);
+								return err;
+							}
+						}
+				}
 				else if (*format == 'f')
 				{
 					int ret = snprintf(tempBuf, sizeof(tempBuf), "%f", va_arg(args, mfmF64));
