@@ -241,19 +241,52 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 		{
 			if (bp->type == MFG_CONSTANT_BUFFER)
 			{
-				// TO DO
+				mfgMetaDataConstantBuffer* cb = bp;
+				if (mfsPrintFormatUTF8(outputStream, u8"cbuffer buf_%s\n{\n", bp->name) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+
+				mfgMetaDataConstantBufferVariable* var = cb->firstVariable;
+				while (var != NULL)
+				{
+					if (mfsPutByte(outputStream, '\t') != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+
+					mfgError err = mfgD3D11WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+
+					if (mfsPrintFormatUTF8(outputStream, u8" buf_%s_%d;\n", bp->name, var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+
+					var = var->next;
+				}
+
+				if (mfsPrintFormatUTF8(outputStream, u8"};\n\n") != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_1D)
 			{
-				// TO DO
+				mfgMetaDataTexture1D* tex = bp;
+				if (mfsPrintFormatUTF8(outputStream, u8"Texture1D tex1d_%d : register(t%d);\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex1d_%d_sampler : register(s%d);\n\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
-				// TO DO
+				mfgMetaDataTexture2D* tex = bp;
+				if (mfsPrintFormatUTF8(outputStream, u8"Texture2D tex2d_%d : register(t%d);\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex2d_%d_sampler : register(s%d);\n\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
-				// TO DO
+				mfgMetaDataTexture3D* tex = bp;
+				if (mfsPrintFormatUTF8(outputStream, u8"Texture3D tex3d_%d : register(t%d);\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex3d_%d_sampler : register(s%d);\n\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else
 			{

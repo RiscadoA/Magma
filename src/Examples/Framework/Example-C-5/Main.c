@@ -23,7 +23,7 @@ void Main(int argc, char** argv)
 		metaDataB[ptr++] = MFG_VERTEX_SHADER;
 		metaDataB[ptr++] = 1;	// Input var count
 		metaDataB[ptr++] = 1;	// Output var count
-		metaDataB[ptr++] = 0;	// Binding point count
+		metaDataB[ptr++] = 2;	// Binding point count
 
 		// Input var 1
 		memcpy(metaDataB + ptr, "position", 9);
@@ -37,7 +37,31 @@ void Main(int argc, char** argv)
 		ptr += 16;
 		metaDataB[ptr++] = 0x00;
 		metaDataB[ptr++] = 0x00;	// ID 0
-		metaDataB[ptr++] = MFG_FLOAT2;
+		metaDataB[ptr++] = MFG_FLOAT4;
+
+		// Constant buffer
+		memcpy(metaDataB + ptr, "buf1", 5);
+		ptr += 16;
+		metaDataB[ptr++] = MFG_CONSTANT_BUFFER;
+		metaDataB[ptr++] = 0x00; // 2 elements
+		metaDataB[ptr++] = 0x02;
+		// Elements:
+		{
+			metaDataB[ptr++] = 0x00; // Var index 4
+			metaDataB[ptr++] = 0x04;
+			metaDataB[ptr++] = MFG_FLOAT44;
+
+			metaDataB[ptr++] = 0x00; // Var index 5
+			metaDataB[ptr++] = 0x05;
+			metaDataB[ptr++] = MFG_FLOAT22;
+		}
+
+		// 3D texture
+		memcpy(metaDataB + ptr, "texture", 8);
+		ptr += 16;
+		metaDataB[ptr++] = MFG_TEXTURE_3D;
+		metaDataB[ptr++] = 0x00; // Var index 6
+		metaDataB[ptr++] = 0x06;
 		
 		// Load
 		err = mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL);
