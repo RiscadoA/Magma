@@ -107,6 +107,7 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 	(*outData)->inputVarCount = inputVarCount;
 	(*outData)->outputVarCount = outputVarCount;
 	(*outData)->bindingPointCount = bindingPointCount;
+	(*outData)->shaderType = shaderType;
 	(*outData)->firstInputVar = NULL;
 	(*outData)->firstOutputVar = NULL;
 	(*outData)->firstBindingPoint = NULL;
