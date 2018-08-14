@@ -148,21 +148,21 @@ extern "C"
 #define MFG_BYTECODE_DECLF44A			0x36	// Declares an floating point 4x4 matrix variable array { array starting index stored on param 1x2, element count on param 2x2 }.
 
 	// Variable operations.
-#define MFG_BYTECODE_ASSIGN				0x40	// Performs an assign operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_ADD				0x41	// Performs an addition operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_SUBTRACT			0x42	// Performs a subtraction operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_MULTIPLY			0x43	// Performs a multiplication operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_DIVIDE				0x44	// Performs a division operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_AND				0x45	// Performs a logical and operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_OR					0x46	// Performs a logical or operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_NOT				0x47	// Performs a logical not operation between on a variables { variable index on param 1x2 }.
-#define MFG_BYTECODE_NEGATE				0x48	// Negates a variables { variable index on param 1x2 }.
-#define MFG_BYTECODE_GREATER			0x49	// Performs a logical 'is greater than' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_LESS				0x4A	// Performs a logical 'is less than' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_GEQUAL				0x4B	// Performs a logical 'is greater than or equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_LEQUAL				0x4C	// Performs a logical 'is less than or equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_EQUAL				0x4D	// Performs a logical 'is equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
-#define MFG_BYTECODE_DIFFERENT			0x4E	// Performs a logical 'is not equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }.
+#define MFG_BYTECODE_ASSIGN				0x40	// Performs an assign operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_ADD				0x41	// Performs an addition operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_SUBTRACT			0x42	// Performs a subtraction operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_MULTIPLY			0x43	// Performs a multiplication operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_DIVIDE				0x44	// Performs a division operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_AND				0x45	// Performs a logical and operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_OR					0x46	// Performs a logical or operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_NOT				0x47	// Performs a logical not operation between on a variables { variable index on param 1x2 } (output variable on { param 2x2 }).
+#define MFG_BYTECODE_NEGATE				0x48	// Negates a variables { variable index on param 1x2 }  (output variable on { param 2x2 }).
+#define MFG_BYTECODE_GREATER			0x49	// Performs a logical 'is greater than' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_LESS				0x4A	// Performs a logical 'is less than' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_GEQUAL				0x4B	// Performs a logical 'is greater than or equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_LEQUAL				0x4C	// Performs a logical 'is less than or equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_EQUAL				0x4D	// Performs a logical 'is equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_DIFFERENT			0x4E	// Performs a logical 'is not equal to' operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
 
 	// Boolean literal setters.
 #define MFG_BYTECODE_LITB1TRUE			0x50	// Sets a variable to a boolean literal with the value 'true' { variable index on param 1x2 }.
@@ -173,19 +173,13 @@ extern "C"
 #define MFG_BYTECODE_LITI2				0x53	// Sets a variable to a 2 component integer vector literal { variable index on param 1x2, literal on param 2x8 }.
 #define MFG_BYTECODE_LITI3				0x54	// Sets a variable to a 3 component integer vector literal { variable index on param 1x2, literal on param 2x12 }.
 #define MFG_BYTECODE_LITI4				0x55	// Sets a variable to a 4 component integer vector literal { variable index on param 1x2, literal on param 2x16 }.
-#define MFG_BYTECODE_LITI22				0x56	// Sets a variable to a integer 2x2 matrix literal { variable index on param 1x2, literal on param 2x16 }.
-#define MFG_BYTECODE_LITI33				0x57	// Sets a variable to a integer 3x3 matrix literal { variable index on param 1x2, literal on param 2x36 }.
-#define MFG_BYTECODE_LITI44				0x58	// Sets a variable to a integer 4x4 matrix literal { variable index on param 1x2, literal on param 2x64 }.
 
 	// Floating point literal setters.
 #define MFG_BYTECODE_LITF1				0x60	// Sets a variable to a floating point scalar literal { variable index on param 1x2, literal on param 2x4 }.
 #define MFG_BYTECODE_LITF2				0x61	// Sets a variable to a 2 component floating point vector literal { variable index on param 1x2, literal on param 2x8 }.
 #define MFG_BYTECODE_LITF3				0x62	// Sets a variable to a 3 component floating point vector literal { variable index on param 1x2, literal on param 2x12 }.
 #define MFG_BYTECODE_LITF4				0x63	// Sets a variable to a 4 component floating point vector literal { variable index on param 1x2, literal on param 2x16 }.
-#define MFG_BYTECODE_LITF22				0x64	// Sets a variable to a floating point 2x2 matrix literal { variable index on param 1x2, literal on param 2x16 }.
-#define MFG_BYTECODE_LITF33				0x65	// Sets a variable to a floating point 3x3 matrix literal { variable index on param 1x2, literal on param 2x36 }.
-#define MFG_BYTECODE_LITF44				0x66	// Sets a variable to a floating point 4x4 matrix literal { variable index on param 1x2, literal on param 2x64 }.
-
+	
 	// Vector/matrix component getters.
 	// These getters turn a certain variable index into a reference to a vector or matrix component.
 #define MFG_BYTECODE_GET2CMP			0x70	// Sets variable index { param 1x2 } to a reference to a component of a 2 component vector  { vector index on param 2x2, component index on param 3x1 }.
@@ -205,10 +199,10 @@ extern "C"
 #define MFG_BYTECODE_ELSE				0x86	// Executes the next instruction/scope if the previous 'if' failed.
 
 	// Functions 1
-#define MFG_BYTECODE_MULMAT				0x90	// Performs matrix on multiplication between the variable on the index on { param 1x2 } and the variable on the index on { param 2x2 }.
-#define MFG_BYTECODE_SAMPLE1D			0x91	// Samples a pixel from the 1D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 }.
-#define MFG_BYTECODE_SAMPLE2D			0x92	// Samples a pixel from the 2D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 }.
-#define MFG_BYTECODE_SAMPLE3D			0x93	// Samples a pixel from the 3D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 }.
+#define MFG_BYTECODE_MULMAT				0x90	// Performs matrix on multiplication between the variable on the index on { param 1x2 } and the variable on the index on { param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_SAMPLE1D			0x91	// Samples a pixel from the 1D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_SAMPLE2D			0x92	// Samples a pixel from the 2D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_SAMPLE3D			0x93	// Samples a pixel from the 3D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
 #define MFG_BYTECODE_COS				0x94	// Sets the variable on the index on { param 1x2 } to the cosine of the variable on index { param 2x2 }.
 #define MFG_BYTECODE_SIN				0x95	// Sets the variable on the index on { param 1x2 } to the sine of the variable on index { param 2x2 }.
 #define MFG_BYTECODE_TAN				0x96	// Sets the variable on the index on { param 1x2 } to the tangent of the variable on index { param 2x2 }.
