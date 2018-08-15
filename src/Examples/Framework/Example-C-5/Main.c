@@ -1,6 +1,7 @@
 ﻿#include <Magma/Framework/Input/Entry.h>
 #include <Magma/Framework/Graphics/Bytecode.h>
 #include <Magma/Framework/Graphics/D3D11Assembler.h>
+#include <Magma/Framework/Graphics/OGL4Assembler.h>
 #include <Magma/Framework/String/Stream.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,10 +82,14 @@ void Main(int argc, char** argv)
 		MFG_BYTECODE_ASSIGN, 0x00, 0x02, 0x00, 0x01,
 		MFG_BYTECODE_ASSIGN, 0x00, 0x00, 0x00, 0x02,
 		MFG_BYTECODE_GET4CMP, 0x00, 0xF0, 0x00, 0x00, 0x01,
-		MFG_BYTECODE_LITI1, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x01,
+		MFG_BYTECODE_MULMAT, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
 	};
 
 	err = mfgD3D11Assemble(bytecode, sizeof(bytecode), metaData, mfsOut);
+	if (err != MFG_ERROR_OKAY)
+		abort();
+
+	err = mfgOGL4Assemble(bytecode, sizeof(bytecode), metaData, mfsOut);
 	if (err != MFG_ERROR_OKAY)
 		abort();
 
