@@ -727,6 +727,16 @@ extern "C"
 		mfgRDCreateSamplerFunction createSampler;
 		mfgRDDestroySamplerFunction destroySampler;
 
+		mfgRDCreateRasterStateFunction createRasterState;
+		mfgRDDestroyRasterStateFunction destroyRasterState;
+		mfgRDSetRasterStateFunction setRasterState;
+		mfgRDCreateDepthStencilStateFunction createDepthStencilState;
+		mfgRDDestroyDepthStencilFunction destroyDepthStencilState;
+		mfgRDSetDepthStencilFunction setDepthStencilState;
+		mfgRDCreateBlendStateFunction createBlendState;
+		mfgRDDestroyBlendStateFunction destroyBlendState;
+		mfgRDSetBlendStateFunction setBlendState;
+
 		mfgRDCreateRenderTextureFunction createRenderTexture;
 		mfgRDDestroyRenderTextureFunction destroyRenderTexture;
 		mfgRDCreateDepthStencilTextureFunction createDepthStencilTexture;
@@ -760,7 +770,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSie, const mfgMetaData* metaData);
+	mfgError mfgCreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
 
 	/// <summary>
 	///		Destroys a vertex shader.
@@ -785,7 +795,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** pixelShader, const mfmU8* bytecode, mfmU64 bytecodeSie, const mfgMetaData* metaData);
+	mfgError mfgCreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** pixelShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
 
 	/// <summary>
 	///		Destroys a pixel shader.
@@ -1265,14 +1275,16 @@ extern "C"
 	/// <param name="tex">Texture handle</param>
 	/// <param name="dstX">Update destination X coordinate</param>
 	/// <param name="dstY">Update destination Y coordinate</param>
+	/// <param name="dstZ">Update destination Z coordinate</param>
 	/// <param name="width">Update data width</param>
 	/// <param name="height">Update data height</param>
+	/// <param name="depth">Update data depth</param>
 	/// <param name="data">Update data</param>
 	/// <returns>
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgUpdateTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
+	mfgError mfgUpdateTexture3D(mfgRenderDevice * rd, mfgTexture3D * tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void * data);
 
 	/// <summary>
 	///		Destroys a texture 3D.
