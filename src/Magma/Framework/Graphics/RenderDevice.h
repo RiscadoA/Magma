@@ -68,15 +68,113 @@ extern "C"
 #define MFG_NEAREST			0x01
 #define MFG_LINEAR			0x02
 
+#define MFG_CW				0x01
+#define MFG_CCW				0x02
+
+#define MFG_FRONT			0x01
+#define MFG_BACK			0x02
+#define MFG_FRONT_AND_BACK	0x03
+
+#define MFG_WIREFRAME		0x01
+#define MFG_FILL			0x02
+
+#define MFG_NEVER			0x01
+#define MFG_LESS			0x02
+#define MFG_LEQUAL			0x03
+#define MFG_GREATER			0x04
+#define MFG_GEQUAL			0x05
+#define MFG_EQUAL			0x06
+#define MFG_NEQUAL			0x07
+#define MFG_ALWAYS			0x08
+
+#define MFG_ZERO			0x01
+#define MFG_KEEP			0x02
+#define MFG_REPLACE			0x03
+#define MFG_INCREMENT		0x04
+#define MFG_INCREMENT_WRAP	0x05
+#define MFG_DECREMENT		0x06
+#define MFG_DECREMENT_WRAP	0x07
+#define MFG_INVERT			0x08
+
+#define MFG_ONE				0X02
+#define MFG_SRC_COLOR		0x03
+#define MFG_INV_SRC_COLOR	0x04
+#define MFG_DST_COLOR		0x05
+#define MFG_INV_DST_COLOR	0x06
+#define MFG_SRC_ALPHA		0x07
+#define MFG_INV_SRC_ALPHA	0x08
+#define MFG_DST_ALPHA		0x09
+#define MFG_INV_DST_ALPHA	0x0A
+
+#define MFG_ADD				0x01
+#define MFG_SUBTRACT		0x02
+#define MFG_REV_SUBTRACT	0x03
+#define MFG_MIN				0x04
+#define MFG_MAX				0x05
+
+#define MFG_DEPTH24STENCIL8	0x01
+#define MFG_DEPTH32STENCIL8 0x02
+
+#define MFG_MAX_ANISOTROPY	0x01
+
 	typedef struct mfgRenderDevice mfgRenderDevice;
 
 	typedef struct
 	{
+		/// <summary>
+		///		Valid values:
+		///			MFG_FALSE;
+		///			MFG_TRUE;
+		/// </summary>
+		mfmBool vsyncEnabled;
+	} mfgRenderDeviceDesc;
+
+	void mfgDefaultRenderDeviceDesc(mfgRenderDeviceDesc* desc);
+
+	typedef struct
+	{
+		/// <summary>
+		///		Vertex element name (16 bytes max).
+		/// </summary>
 		mfsUTF8CodeUnit name[16];
+
+		/// <summary>
+		///		Stride between each element in memory.
+		/// </summary>
 		mfmU64 stride;
+
+		/// <summary>
+		///		First element in the buffer offset.
+		/// </summary>
 		mfmU64 offset;
+
+		/// <summary>
+		///		Vertex buffer index.
+		/// </summary>
 		mfmU64 bufferIndex;
-		mfmU8 elementType;
+
+		/// <summary>
+		///		Valid values:
+		///			MFG_BYTE;
+		///			MFG_SHORT;
+		///			MFG_INT;
+		///			MFG_UBYTE;
+		///			MFG_USHORT;
+		///			MFG_UINT;
+		///			MFG_NBYTE;
+		///			MFG_NSHORT;
+		///			MFG_NINT;
+		///			MFG_NUBYTE;
+		///			MFG_NUSHORT;
+		///			MFG_NUINT;
+		///			MFG_FLOAT;
+		/// </summary>
+		mfmU8 type;
+
+		/// <summary>
+		///		Vertex element component count.
+		///		Valid values: 1; 2; 3; 4;
+		/// </summary>
 		mfmU8 size;
 	} mfgVertexElement;
 
@@ -84,13 +182,71 @@ extern "C"
 
 	typedef struct
 	{
+		/// <summary>
+		///		Border color (RGBA).
+		/// </summary>
 		mfmF32 borderColor[4];
+
+		/// <summary>
+		///		Max anisotropy for filtering.
+		///		Set to 1 to anisotropic filtering.
+		///		Valid values: 1 - MFG_MAX_ANISOTROPY.
+		/// </summary>
 		mfmU32 maxAnisotropy;
+
+		/// <summary>
+		///		Minifying filter.
+		///		Valid values:
+		///			MFG_NEAREST;
+		///			MFG_LINEAR;
+		/// </summary>
 		mfmU8 minFilter;
+
+		/// <summary>
+		///		Magnifying filter.
+		///		Valid values:
+		///			MFG_NEAREST;
+		///			MFG_LINEAR;
+		/// </summary>
 		mfmU8 magFilter;
+
+		/// <summary>
+		///		Mipmap filter (set to MFG_NONE to disable mipmaps).
+		///		Valid values:
+		///			MFG_NONE;
+		///			MFG_NEAREST;
+		///			MFG_LINEAR;
+		/// </summary>
 		mfmU8 mipmapFilter;
+
+		/// <summary>
+		///		Texture adress mode on coordinate U.
+		///		Valid values:
+		///			MFG_REPEAT;
+		///			MFG_MIRROR;
+		///			MFG_CLAMP;
+		///			MFG_BORDER;
+		/// </summary>
 		mfmU8 adressU;
+
+		/// <summary>
+		///		Texture adress mode on coordinate V.
+		///		Valid values:
+		///			MFG_REPEAT;
+		///			MFG_MIRROR;
+		///			MFG_CLAMP;
+		///			MFG_BORDER;
+		/// </summary>
 		mfmU8 adressV;
+
+		/// <summary>
+		///		Texture adress mode on coordinate W.
+		///		Valid values:
+		///			MFG_REPEAT;
+		///			MFG_MIRROR;
+		///			MFG_CLAMP;
+		///			MFG_BORDER;
+		/// </summary>
 		mfmU8 adressW;
 	} mfgSamplerDesc;
 
@@ -98,13 +254,203 @@ extern "C"
 
 	typedef struct
 	{
+		/// <summary>
+		///		Valid values:
+		///			MFG_FALSE;
+		///			MFG_TRUE;
+		/// </summary>
+		mfmBool cullEnabled;
 
+		/// <summary>
+		///		Valid values:
+		///			MFG_CW;
+		///			MFG_CCW;
+		/// </summary>
+		mfmU8 frontFace;
+
+		/// <summary>
+		///		Valid values:
+		///			MFG_FRONT;
+		///			MFG_BACK;
+		///			MFG_FRONT_AND_BACK;
+		/// </summary>
+		mfmU8 cullFace;
+
+		/// <summary>
+		///		Valid values:
+		///			MFG_FILL;
+		///			MFG_WIREFRAME;
+		/// </summary>
+		mfmU8 rasterMode;
 	} mfgRasterStateDesc;
 
 	void mfgDefaultRasterStateDesc(mfgRasterStateDesc* desc);
 
 	typedef struct
 	{
+		/// <summary>
+		///		Performs depth checks?
+		///		Valid values:
+		///			MFG_FALSE;
+		///			MFG_TRUE;
+		/// </summary>
+		mfmBool depthEnabled;
+
+		/// <summary>
+		///		Write depth?
+		///		Valid values:
+		///			MFG_FALSE;
+		///			MFG_TRUE;
+		/// </summary>
+		mfmBool depthWriteEnabled;
+
+		/// <summary>
+		///		Depth 'near' value.
+		/// </summary>
+		mfmF32 depthNear;
+
+		/// <summary>
+		///		Depth 'far' value.
+		/// </summary>
+		mfmF32 depthFar;
+
+		/// <summary>
+		///		Depth comparison function.
+		///		Valid values:
+		///			MFG_NEVER;
+		///			MFG_LESS;
+		///			MFG_LEQUAL;
+		///			MFG_GREATER;
+		///			MFG_GEQUAL;
+		///			MFG_EQUAL;
+		///			MFG_NEQUAL;
+		///			MFG_ALWAYS;
+		/// </summary>
+		mfmU8 depthCompare;
+
+		mfmU32 stencilRef;
+
+		/// <summary>
+		///		Is stencil enabled?
+		///		Valid values:
+		///			MFG_FALSE;
+		///			MFG_TRUE;
+		/// </summary>
+		mfmBool stencilEnabled;
+		mfmU8 stencilReadMask;
+		mfmU8 stencilWriteMask;
+
+		/// <summary>
+		///		Front face stencil comparison function.
+		///		Valid values:
+		///			MFG_NEVER;
+		///			MFG_LESS;
+		///			MFG_LEQUAL;
+		///			MFG_GREATER;
+		///			MFG_GEQUAL;
+		///			MFG_EQUAL;
+		///			MFG_NEQUAL;
+		///			MFG_ALWAYS;
+		/// </summary>
+		mfmU8 frontFaceStencilCompare;
+
+		/// <summary>
+		///		Front face steincil fail action.
+		///		Valid values:
+		///			MFG_KEEP;
+		///			MFG_ZERO;
+		///			MFG_REPLACE;
+		///			MFG_INCREMENT;
+		///			MFG_INCREMENT_WRAP;
+		///			MFG_DECREMENT;
+		///			MFG_DECREMENT_WRAP;
+		///			MFG_INVERT;
+		/// </summary>
+		mfmU8 frontFaceStencilFail;
+
+		/// <summary>
+		///		Front face steincil pass action.
+		///		Valid values:
+		///			MFG_KEEP;
+		///			MFG_ZERO;
+		///			MFG_REPLACE;
+		///			MFG_INCREMENT;
+		///			MFG_INCREMENT_WRAP;
+		///			MFG_DECREMENT;
+		///			MFG_DECREMENT_WRAP;
+		///			MFG_INVERT;
+		/// </summary>
+		mfmU8 frontFaceStencilPass;
+
+		/// <summary>
+		///		Front face stencil depth fail action.
+		///		Valid values:
+		///			MFG_KEEP;
+		///			MFG_ZERO;
+		///			MFG_REPLACE;
+		///			MFG_INCREMENT;
+		///			MFG_INCREMENT_WRAP;
+		///			MFG_DECREMENT;
+		///			MFG_DECREMENT_WRAP;
+		///			MFG_INVERT;
+		/// </summary>
+		mfmU8 frontFaceDepthFail;
+
+		/// <summary>
+		///		Back face stencil comparison function.
+		///		Valid values:
+		///			MFG_NEVER;
+		///			MFG_LESS;
+		///			MFG_LEQUAL;
+		///			MFG_GREATER;
+		///			MFG_GEQUAL;
+		///			MFG_EQUAL;
+		///			MFG_NEQUAL;
+		///			MFG_ALWAYS;
+		/// </summary>
+		mfmU8 backFaceStencilCompare;
+
+		/// <summary>
+		///		Back face steincil fail action.
+		///		Valid values:
+		///			MFG_KEEP;
+		///			MFG_ZERO;
+		///			MFG_REPLACE;
+		///			MFG_INCREMENT;
+		///			MFG_INCREMENT_WRAP;
+		///			MFG_DECREMENT;
+		///			MFG_DECREMENT_WRAP;
+		///			MFG_INVERT;
+		/// </summary>
+		mfmU8 backFaceStencilFail;
+
+		/// <summary>
+		///		Back face steincil pass action.
+		///		Valid values:
+		///			MFG_KEEP;
+		///			MFG_ZERO;
+		///			MFG_REPLACE;
+		///			MFG_INCREMENT;
+		///			MFG_INCREMENT_WRAP;
+		///			MFG_DECREMENT;
+		///			MFG_DECREMENT_WRAP;
+		///			MFG_INVERT;
+		/// </summary>
+		mfmU8 backFaceStencilPass;
+
+		/// <summary>
+		///		Back face stencil depth fail action.
+		///		Valid values:
+		///			MFG_KEEP;
+		///			MFG_ZERO;
+		///			MFG_REPLACE;
+		///			MFG_INCREMENT;
+		///			MFG_INCREMENT_WRAP;
+		///			MFG_DECREMENT;
+		///			MFG_DECREMENT_WRAP;
+		///			MFG_INVERT;
+		/// </summary>
+		mfmU8 backFaceDepthFail;
 
 	} mfgDepthStencilStateDesc;
 
@@ -112,7 +458,99 @@ extern "C"
 
 	typedef struct
 	{
+		/// <summary>
+		///		Is blending enabled?
+		///		Valid values:
+		///			MFG_FALSE;
+		///			MFG_TRUE;
+		/// </summary>
+		mfmBool blendEnabled;
 
+		/// <summary>
+		///		Source color factor.
+		///		Valid values:
+		///			MFG_ZERO;
+		///			MFG_ONE;
+		///			MFG_SRC_COLOR;
+		///			MFG_INV_SRC_COLOR;
+		///			MFG_DST_COLOR;
+		///			MFG_INV_DST_COLOR;
+		///			MFG_SRC_ALPHA;
+		///			MFG_INV_SRC_ALPHA;
+		///			MFG_DST_ALPHA;
+		///			MFG_INV_DST_ALPHA;
+		/// </summary>
+		mfmU8 sourceFactor;
+
+		/// <summary>
+		///		Destination color factor.
+		///		Valid values:
+		///			MFG_ZERO;
+		///			MFG_ONE;
+		///			MFG_SRC_COLOR;
+		///			MFG_INV_SRC_COLOR;
+		///			MFG_DST_COLOR;
+		///			MFG_INV_DST_COLOR;
+		///			MFG_SRC_ALPHA;
+		///			MFG_INV_SRC_ALPHA;
+		///			MFG_DST_ALPHA;
+		///			MFG_INV_DST_ALPHA;
+		/// </summary>
+		mfmU8 destinationFactor;
+
+		/// <summary>
+		///		Color blend operation.
+		///		Valid values:
+		///			MFG_ADD;
+		///			MFG_SUBTRACT;
+		///			MFG_REV_SUBTRACT;
+		///			MFG_MIN;
+		///			MFG_MAX;
+		/// </summary>
+		mfmU8 blendOperation;
+
+		/// <summary>
+		///		Source alpha factor.
+		///		Valid values:
+		///			MFG_ZERO;
+		///			MFG_ONE;
+		///			MFG_SRC_COLOR;
+		///			MFG_INV_SRC_COLOR;
+		///			MFG_DST_COLOR;
+		///			MFG_INV_DST_COLOR;
+		///			MFG_SRC_ALPHA;
+		///			MFG_INV_SRC_ALPHA;
+		///			MFG_DST_ALPHA;
+		///			MFG_INV_DST_ALPHA;
+		/// </summary>
+		mfmU8 sourceAlphaFactor;
+
+		/// <summary>
+		///		Destination alpha factor.
+		///		Valid values:
+		///			MFG_ZERO;
+		///			MFG_ONE;
+		///			MFG_SRC_COLOR;
+		///			MFG_INV_SRC_COLOR;
+		///			MFG_DST_COLOR;
+		///			MFG_INV_DST_COLOR;
+		///			MFG_SRC_ALPHA;
+		///			MFG_INV_SRC_ALPHA;
+		///			MFG_DST_ALPHA;
+		///			MFG_INV_DST_ALPHA;
+		/// </summary>
+		mfmU8 destinationAlphaFactor;
+
+		/// <summary>
+		///		Color alpha operation.
+		///		Valid values:
+		///			MFG_ADD;
+		///			MFG_SUBTRACT;
+		///			MFG_REV_SUBTRACT;
+		///			MFG_MIN;
+		///			MFG_MAX;
+		/// </summary>
+		mfmU8 blendAlphaOperation;
 	} mfgBlendStateDesc;
 
 	void mfgDefaultBlendStateDesc(mfgBlendStateDesc* desc);
@@ -142,6 +580,8 @@ extern "C"
 	// Vertex functions
 	typedef mfgError(*mfgRDCreateVertexBufferFunction)(mfgRenderDevice* rd, void** vb, mfmU64 size, const void* data, mfmU8 usage);
 	typedef mfgError(*mfgRDDestroyVertexBufferFunction)(mfgRenderDevice* rd, void* vb);
+	typedef mfgError(*mfgRDMapVertexBufferFunction)(mfgRenderDevice* rd, void* vb, void** memory);
+	typedef mfgError(*mfgRDUnmapVertexBufferFunction)(mfgRenderDevice* rd, void* vb);
 	typedef mfgError(*mfgRDCreateVertexLayoutFunction)(mfgRenderDevice* rd, void** vl, mfmU64 elementCount, const mfgVertexElement* elements, void* vs);
 	typedef mfgError(*mfgRDDestroyVertexLayoutFunction)(mfgRenderDevice* rd, void* vl);
 	typedef mfgError(*mfgRDCreateVertexArrayFunction)(mfgRenderDevice* rd, void** va, mfmU64 vbCount, void** vbs, void* vl);
@@ -150,6 +590,8 @@ extern "C"
 	typedef mfgError(*mfgRDCreateIndexBufferFunction)(mfgRenderDevice* rd, void** ib, mfmU64 size, const void* data, mfmU8 usage);
 	typedef mfgError(*mfgRDDestroyIndexBufferFunction)(mfgRenderDevice* rd, void* ib);
 	typedef mfgError(*mfgRDSetIndexBufferFunction)(mfgRenderDevice* rd, void* ib);
+	typedef mfgError(*mfgRDMapIndexBufferFunction)(mfgRenderDevice* rd, void* ib, void** memory);
+	typedef mfgError(*mfgRDUnmapIndexBufferFunction)(mfgRenderDevice* rd, void* ib);
 
 	// Texture functions
 	typedef mfgError(*mfgRDCreateTexture1DFunction)(mfgRenderDevice* rd, void** tex, mfmU64 width, mfmU8 format, const void* data, mfmU8 usage);
@@ -217,8 +659,23 @@ extern "C"
 		mfgRDDestroyPipelineFunction destroyPipeline;
 		mfgRDSetPipelineFunction setPipeline;
 
+		mfgRDGetVertexShaderBindingPointFunction getVertexShaderBindingPoint;
+		mfgRDGetPixelShaderBindingPointFunction getPixelShaderBindingPoint;
+		mfgRDBindConstantBufferFunction bindConstantBuffer;
+		mfgRDBindTexture1DFunction bindTexture1D;
+		mfgRDBindTexture2DFunction bindTexture2D;
+		mfgRDBindTexture3DFunction bindTexture3D;
+		mfgRDBindSamplerFunction bindSampler;
+
+		mfgRDCreateConstantBufferFunction createConstantBuffer;
+		mfgRDDestroyConstantBufferFunction destroyConstantBuffer;
+		mfgRDMapConstantBufferFunction mapConstantBuffer;
+		mfgRDUnmapConstantBufferFunction unmapConstantBuffer;
+
 		mfgRDCreateVertexBufferFunction createVertexBuffer;
 		mfgRDDestroyVertexBufferFunction destroyVertexBuffer;
+		mfgRDMapVertexBufferFunction mapVertexBuffer;
+		mfgRDUnmapVertexBufferFunction unmapVertexBuffer;
 		mfgRDCreateVertexLayoutFunction createVertexLayout;
 		mfgRDDestroyVertexLayoutFunction destroyVertexLayout;
 		mfgRDCreateVertexArrayFunction createVertexArray;
@@ -227,6 +684,8 @@ extern "C"
 		mfgRDCreateIndexBufferFunction createIndexBuffer;
 		mfgRDDestroyIndexBufferFunction destroyIndexBuffer;
 		mfgRDSetIndexBufferFunction setIndexBuffer;
+		mfgRDMapIndexBufferFunction mapIndexBuffer;
+		mfgRDUnmapIndexBufferFunction unmapIndexBuffer;
 
 		mfgRDCreateTexture1DFunction createTexture1D;
 		mfgRDDestroyTexture1DFunction destroyTexture1D;
