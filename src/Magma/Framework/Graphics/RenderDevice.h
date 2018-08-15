@@ -1578,6 +1578,18 @@ extern "C"
 	/// </returns>
 	mfgError mfgSwapBuffers(mfgRenderDevice* rd);
 
+	/// <summary>
+	///		Gets the last error string.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="str">Output error string</param>
+	/// <param name="maxSize">Maximum error string size</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGetErrorString(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize);
+
 #ifdef __cplusplus
 }
 #endif
