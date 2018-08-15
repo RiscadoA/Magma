@@ -1308,6 +1308,108 @@ extern "C"
 	/// </returns>
 	mfgError mfgDestroySampler(mfgRenderDevice* rd, mfgSampler* sampler);
 
+	/// <summary>
+	///		Creates a new rasterizer state.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Pointer to raster state handle</param>
+	/// <param name="desc">State description</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc);
+
+	/// <summary>
+	///		Destroys a rasterizer state.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Raster state handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyRasterState(mfgRenderDevice* rd, mfgRasterState* state);
+
+	/// <summary>
+	///		Sets a rasterizer state as the one used for draw calls.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Raster state handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSetRasterState(mfgRenderDevice* rd, mfgRasterState* state);
+
+	/// <summary>
+	///		Creates a new depth stencil state.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Pointer to depth stencil state handle</param>
+	/// <param name="desc">State description</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc);
+
+	/// <summary>
+	///		Destroys a depth stencil state.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Depth stencil state handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState* state);
+
+	/// <summary>
+	///		Sets a depth stencil state as the one used for draw calls.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Depth stencil state handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSetDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState* state);
+
+	/// <summary>
+	///		Creates a new blend state.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Pointer to blend state handle</param>
+	/// <param name="desc">State description</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc);
+
+	/// <summary>
+	///		Destroys a blend state.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Blend state handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyBlendState(mfgRenderDevice* rd, mfgBlendState* state);
+
+	/// <summary>
+	///		Sets a blend state as the one used for draw calls.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Blend state handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSetBlendState(mfgRenderDevice* rd, mfgBlendState* state);
+
 #ifdef __cplusplus
 }
 #endif
