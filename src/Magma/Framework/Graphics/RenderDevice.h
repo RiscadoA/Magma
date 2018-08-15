@@ -17,105 +17,127 @@ extern "C"
 #define MFG_USAGE_DYNAMIC	0x02
 #define MFG_USAGE_STATIC	0x03
 
-#define MFG_BYTE			0x01
-#define MFG_SHORT			0x02
-#define MFG_INT				0x03
-#define MFG_UBYTE			0x04
-#define MFG_USHORT			0x05
-#define MFG_UINT			0x06
-#define MFG_NBYTE			0x07
-#define MFG_NSHORT			0x08
-#define MFG_NINT			0x09
-#define MFG_NUBYTE			0x0A
-#define MFG_NUSHORT			0x0B
-#define MFG_NUINT			0x0C
-#define MFG_FLOAT			0x0D
+#define MFG_BYTE			0x04
+#define MFG_SHORT			0x05
+#define MFG_INT				0x06
+#define MFG_UBYTE			0x07
+#define MFG_USHORT			0x08
+#define MFG_UINT			0x09
+#define MFG_NBYTE			0x0A
+#define MFG_NSHORT			0x0B
+#define MFG_NINT			0x0C
+#define MFG_NUBYTE			0x0D
+#define MFG_NUSHORT			0x0E
+#define MFG_NUINT			0x0F
+#define MFG_FLOAT			0x10
 
-#define MFG_R8SNORM			0x01
-#define MFG_R16SNORM		0x02
-#define MFG_RG8SNORM		0x03
-#define MFG_RG16SNORM		0x04
-#define MFG_RGBA8SNORM		0x05
-#define MFG_RGBA16SNORM		0x06
-#define MFG_R8UNORM			0x07
-#define MFG_R16UNORM		0x08
-#define MFG_RG8UNORM		0x09
-#define MFG_RG16UNORM		0x0A
-#define MFG_RGBA8UNORM		0x0B
-#define MFG_RGBA16UNORM		0x0C
-#define MFG_R8SINT			0x0D
-#define MFG_R16SINT			0x0E
-#define MFG_RG8SINT			0x0F
-#define MFG_RG16SINT		0x10
-#define MFG_RGBA8SINT		0x11
-#define MFG_RGBA16SINT		0x12
-#define MFG_R8UINT			0x13
-#define MFG_R16UINT			0x14
-#define MFG_RG8UINT			0x15
-#define MFG_RG16UINT		0x16
-#define MFG_RGBA8UINT		0x17
-#define MFG_RGBA16UINT		0x18
-#define MFG_R32FLOAT		0x19
-#define MFG_RG32FLOAT		0x1A
-#define MFG_RGB32FLOAT		0x1B
-#define MFG_RGBA32FLOAT		0x1C
+#define MFG_R8SNORM			0x11
+#define MFG_R16SNORM		0x12
+#define MFG_RG8SNORM		0x13
+#define MFG_RG16SNORM		0x14
+#define MFG_RGBA8SNORM		0x15
+#define MFG_RGBA16SNORM		0x16
+#define MFG_R8UNORM			0x17
+#define MFG_R16UNORM		0x18
+#define MFG_RG8UNORM		0x19
+#define MFG_RG16UNORM		0x1A
+#define MFG_RGBA8UNORM		0x1B
+#define MFG_RGBA16UNORM		0x1C
+#define MFG_R8SINT			0x1D
+#define MFG_R16SINT			0x1E
+#define MFG_RG8SINT			0x1F
+#define MFG_RG16SINT		0x20
+#define MFG_RGBA8SINT		0x21
+#define MFG_RGBA16SINT		0x22
+#define MFG_R8UINT			0x23
+#define MFG_R16UINT			0x24
+#define MFG_RG8UINT			0x25
+#define MFG_RG16UINT		0x26
+#define MFG_RGBA8UINT		0x27
+#define MFG_RGBA16UINT		0x28
+#define MFG_R32FLOAT		0x29
+#define MFG_RG32FLOAT		0x2A
+#define MFG_RGB32FLOAT		0x2B
+#define MFG_RGBA32FLOAT		0x2C
 
-#define MFG_REPEAT			0x01
-#define MFG_MIRROR			0x02
-#define MFG_CLAMP			0x03
-#define MFG_BORDER			0x04
+#define MFG_REPEAT			0x2D
+#define MFG_MIRROR			0x2E
+#define MFG_CLAMP			0x2F
+#define MFG_BORDER			0x30
 
-#define MFG_NEAREST			0x01
-#define MFG_LINEAR			0x02
+#define MFG_NEAREST			0x31
+#define MFG_LINEAR			0x32
 
-#define MFG_CW				0x01
-#define MFG_CCW				0x02
+#define MFG_CW				0x33
+#define MFG_CCW				0x34
 
-#define MFG_FRONT			0x01
-#define MFG_BACK			0x02
-#define MFG_FRONT_AND_BACK	0x03
+#define MFG_FRONT			0x35
+#define MFG_BACK			0x36
+#define MFG_FRONT_AND_BACK	0x37
 
-#define MFG_WIREFRAME		0x01
-#define MFG_FILL			0x02
+#define MFG_WIREFRAME		0x38
+#define MFG_FILL			0x39
 
-#define MFG_NEVER			0x01
-#define MFG_LESS			0x02
-#define MFG_LEQUAL			0x03
-#define MFG_GREATER			0x04
-#define MFG_GEQUAL			0x05
-#define MFG_EQUAL			0x06
-#define MFG_NEQUAL			0x07
-#define MFG_ALWAYS			0x08
+#define MFG_NEVER			0x3A
+#define MFG_LESS			0x3B
+#define MFG_LEQUAL			0x3C
+#define MFG_GREATER			0x3D
+#define MFG_GEQUAL			0x3E
+#define MFG_EQUAL			0x3F
+#define MFG_NEQUAL			0x40
+#define MFG_ALWAYS			0x41
 
-#define MFG_ZERO			0x01
-#define MFG_KEEP			0x02
-#define MFG_REPLACE			0x03
-#define MFG_INCREMENT		0x04
-#define MFG_INCREMENT_WRAP	0x05
-#define MFG_DECREMENT		0x06
-#define MFG_DECREMENT_WRAP	0x07
-#define MFG_INVERT			0x08
+#define MFG_ZERO			0x42
+#define MFG_KEEP			0x43
+#define MFG_REPLACE			0x44
+#define MFG_INCREMENT		0x45
+#define MFG_INCREMENT_WRAP	0x46
+#define MFG_DECREMENT		0x47
+#define MFG_DECREMENT_WRAP	0x48
+#define MFG_INVERT			0x49
 
-#define MFG_ONE				0X02
-#define MFG_SRC_COLOR		0x03
-#define MFG_INV_SRC_COLOR	0x04
-#define MFG_DST_COLOR		0x05
-#define MFG_INV_DST_COLOR	0x06
-#define MFG_SRC_ALPHA		0x07
-#define MFG_INV_SRC_ALPHA	0x08
-#define MFG_DST_ALPHA		0x09
-#define MFG_INV_DST_ALPHA	0x0A
+#define MFG_ONE				0X4A
+#define MFG_SRC_COLOR		0x4B
+#define MFG_INV_SRC_COLOR	0x4C
+#define MFG_DST_COLOR		0x4D
+#define MFG_INV_DST_COLOR	0x4E
+#define MFG_SRC_ALPHA		0x4F
+#define MFG_INV_SRC_ALPHA	0x50
+#define MFG_DST_ALPHA		0x51
+#define MFG_INV_DST_ALPHA	0x52
 
-#define MFG_ADD				0x01
-#define MFG_SUBTRACT		0x02
-#define MFG_REV_SUBTRACT	0x03
-#define MFG_MIN				0x04
-#define MFG_MAX				0x05
+#define MFG_ADD				0x53
+#define MFG_SUBTRACT		0x54
+#define MFG_REV_SUBTRACT	0x55
+#define MFG_MIN				0x56
+#define MFG_MAX				0x57
 
-#define MFG_DEPTH24STENCIL8	0x01
-#define MFG_DEPTH32STENCIL8 0x02
+#define MFG_DEPTH24STENCIL8	0x58
+#define MFG_DEPTH32STENCIL8 0x59
 
-#define MFG_MAX_ANISOTROPY	0x01
+#define MFG_MAX_ANISOTROPY	0x5A
+
+	typedef mfmI32 mfgEnum;
+
+	typedef void mfgVertexShader;
+	typedef void mfgPixelShader;
+	typedef void mfgPipeline;
+	typedef void mfgBindingPoint;
+	typedef void mfgConstantBuffer;
+	typedef void mfgTexture1D;
+	typedef void mfgTexture2D;
+	typedef void mfgTexture3D;
+	typedef void mfgSampler;
+	typedef void mfgVertexBuffer;
+	typedef void mfgVertexLayout;
+	typedef void mfgVertexArray;
+	typedef void mfgIndexBuffer;
+	typedef void mfgRasterState;
+	typedef void mfgDepthStencilState;
+	typedef void mfgBlendState;
+	typedef void mfgRenderTexture;
+	typedef void mfgDepthStencilTexture;
+	typedef void mfgFramebuffer;
 
 	typedef struct mfgRenderDevice mfgRenderDevice;
 
@@ -169,13 +191,13 @@ extern "C"
 		///			MFG_NUINT;
 		///			MFG_FLOAT;
 		/// </summary>
-		mfmU8 type;
+		mfgEnum type;
 
 		/// <summary>
 		///		Vertex element component count.
 		///		Valid values: 1; 2; 3; 4;
 		/// </summary>
-		mfmU8 size;
+		mfgEnum size;
 	} mfgVertexElement;
 
 	void mfgDefaultVertexElement(mfgVertexElement* element);
@@ -200,7 +222,7 @@ extern "C"
 		///			MFG_NEAREST;
 		///			MFG_LINEAR;
 		/// </summary>
-		mfmU8 minFilter;
+		mfgEnum minFilter;
 
 		/// <summary>
 		///		Magnifying filter.
@@ -208,7 +230,7 @@ extern "C"
 		///			MFG_NEAREST;
 		///			MFG_LINEAR;
 		/// </summary>
-		mfmU8 magFilter;
+		mfgEnum magFilter;
 
 		/// <summary>
 		///		Mipmap filter (set to MFG_NONE to disable mipmaps).
@@ -217,7 +239,7 @@ extern "C"
 		///			MFG_NEAREST;
 		///			MFG_LINEAR;
 		/// </summary>
-		mfmU8 mipmapFilter;
+		mfgEnum mipmapFilter;
 
 		/// <summary>
 		///		Texture adress mode on coordinate U.
@@ -227,7 +249,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfmU8 adressU;
+		mfgEnum adressU;
 
 		/// <summary>
 		///		Texture adress mode on coordinate V.
@@ -237,7 +259,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfmU8 adressV;
+		mfgEnum adressV;
 
 		/// <summary>
 		///		Texture adress mode on coordinate W.
@@ -247,7 +269,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfmU8 adressW;
+		mfgEnum adressW;
 	} mfgSamplerDesc;
 
 	void mfgDefaultSamplerDesc(mfgSamplerDesc* desc);
@@ -266,7 +288,7 @@ extern "C"
 		///			MFG_CW;
 		///			MFG_CCW;
 		/// </summary>
-		mfmU8 frontFace;
+		mfgEnum frontFace;
 
 		/// <summary>
 		///		Valid values:
@@ -274,14 +296,14 @@ extern "C"
 		///			MFG_BACK;
 		///			MFG_FRONT_AND_BACK;
 		/// </summary>
-		mfmU8 cullFace;
+		mfgEnum cullFace;
 
 		/// <summary>
 		///		Valid values:
 		///			MFG_FILL;
 		///			MFG_WIREFRAME;
 		/// </summary>
-		mfmU8 rasterMode;
+		mfgEnum rasterMode;
 	} mfgRasterStateDesc;
 
 	void mfgDefaultRasterStateDesc(mfgRasterStateDesc* desc);
@@ -326,7 +348,7 @@ extern "C"
 		///			MFG_NEQUAL;
 		///			MFG_ALWAYS;
 		/// </summary>
-		mfmU8 depthCompare;
+		mfgEnum depthCompare;
 
 		mfmU32 stencilRef;
 
@@ -352,7 +374,7 @@ extern "C"
 		///			MFG_NEQUAL;
 		///			MFG_ALWAYS;
 		/// </summary>
-		mfmU8 frontFaceStencilCompare;
+		mfgEnum frontFaceStencilCompare;
 
 		/// <summary>
 		///		Front face steincil fail action.
@@ -366,7 +388,7 @@ extern "C"
 		///			MFG_DECREMENT_WRAP;
 		///			MFG_INVERT;
 		/// </summary>
-		mfmU8 frontFaceStencilFail;
+		mfgEnum frontFaceStencilFail;
 
 		/// <summary>
 		///		Front face steincil pass action.
@@ -380,7 +402,7 @@ extern "C"
 		///			MFG_DECREMENT_WRAP;
 		///			MFG_INVERT;
 		/// </summary>
-		mfmU8 frontFaceStencilPass;
+		mfgEnum frontFaceStencilPass;
 
 		/// <summary>
 		///		Front face stencil depth fail action.
@@ -394,7 +416,7 @@ extern "C"
 		///			MFG_DECREMENT_WRAP;
 		///			MFG_INVERT;
 		/// </summary>
-		mfmU8 frontFaceDepthFail;
+		mfgEnum frontFaceDepthFail;
 
 		/// <summary>
 		///		Back face stencil comparison function.
@@ -408,7 +430,7 @@ extern "C"
 		///			MFG_NEQUAL;
 		///			MFG_ALWAYS;
 		/// </summary>
-		mfmU8 backFaceStencilCompare;
+		mfgEnum backFaceStencilCompare;
 
 		/// <summary>
 		///		Back face steincil fail action.
@@ -422,7 +444,7 @@ extern "C"
 		///			MFG_DECREMENT_WRAP;
 		///			MFG_INVERT;
 		/// </summary>
-		mfmU8 backFaceStencilFail;
+		mfgEnum backFaceStencilFail;
 
 		/// <summary>
 		///		Back face steincil pass action.
@@ -436,7 +458,7 @@ extern "C"
 		///			MFG_DECREMENT_WRAP;
 		///			MFG_INVERT;
 		/// </summary>
-		mfmU8 backFaceStencilPass;
+		mfgEnum backFaceStencilPass;
 
 		/// <summary>
 		///		Back face stencil depth fail action.
@@ -450,7 +472,7 @@ extern "C"
 		///			MFG_DECREMENT_WRAP;
 		///			MFG_INVERT;
 		/// </summary>
-		mfmU8 backFaceDepthFail;
+		mfgEnum backFaceDepthFail;
 
 	} mfgDepthStencilStateDesc;
 
@@ -480,7 +502,7 @@ extern "C"
 		///			MFG_DST_ALPHA;
 		///			MFG_INV_DST_ALPHA;
 		/// </summary>
-		mfmU8 sourceFactor;
+		mfgEnum sourceFactor;
 
 		/// <summary>
 		///		Destination color factor.
@@ -496,7 +518,7 @@ extern "C"
 		///			MFG_DST_ALPHA;
 		///			MFG_INV_DST_ALPHA;
 		/// </summary>
-		mfmU8 destinationFactor;
+		mfgEnum destinationFactor;
 
 		/// <summary>
 		///		Color blend operation.
@@ -507,7 +529,7 @@ extern "C"
 		///			MFG_MIN;
 		///			MFG_MAX;
 		/// </summary>
-		mfmU8 blendOperation;
+		mfgEnum blendOperation;
 
 		/// <summary>
 		///		Source alpha factor.
@@ -523,7 +545,7 @@ extern "C"
 		///			MFG_DST_ALPHA;
 		///			MFG_INV_DST_ALPHA;
 		/// </summary>
-		mfmU8 sourceAlphaFactor;
+		mfgEnum sourceAlphaFactor;
 
 		/// <summary>
 		///		Destination alpha factor.
@@ -539,7 +561,7 @@ extern "C"
 		///			MFG_DST_ALPHA;
 		///			MFG_INV_DST_ALPHA;
 		/// </summary>
-		mfmU8 destinationAlphaFactor;
+		mfgEnum destinationAlphaFactor;
 
 		/// <summary>
 		///		Color alpha operation.
@@ -550,87 +572,87 @@ extern "C"
 		///			MFG_MIN;
 		///			MFG_MAX;
 		/// </summary>
-		mfmU8 blendAlphaOperation;
+		mfgEnum blendAlphaOperation;
 	} mfgBlendStateDesc;
 
 	void mfgDefaultBlendStateDesc(mfgBlendStateDesc* desc);
 
 	// Shader functions
-	typedef mfgError(*mfgRDCreateVertexShaderFunction)(mfgRenderDevice* rd, void** vs, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
-	typedef mfgError(*mfgRDDestroyVertexShaderFunction)(mfgRenderDevice* rd, void* vs);
-	typedef mfgError(*mfgRDCreatePixelShaderFunction)(mfgRenderDevice* rd, void** ps, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
-	typedef mfgError(*mfgRDDestroyPixelShaderFunction)(mfgRenderDevice* rd, void* ps);
-	typedef mfgError(*mfgRDCreatePipelineFunction)(mfgRenderDevice* rd, void** pp, void* vs, void* ps);
-	typedef mfgError(*mfgRDDestroyPipelineFunction)(mfgRenderDevice* rd, void* pp);
-	typedef mfgError(*mfgRDSetPipelineFunction)(mfgRenderDevice* rd, void* pp);
+	typedef mfgError(*mfgRDCreateVertexShaderFunction)(mfgRenderDevice* rd, mfgVertexShader** vs, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
+	typedef mfgError(*mfgRDDestroyVertexShaderFunction)(mfgRenderDevice* rd, mfgVertexShader* vs);
+	typedef mfgError(*mfgRDCreatePixelShaderFunction)(mfgRenderDevice* rd, mfgPixelShader** ps, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
+	typedef mfgError(*mfgRDDestroyPixelShaderFunction)(mfgRenderDevice* rd, mfgPixelShader* ps);
+	typedef mfgError(*mfgRDCreatePipelineFunction)(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexShader* vs, mfgPixelShader* ps);
+	typedef mfgError(*mfgRDDestroyPipelineFunction)(mfgRenderDevice* rd, mfgPipeline* pp);
+	typedef mfgError(*mfgRDSetPipelineFunction)(mfgRenderDevice* rd, mfgPipeline* pp);
 
-	typedef mfgError(*mfgRDGetVertexShaderBindingPointFunction)(mfgRenderDevice* rd, void** bp, void* vs, const mfsUTF8CodeUnit* name);
-	typedef mfgError(*mfgRDGetPixelShaderBindingPointFunction)(mfgRenderDevice* rd, void** bp, void* vs, const mfsUTF8CodeUnit* name);
-	typedef mfgError(*mfgRDBindConstantBufferFunction)(mfgRenderDevice* rd, void* bp, void* cb);
-	typedef mfgError(*mfgRDBindTexture1DFunction)(mfgRenderDevice* rd, void* bp, void* tex);
-	typedef mfgError(*mfgRDBindTexture2DFunction)(mfgRenderDevice* rd, void* bp, void* tex);
-	typedef mfgError(*mfgRDBindTexture3DFunction)(mfgRenderDevice* rd, void* bp, void* tex);
-	typedef mfgError(*mfgRDBindSamplerFunction)(mfgRenderDevice* rd, void* bp, void* sampler);
+	typedef mfgError(*mfgRDGetVertexShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vs, const mfsUTF8CodeUnit* name);
+	typedef mfgError(*mfgRDGetPixelShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* ps, const mfsUTF8CodeUnit* name);
+	typedef mfgError(*mfgRDBindConstantBufferFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
+	typedef mfgError(*mfgRDBindTexture1DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
+	typedef mfgError(*mfgRDBindTexture2DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
+	typedef mfgError(*mfgRDBindTexture3DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
+	typedef mfgError(*mfgRDBindSamplerFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler);
 
-	typedef mfgError(*mfgRDCreateConstantBufferFunction)(mfgRenderDevice* rd, void** cb, mfmU64 size, const void* data, mfmU8 usage);
-	typedef mfgError(*mfgRDDestroyConstantBufferFunction)(mfgRenderDevice* rd, void* cb);
-	typedef mfgError(*mfgRDMapConstantBufferFunction)(mfgRenderDevice* rd, void* cb, void** memory);
-	typedef mfgError(*mfgRDUnmapConstantBufferFunction)(mfgRenderDevice* rd, void* cb);
+	typedef mfgError(*mfgRDCreateConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
+	typedef mfgError(*mfgRDDestroyConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer* cb);
+	typedef mfgError(*mfgRDMapConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory);
+	typedef mfgError(*mfgRDUnmapConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer* cb);
 
 	// Vertex functions
-	typedef mfgError(*mfgRDCreateVertexBufferFunction)(mfgRenderDevice* rd, void** vb, mfmU64 size, const void* data, mfmU8 usage);
-	typedef mfgError(*mfgRDDestroyVertexBufferFunction)(mfgRenderDevice* rd, void* vb);
-	typedef mfgError(*mfgRDMapVertexBufferFunction)(mfgRenderDevice* rd, void* vb, void** memory);
-	typedef mfgError(*mfgRDUnmapVertexBufferFunction)(mfgRenderDevice* rd, void* vb);
-	typedef mfgError(*mfgRDCreateVertexLayoutFunction)(mfgRenderDevice* rd, void** vl, mfmU64 elementCount, const mfgVertexElement* elements, void* vs);
-	typedef mfgError(*mfgRDDestroyVertexLayoutFunction)(mfgRenderDevice* rd, void* vl);
-	typedef mfgError(*mfgRDCreateVertexArrayFunction)(mfgRenderDevice* rd, void** va, mfmU64 vbCount, void** vbs, void* vl);
-	typedef mfgError(*mfgRDDestroyVertexArrayFunction)(mfgRenderDevice* rd, void* va);
-	typedef mfgError(*mfgRDSetVertexArrayFunction)(mfgRenderDevice* rd, void* va);
-	typedef mfgError(*mfgRDCreateIndexBufferFunction)(mfgRenderDevice* rd, void** ib, mfmU64 size, const void* data, mfmU8 usage);
-	typedef mfgError(*mfgRDDestroyIndexBufferFunction)(mfgRenderDevice* rd, void* ib);
-	typedef mfgError(*mfgRDSetIndexBufferFunction)(mfgRenderDevice* rd, void* ib);
-	typedef mfgError(*mfgRDMapIndexBufferFunction)(mfgRenderDevice* rd, void* ib, void** memory);
-	typedef mfgError(*mfgRDUnmapIndexBufferFunction)(mfgRenderDevice* rd, void* ib);
+	typedef mfgError(*mfgRDCreateVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage);
+	typedef mfgError(*mfgRDDestroyVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer* vb);
+	typedef mfgError(*mfgRDMapVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory);
+	typedef mfgError(*mfgRDUnmapVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer* vb);
+	typedef mfgError(*mfgRDCreateVertexLayoutFunction)(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs);
+	typedef mfgError(*mfgRDDestroyVertexLayoutFunction)(mfgRenderDevice* rd, mfgVertexLayout* vl);
+	typedef mfgError(*mfgRDCreateVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 vbCount, mfgVertexBuffer** vbs, mfgVertexLayout* vl);
+	typedef mfgError(*mfgRDDestroyVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray* va);
+	typedef mfgError(*mfgRDSetVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray* va);
+	typedef mfgError(*mfgRDCreateIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum usage);
+	typedef mfgError(*mfgRDDestroyIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+	typedef mfgError(*mfgRDSetIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+	typedef mfgError(*mfgRDMapIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory);
+	typedef mfgError(*mfgRDUnmapIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
 
 	// Texture functions
-	typedef mfgError(*mfgRDCreateTexture1DFunction)(mfgRenderDevice* rd, void** tex, mfmU64 width, mfmU8 format, const void* data, mfmU8 usage);
-	typedef mfgError(*mfgRDDestroyTexture1DFunction)(mfgRenderDevice* rd, void* tex);
-	typedef mfgError(*mfgRDUpdateTexture1DFunction)(mfgRenderDevice* rd, void* tex, mfmU64 dstX, mfmU64 width, const void* data);
-	typedef mfgError(*mfgRDGenerateTexture1DMipmapsFunction)(mfgRenderDevice* rd, void* tex);
+	typedef mfgError(*mfgRDCreateTexture1DFunction)(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage);
+	typedef mfgError(*mfgRDDestroyTexture1DFunction)(mfgRenderDevice* rd, mfgTexture1D* tex);
+	typedef mfgError(*mfgRDUpdateTexture1DFunction)(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data);
+	typedef mfgError(*mfgRDGenerateTexture1DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture1D* tex);
 
-	typedef mfgError(*mfgRDCreateTexture2DFunction)(mfgRenderDevice* rd, void** tex, mfmU64 width, mfmU64 height, mfmU8 format, const void* data, mfmU8 usage);
-	typedef mfgError(*mfgRDDestroyTexture2DFunction)(mfgRenderDevice* rd, void* tex);
-	typedef mfgError(*mfgRDUpdateTexture2DFunction)(mfgRenderDevice* rd, void* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
-	typedef mfgError(*mfgRDGenerateTexture2DMipmapsFunction)(mfgRenderDevice* rd, void* tex);
+	typedef mfgError(*mfgRDCreateTexture2DFunction)(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage);
+	typedef mfgError(*mfgRDDestroyTexture2DFunction)(mfgRenderDevice* rd, mfgTexture2D* tex);
+	typedef mfgError(*mfgRDUpdateTexture2DFunction)(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
+	typedef mfgError(*mfgRDGenerateTexture2DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture2D* tex);
 
-	typedef mfgError(*mfgRDCreateTexture3DFunction)(mfgRenderDevice* rd, void** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfmU8 format, const void* data, mfmU8 usage);
-	typedef mfgError(*mfgRDDestroyTexture3DFunction)(mfgRenderDevice* rd, void* tex);
-	typedef mfgError(*mfgRDUpdateTexture3DFunction)(mfgRenderDevice* rd, void* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data);
-	typedef mfgError(*mfgRDGenerateTexture3DMipmapsFunction)(mfgRenderDevice* rd, void* tex);
+	typedef mfgError(*mfgRDCreateTexture3DFunction)(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage);
+	typedef mfgError(*mfgRDDestroyTexture3DFunction)(mfgRenderDevice* rd, mfgTexture3D* tex);
+	typedef mfgError(*mfgRDUpdateTexture3DFunction)(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data);
+	typedef mfgError(*mfgRDGenerateTexture3DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture3D* tex);
 
-	typedef mfgError(*mfgRDCreateSamplerFunction)(mfgRenderDevice* rd, void** sampler, const mfgSamplerDesc* desc);
-	typedef mfgError(*mfgRDDestroySamplerFunction)(mfgRenderDevice* rd, void* sampler);
+	typedef mfgError(*mfgRDCreateSamplerFunction)(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc);
+	typedef mfgError(*mfgRDDestroySamplerFunction)(mfgRenderDevice* rd, mfgSampler* sampler);
 
 	// Raster/depth stencil/blend state functions
-	typedef mfgError(*mfgRDCreateRasterStateFunction)(mfgRenderDevice* rd, void** state, const mfgRasterStateDesc* desc);
-	typedef mfgError(*mfgRDDestroyRasterStateFunction)(mfgRenderDevice* rd, void* state);
-	typedef mfgError(*mfgRDSetRasterStateFunction)(mfgRenderDevice* rd, void* state);
-	typedef mfgError(*mfgRDCreateDepthStencilStateFunction)(mfgRenderDevice* rd, void** state, const mfgDepthStencilStateDesc* desc);
-	typedef mfgError(*mfgRDDestroyDepthStencilFunction)(mfgRenderDevice* rd, void* state);
-	typedef mfgError(*mfgRDSetDepthStencilFunction)(mfgRenderDevice* rd, void* state);
-	typedef mfgError(*mfgRDCreateBlendStateFunction)(mfgRenderDevice* rd, void** state, const mfgBlendStateDesc* desc);
-	typedef mfgError(*mfgRDDestroyBlendStateFunction)(mfgRenderDevice* rd, void* state);
-	typedef mfgError(*mfgRDSetBlendStateFunction)(mfgRenderDevice* rd, void* state);
+	typedef mfgError(*mfgRDCreateRasterStateFunction)(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc);
+	typedef mfgError(*mfgRDDestroyRasterStateFunction)(mfgRenderDevice* rd, mfgRasterState* state);
+	typedef mfgError(*mfgRDSetRasterStateFunction)(mfgRenderDevice* rd, mfgRasterState* state);
+	typedef mfgError(*mfgRDCreateDepthStencilStateFunction)(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc);
+	typedef mfgError(*mfgRDDestroyDepthStencilFunction)(mfgRenderDevice* rd, mfgDepthStencilState* state);
+	typedef mfgError(*mfgRDSetDepthStencilFunction)(mfgRenderDevice* rd, mfgDepthStencilState* state);
+	typedef mfgError(*mfgRDCreateBlendStateFunction)(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc);
+	typedef mfgError(*mfgRDDestroyBlendStateFunction)(mfgRenderDevice* rd, mfgBlendState* state);
+	typedef mfgError(*mfgRDSetBlendStateFunction)(mfgRenderDevice* rd, mfgBlendState* state);
 
 	// Framebuffer functions
-	typedef mfgError(*mfgRDCreateRenderTextureFunction)(mfgRenderDevice* rd, void** tex, mfmU64 width, mfmU64 height, mfmU8 format);
-	typedef mfgError(*mfgRDDestroyRenderTextureFunction)(mfgRenderDevice* rd, void* tex);
-	typedef mfgError(*mfgRDCreateDepthStencilTextureFunction)(mfgRenderDevice* rd, void** tex, mfmU64 width, mfmU64 height, mfmU8 format);
-	typedef mfgError(*mfgRDDestroyDepthStencilTextureFunction)(mfgRenderDevice* rd, void* tex);
-	typedef mfgError(*mfgRDCreateFramebufferFunction)(mfgRenderDevice* rd, void** fb, mfmU64 textureCount, void* textures, void* depthStencilTexture);
-	typedef mfgError(*mfgRDDestroyFramebufferFunction)(mfgRenderDevice* rd, void* fb);
-	typedef mfgError(*mfgRDSetFramebufferFunction)(mfgRenderDevice* rd, void* fb);
+	typedef mfgError(*mfgRDCreateRenderTextureFunction)(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+	typedef mfgError(*mfgRDDestroyRenderTextureFunction)(mfgRenderDevice* rd, mfgRenderTexture* tex);
+	typedef mfgError(*mfgRDCreateDepthStencilTextureFunction)(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+	typedef mfgError(*mfgRDDestroyDepthStencilTextureFunction)(mfgRenderDevice* rd, mfgDepthStencilTexture* tex);
+	typedef mfgError(*mfgRDCreateFramebufferFunction)(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture);
+	typedef mfgError(*mfgRDDestroyFramebufferFunction)(mfgRenderDevice* rd, mfgFramebuffer* fb);
+	typedef mfgError(*mfgRDSetFramebufferFunction)(mfgRenderDevice* rd, mfgFramebuffer* fb);
 
 	// Draw functions
 	typedef mfgError(*mfgRDClearColorFunction)(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
@@ -647,7 +669,7 @@ extern "C"
 	// Error functions
 	typedef mfmBool(*mfgRDGetErrorString)(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize);
 
-	typedef struct
+	struct mfgRenderDevice
 	{
 		mfmObject object;
 
@@ -724,7 +746,14 @@ extern "C"
 		mfgRDGetFProperty getFProperty;
 
 		mfgRDGetErrorString getErrorString;
-	} mfgRenderDevice;
+	};
+
+	/// <summary>
+	///		Creates a new vertex shader.
+	/// </summary>
+	/// <param name="rd">Render device where the vertex shader will be created</param>
+	/// <param name="vertexShader">Pointer to vertex shader handle</param>
+	mfgError mfgCreateVertexShader(mfgRenderDevice* rd, void** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSie, const mfgMetaData* metaData);
 
 #ifdef __cplusplus
 }
