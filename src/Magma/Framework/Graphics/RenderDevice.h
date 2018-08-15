@@ -609,7 +609,7 @@ extern "C"
 	typedef mfgError(*mfgRDCreateVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 vbCount, mfgVertexBuffer** vbs, mfgVertexLayout* vl);
 	typedef mfgError(*mfgRDDestroyVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray* va);
 	typedef mfgError(*mfgRDSetVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray* va);
-	typedef mfgError(*mfgRDCreateIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum usage);
+	typedef mfgError(*mfgRDCreateIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage);
 	typedef mfgError(*mfgRDDestroyIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
 	typedef mfgError(*mfgRDSetIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
 	typedef mfgError(*mfgRDMapIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory);
@@ -751,9 +751,562 @@ extern "C"
 	/// <summary>
 	///		Creates a new vertex shader.
 	/// </summary>
-	/// <param name="rd">Render device where the vertex shader will be created</param>
+	/// <param name="rd">Render device</param>
 	/// <param name="vertexShader">Pointer to vertex shader handle</param>
-	mfgError mfgCreateVertexShader(mfgRenderDevice* rd, void** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSie, const mfgMetaData* metaData);
+	/// <param name="bytecode">Shader bytecode</param>
+	/// <param name="bytecodeSize">Shader bytecode size</param>
+	/// <param name="metaData">Shader meta data</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSie, const mfgMetaData* metaData);
+
+	/// <summary>
+	///		Destroys a vertex shader.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="vertexShader">Vertex shader handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyVertexShader(mfgRenderDevice* rd, mfgVertexShader* vertexShader);
+
+	/// <summary>
+	///		Creates a new pixel shader.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="pixelShader">Pointer to pixel shader handle</param>
+	/// <param name="bytecode">Shader bytecode</param>
+	/// <param name="bytecodeSize">Shader bytecode size</param>
+	/// <param name="metaData">Shader meta data</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** pixelShader, const mfmU8* bytecode, mfmU64 bytecodeSie, const mfgMetaData* metaData);
+
+	/// <summary>
+	///		Destroys a pixel shader.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="pixelShader">Pixel shader handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyPixelShader(mfgRenderDevice* rd, mfgPixelShader* pixelShader);
+
+	/// <summary>
+	///		Creates a new pipeline.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="pipeline">Pointer to pipeline handle</param>
+	/// <param name="vs">Vertex shader handle</param>
+	/// <param name="ps">Pixel shader handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreatePipeline(mfgRenderDevice* rd, mfgPipeline** pipeline, mfgVertexShader* vs, mfgPixelShader* ps);
+
+	/// <summary>
+	///		Destroys a pipeline.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="pipeline">Pipeline handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyPipeline(mfgRenderDevice* rd, mfgPipeline* pipeline);
+
+	/// <summary>
+	///		Sets a pipeline as the one used for rendering.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="pipeline">Pipeline handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSetPipeline(mfgRenderDevice* rd, mfgPipeline* pipeline);
+
+	/// <summary>
+	///		Gets a vertex shader binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Pointer to binding point handle</param>
+	/// <param name="vertexShader">Vertex shader handle</param>
+	/// <param name="name">Binding point name</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vertexShader, const mfsUTF8CodeUnit* name);
+
+	/// <summary>
+	///		Gets a pixel shader binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Pointer to binding point handle</param>
+	/// <param name="pixelShader">Pixel shader handle</param>
+	/// <param name="name">Binding point name</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* pixelShader, const mfsUTF8CodeUnit* name);
+
+	/// <summary>
+	///		Binds a constant buffer to a binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Binding point handle</param>
+	/// <param name="cb">Constant buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgBindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
+
+	/// <summary>
+	///		Binds a texture 1D to a binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Binding point handle</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgBindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
+
+	/// <summary>
+	///		Binds a texture 2D to a binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Binding point handle</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgBindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
+
+	/// <summary>
+	///		Binds a texture 3D to a binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Binding point handle</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgBindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
+
+	/// <summary>
+	///		Binds a sampler to a binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Binding point handle</param>
+	/// <param name="sampler">Sampler handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgBindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler);
+
+	/// <summary>
+	///		Creates a new constant buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="cb">Pointer to constant buffer handle</param>
+	/// <param name="size">Constant buffer size</param>
+	/// <param name="data">Constant buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
+	/// <param name="usage">Constant buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
+	
+	/// <summary>
+	///		Destroys a constant buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="cb">Constant buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb);
+
+	/// <summary>
+	///		Maps the constant buffer data to a accessible memory location.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="cb">Constant buffer handle</param>
+	/// <param name="memory">Pointer to memory pointer</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgMapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory);
+
+	/// <summary>
+	///		Unmaps the constant buffer pointer data.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="cb">Constant buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgUnmapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb);
+
+	/// <summary>
+	///		Creates a new vertex buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="vb">Pointer to vertex buffer handle</param>
+	/// <param name="size">Vertex buffer size</param>
+	/// <param name="data">Vertex buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
+	/// <param name="usage">Vertex buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage);
+	
+	/// <summary>
+	///		Destroys a vertex buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="vb">Vertex buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb);
+
+	/// <summary>
+	///		Maps the vertex buffer data to a accessible memory location.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="vb">Vertex buffer handle</param>
+	/// <param name="memory">Pointer to memory pointer</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgMapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory);
+
+	/// <summary>
+	///		Unmaps the vertex buffer pointer data.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="vb">Vertex buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgUnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb);
+
+	/// <summary>
+	///		Creates a new vertex layout.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="vl">Pointer to vertex layout handle</param>
+	/// <param name="elementCount">Vertex element count</param>
+	/// <param name="elements">Vertex elements array pointer</param>
+	/// <param name="vs">Vertex shader handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement** elements, mfgVertexShader* vs);
+
+	/// <summary>
+	///		Destroys a vertex layout.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="vb">Vertex layout handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyVertexLayout(mfgRenderDevice* rd, mfgVertexLayout* vl);
+
+	/// <summary>
+	///		Creates a new vertex array.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="va">Pointer to vertex array handle</param>
+	/// <param name="vbCount">Vertex buffer count</param>
+	/// <param name="vbs">Vertex buffers array pointer</param>
+	/// <param name="vl">Vertex layout handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 vbCount, mfgVertexBuffer** vbs, mfgVertexLayout* vl);
+
+	/// <summary>
+	///		Destroys a vertex array.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="va">Vertex array handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyVertexArray(mfgRenderDevice* rd, mfgVertexArray* va);
+	
+	/// <summary>
+	///		Sets a vertex array as the one used in draw calls.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="va">Vertex array handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va);
+
+	/// <summary>
+	///		Creates a new index buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="ib">Pointer to index buffer handle</param>
+	/// <param name="size">Index buffer size</param>
+	/// <param name="data">Index buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
+	/// <param name="format">Index data format</param>
+	/// <param name="usage">Index buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage);
+
+	/// <summary>
+	///		Destroys an index buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="ib">Index buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+
+	/// <summary>
+	///		Maps the index buffer data to a accessible memory location.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="ib">Index buffer handle</param>
+	/// <param name="memory">Pointer to memory pointer</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgMapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory);
+
+	/// <summary>
+	///		Unmaps the index buffer pointer data.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="ib">Index buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgUnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+
+	/// <summary>
+	///		Creates a new texture 1D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Pointer to texture handle</param>
+	/// <param name="width">Texture width</param>
+	/// <param name="format">Texture data format</param>
+	/// <param name="data">Texture initial data (set to NULL to create empty texture, only works if the usage isn't set to MFG_STATIC)</param>
+	/// <param name="usage">Texture usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage);
+
+	/// <summary>
+	///		Destroys a texture 1D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex);
+
+	/// <summary>
+	///		Destroys a texture 1D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <param name="dstX">Update destination X coordinate</param>
+	/// <param name="width">Update data width</param>
+	/// <param name="data">Update data</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgUpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data);
+
+	/// <summary>
+	///		Destroys a texture 1D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGenerateTexture1DMipmaps(mfgRenderDevice* rd, mfgTexture1D* tex);
+
+	/// <summary>
+	///		Creates a new texture 2D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Pointer to texture handle</param>
+	/// <param name="width">Texture width</param>
+	/// <param name="height">Texture height</param>
+	/// <param name="format">Texture data format</param>
+	/// <param name="data">Texture initial data (set to NULL to create empty texture, only works if the usage isn't set to MFG_STATIC)</param>
+	/// <param name="usage">Texture usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage);
+
+	/// <summary>
+	///		Destroys a texture 2D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex);
+
+	/// <summary>
+	///		Destroys a texture 2D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <param name="dstX">Update destination X coordinate</param>
+	/// <param name="dstY">Update destination Y coordinate</param>
+	/// <param name="width">Update data width</param>
+	/// <param name="height">Update data height</param>
+	/// <param name="data">Update data</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgUpdateTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
+
+	/// <summary>
+	///		Destroys a texture 2D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGenerateTexture2DMipmaps(mfgRenderDevice* rd, mfgTexture2D* tex);
+
+	/// <summary>
+	///		Creates a new texture 3D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Pointer to texture handle</param>
+	/// <param name="width">Texture width</param>
+	/// <param name="height">Texture height</param>
+	/// <param name="depth">Texture depth</param>
+	/// <param name="format">Texture data format</param>
+	/// <param name="data">Texture initial data (set to NULL to create empty texture, only works if the usage isn't set to MFG_STATIC)</param>
+	/// <param name="usage">Texture usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage);
+
+	/// <summary>
+	///		Destroys a texture 3D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex);
+
+	/// <summary>
+	///		Destroys a texture 3D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <param name="dstX">Update destination X coordinate</param>
+	/// <param name="dstY">Update destination Y coordinate</param>
+	/// <param name="width">Update data width</param>
+	/// <param name="height">Update data height</param>
+	/// <param name="data">Update data</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgUpdateTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
+
+	/// <summary>
+	///		Destroys a texture 3D.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex);
+
+	/// <summary>
+	///		Creates a new sampler.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="sampler">Pointer to sampler handle</param>
+	/// <param name="desc">Sampler description</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc);
+
+	/// <summary>
+	///		Destroys a sampler.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="sampler">Sampler handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroySampler(mfgRenderDevice* rd, mfgSampler* sampler);
 
 #ifdef __cplusplus
 }
