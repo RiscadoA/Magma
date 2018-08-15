@@ -1410,6 +1410,162 @@ extern "C"
 	/// </returns>
 	mfgError mfgSetBlendState(mfgRenderDevice* rd, mfgBlendState* state);
 
+	/// <summary>
+	///		Creates a new render texture.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Pointer to texture handle</param>
+	/// <param name="width">Texture width</param>
+	/// <param name="height">Texture height</param>
+	/// <param name="format">Texture data format</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+
+	/// <summary>
+	///		Destroys a render texture.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyRenderTexture(mfgRenderDevice* rd, mfgRenderTexture* tex);
+
+	/// <summary>
+	///		Creates a new depth stencil texture.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Pointer to texture handle</param>
+	/// <param name="width">Texture width</param>
+	/// <param name="height">Texture height</param>
+	/// <param name="format">Texture data format</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+
+	/// <summary>
+	///		Destroys a depth stencil texture.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture* tex);
+
+	/// <summary>
+	///		Creates a new framebuffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="state">Pointer to framebuffer handle</param>
+	/// <param name="textureCount">Number of texture attachments</param>
+	/// <param name="texture">Texture attachments array</param>
+	/// <param name="depthStencilTexture">Depth stencil texture (optional, can be set to NULL)</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgCreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture);
+
+	/// <summary>
+	///		Destroys a framebuffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="fb">Framebuffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDestroyFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb);
+
+	/// <summary>
+	///		Sets a framebuffer as the one used for draw calls.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="fb">Framebuffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb);
+
+	/// <summary>
+	///		Clears the current framebuffer color buffers.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="r">Color red component</param>
+	/// <param name="g">Color green component</param>
+	/// <param name="b">Color blue component</param>
+	/// <param name="a">Color alpha component</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
+
+	/// <summary>
+	///		Clears the current framebuffer depth buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="depth">Depth value</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgClearDepth(mfgRenderDevice* rd, mfmF32 depth);
+
+	/// <summary>
+	///		Clears the current framebuffer stencil buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="stencil">Stencil value</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgClearStencil(mfgRenderDevice* rd, mfmI32 stencil);
+
+	/// <summary>
+	///		Draws the triangles stored in the currently active vertex array using the currently active pipeline.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="offset">First vertex offset</param>
+	/// <param name="count">Vertex count</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
+
+	/// <summary>
+	///		Draws the triangles stored in the currently active vertex array using the currently active pipeline and index buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="offset">First index offset</param>
+	/// <param name="count">Index count</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgDrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
+
+	/// <summary>
+	///		Swaps the front and back buffers (displays the stuff drawn until this point).
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSwapBuffers(mfgRenderDevice* rd);
+
 #ifdef __cplusplus
 }
 #endif
