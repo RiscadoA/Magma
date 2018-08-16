@@ -32,11 +32,11 @@ extern "C"
 
 		mfmU8* buffer;
 		mfmU64 bufferSize;
-		mfmU64 bufferHead;
 	} mfsStream;
 
-	extern mfsStream* mfsIn;
-	extern mfsStream* mfsOut;
+	extern mfsStream* mfsInStream;
+	extern mfsStream* mfsOutStream;
+	extern mfsStream* mfsErrStream;
 
 	/// <summary>
 	///		Initializes the stream library.

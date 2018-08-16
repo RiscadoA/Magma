@@ -3,11 +3,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-mfsStream* mfsIn = NULL;
-mfsStream* mfsOut = NULL;
+mfsStream* mfsInStream = NULL;
+mfsStream* mfsOutStream = NULL;
+mfsStream* mfsErrStream = NULL;
 
 static mfmU8 mfsInDefaultBuffer[512];
 static mfmU8 mfsOutDefaultBuffer[512];
+static mfmU8 mfsErrDefaultBuffer[512];
 
 typedef struct
 {
@@ -74,13 +76,14 @@ void mfsDestroyFileStream(void* stream)
 mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSize)
 {
 	mfsFileStream* stream = (mfsFileStream*)malloc(sizeof(mfsFileStream));
+	if (stream == NULL)
+		abort();
 
 	stream->base.object.destructorFunc = &mfsDestroyFileStream;
 	stream->base.object.referenceCount = 0;
 
 	stream->base.buffer = buffer;
 	stream->base.bufferSize = bufferSize;
-	stream->base.bufferHead = 0;
 	stream->file = file;
 
 	stream->base.read = &mfsFileRead;
@@ -91,19 +94,24 @@ mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSize)
 
 void mfsInitStream()
 {
-	// Initialize mfsIn stream
-	mfsIn = mfsCreateFileStream(stdin, mfsInDefaultBuffer, sizeof(mfsInDefaultBuffer));
+	// Initialize mfsInStream stream
+	mfsInStream = mfsCreateFileStream(stdin, mfsInDefaultBuffer, sizeof(mfsInDefaultBuffer));
 	
-	// Initialize mfsOut stream
-	mfsOut = mfsCreateFileStream(stdout, mfsOutDefaultBuffer, sizeof(mfsOutDefaultBuffer));
+	// Initialize mfsOutStream stream
+	mfsOutStream = mfsCreateFileStream(stdout, mfsOutDefaultBuffer, sizeof(mfsOutDefaultBuffer));
+
+	// Initialize mfsErrStream stream
+	mfsErrStream = mfsCreateFileStream(stderr, mfsErrDefaultBuffer, sizeof(mfsErrDefaultBuffer));
 }
 
 void mfsTerminateStream()
 {
-	if (mfsIn != NULL)
-		mfsIn->object.destructorFunc(mfsIn);
-	if (mfsOut != NULL)
-		mfsOut->object.destructorFunc(mfsOut);
+	if (mfsInStream != NULL)
+		mfsInStream->object.destructorFunc(mfsInStream);
+	if (mfsOutStream != NULL)
+		mfsOutStream->object.destructorFunc(mfsOutStream);
+	if (mfsErrStream != NULL)
+		mfsErrStream->object.destructorFunc(mfsErrStream);
 }
 
 mfsError mfsWrite(mfsStream * stream, const mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize)
