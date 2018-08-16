@@ -162,6 +162,8 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Set properties
+	d3dWindow->base.type = MFI_D3DWINDOW;
+
 	d3dWindow->width = width;
 	d3dWindow->height = height;
 	d3dWindow->mode = mode;
