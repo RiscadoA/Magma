@@ -98,7 +98,7 @@ mfsError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size,
 	str->base.object.referenceCount = 0;
 
 	str->base.buffer = buffer;
-	str->base.bufferSize = bufferSize;
+	str->base.bufferSize = size;
 
 	str->base.read = &mfsStringStreamRead;
 	str->base.write = &mfsStringStreamWrite;
