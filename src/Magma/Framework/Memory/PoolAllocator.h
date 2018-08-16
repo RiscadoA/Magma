@@ -33,6 +33,7 @@ extern "C"
 		mfmU64 currentSlotCount;
 		mfmU64 currentFreeSlotCount;
 		mfmU64 currentChunkCount;
+		mfmBool onMemory;
 	} mfmPoolAllocator;
 
 	/// <summary>
@@ -45,7 +46,20 @@ extern "C"
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the pool.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the pool description or allocator pointers are NULL.
 	/// </returns>
-	mfmError mfmCreatePoolAllocator(mfmPoolAllocator** poolAllocator, mfmPoolAllocatorDesc* desc);
+	mfmError mfmCreatePoolAllocator(mfmPoolAllocator** poolAllocator, const mfmPoolAllocatorDesc* desc);
+
+	/// <summary>
+	///		Creates a new magma framework memory pool allocator.
+	/// </summary>
+	/// <param name="poolAllocator">Pointer to allocator pointer</param>
+	/// <param name="desc">Pointer to pool allocator description</param>
+	/// <param name="memory">Pointer to memory adress where the pool allocator will be created</param>
+	/// <param name="memorySize">Size of the reserved memory</param>
+	/// <returns>
+	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the pool description or allocator pointers are NULL or if the pool is marked as expandable or if the pool doesn't fit on the memory passed.
+	/// </returns>
+	mfmError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator** poolAllocator, const mfmPoolAllocatorDesc* desc, void* memory, mfmU64 memorySize);
 
 	/// <summary>
 	///		Destroys a magma framework memory pool allocator.

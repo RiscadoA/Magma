@@ -13,7 +13,7 @@ mfmError mfmInternalPoolDeallocate(void* allocator, void* memory)
 	return mfmPoolDeallocate((mfmPoolAllocator*)allocator, memory);
 }
 
-mfmError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, mfmPoolAllocatorDesc* desc)
+mfmError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPoolAllocatorDesc* desc)
 {
 	// Check if the arguments are valid
 	if (poolAllocator == NULL || desc == NULL)
@@ -33,6 +33,50 @@ mfmError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, mfmPoolAlloca
 	(*poolAllocator)->currentFreeSlotCount = desc->slotCount;
 	(*poolAllocator)->currentSlotCount = desc->slotCount;
 	(*poolAllocator)->currentChunkCount = 1;
+	(*poolAllocator)->onMemory = MFM_FALSE;
+
+	// Get description
+	memcpy(&(*poolAllocator)->desc, desc, sizeof(mfmPoolAllocatorDesc));
+
+	// Set functions
+	(*poolAllocator)->base.allocate = &mfmInternalPoolAllocate;
+	(*poolAllocator)->base.deallocate = &mfmInternalPoolDeallocate;
+
+	// Set destructor function
+	(*poolAllocator)->base.object.destructorFunc = &mfmDestroyPoolAllocator;
+
+	// Initialize slot states to empty
+	memset((*poolAllocator)->firstChunk->slotStatesPtr, MFM_FALSE, desc->slotCount * sizeof(mfmBool));
+
+	// Successfully created a pool allocator
+	return MFM_ERROR_OKAY;
+}
+
+mfmError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator ** poolAllocator, const mfmPoolAllocatorDesc * desc, void * memPtr, mfmU64 memSize)
+{
+	// Check if the arguments are valid
+	if (poolAllocator == NULL || desc == NULL || desc->expandable == MFM_TRUE)
+		return MFM_ERROR_INVALID_ARGUMENTS;
+
+	// Check if there is enough size for the pool
+	if (sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + desc->slotCount * sizeof(mfmBool) + desc->slotSize * desc->slotCount > memSize)
+		return MFM_ERROR_INVALID_ARGUMENTS;
+
+	// Allocate memory for the pool allocator and its first chunk
+	mfmU8* memory = (mfmU8*)memPtr;
+	if (memory == NULL)
+		return MFM_ERROR_ALLOCATION_FAILED;
+
+	// Get data pointers
+	*poolAllocator = (mfmPoolAllocator*)(memory + 0);
+	(*poolAllocator)->firstChunk = (mfmPoolAllocatorChunk*)(memory + sizeof(mfmPoolAllocator));
+	(*poolAllocator)->firstChunk->slotStatesPtr = memory + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk);
+	(*poolAllocator)->firstChunk->slotDataPtr = memory + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + desc->slotCount * sizeof(mfmBool);
+	(*poolAllocator)->firstChunk->next = NULL;
+	(*poolAllocator)->currentFreeSlotCount = desc->slotCount;
+	(*poolAllocator)->currentSlotCount = desc->slotCount;
+	(*poolAllocator)->currentChunkCount = 1;
+	(*poolAllocator)->onMemory = MFM_TRUE;
 
 	// Get description
 	memcpy(&(*poolAllocator)->desc, desc, sizeof(mfmPoolAllocatorDesc));
@@ -63,7 +107,8 @@ void mfmDestroyPoolAllocator(void * poolAllocator)
 	}
 
 	// Free the pool allocator and its main chunk
-	free(poolAllocator);
+	if (((mfmPoolAllocator*)poolAllocator)->onMemory == MFM_FALSE)
+		free(poolAllocator);
 }
 
 mfmError mfmExpandPoolAllocator(mfmPoolAllocator* poolAllocator, mfmPoolAllocatorChunk** newChunk)
