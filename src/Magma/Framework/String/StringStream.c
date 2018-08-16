@@ -58,7 +58,7 @@ mfsError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU
 	}
 	else if (str->writeHead + size > str->base.bufferSize)
 	{
-		memcpy(data, str->base.buffer + str->writeHead, str->base.bufferSize - str->writeHead);
+		memcpy(str->base.buffer + str->writeHead, data, str->base.bufferSize - str->writeHead);
 		if (writeSize != NULL)
 			*writeSize = str->base.bufferSize - str->writeHead;
 		str->writeHead = str->base.bufferSize;
@@ -66,7 +66,7 @@ mfsError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU
 	}
 	else
 	{
-		memcpy(data, str->base.buffer + str->writeHead, size);
+		memcpy(str->base.buffer + str->writeHead, data, size);
 		if (writeSize != NULL)
 			*writeSize = size;
 		str->writeHead += size;
@@ -77,6 +77,7 @@ mfsError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU
 mfsError mfsStringStreamFlush(void* stream)
 {
 	// Do nothing
+	return MFS_ERROR_OKAY;
 }
 
 mfsError mfsStringStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 size)
@@ -86,12 +87,15 @@ mfsError mfsStringStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 size)
 	str->writeHead = 0;
 	str->base.buffer = buffer;
 	str->base.bufferSize = size;
+	memset(buffer, 0, size);
+
+	return MFS_ERROR_OKAY;
 }
 
 mfsError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, void * allocator)
 {
 	mfsStringStream* str = NULL;
-	if (mfmAllocate(allocator, &str, sizeof(mfsStream)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(allocator, &str, sizeof(mfsStringStream)) != MFM_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
 	str->base.object.destructorFunc = &mfsDestroyStringStream;
@@ -99,6 +103,7 @@ mfsError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size,
 
 	str->base.buffer = buffer;
 	str->base.bufferSize = size;
+	memset(buffer, 0, size);
 
 	str->base.read = &mfsStringStreamRead;
 	str->base.write = &mfsStringStreamWrite;
@@ -110,6 +115,8 @@ mfsError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size,
 	str->readHead = 0;
 
 	*stream = str;
+
+	return MFS_ERROR_OKAY;
 }
 
 void mfsDestroyStringStream(mfsStream * stream)
