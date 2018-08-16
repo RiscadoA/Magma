@@ -85,9 +85,26 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 
 	// Check if it is an output variable
 	{
+		if (id == 0)
+		{
+			if (data->metaData->shaderType == MFG_VERTEX_SHADER)
+			{
+				if (mfsPrintFormatUTF8(out, u8"gl_Position") != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				return MFG_ERROR_OKAY;
+			}
+			else if (data->metaData->shaderType == MFG_PIXEL_SHADER)
+			{
+				if (mfsPrintFormatUTF8(out, u8"gl_FragDepth") != MFS_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				return MFG_ERROR_OKAY;
+			}
+		}
+
 		mfgMetaDataOutputVariable* var = metaData->firstOutputVar;
 		while (var != NULL)
 		{
+			
 			if (var->id == id)
 			{
 				if (mfsPrintFormatUTF8(out, u8"out_%d", id) != MFS_ERROR_OKAY)

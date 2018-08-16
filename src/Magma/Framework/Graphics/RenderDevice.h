@@ -1585,10 +1585,9 @@ extern "C"
 	/// <param name="str">Output error string</param>
 	/// <param name="maxSize">Maximum error string size</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
-	///		Otherwise returns the error code.
+	///		True if there was an error, otherwise false.
 	/// </returns>
-	mfgError mfgGetErrorString(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize);
+	mfmBool mfgGetErrorString(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
 
 #include "RenderDevice.h"
 
-#include "../Input/Window.h"
+#include "../Input/GLWindow.h"
 
 #ifdef __cplusplus
 extern "C"

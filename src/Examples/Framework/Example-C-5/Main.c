@@ -85,11 +85,11 @@ void Main(int argc, char** argv)
 		MFG_BYTECODE_MULMAT, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
 	};
 
-	err = mfgD3D11Assemble(bytecode, sizeof(bytecode), metaData, mfsOut);
+	err = mfgD3D11Assemble(bytecode, sizeof(bytecode), metaData, mfsOutStream);
 	if (err != MFG_ERROR_OKAY)
 		abort();
 
-	err = mfgOGL4Assemble(bytecode, sizeof(bytecode), metaData, mfsOut);
+	err = mfgOGL4Assemble(bytecode, sizeof(bytecode), metaData, mfsOutStream);
 	if (err != MFG_ERROR_OKAY)
 		abort();
 

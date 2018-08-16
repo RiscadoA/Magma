@@ -406,7 +406,7 @@ mfgError mfgSwapBuffers(mfgRenderDevice * rd)
 	return rd->swapBuffers(rd);
 }
 
-mfgError mfgGetErrorString(mfgRenderDevice * rd, mfsUTF8CodeUnit * str, mfmU64 maxSize)
+mfmBool mfgGetErrorString(mfgRenderDevice * rd, mfsUTF8CodeUnit * str, mfmU64 maxSize)
 {
 	return rd->getErrorString(rd, str, maxSize);
 }
