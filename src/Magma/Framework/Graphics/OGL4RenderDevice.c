@@ -2,6 +2,7 @@
 #include "OGL4Assembler.h"
 #include "Config.h"
 	
+#include "../Memory/StackAllocator.h"
 #include "../Memory/PoolAllocator.h"
 #include "../String/StringStream.h"
 
@@ -132,16 +133,19 @@ typedef struct
 	mfmU64 errorStringSize;
 
 	mfmPoolAllocator* pool32;
-	mfmU8 pool32Memory[MFG_POOL_32_ELEMENT_COUNT * 32 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_32_ELEMENT_COUNT];
+	mfmU8 pool32Memory[MFG_POOL_32_ELEMENT_COUNT * 32 + MFM_POOL_ALLOCATOR_BASE_SIZE + MFG_POOL_32_ELEMENT_COUNT];
 
 	mfmPoolAllocator* pool64;
-	mfmU8 pool64Memory[MFG_POOL_64_ELEMENT_COUNT * 64 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
+	mfmU8 pool64Memory[MFG_POOL_64_ELEMENT_COUNT * 64 + MFM_POOL_ALLOCATOR_BASE_SIZE + MFG_POOL_64_ELEMENT_COUNT];
 
 	mfmPoolAllocator* pool256;
-	mfmU8 pool256Memory[MFG_POOL_256_ELEMENT_COUNT * 256 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
+	mfmU8 pool256Memory[MFG_POOL_256_ELEMENT_COUNT * 256 + MFM_POOL_ALLOCATOR_BASE_SIZE + MFG_POOL_64_ELEMENT_COUNT];
 
 	mfmPoolAllocator* pool512;
-	mfmU8 pool512Memory[MFG_POOL_512_ELEMENT_COUNT * 512 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_512_ELEMENT_COUNT];
+	mfmU8 pool512Memory[MFG_POOL_512_ELEMENT_COUNT * 512 + MFM_POOL_ALLOCATOR_BASE_SIZE + MFG_POOL_512_ELEMENT_COUNT];
+
+	mfmStackAllocator* stack;
+	mfmU8 stackMemory[MFM_STACK_ALLOCATOR_BASE_SIZE + 2048];
 
 	mfgRasterState* defaultRasterState;
 	mfgDepthStencilState* defaultDepthStencilState;
@@ -204,7 +208,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 	// Create string stream
 	mfsStream* ss;
 	GLchar buffer[4096];
-	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), oglRD->allocator) != MFM_ERROR_OKAY)
+	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), oglRD->stack) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for mfgOGL4Assemble");
 	mfgError err = mfgOGL4Assemble(bytecode, bytecodeSize, metaData, ss);
 	if (err != MFG_ERROR_OKAY)
@@ -1386,6 +1390,13 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
+	// Create stack
+	{
+		mfmError err = mfmCreateStackAllocatorOnMemory(&rd->stack, 2048, rd->stackMemory, sizeof(rd->stackMemory));
+		if (err != MFM_ERROR_OKAY)
+			return MFG_ERROR_ALLOCATION_FAILED;
+	}
+
 	// Initialize some properties
 	rd->base.object.destructorFunc = &mfgDestroyOGL4RenderDevice;
 	rd->base.object.referenceCount = 0;
@@ -1513,6 +1524,7 @@ void mfgDestroyOGL4RenderDevice(void * renderDevice)
 	mfgDestroyBlendState(rd->defaultBlendState);
 
 	// Destroy pools
+	mfmDestroyStackAllocator(rd->stack);
 	mfmDestroyPoolAllocator(rd->pool512);
 	mfmDestroyPoolAllocator(rd->pool256);
 	mfmDestroyPoolAllocator(rd->pool64);
