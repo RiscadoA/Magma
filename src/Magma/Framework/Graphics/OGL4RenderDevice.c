@@ -206,8 +206,14 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 	mfgError err = mfgOGL4Assemble(bytecode, bytecodeSize, metaData, ss);
 	if (err != MFG_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgOGL4Assemble failed");
-	mfsPutByte(ss, '\0');
+	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+	{
+		mfsDestroyStringStream(ss);
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+	}
+
 	mfsDestroyStringStream(ss);
+	mfsPutString(mfsOutStream, buffer);
 
 	// Create shader program
 	oglVS->md = metaData;
@@ -279,8 +285,14 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 	mfgError err = mfgOGL4Assemble(bytecode, bytecodeSize, metaData, ss);
 	if (err != MFG_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgOGL4Assemble failed");
-	mfsPutByte(ss, '\0');
+	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+	{
+		mfsDestroyStringStream(ss);
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+	}
 	mfsDestroyStringStream(ss);
+
+	mfsPutString(mfsOutStream, buffer);
 
 	// Create shader program
 	oglPS->md = metaData;
@@ -349,6 +361,25 @@ mfgError mfgOGL4CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexS
 	glUseProgramStages(oglPP->pipeline, GL_FRAGMENT_SHADER_BIT, ((mfgOGL4Shader*)ps)->program);
 
 	*pp = oglPP;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4SetPipeline(mfgRenderDevice* rd, mfgPipeline* pp)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Set pipeline
+	mfgOGL4Pipeline* oglPP = pp;
+	if (oglPP == NULL)
+		glBindProgramPipeline(0);
+	else
+		glBindProgramPipeline(oglPP->pipeline);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -1245,6 +1276,7 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.destroyPixelShader = &mfgOGL4DestroyPixelShader;
 	rd->base.createPipeline = &mfgOGL4CreatePipeline;
 	rd->base.destroyPipeline = &mfgOGL4DestroyPipeline;
+	rd->base.setPipeline = &mfgOGL4SetPipeline;
 
 	rd->base.createVertexBuffer = &mfgOGL4CreateVertexBuffer;
 	rd->base.destroyVertexBuffer = &mfgOGL4DestroyVertexBuffer;

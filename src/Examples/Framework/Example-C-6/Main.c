@@ -24,6 +24,8 @@ struct Vertex
 {
 	mfmF32 x;
 	mfmF32 y;
+	mfmF32 z;
+	mfmF32 w;
 };
 
 void OnClose(void* window)
@@ -145,7 +147,11 @@ void Main(int argc, char** argv)
 			MFG_BYTECODE_HEADER_MARKER_3,
 			0x02, // Major version 2
 			0x00, // Minor version 0
-			MFG_BYTECODE_LITI4, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+			MFG_BYTECODE_LITI4, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x01,
 		};
 
 		// Create shader
@@ -189,7 +195,7 @@ void Main(int argc, char** argv)
 		strcpy(elements[0].name, u8"position");
 		elements[0].offset = offsetof(struct Vertex, x);
 		elements[0].stride = sizeof(struct Vertex);
-		elements[0].size = 2;
+		elements[0].size = 4;
 		elements[0].type = MFG_FLOAT;
 
 		// Create layout
@@ -219,6 +225,8 @@ void Main(int argc, char** argv)
 	{
 		window->pollEvents(window);
 
+		x += 0.001f;
+
 		// Clear
 
 		if (mfgClearColor(renderDevice, 0.0f, 0.0f, 0.2f, 1.0f) != MFG_ERROR_OKAY)
@@ -241,14 +249,20 @@ void Main(int argc, char** argv)
 				abort();
 			}
 
-			vertexes[0].x = 0.0f + x;
-			vertexes[0].y = 0.0f;
+			vertexes[0].x = 1.0f + x;
+			vertexes[0].y = 1.0f;
+			vertexes[0].z = 0.0f;
+			vertexes[0].w = 1.0f;
 
 			vertexes[1].x = 0.0f + x;
 			vertexes[1].y = 1.0f;
+			vertexes[1].z = 0.0f;
+			vertexes[1].w = 1.0f;
 
-			vertexes[2].x = 1.0f + x;
-			vertexes[2].y = 1.0f;
+			vertexes[2].x = 0.0f + x;
+			vertexes[2].y = 0.0f;
+			vertexes[2].z = 0.0f;
+			vertexes[2].w = 1.0f;
 
 			if (mfgUnmapVertexBuffer(renderDevice, vb) != MFG_ERROR_OKAY)
 			{
@@ -261,6 +275,8 @@ void Main(int argc, char** argv)
 		}
 
 		// Draw vertex array
+		if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
+			abort();
 		if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
 			abort();
 		if (mfgDrawTriangles(renderDevice, 0, 3) != MFG_ERROR_OKAY)
