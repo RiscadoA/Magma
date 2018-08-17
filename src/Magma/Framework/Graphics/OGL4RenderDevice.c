@@ -379,10 +379,35 @@ mfgError mfgOGL4CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, c
 	oglState->base.object.referenceCount = 0;
 	oglState->base.renderDevice = rd;
 
-	// Set properties
-	// TO DO
-
 	*state = oglState;
+
+	// Set properties
+	if (desc->cullEnabled == MFM_FALSE)
+		oglState->cullEnabled = GL_FALSE;
+	else
+		oglState->cullEnabled = GL_TRUE;
+
+	switch (desc->frontFace)
+	{
+		case MFG_CW: oglState->frontFace = GL_CW; break;
+		case MFG_CCW: oglState->frontFace = GL_CCW; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->cullFace)
+	{
+		case MFG_FRONT: oglState->cullFace = GL_FRONT; break;
+		case MFG_BACK: oglState->cullFace = GL_BACK; break;
+		case MFG_FRONT_AND_BACK: oglState->cullFace = GL_FRONT_AND_BACK; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->rasterMode)
+	{
+		case MFG_WIREFRAME: oglState->polygonMode = GL_LINE; break;
+		case MFG_FILL: oglState->polygonMode = GL_FILL; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -391,8 +416,23 @@ mfgError mfgOGL4CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, c
 mfgError mfgOGL4SetRasterState(mfgRenderDevice* rd, mfgRasterState* state)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL || state == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	if (state == NULL)
+		return mfgOGL4SetRasterState(rd, ((mfgOGL4RenderDevice*)rd)->defaultRasterState);
+
+	mfgOGL4RasterState* oglRS = (mfgOGL4RasterState*)state;
+
+	if (oglRS->cullEnabled)
+		glEnable(GL_CULL_FACE);
+	else
+		glDisable(GL_CULL_FACE);
+	glFrontFace(oglRS->frontFace);
+	glCullFace(oglRS->cullFace);
+	glPolygonMode(GL_FRONT_AND_BACK, oglRS->polygonMode);
+
+	MFG_CHECK_GL_ERROR();
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -430,7 +470,132 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 	oglState->base.renderDevice = rd;
 
 	// Set properties
-	// TO DO
+	oglState->depthEnabled = desc->depthEnabled;
+	oglState->depthWriteEnabled = desc->depthWriteEnabled;
+	oglState->depthNear = desc->depthNear;
+	oglState->depthFar = desc->depthFar;
+
+	switch (desc->depthCompare)
+	{
+		case MFG_NEVER: oglState->depthFunc = GL_NEVER; break;
+		case MFG_LESS: oglState->depthFunc = GL_LESS; break;
+		case MFG_LEQUAL: oglState->depthFunc = GL_LEQUAL; break;
+		case MFG_GREATER: oglState->depthFunc = GL_GREATER; break;
+		case MFG_GEQUAL: oglState->depthFunc = GL_GEQUAL; break;
+		case MFG_EQUAL: oglState->depthFunc = GL_EQUAL; break;
+		case MFG_NEQUAL: oglState->depthFunc = GL_NOTEQUAL; break;
+		case MFG_ALWAYS: oglState->depthFunc = GL_ALWAYS; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	oglState->stencilEnabled = desc->stencilEnabled;
+	oglState->stencilRef = desc->stencilRef;
+	oglState->stencilReadMask = desc->stencilReadMask;
+	oglState->stencilWriteMask = desc->stencilWriteMask;
+
+	switch (desc->frontFaceStencilCompare)
+	{
+		case MFG_NEVER: oglState->frontStencilFunc = GL_NEVER; break;
+		case MFG_LESS: oglState->frontStencilFunc = GL_LESS; break;
+		case MFG_LEQUAL: oglState->frontStencilFunc = GL_LEQUAL; break;
+		case MFG_GREATER: oglState->frontStencilFunc = GL_GREATER; break;
+		case MFG_GEQUAL: oglState->frontStencilFunc = GL_GEQUAL; break;
+		case MFG_EQUAL: oglState->frontStencilFunc = GL_EQUAL; break;
+		case MFG_NEQUAL: oglState->frontStencilFunc = GL_NOTEQUAL; break;
+		case MFG_ALWAYS: oglState->frontStencilFunc = GL_ALWAYS; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->frontFaceStencilFail)
+	{
+		case MFG_KEEP: oglState->frontFaceStencilFail = GL_KEEP; break;
+		case MFG_ZERO: oglState->frontFaceStencilFail = GL_ZERO; break;
+		case MFG_REPLACE: oglState->frontFaceStencilFail = GL_REPLACE; break;
+		case MFG_INCREMENT: oglState->frontFaceStencilFail = GL_INCR; break;
+		case MFG_INCREMENT_WRAP: oglState->frontFaceStencilFail = GL_INCR_WRAP; break;
+		case MFG_DECREMENT: oglState->frontFaceStencilFail = GL_DECR; break;
+		case MFG_DECREMENT_WRAP: oglState->frontFaceStencilFail = GL_DECR_WRAP; break;
+		case MFG_INVERT: oglState->frontFaceStencilFail = GL_INVERT; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->frontFaceStencilPass)
+	{
+		case MFG_KEEP: oglState->frontFaceStencilPass = GL_KEEP; break;
+		case MFG_ZERO: oglState->frontFaceStencilPass = GL_ZERO; break;
+		case MFG_REPLACE: oglState->frontFaceStencilPass = GL_REPLACE; break;
+		case MFG_INCREMENT: oglState->frontFaceStencilPass = GL_INCR; break;
+		case MFG_INCREMENT_WRAP: oglState->frontFaceStencilPass = GL_INCR_WRAP; break;
+		case MFG_DECREMENT: oglState->frontFaceStencilPass = GL_DECR; break;
+		case MFG_DECREMENT_WRAP: oglState->frontFaceStencilPass = GL_DECR_WRAP; break;
+		case MFG_INVERT: oglState->frontFaceStencilPass = GL_INVERT; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->frontFaceDepthFail)
+	{
+		case MFG_KEEP: oglState->frontFaceDepthFail = GL_KEEP; break;
+		case MFG_ZERO: oglState->frontFaceDepthFail = GL_ZERO; break;
+		case MFG_REPLACE: oglState->frontFaceDepthFail = GL_REPLACE; break;
+		case MFG_INCREMENT: oglState->frontFaceDepthFail = GL_INCR; break;
+		case MFG_INCREMENT_WRAP: oglState->frontFaceDepthFail = GL_INCR_WRAP; break;
+		case MFG_DECREMENT: oglState->frontFaceDepthFail = GL_DECR; break;
+		case MFG_DECREMENT_WRAP: oglState->frontFaceDepthFail = GL_DECR_WRAP; break;
+		case MFG_INVERT: oglState->frontFaceDepthFail = GL_INVERT; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->backFaceStencilCompare)
+	{
+		case MFG_NEVER: oglState->backStencilFunc = GL_NEVER; break;
+		case MFG_LESS: oglState->backStencilFunc = GL_LESS; break;
+		case MFG_LEQUAL: oglState->backStencilFunc = GL_LEQUAL; break;
+		case MFG_GREATER: oglState->backStencilFunc = GL_GREATER; break;
+		case MFG_GEQUAL: oglState->backStencilFunc = GL_GEQUAL; break;
+		case MFG_EQUAL: oglState->backStencilFunc = GL_EQUAL; break;
+		case MFG_NEQUAL: oglState->backStencilFunc = GL_NOTEQUAL; break;
+		case MFG_ALWAYS: oglState->backStencilFunc = GL_ALWAYS; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->backFaceStencilFail)
+	{
+		case MFG_KEEP: oglState->backFaceStencilFail = GL_KEEP; break;
+		case MFG_ZERO: oglState->backFaceStencilFail = GL_ZERO; break;
+		case MFG_REPLACE: oglState->backFaceStencilFail = GL_REPLACE; break;
+		case MFG_INCREMENT: oglState->backFaceStencilFail = GL_INCR; break;
+		case MFG_INCREMENT_WRAP: oglState->backFaceStencilFail = GL_INCR_WRAP; break;
+		case MFG_DECREMENT: oglState->backFaceStencilFail = GL_DECR; break;
+		case MFG_DECREMENT_WRAP: oglState->backFaceStencilFail = GL_DECR_WRAP; break;
+		case MFG_INVERT: oglState->backFaceStencilFail = GL_INVERT; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->backFaceStencilPass)
+	{
+		case MFG_KEEP: oglState->backFaceStencilPass = GL_KEEP; break;
+		case MFG_ZERO: oglState->backFaceStencilPass = GL_ZERO; break;
+		case MFG_REPLACE: oglState->backFaceStencilPass = GL_REPLACE; break;
+		case MFG_INCREMENT: oglState->backFaceStencilPass = GL_INCR; break;
+		case MFG_INCREMENT_WRAP: oglState->backFaceStencilPass = GL_INCR_WRAP; break;
+		case MFG_DECREMENT: oglState->backFaceStencilPass = GL_DECR; break;
+		case MFG_DECREMENT_WRAP: oglState->backFaceStencilPass = GL_DECR_WRAP; break;
+		case MFG_INVERT: oglState->backFaceStencilPass = GL_INVERT; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->backFaceDepthFail)
+	{
+		case MFG_KEEP: oglState->backFaceDepthFail = GL_KEEP; break;
+		case MFG_ZERO: oglState->backFaceDepthFail = GL_ZERO; break;
+		case MFG_REPLACE: oglState->backFaceDepthFail = GL_REPLACE; break;
+		case MFG_INCREMENT: oglState->backFaceDepthFail = GL_INCR; break;
+		case MFG_INCREMENT_WRAP: oglState->backFaceDepthFail = GL_INCR_WRAP; break;
+		case MFG_DECREMENT: oglState->backFaceDepthFail = GL_DECR; break;
+		case MFG_DECREMENT_WRAP: oglState->backFaceDepthFail = GL_DECR_WRAP; break;
+		case MFG_INVERT: oglState->backFaceDepthFail = GL_INVERT; break;
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
 
 	*state = oglState;
 
@@ -441,8 +606,37 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 mfgError mfgOGL4SetDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState* state)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL || state == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	if (state == NULL)
+		return mfgOGL4SetDepthStencilState(rd, ((mfgOGL4RenderDevice*)rd)->defaultDepthStencilState);
+
+	mfgOGL4DepthStencilState* oglDSS = (mfgOGL4DepthStencilState*)state;
+
+	if (oglDSS->depthEnabled)
+		glEnable(GL_DEPTH_TEST);
+	else
+		glDisable(GL_DEPTH_TEST);
+	
+	glDepthFunc(oglDSS->depthFunc);
+	glDepthMask(oglDSS->depthWriteEnabled ? GL_TRUE : GL_FALSE);
+	glDepthRange(oglDSS->depthNear, oglDSS->depthFar);
+
+	if (oglDSS->stencilEnabled)
+		glEnable(GL_STENCIL_TEST);
+	else
+		glDisable(GL_STENCIL_TEST);
+
+	glStencilFuncSeparate(GL_FRONT, oglDSS->frontStencilFunc, oglDSS->stencilRef, oglDSS->stencilReadMask);
+	glStencilMaskSeparate(GL_FRONT, oglDSS->stencilWriteMask);
+	glStencilOpSeparate(GL_FRONT, oglDSS->frontFaceStencilFail, oglDSS->frontFaceDepthFail, oglDSS->frontFaceStencilPass);
+
+	glStencilFuncSeparate(GL_BACK, oglDSS->backStencilFunc, oglDSS->stencilRef, oglDSS->stencilReadMask);
+	glStencilMaskSeparate(GL_BACK, oglDSS->stencilWriteMask);
+	glStencilOpSeparate(GL_BACK, oglDSS->backFaceStencilFail, oglDSS->backFaceDepthFail, oglDSS->backFaceStencilPass);
+
+	MFG_CHECK_GL_ERROR();
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -480,7 +674,93 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 	oglState->base.renderDevice = rd;
 
 	// Set properties
-	// TO DO
+	oglState->blendEnabled = desc->blendEnabled;
+
+	switch (desc->sourceFactor)
+	{
+		case MFG_ZERO: oglState->srcFactor = GL_ZERO; break;
+		case MFG_ONE: oglState->srcFactor = GL_ONE; break;
+		case MFG_SRC_COLOR: oglState->srcFactor = GL_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: oglState->srcFactor = GL_ONE_MINUS_SRC_COLOR; break;
+		case MFG_DST_COLOR: oglState->srcFactor = GL_DST_COLOR; break;
+		case MFG_INV_DST_COLOR: oglState->srcFactor = GL_ONE_MINUS_DST_COLOR; break;
+		case MFG_SRC_ALPHA: oglState->srcFactor = GL_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: oglState->srcFactor = GL_ONE_MINUS_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: oglState->srcFactor = GL_DST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: oglState->srcFactor = GL_ONE_MINUS_DST_ALPHA; break;
+
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->destinationFactor)
+	{
+		case MFG_ZERO: oglState->dstFactor = GL_ZERO; break;
+		case MFG_ONE: oglState->dstFactor = GL_ONE; break;
+		case MFG_SRC_COLOR: oglState->dstFactor = GL_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: oglState->dstFactor = GL_ONE_MINUS_SRC_COLOR; break;
+		case MFG_DST_COLOR: oglState->dstFactor = GL_DST_COLOR; break;
+		case MFG_INV_DST_COLOR: oglState->dstFactor = GL_ONE_MINUS_DST_COLOR; break;
+		case MFG_SRC_ALPHA: oglState->dstFactor = GL_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: oglState->dstFactor = GL_ONE_MINUS_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: oglState->dstFactor = GL_DST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: oglState->dstFactor = GL_ONE_MINUS_DST_ALPHA; break;
+
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->blendOperation)
+	{
+		case MFG_ADD: oglState->blendOp = GL_FUNC_ADD; break;
+		case MFG_SUBTRACT: oglState->blendOp = GL_FUNC_SUBTRACT; break;
+		case MFG_REV_SUBTRACT: oglState->blendOp = GL_FUNC_REVERSE_SUBTRACT; break;
+		case MFG_MIN: oglState->blendOp = GL_MIN; break;
+		case MFG_MAX: oglState->blendOp = GL_MAX; break;
+
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->sourceAlphaFactor)
+	{
+		case MFG_ZERO: oglState->srcAlphaFactor = GL_ZERO; break;
+		case MFG_ONE: oglState->srcAlphaFactor = GL_ONE; break;
+		case MFG_SRC_COLOR: oglState->srcAlphaFactor = GL_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: oglState->srcAlphaFactor = GL_ONE_MINUS_SRC_COLOR; break;
+		case MFG_DST_COLOR: oglState->srcAlphaFactor = GL_DST_COLOR; break;
+		case MFG_INV_DST_COLOR: oglState->srcAlphaFactor = GL_ONE_MINUS_DST_COLOR; break;
+		case MFG_SRC_ALPHA: oglState->srcAlphaFactor = GL_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: oglState->srcAlphaFactor = GL_ONE_MINUS_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: oglState->srcAlphaFactor = GL_DST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: oglState->srcAlphaFactor = GL_ONE_MINUS_DST_ALPHA; break;
+
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->destinationAlphaFactor)
+	{
+		case MFG_ZERO: oglState->dstAlphaFactor = GL_ZERO; break;
+		case MFG_ONE: oglState->dstAlphaFactor = GL_ONE; break;
+		case MFG_SRC_COLOR: oglState->dstAlphaFactor = GL_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: oglState->dstAlphaFactor = GL_ONE_MINUS_SRC_COLOR; break;
+		case MFG_DST_COLOR: oglState->dstAlphaFactor = GL_DST_COLOR; break;
+		case MFG_INV_DST_COLOR: oglState->dstAlphaFactor = GL_ONE_MINUS_DST_COLOR; break;
+		case MFG_SRC_ALPHA: oglState->dstAlphaFactor = GL_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: oglState->dstAlphaFactor = GL_ONE_MINUS_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: oglState->dstAlphaFactor = GL_DST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: oglState->dstAlphaFactor = GL_ONE_MINUS_DST_ALPHA; break;
+
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+
+	switch (desc->blendAlphaOperation)
+	{
+		case MFG_ADD: oglState->alphaBlendOp = GL_FUNC_ADD; break;
+		case MFG_SUBTRACT: oglState->alphaBlendOp = GL_FUNC_SUBTRACT; break;
+		case MFG_REV_SUBTRACT: oglState->alphaBlendOp = GL_FUNC_REVERSE_SUBTRACT; break;
+		case MFG_MIN: oglState->alphaBlendOp = GL_MIN; break;
+		case MFG_MAX: oglState->alphaBlendOp = GL_MAX; break;
+
+		default: return MFG_ERROR_INVALID_ARGUMENTS;
+	}
 
 	*state = oglState;
 
@@ -491,8 +771,28 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 mfgError mfgOGL4SetBlendState(mfgRenderDevice* rd, mfgBlendState* state)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL || state == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	if (state == NULL)
+		return mfgOGL4SetBlendState(rd, ((mfgOGL4RenderDevice*)rd)->defaultBlendState);
+
+	mfgOGL4BlendState* oglBS = (mfgOGL4BlendState*)state;
+	
+	if (oglBS->blendEnabled)
+		glEnable(GL_BLEND);
+	else
+		glDisable(GL_BLEND);
+
+	glBlendFuncSeparate(oglBS->srcFactor,
+						oglBS->dstFactor,
+						oglBS->srcAlphaFactor,
+						oglBS->dstAlphaFactor);
+
+	glBlendEquationSeparate(oglBS->blendOp,
+							oglBS->alphaBlendOp);
+
+	MFG_CHECK_GL_ERROR();
+
 	return MFG_ERROR_OKAY;
 }
 
