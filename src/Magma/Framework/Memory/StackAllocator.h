@@ -20,6 +20,7 @@ extern "C"
 	} mfmStackAllocator;
 
 #define MFM_STACK_ALLOCATOR_BASE_SIZE (sizeof(mfmStackAllocator))
+#define MFM_STACK_ALLOCATOR_SIZE(memSize) (MFM_STACK_ALLOCATOR_BASE_SIZE + memSize)
 
 	/// <summary>
 	///		Creates a new magma framework memory stack allocator.

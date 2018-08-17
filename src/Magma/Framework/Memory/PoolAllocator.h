@@ -37,6 +37,7 @@ extern "C"
 	} mfmPoolAllocator;
 
 #define MFM_POOL_ALLOCATOR_BASE_SIZE (sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk))
+#define MFM_POOL_ALLOCATOR_SIZE(slotCount, slotSize) (MFM_POOL_ALLOCATOR_BASE_SIZE + slotCount * slotSize + slotCount * sizeof(mfmBool))
 
 	/// <summary>
 	///		Creates a new magma framework memory pool allocator.
