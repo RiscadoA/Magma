@@ -15,6 +15,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#define MFG_POOL_32_ELEMENT_COUNT 2048
+#define MFG_POOL_64_ELEMENT_COUNT 2048
+#define MFG_POOL_256_ELEMENT_COUNT 2048
+#define MFG_POOL_512_ELEMENT_COUNT 2048
+
 typedef struct
 {
 	mfgRenderDevice base;
@@ -26,8 +31,17 @@ typedef struct
 	mfsUTF8CodeUnit errorString[256];
 	mfmU64 errorStringSize;
 
-	mfmPoolAllocator* pool;
-	mfmU8 poolMemory[280000];
+	mfmPoolAllocator* pool32;
+	mfmU8 pool32Memory[MFG_POOL_32_ELEMENT_COUNT * 32 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_32_ELEMENT_COUNT];
+
+	mfmPoolAllocator* pool64;
+	mfmU8 pool64Memory[MFG_POOL_64_ELEMENT_COUNT * 64 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
+
+	mfmPoolAllocator* pool256;
+	mfmU8 pool256Memory[MFG_POOL_256_ELEMENT_COUNT * 256 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
+
+	mfmPoolAllocator* pool512;
+	mfmU8 pool512Memory[MFG_POOL_512_ELEMENT_COUNT * 512 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_512_ELEMENT_COUNT];
 
 	mfgRasterState* defaultRasterState;
 	mfgDepthStencilState* defaultDepthStencilState;
@@ -46,6 +60,43 @@ typedef struct
 	mfgRenderDeviceObject base;
 	GLint pipeline;
 } mfgOGL4Pipeline;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+	GLint vb;
+} mfgOGL4VertexBuffer;
+
+typedef struct
+{
+	GLuint bufferIndex;
+	GLuint index;
+	GLuint size;
+	GLenum type;
+	GLboolean normalized;
+	GLsizei stride;
+	const GLvoid* offset;
+	GLboolean isInteger;
+} mfgOGL4VertexElement;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+	mfgOGL4VertexElement elements[15];
+	mfmU64 elementCount;
+} mfgOGL4VertexLayout;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+	GLint va;
+} mfgOGL4VertexArray;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+	GLint ib;
+} mfgOGL4IndexBuffer;
 
 typedef struct
 {
@@ -119,7 +170,7 @@ void mfgOGL4DestroyVertexShader(void* vs)
 #endif
 	mfgOGL4Shader* oglVS = vs;
 	glDeleteProgram(oglVS->program);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVS->base.renderDevice)->pool, oglVS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVS->base.renderDevice)->pool32, oglVS) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -138,7 +189,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 
 	// Allocate vertex shader
 	mfgOGL4Shader* oglVS = NULL;
-	if (mfmAllocate(oglRD->pool, &oglVS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool32, &oglVS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex shader on pool");
 
 	// Init object
@@ -191,7 +242,7 @@ void mfgOGL4DestroyPixelShader(void* ps)
 #endif
 	mfgOGL4Shader* oglPS = ps;
 	glDeleteProgram(oglPS->program);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPS->base.renderDevice)->pool, oglPS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPS->base.renderDevice)->pool32, oglPS) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -211,7 +262,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 	
 	// Allocate pixel shader
 	mfgOGL4Shader* oglPS = NULL;
-	if (mfmAllocate(oglRD->pool, &oglPS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool32, &oglPS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pixel shader on pool");
 
 	// Init object
@@ -264,7 +315,7 @@ void mfgOGL4DestroyPipeline(void* pp)
 #endif
 	mfgOGL4Pipeline* oglPP = pp;
 	glDeleteProgramPipelines(1, &oglPP->pipeline);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool, oglPP) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool32, oglPP) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -272,7 +323,6 @@ void mfgOGL4DestroyPipeline(void* pp)
 		abort();
 #endif
 }
-
 
 mfgError mfgOGL4CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexShader* vs, mfgPixelShader* ps)
 {
@@ -284,7 +334,7 @@ mfgError mfgOGL4CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexS
 
 	// Allocate pipeline
 	mfgOGL4Pipeline* oglPP = NULL;
-	if (mfmAllocate(oglRD->pool, &oglPP, sizeof(mfgOGL4Pipeline)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool32, &oglPP, sizeof(mfgOGL4Pipeline)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
 
 	// Init object
@@ -298,6 +348,201 @@ mfgError mfgOGL4CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexS
 	glUseProgramStages(oglPP->pipeline, GL_FRAGMENT_SHADER_BIT, ((mfgOGL4Shader*)ps)->program);
 
 	*pp = oglPP;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+void mfgOGL4DestroyVertexBuffer(void* buffer)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (buffer == NULL) abort();
+#endif
+	mfgOGL4VertexBuffer* oglVB = buffer;
+	glDeleteBuffers(1, &oglVB->vb);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVB->base.renderDevice)->pool32, oglVB) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || vb == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate vertex buffer
+	mfgOGL4VertexBuffer* oglVB = NULL;
+	if (mfmAllocate(oglRD->pool32, &oglVB, sizeof(mfgOGL4VertexBuffer)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
+
+	// Init object
+	oglVB->base.object.destructorFunc = &mfgOGL4DestroyVertexBuffer;
+	oglVB->base.object.referenceCount = 0;
+	oglVB->base.renderDevice = rd;
+
+	// Create vertex buffer
+	GLenum gl_usage;
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: gl_usage = GL_STATIC_DRAW; break;
+		case MFG_USAGE_STATIC: gl_usage = GL_STATIC_DRAW; break;
+		case MFG_USAGE_DYNAMIC: gl_usage = GL_DYNAMIC_DRAW; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported usage mode");
+	}
+
+	glGenBuffers(1, &oglVB->vb);
+	glBindBuffer(GL_ARRAY_BUFFER, oglVB->vb);
+	glBufferData(GL_ARRAY_BUFFER, size, data, gl_usage);
+
+	*vb = oglVB;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+
+mfgError mfgOGL4MapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || vb == NULL || memory == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Map vertex buffer
+	mfgOGL4VertexBuffer* oglVB = vb;
+	
+	glBindBuffer(GL_ARRAY_BUFFER, oglVB->vb);
+	*memory = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4UnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || vb == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Unmap vertex buffer
+	mfgOGL4VertexBuffer* oglVB = vb;
+
+	glBindBuffer(GL_ARRAY_BUFFER, oglVB->vb);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+void mfgOGL4DestroyVertexLayout(void* vl)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (vl == NULL) abort();
+#endif
+	mfgOGL4VertexLayout* oglVL = vl;
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVL->base.renderDevice)->pool512, oglVL) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 size, const void* data, mfgEnum usage)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || vl == NULL || data == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate vertex layout
+	mfgOGL4VertexLayout* oglVL = NULL;
+	if (mfmAllocate(oglRD->pool512, &oglVL, sizeof(mfgOGL4VertexLayout)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
+
+	// Init object
+	oglVL->base.object.destructorFunc = &mfgOGL4DestroyVertexLayout;
+	oglVL->base.object.referenceCount = 0;
+	oglVL->base.renderDevice = rd;
+
+	// Create vertex layout
+
+
+	*vl = oglVL;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+void mfgOGL4DestroyVertexArray(void* va)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (va == NULL) abort();
+#endif
+	mfgOGL4VertexArray* oglVA = va;
+	glDeleteVertexArrays(1, &oglVA->va);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool32, oglVA) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 bufferCount, mfgVertexBuffer** buffers, mfgVertexLayout* vl)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || va == NULL || bufferCount == 0 || vl == NULL || buffers == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate vertex array
+	mfgOGL4VertexArray* oglVA = NULL;
+	if (mfmAllocate(oglRD->pool32, &oglVA, sizeof(mfgOGL4VertexArray)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
+
+	// Init object
+	oglVA->base.object.destructorFunc = &mfgOGL4DestroyVertexArray;
+	oglVA->base.object.referenceCount = 0;
+	oglVA->base.renderDevice = rd;
+
+	// Create vertex array
+	glGenVertexArrays(1, &oglVA->va);
+	// TO DO
+
+	*va = oglVA;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4SetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || va == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Set vertex array as active
+	mfgOGL4VertexBuffer* oglVA = va;
+
+	// TO DO
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -352,7 +597,7 @@ void mfgOGL4DestroyRasterState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4RasterState* oglState = state;
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool, oglState) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -371,7 +616,7 @@ mfgError mfgOGL4CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, c
 
 	// Allocate state
 	mfgOGL4RasterState* oglState = NULL;
-	if (mfmAllocate(oglRD->pool, &oglState, sizeof(mfgOGL4RasterState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4RasterState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
 	// Init object
@@ -391,7 +636,7 @@ mfgError mfgOGL4CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, c
 	{
 		case MFG_CW: oglState->frontFace = GL_CW; break;
 		case MFG_CCW: oglState->frontFace = GL_CCW; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported front face");
 	}
 
 	switch (desc->cullFace)
@@ -399,14 +644,14 @@ mfgError mfgOGL4CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, c
 		case MFG_FRONT: oglState->cullFace = GL_FRONT; break;
 		case MFG_BACK: oglState->cullFace = GL_BACK; break;
 		case MFG_FRONT_AND_BACK: oglState->cullFace = GL_FRONT_AND_BACK; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported cull face");
 	}
 
 	switch (desc->rasterMode)
 	{
 		case MFG_WIREFRAME: oglState->polygonMode = GL_LINE; break;
 		case MFG_FILL: oglState->polygonMode = GL_FILL; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported raster mode");
 	}
 
 	MFG_CHECK_GL_ERROR();
@@ -442,7 +687,7 @@ void mfgOGL4DestroyDepthStencilState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4DepthStencilState* oglState = state;
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool, oglState) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool256, oglState) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -461,7 +706,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 
 	// Allocate state
 	mfgOGL4DepthStencilState* oglState = NULL;
-	if (mfmAllocate(oglRD->pool, &oglState, sizeof(mfgOGL4DepthStencilState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool256, &oglState, sizeof(mfgOGL4DepthStencilState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
 
 	// Init object
@@ -485,7 +730,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_EQUAL: oglState->depthFunc = GL_EQUAL; break;
 		case MFG_NEQUAL: oglState->depthFunc = GL_NOTEQUAL; break;
 		case MFG_ALWAYS: oglState->depthFunc = GL_ALWAYS; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported depth compare func");
 	}
 
 	oglState->stencilEnabled = desc->stencilEnabled;
@@ -503,7 +748,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_EQUAL: oglState->frontStencilFunc = GL_EQUAL; break;
 		case MFG_NEQUAL: oglState->frontStencilFunc = GL_NOTEQUAL; break;
 		case MFG_ALWAYS: oglState->frontStencilFunc = GL_ALWAYS; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported front face stencil compare func");
 	}
 
 	switch (desc->frontFaceStencilFail)
@@ -516,7 +761,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_DECREMENT: oglState->frontFaceStencilFail = GL_DECR; break;
 		case MFG_DECREMENT_WRAP: oglState->frontFaceStencilFail = GL_DECR_WRAP; break;
 		case MFG_INVERT: oglState->frontFaceStencilFail = GL_INVERT; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported front face stencil fail action");
 	}
 
 	switch (desc->frontFaceStencilPass)
@@ -529,7 +774,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_DECREMENT: oglState->frontFaceStencilPass = GL_DECR; break;
 		case MFG_DECREMENT_WRAP: oglState->frontFaceStencilPass = GL_DECR_WRAP; break;
 		case MFG_INVERT: oglState->frontFaceStencilPass = GL_INVERT; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported front face stencil pass action");
 	}
 
 	switch (desc->frontFaceDepthFail)
@@ -542,7 +787,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_DECREMENT: oglState->frontFaceDepthFail = GL_DECR; break;
 		case MFG_DECREMENT_WRAP: oglState->frontFaceDepthFail = GL_DECR_WRAP; break;
 		case MFG_INVERT: oglState->frontFaceDepthFail = GL_INVERT; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported front face depth fail action");
 	}
 
 	switch (desc->backFaceStencilCompare)
@@ -555,7 +800,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_EQUAL: oglState->backStencilFunc = GL_EQUAL; break;
 		case MFG_NEQUAL: oglState->backStencilFunc = GL_NOTEQUAL; break;
 		case MFG_ALWAYS: oglState->backStencilFunc = GL_ALWAYS; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported back face stencil compare func");
 	}
 
 	switch (desc->backFaceStencilFail)
@@ -568,7 +813,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_DECREMENT: oglState->backFaceStencilFail = GL_DECR; break;
 		case MFG_DECREMENT_WRAP: oglState->backFaceStencilFail = GL_DECR_WRAP; break;
 		case MFG_INVERT: oglState->backFaceStencilFail = GL_INVERT; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported back face stencil fail action");
 	}
 
 	switch (desc->backFaceStencilPass)
@@ -581,7 +826,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_DECREMENT: oglState->backFaceStencilPass = GL_DECR; break;
 		case MFG_DECREMENT_WRAP: oglState->backFaceStencilPass = GL_DECR_WRAP; break;
 		case MFG_INVERT: oglState->backFaceStencilPass = GL_INVERT; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported back face stencil pass action");
 	}
 
 	switch (desc->backFaceDepthFail)
@@ -594,7 +839,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 		case MFG_DECREMENT: oglState->backFaceDepthFail = GL_DECR; break;
 		case MFG_DECREMENT_WRAP: oglState->backFaceDepthFail = GL_DECR_WRAP; break;
 		case MFG_INVERT: oglState->backFaceDepthFail = GL_INVERT; break;
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported back face depth fail action");
 	}
 
 	*state = oglState;
@@ -646,7 +891,7 @@ void mfgOGL4DestroyBlendState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4BlendState* oglState = state;
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool, oglState) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -665,7 +910,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 
 	// Allocate state
 	mfgOGL4BlendState* oglState = NULL;
-	if (mfmAllocate(oglRD->pool, &oglState, sizeof(mfgOGL4BlendState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4BlendState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
 	// Init object
@@ -689,7 +934,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 		case MFG_DST_ALPHA: oglState->srcFactor = GL_DST_ALPHA; break;
 		case MFG_INV_DST_ALPHA: oglState->srcFactor = GL_ONE_MINUS_DST_ALPHA; break;
 
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported blend source factor");
 	}
 
 	switch (desc->destinationFactor)
@@ -705,7 +950,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 		case MFG_DST_ALPHA: oglState->dstFactor = GL_DST_ALPHA; break;
 		case MFG_INV_DST_ALPHA: oglState->dstFactor = GL_ONE_MINUS_DST_ALPHA; break;
 
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported blend destination factor");
 	}
 
 	switch (desc->blendOperation)
@@ -716,7 +961,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 		case MFG_MIN: oglState->blendOp = GL_MIN; break;
 		case MFG_MAX: oglState->blendOp = GL_MAX; break;
 
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported blend operation");
 	}
 
 	switch (desc->sourceAlphaFactor)
@@ -732,7 +977,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 		case MFG_DST_ALPHA: oglState->srcAlphaFactor = GL_DST_ALPHA; break;
 		case MFG_INV_DST_ALPHA: oglState->srcAlphaFactor = GL_ONE_MINUS_DST_ALPHA; break;
 
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported blend source alpha factor");
 	}
 
 	switch (desc->destinationAlphaFactor)
@@ -748,7 +993,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 		case MFG_DST_ALPHA: oglState->dstAlphaFactor = GL_DST_ALPHA; break;
 		case MFG_INV_DST_ALPHA: oglState->dstAlphaFactor = GL_ONE_MINUS_DST_ALPHA; break;
 
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported blend destination alpha factor");
 	}
 
 	switch (desc->blendAlphaOperation)
@@ -759,7 +1004,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 		case MFG_MIN: oglState->alphaBlendOp = GL_MIN; break;
 		case MFG_MAX: oglState->alphaBlendOp = GL_MAX; break;
 
-		default: return MFG_ERROR_INVALID_ARGUMENTS;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported blend alpha operation");
 	}
 
 	*state = oglState;
@@ -804,10 +1049,16 @@ mfmBool mfgOGL4GetErrorString(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
 
 	if (oglRD->errorStringSize == 0)
+	{
+		str[0] = '\0';
 		return MFM_FALSE;
+	}
 
 	if (maxSize >= oglRD->errorStringSize)
+	{
 		memcpy(str, oglRD->errorString, oglRD->errorStringSize);
+		str[oglRD->errorStringSize] = '\0';
+	}
 	else
 	{
 		memcpy(str, oglRD->errorString, maxSize - 1);
@@ -828,13 +1079,46 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	if (mfmAllocate(allocator, &rd, sizeof(mfgOGL4RenderDevice)) != MFM_ERROR_OKAY)
 		return MFG_ERROR_ALLOCATION_FAILED;
 
-	// Create pool allocator
+	// Create 32 bytes pool
 	{
 		mfmPoolAllocatorDesc desc;
 		desc.expandable = MFM_FALSE;
-		desc.slotCount = 2048;
-		desc.slotSize = 96;
-		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool, &desc, rd->poolMemory, sizeof(rd->poolMemory));
+		desc.slotCount = MFG_POOL_32_ELEMENT_COUNT;
+		desc.slotSize = 32;
+		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool32, &desc, rd->pool32Memory, sizeof(rd->pool32Memory));
+		if (err != MFM_ERROR_OKAY)
+			return MFG_ERROR_ALLOCATION_FAILED;
+	}
+
+	// Create 64 bytes pool
+	{
+		mfmPoolAllocatorDesc desc;
+		desc.expandable = MFM_FALSE;
+		desc.slotCount = MFG_POOL_64_ELEMENT_COUNT;
+		desc.slotSize = 64;
+		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool64, &desc, rd->pool64Memory, sizeof(rd->pool64Memory));
+		if (err != MFM_ERROR_OKAY)
+			return MFG_ERROR_ALLOCATION_FAILED;
+	}
+
+	// Create 256 bytes pool
+	{
+		mfmPoolAllocatorDesc desc;
+		desc.expandable = MFM_FALSE;
+		desc.slotCount = MFG_POOL_256_ELEMENT_COUNT;
+		desc.slotSize = 256;
+		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool256, &desc, rd->pool256Memory, sizeof(rd->pool256Memory));
+		if (err != MFM_ERROR_OKAY)
+			return MFG_ERROR_ALLOCATION_FAILED;
+	}
+
+	// Create 512 bytes pool
+	{
+		mfmPoolAllocatorDesc desc;
+		desc.expandable = MFM_FALSE;
+		desc.slotCount = MFG_POOL_512_ELEMENT_COUNT;
+		desc.slotSize = 512;
+		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool512, &desc, rd->pool512Memory, sizeof(rd->pool512Memory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
@@ -875,6 +1159,16 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.destroyPixelShader = &mfgOGL4DestroyPixelShader;
 	rd->base.createPipeline = &mfgOGL4CreatePipeline;
 	rd->base.destroyPipeline = &mfgOGL4DestroyPipeline;
+
+	rd->base.createVertexBuffer = &mfgOGL4CreateVertexBuffer;
+	rd->base.destroyVertexBuffer = &mfgOGL4DestroyVertexBuffer;
+	rd->base.mapVertexBuffer = &mfgOGL4MapVertexBuffer;
+	rd->base.unmapVertexBuffer = &mfgOGL4UnmapVertexBuffer;
+	rd->base.createVertexLayout = &mfgOGL4CreateVertexLayout;
+	rd->base.destroyVertexLayout = &mfgOGL4DestroyVertexLayout;
+	rd->base.createVertexArray = &mfgOGL4CreateVertexArray;
+	rd->base.destroyVertexArray = &mfgOGL4DestroyVertexArray;
+	rd->base.setVertexArray = &mfgOGL4SetVertexArray;
 
 	rd->base.createRasterState = &mfgOGL4CreateRasterState;
 	rd->base.destroyRasterState = &mfgOGL4DestroyRasterState;
@@ -946,8 +1240,11 @@ void mfgDestroyOGL4RenderDevice(void * renderDevice)
 	mfgDestroyDepthStencilState(rd->defaultDepthStencilState);
 	mfgDestroyBlendState(rd->defaultBlendState);
 
-	// Destroy pool allocator
-	mfmDestroyPoolAllocator(rd->pool);
+	// Destroy pools
+	mfmDestroyPoolAllocator(rd->pool512);
+	mfmDestroyPoolAllocator(rd->pool256);
+	mfmDestroyPoolAllocator(rd->pool64);
+	mfmDestroyPoolAllocator(rd->pool32);
 
 	// Deallocate render device
 	if (mfmDeallocate(rd->allocator, rd) != MFM_ERROR_OKAY)

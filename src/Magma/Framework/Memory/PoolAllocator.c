@@ -19,7 +19,7 @@ mfmError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPool
 	if (poolAllocator == NULL || desc == NULL)
 		return MFM_ERROR_INVALID_ARGUMENTS;
 
-	// Allocate memory for the pool allocator and its first chunk
+	// Allocate memory for the pool32 allocator and its first chunk
 	mfmU8* memory = (mfmU8*)malloc(sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + desc->slotCount * sizeof(mfmBool) + desc->slotSize * desc->slotCount);
 	if (memory == NULL)
 		return MFM_ERROR_ALLOCATION_FAILED;
@@ -48,7 +48,7 @@ mfmError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPool
 	// Initialize slot states to empty
 	memset((*poolAllocator)->firstChunk->slotStatesPtr, MFM_FALSE, desc->slotCount * sizeof(mfmBool));
 
-	// Successfully created a pool allocator
+	// Successfully created a pool32 allocator
 	return MFM_ERROR_OKAY;
 }
 
@@ -58,11 +58,11 @@ mfmError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator ** poolAllocator, const
 	if (poolAllocator == NULL || desc == NULL || desc->expandable == MFM_TRUE)
 		return MFM_ERROR_INVALID_ARGUMENTS;
 
-	// Check if there is enough size for the pool
+	// Check if there is enough size for the pool32
 	if (sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + desc->slotCount * sizeof(mfmBool) + desc->slotSize * desc->slotCount > memSize)
 		return MFM_ERROR_INVALID_ARGUMENTS;
 
-	// Allocate memory for the pool allocator and its first chunk
+	// Allocate memory for the pool32 allocator and its first chunk
 	mfmU8* memory = (mfmU8*)memPtr;
 	if (memory == NULL)
 		return MFM_ERROR_ALLOCATION_FAILED;
@@ -91,13 +91,13 @@ mfmError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator ** poolAllocator, const
 	// Initialize slot states to empty
 	memset((*poolAllocator)->firstChunk->slotStatesPtr, MFM_FALSE, desc->slotCount * sizeof(mfmBool));
 
-	// Successfully created a pool allocator
+	// Successfully created a pool32 allocator
 	return MFM_ERROR_OKAY;
 }
 
 void mfmDestroyPoolAllocator(void * poolAllocator)
 {
-	// Free extra pool allocator chunks
+	// Free extra pool32 allocator chunks
 	mfmPoolAllocatorChunk* chunk = ((mfmPoolAllocator*)poolAllocator)->firstChunk->next;
 	while (chunk != NULL)
 	{
@@ -106,7 +106,7 @@ void mfmDestroyPoolAllocator(void * poolAllocator)
 		chunk = next;
 	}
 
-	// Free the pool allocator and its main chunk
+	// Free the pool32 allocator and its main chunk
 	if (((mfmPoolAllocator*)poolAllocator)->onMemory == MFM_FALSE)
 		free(poolAllocator);
 }
@@ -127,7 +127,7 @@ mfmError mfmExpandPoolAllocator(mfmPoolAllocator* poolAllocator, mfmPoolAllocato
 	// Initialize slot states to empty
 	memset(chunk->slotStatesPtr, MFM_FALSE, poolAllocator->desc.slotCount * sizeof(mfmBool));
 
-	// Add chunk to pool
+	// Add chunk to pool32
 	mfmPoolAllocatorChunk* ck = ((mfmPoolAllocator*)poolAllocator)->firstChunk;
 	while (ck->next != NULL)
 		ck = ck->next;
@@ -144,7 +144,7 @@ mfmError mfmExpandPoolAllocator(mfmPoolAllocator* poolAllocator, mfmPoolAllocato
 
 mfmError mfmPoolChunkAllocate(mfmPoolAllocator * allocator, mfmPoolAllocatorChunk * chunk, void ** memory, mfmU64 size)
 {
-	// Check if the allocation size fits on a pool slot
+	// Check if the allocation size fits on a pool32 slot
 	if (size > allocator->desc.slotSize)
 		return MFM_ERROR_ALLOCATION_TOO_BIG;
 
@@ -180,7 +180,7 @@ mfmError mfmPoolChunkDeallocate(void * memory, mfmPoolAllocator * allocator, mfm
 
 mfmError mfmPoolAllocate(mfmPoolAllocator * allocator, void ** memory, mfmU64 size)
 {
-	// Check if the allocation size fits on a pool slot
+	// Check if the allocation size fits on a pool32 slot
 	if (size > allocator->desc.slotSize)
 		return MFM_ERROR_ALLOCATION_TOO_BIG;
 
@@ -197,7 +197,7 @@ mfmError mfmPoolAllocate(mfmPoolAllocator * allocator, void ** memory, mfmU64 si
 	}
 
 	// No free slots
-	// If the pool is expandable, expand it
+	// If the pool32 is expandable, expand it
 	if (allocator->desc.expandable)
 	{
 		mfmError err = mfmExpandPoolAllocator(allocator, &ck);

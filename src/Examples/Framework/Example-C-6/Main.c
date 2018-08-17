@@ -2,8 +2,11 @@
 #include <Magma/Framework/Graphics/OGL4RenderDevice.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <Magma/Framework/String/Stream.h>
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stddef.h>
 
 mfiWindow* window = NULL;
 mfgRenderDevice* renderDevice = NULL;
@@ -16,6 +19,12 @@ mfgPipeline* pp = NULL;
 mfgVertexBuffer* vb = NULL;
 mfgVertexLayout* vl = NULL;
 mfgVertexArray* va = NULL;
+
+struct Vertex
+{
+	mfmF32 x;
+	mfmF32 y;
+};
 
 void OnClose(void* window)
 {
@@ -161,22 +170,30 @@ void Main(int argc, char** argv)
 	}
 
 	// Create vertex buffer
-	/*{
-		struct Vertex
-		{
-			mfmF32 x;
-			mfmF32 y;
-		};
+	if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(struct Vertex) * 3, NULL, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
 
-		struct Vertex vertexes[] =
-		{
-			{ 0.0f, 0.0f },
-			{ 1.0f, 0.0f },
-			{ 1.0f, 1.0f },
-		};
+	// Create vertex layout
+	{
+		mfgVertexElement elements[1];
+		
+		mfgDefaultVertexElement(&elements[0]);
 
-		// Create buffer
-		if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+		elements[0].bufferIndex = 0;
+		strcpy(elements[0].name, u8"position");
+		elements[0].offset = offsetof(struct Vertex, x);
+		elements[0].stride = sizeof(struct Vertex);
+		elements[0].size = 2;
+		elements[0].type = MFG_FLOAT;
+
+		// Create layout
+		if (mfgCreateVertexLayout(renderDevice, &vl, 1, elements, vs) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgGetErrorString(renderDevice, err, sizeof(err));
@@ -184,11 +201,25 @@ void Main(int argc, char** argv)
 			mfsFlush(mfsErrStream);
 			abort();
 		}
-	}*/
+	}
+
+	// Create vertex array
+	if (mfgCreateVertexArray(renderDevice, &va, 1, &vb, vl) != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
+
+	mfmF32 x = 0.0f;
 
 	while (windowOpen == MFM_TRUE)
 	{
 		window->pollEvents(window);
+
+		// Clear
 
 		if (mfgClearColor(renderDevice, 0.0f, 0.0f, 0.2f, 1.0f) != MFG_ERROR_OKAY)
 			abort();
@@ -196,9 +227,52 @@ void Main(int argc, char** argv)
 			abort();
 		if (mfgClearStencil(renderDevice, 0) != MFG_ERROR_OKAY)
 			abort();
+
+		// Update vertex buffer
+		{
+			struct Vertex* vertexes = NULL;
+
+			if (mfgMapVertexBuffer(renderDevice, vb, &vertexes) != MFG_ERROR_OKAY)
+			{
+				mfsUTF8CodeUnit err[512];
+				mfgGetErrorString(renderDevice, err, sizeof(err));
+				mfsPrintFormatUTF8(mfsErrStream, err);
+				mfsFlush(mfsErrStream);
+				abort();
+			}
+
+			vertexes[0].x = 0.0f + x;
+			vertexes[0].y = 0.0f;
+
+			vertexes[1].x = 0.0f + x;
+			vertexes[1].y = 1.0f;
+
+			vertexes[2].x = 1.0f + x;
+			vertexes[2].y = 1.0f;
+
+			if (mfgUnmapVertexBuffer(renderDevice, vb) != MFG_ERROR_OKAY)
+			{
+				mfsUTF8CodeUnit err[512];
+				mfgGetErrorString(renderDevice, err, sizeof(err));
+				mfsPrintFormatUTF8(mfsErrStream, err);
+				mfsFlush(mfsErrStream);
+				abort();
+			}
+		}
+
+		// Draw vertex array
+		if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
+			abort();
+		if (mfgDrawTriangles(renderDevice, 0, 3) != MFG_ERROR_OKAY)
+			abort();
+
 		if (mfgSwapBuffers(renderDevice) != MFG_ERROR_OKAY)
 			abort();
 	}
+
+	mfgDestroyVertexArray(va);
+	mfgDestroyVertexLayout(vl);
+	mfgDestroyVertexBuffer(vb);
 
 	mfgDestroyPipeline(pp);
 	mfgDestroyPixelShader(ps);

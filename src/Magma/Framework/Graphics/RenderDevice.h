@@ -1018,7 +1018,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement** elements, mfgVertexShader* vs);
+	mfgError mfgCreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs);
 
 	/// <summary>
 	///		Destroys a vertex layout.

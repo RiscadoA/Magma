@@ -6,78 +6,78 @@
 void Main(int argc, char** argv)
 {
 	mfmError err = MFM_ERROR_OKAY;
-	mfmPoolAllocator* pool;
+	mfmPoolAllocator* pool32;
 
-	// Create pool
+	// Create pool32
 	{
 		mfmPoolAllocatorDesc desc;
 		desc.expandable = MFM_TRUE;
 		desc.slotCount = 1;
 		desc.slotSize = sizeof(mfmU32);
-		err = mfmCreatePoolAllocator(&pool, &desc);
+		err = mfmCreatePoolAllocator(&pool32, &desc);
 		if (err != MFM_ERROR_OKAY)
 			abort();
 	}
 
 	printf("Created pool, stats:\n");
-	printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool));
-	printf("Current occupied slot count: %d\n",  mfmPoolGetOccupiedSlotCount(pool));
-	printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool));
-	printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
+	printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool32));
+	printf("Current occupied slot count: %d\n",  mfmPoolGetOccupiedSlotCount(pool32));
+	printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool32));
+	printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool32));
 
 	// Allocate and deallocate value
 	{
 		mfmU8* value;
-		err = mfmPoolAllocate(pool, (void**)&value, sizeof(mfmU32));
+		err = mfmPoolAllocate(pool32, (void**)&value, sizeof(mfmU32));
 		if (err != MFM_ERROR_OKAY)
 			abort();
 
 		printf("Allocated on pool, stats:\n");
-		printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool));
-		printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool));
-		printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool));
-		printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
+		printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool32));
+		printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool32));
+		printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool32));
+		printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool32));
 
-		err = mfmPoolDeallocate(pool, value);
+		err = mfmPoolDeallocate(pool32, value);
 		if (err != MFM_ERROR_OKAY)
 			abort();
 
 		printf("Deallocated on pool, stats:\n");
-		printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool));
-		printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool));
-		printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool));
-		printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
+		printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool32));
+		printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool32));
+		printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool32));
+		printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool32));
 	}
 
 	{
 		mfmU8* value;
-		err = mfmPoolAllocate(pool, (void**)&value, sizeof(mfmU32));
+		err = mfmPoolAllocate(pool32, (void**)&value, sizeof(mfmU32));
 		if (err != MFM_ERROR_OKAY)
 			abort();
 	}
 
 	printf("Allocated on pool, stats:\n");
-	printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool));
-	printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool));
-	printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool));
-	printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
+	printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool32));
+	printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool32));
+	printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool32));
+	printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool32));
 
 	{
 		mfmU8* value;
-		err = mfmPoolAllocate(pool, (void**)&value, sizeof(mfmU32));
+		err = mfmPoolAllocate(pool32, (void**)&value, sizeof(mfmU32));
 		if (err != MFM_ERROR_OKAY)
 			abort();
 	}
 
 	printf("Allocated on pool, stats:\n");
-	printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool));
-	printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool));
-	printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool));
-	printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool));
+	printf("Current free slot count: %d\n", mfmPoolGetFreeSlotCount(pool32));
+	printf("Current occupied slot count: %d\n", mfmPoolGetOccupiedSlotCount(pool32));
+	printf("Current slot count: %d\n", mfmPoolGetSlotCount(pool32));
+	printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool32));
 
 
-	// Destroy pool
-	mfmDestroyPoolAllocator(pool);
+	// Destroy pool32
+	mfmDestroyPoolAllocator(pool32);
 
 	printf("Program finished. Enter any input to quit.\n");
 	getchar();

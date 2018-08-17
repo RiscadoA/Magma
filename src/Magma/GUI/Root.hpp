@@ -15,7 +15,7 @@ namespace Magma
 			/// <summary>
 			///		Constructs a new GUI element tree
 			/// </summary>
-			/// <param name="poolSize">Element pool allocator capacity</param>
+			/// <param name="poolSize">Element pool32 allocator capacity</param>
 			/// <param name="maxElementSize">Maximum element size in bytes</param>
 			Root(size_t poolSize = 4096, size_t maxElementSize = 1024);
 
