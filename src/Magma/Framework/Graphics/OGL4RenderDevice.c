@@ -82,8 +82,9 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	mfgOGL4VertexElement elements[15];
+	mfgOGL4VertexElement elements[14];
 	mfmU64 elementCount;
+	mfgOGL4Shader* vs;
 } mfgOGL4VertexLayout;
 
 typedef struct
@@ -190,7 +191,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 	// Allocate vertex shader
 	mfgOGL4Shader* oglVS = NULL;
 	if (mfmAllocate(oglRD->pool32, &oglVS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex shader on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex shader on pool");
 
 	// Init object
 	oglVS->base.object.destructorFunc = &mfgOGL4DestroyVertexShader;
@@ -263,7 +264,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 	// Allocate pixel shader
 	mfgOGL4Shader* oglPS = NULL;
 	if (mfmAllocate(oglRD->pool32, &oglPS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pixel shader on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pixel shader on pool");
 
 	// Init object
 	oglPS->base.object.destructorFunc = &mfgOGL4DestroyPixelShader;
@@ -335,7 +336,7 @@ mfgError mfgOGL4CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexS
 	// Allocate pipeline
 	mfgOGL4Pipeline* oglPP = NULL;
 	if (mfmAllocate(oglRD->pool32, &oglPP, sizeof(mfgOGL4Pipeline)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
 
 	// Init object
 	oglPP->base.object.destructorFunc = &mfgOGL4DestroyPipeline;
@@ -380,7 +381,7 @@ mfgError mfgOGL4CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mf
 	// Allocate vertex buffer
 	mfgOGL4VertexBuffer* oglVB = NULL;
 	if (mfmAllocate(oglRD->pool32, &oglVB, sizeof(mfgOGL4VertexBuffer)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
 
 	// Init object
 	oglVB->base.object.destructorFunc = &mfgOGL4DestroyVertexBuffer;
@@ -460,10 +461,10 @@ void mfgOGL4DestroyVertexLayout(void* vl)
 #endif
 }
 
-mfgError mfgOGL4CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 size, const void* data, mfgEnum usage)
+mfgError mfgOGL4CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL || vl == NULL || data == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	{ if (rd == NULL || vl == NULL || elementCount == 0 || elementCount > 14 || vs == NULL || elements == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
@@ -471,7 +472,7 @@ mfgError mfgOGL4CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mf
 	// Allocate vertex layout
 	mfgOGL4VertexLayout* oglVL = NULL;
 	if (mfmAllocate(oglRD->pool512, &oglVL, sizeof(mfgOGL4VertexLayout)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex layout on pool");
 
 	// Init object
 	oglVL->base.object.destructorFunc = &mfgOGL4DestroyVertexLayout;
@@ -479,7 +480,64 @@ mfgError mfgOGL4CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mf
 	oglVL->base.renderDevice = rd;
 
 	// Create vertex layout
+	oglVL->vs = vs;
+	oglVL->elementCount = elementCount;
+	for (mfmU64 i = 0; i < elementCount; ++i)
+	{
+		oglVL->elements[i].index = UINT32_MAX;
 
+		// Search for input variable with element name
+		{
+			mfgMetaDataInputVariable* var = ((mfgOGL4Shader*)vs)->md->firstInputVar;
+			while (var != NULL)
+			{
+				mfmBool isVar = MFM_TRUE;
+				for (mfmU64 j = 0; j < 16; ++j)
+				{
+					if (var->name[j] != elements[i].name[j])
+					{
+						isVar = MFM_FALSE;
+						break;
+					}
+					else if (var->name[j] == '\0')
+						break;
+				}
+				
+				if (isVar == MFM_TRUE)
+				{
+					oglVL->elements[i].index = var->id;
+					break;
+				}
+
+				var = var->next;
+			}
+		}
+
+		if (oglVL->elements[i].index == UINT32_MAX)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Couldn't find shader input with vertex element name");
+
+		oglVL->elements[i].bufferIndex = elements[i].bufferIndex;
+		oglVL->elements[i].size = elements[i].size;
+		oglVL->elements[i].offset = (char*)NULL + elements[i].offset;
+		oglVL->elements[i].stride = elements[i].stride;
+
+
+		switch (elements[i].type)
+		{
+			case MFG_BYTE: oglVL->elements[i].type = GL_BYTE; oglVL->elements[i].normalized = GL_FALSE; oglVL->elements[i].isInteger = GL_TRUE; break;
+			case MFG_SHORT: oglVL->elements[i].type = GL_SHORT; oglVL->elements[i].normalized = GL_FALSE; oglVL->elements[i].isInteger = GL_TRUE; break;
+			case MFG_INT: oglVL->elements[i].type = GL_INT; oglVL->elements[i].normalized = GL_FALSE; oglVL->elements[i].isInteger = GL_TRUE; break;
+			case MFG_UBYTE: oglVL->elements[i].type = GL_UNSIGNED_BYTE; oglVL->elements[i].normalized = GL_FALSE; oglVL->elements[i].isInteger = GL_TRUE; break;
+			case MFG_USHORT: oglVL->elements[i].type = GL_UNSIGNED_SHORT; oglVL->elements[i].normalized = GL_FALSE; oglVL->elements[i].isInteger = GL_TRUE; break;
+			case MFG_UINT: oglVL->elements[i].type = GL_UNSIGNED_INT; oglVL->elements[i].normalized = GL_FALSE; oglVL->elements[i].isInteger = GL_TRUE; break;
+			case MFG_NBYTE: oglVL->elements[i].type = GL_BYTE; oglVL->elements[i].normalized = GL_TRUE; oglVL->elements[i].isInteger = GL_FALSE; break;
+			case MFG_NSHORT: oglVL->elements[i].type = GL_SHORT; oglVL->elements[i].normalized = GL_TRUE; oglVL->elements[i].isInteger = GL_FALSE; break;
+			case MFG_NUBYTE: oglVL->elements[i].type = GL_UNSIGNED_BYTE; oglVL->elements[i].normalized = GL_TRUE; oglVL->elements[i].isInteger = GL_FALSE; break;
+			case MFG_NUSHORT: oglVL->elements[i].type = GL_UNSIGNED_SHORT; oglVL->elements[i].normalized = GL_TRUE; oglVL->elements[i].isInteger = GL_FALSE; break;
+			case MFG_FLOAT: oglVL->elements[i].type = GL_FLOAT; oglVL->elements[i].normalized = GL_FALSE; oglVL->elements[i].isInteger = GL_FALSE; break;
+			default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported vertex element type");
+		}
+	}
 
 	*vl = oglVL;
 
@@ -514,7 +572,8 @@ mfgError mfgOGL4CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU
 	// Allocate vertex array
 	mfgOGL4VertexArray* oglVA = NULL;
 	if (mfmAllocate(oglRD->pool32, &oglVA, sizeof(mfgOGL4VertexArray)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
+	mfgOGL4VertexLayout* oglVL = vl;
 
 	// Init object
 	oglVA->base.object.destructorFunc = &mfgOGL4DestroyVertexArray;
@@ -523,7 +582,25 @@ mfgError mfgOGL4CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU
 
 	// Create vertex array
 	glGenVertexArrays(1, &oglVA->va);
-	// TO DO
+	glBindVertexArray(oglVA->va);
+
+	for (mfmU64 i = 0; i < bufferCount; ++i)
+	{
+		mfgOGL4VertexBuffer* buffer = buffers[i];
+
+		glBindBuffer(GL_ARRAY_BUFFER, buffer->vb);
+
+		for (mfmU64 j = 0; j < oglVL->elementCount; ++j)
+		{
+			if (oglVL->elements[j].bufferIndex != i)
+				continue;
+			glEnableVertexAttribArray(oglVL->elements[j].index);
+			if (oglVL->elements[j].isInteger)
+				glVertexAttribIPointer(oglVL->elements[j].index, oglVL->elements[j].size, oglVL->elements[j].type, oglVL->elements[j].stride, oglVL->elements[j].offset);
+			else
+				glVertexAttribPointer(oglVL->elements[j].index, oglVL->elements[j].size, oglVL->elements[j].type, oglVL->elements[j].normalized, oglVL->elements[j].stride, oglVL->elements[j].offset);
+		}
+	}
 
 	*va = oglVA;
 
@@ -540,9 +617,8 @@ mfgError mfgOGL4SetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va)
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
 
 	// Set vertex array as active
-	mfgOGL4VertexBuffer* oglVA = va;
-
-	// TO DO
+	mfgOGL4VertexArray* oglVA = va;
+	glBindVertexArray(oglVA->va);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -617,7 +693,7 @@ mfgError mfgOGL4CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, c
 	// Allocate state
 	mfgOGL4RasterState* oglState = NULL;
 	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4RasterState)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
 	// Init object
 	oglState->base.object.destructorFunc = &mfgOGL4DestroyRasterState;
@@ -707,7 +783,7 @@ mfgError mfgOGL4CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilStat
 	// Allocate state
 	mfgOGL4DepthStencilState* oglState = NULL;
 	if (mfmAllocate(oglRD->pool256, &oglState, sizeof(mfgOGL4DepthStencilState)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
 
 	// Init object
 	oglState->base.object.destructorFunc = &mfgOGL4DestroyDepthStencilState;
@@ -911,7 +987,7 @@ mfgError mfgOGL4CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, con
 	// Allocate state
 	mfgOGL4BlendState* oglState = NULL;
 	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4BlendState)) != MFM_ERROR_OKAY)
-		MFG_RETURN_ERROR(MFM_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
 	// Init object
 	oglState->base.object.destructorFunc = &mfgOGL4DestroyRasterState;
@@ -1068,6 +1144,16 @@ mfmBool mfgOGL4GetErrorString(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 
 	return MFM_TRUE;
 }
 
+mfgError mfgOGL4DrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+	glDrawArrays(GL_TRIANGLES, offset, count);
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
 mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
 {
 	// Check if params are valid
@@ -1184,6 +1270,7 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.clearDepth = &mfgOGL4ClearDepth;
 	rd->base.clearStencil = &mfgOGL4ClearStencil;
 	rd->base.swapBuffers = &mfgOGL4SwapBuffers;
+	rd->base.drawTriangles = &mfgOGL4DrawTriangles;
 
 	rd->base.getErrorString = &mfgOGL4GetErrorString;
 

@@ -25,10 +25,8 @@ extern "C"
 #define MFG_UINT			0x09
 #define MFG_NBYTE			0x0A
 #define MFG_NSHORT			0x0B
-#define MFG_NINT			0x0C
 #define MFG_NUBYTE			0x0D
 #define MFG_NUSHORT			0x0E
-#define MFG_NUINT			0x0F
 #define MFG_FLOAT			0x10
 
 #define MFG_R8SNORM			0x11
@@ -191,10 +189,8 @@ extern "C"
 		///			MFG_UINT;
 		///			MFG_NBYTE;
 		///			MFG_NSHORT;
-		///			MFG_NINT;
 		///			MFG_NUBYTE;
 		///			MFG_NUSHORT;
-		///			MFG_NUINT;
 		///			MFG_FLOAT;
 		/// </summary>
 		mfgEnum type;
