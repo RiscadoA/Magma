@@ -23,6 +23,7 @@ mfmError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 
 
 	// Get data pointers
 	*linearAllocator = (mfmLinearAllocator*)(memory + 0);
+	(*linearAllocator)->onMemory = MFM_FALSE;
 	(*linearAllocator)->size = size;
 	(*linearAllocator)->begin = memory + sizeof(mfmLinearAllocator);
 	(*linearAllocator)->head = memory + sizeof(mfmLinearAllocator);
@@ -38,9 +39,34 @@ mfmError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 
 	return MFM_ERROR_OKAY;
 }
 
+mfmError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator ** linearAllocator, mfmU64 size, void * memory, mfmU64 memorySize)
+{
+	// Check if the arguments are valid
+	if (linearAllocator == NULL || size == 0 || memory == NULL || memorySize < sizeof(mfmLinearAllocator) + size)
+		return MFM_ERROR_INVALID_ARGUMENTS;
+
+	// Get data pointers
+	*linearAllocator = (mfmLinearAllocator*)((mfmU8*)memory + 0);
+	(*linearAllocator)->onMemory = MFM_TRUE;
+	(*linearAllocator)->size = size;
+	(*linearAllocator)->begin = (mfmU8*)memory + sizeof(mfmLinearAllocator);
+	(*linearAllocator)->head = (mfmU8*)memory + sizeof(mfmLinearAllocator);
+
+	// Set functions
+	(*linearAllocator)->base.allocate = &mfmInternalLinearAllocate;
+	(*linearAllocator)->base.deallocate = &mfmInternalLinearDeallocate;
+
+	// Set destructor function
+	(*linearAllocator)->base.object.destructorFunc = &mfmDestroyLinearAllocator;
+
+	// Successfully created a linear allocator
+	return MFM_ERROR_OKAY;
+}
+
 void mfmDestroyLinearAllocator(void * linearAllocator)
 {
-	free(linearAllocator);
+	if (((mfmLinearAllocator*)linearAllocator)->onMemory == MFM_FALSE)
+		free(linearAllocator);
 }
 
 mfmError mfmLinearAllocate(mfmLinearAllocator * linearAllocator, void ** memory, mfmU64 size)
