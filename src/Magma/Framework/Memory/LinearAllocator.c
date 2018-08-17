@@ -1,5 +1,7 @@
 #include "LinearAllocator.h"
 
+#include <stdlib.h>
+
 mfmError mfmInternalLinearAllocate(void* allocator, void** memory, mfmU64 size)
 {
 	return mfmLinearAllocate((mfmLinearAllocator*)allocator, memory, size);
@@ -17,8 +19,8 @@ mfmError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 
 		return MFM_ERROR_INVALID_ARGUMENTS;
 	
 	// Allocate memory for the linear allocator
-	mfmU8 * memory = (mfmU8*)malloc(sizeof(mfmLinearAllocator) + size);
-	if (memory == NULL)
+	mfmU8 * memory = NULL;
+	if (mfmAllocate(NULL, &memory, sizeof(mfmLinearAllocator) + size) != MFM_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
 	// Get data pointers
@@ -66,7 +68,8 @@ mfmError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator ** linearAllocator,
 void mfmDestroyLinearAllocator(void * linearAllocator)
 {
 	if (((mfmLinearAllocator*)linearAllocator)->onMemory == MFM_FALSE)
-		free(linearAllocator);
+		if (mfmDeallocate(NULL, linearAllocator) != MFM_ERROR_OKAY)
+			abort();
 }
 
 mfmError mfmLinearAllocate(mfmLinearAllocator * linearAllocator, void ** memory, mfmU64 size)

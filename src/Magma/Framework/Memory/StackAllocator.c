@@ -1,5 +1,7 @@
 #include "StackAllocator.h"
 
+#include <stdlib.h>
+
 mfmError mfmInternalStackAllocate(void* allocator, void** memory, mfmU64 size)
 {
 	return mfmStackAllocate((mfmStackAllocator*)allocator, memory, size);
@@ -17,8 +19,8 @@ mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 siz
 		return MFM_ERROR_INVALID_ARGUMENTS;
 	
 	// Allocate memory for the stack allocator
-	mfmU8* memory = (mfmU8*)malloc(sizeof(mfmStackAllocator) + size);
-	if (memory == NULL)
+	mfmU8 * memory = NULL;
+	if (mfmAllocate(NULL, &memory, sizeof(mfmStackAllocator) + size) != MFM_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
 	// Get data pointers
@@ -66,7 +68,8 @@ mfmError mfmCreateStackAllocatorOnMemory(mfmStackAllocator ** stackAllocator, mf
 void mfmDestroyStackAllocator(void * stackAllocator)
 {
 	if (((mfmStackAllocator*)stackAllocator)->onMemory == MFM_FALSE)
-		free(stackAllocator);
+		if (mfmDeallocate(NULL, stackAllocator) != MFM_ERROR_OKAY)
+			abort();
 }
 
 mfmError mfmStackAllocate(mfmStackAllocator * allocator, void ** memory, mfmU64 size)
