@@ -76,9 +76,9 @@ mfgError mfgCreateVertexShader(mfgRenderDevice * rd, mfgVertexShader ** vertexSh
 	return rd->createVertexShader(rd, vertexShader, bytecode, bytecodeSize, metaData);
 }
 
-mfgError mfgDestroyVertexShader(mfgRenderDevice * rd, mfgVertexShader * vertexShader)
+void mfgDestroyVertexShader(void * vertexShader)
 {
-	return rd->destroyVertexShader(rd, vertexShader);
+	((mfgRenderDeviceObject*)vertexShader)->renderDevice->destroyVertexShader(vertexShader);
 }
 
 mfgError mfgCreatePixelShader(mfgRenderDevice * rd, mfgPixelShader ** pixelShader, const mfmU8 * bytecode, mfmU64 bytecodeSize, const mfgMetaData * metaData)
@@ -86,9 +86,9 @@ mfgError mfgCreatePixelShader(mfgRenderDevice * rd, mfgPixelShader ** pixelShade
 	return rd->createPixelShader(rd, pixelShader, bytecode, bytecodeSize, metaData);
 }
 
-mfgError mfgDestroyPixelShader(mfgRenderDevice * rd, mfgPixelShader * pixelShader)
+void mfgDestroyPixelShader(void * pixelShader)
 {
-	return rd->destroyPixelShader(rd, pixelShader);
+	((mfgRenderDeviceObject*)pixelShader)->renderDevice->destroyPixelShader(pixelShader);
 }
 
 mfgError mfgCreatePipeline(mfgRenderDevice * rd, mfgPipeline ** pipeline, mfgVertexShader * vs, mfgPixelShader * ps)
@@ -96,9 +96,9 @@ mfgError mfgCreatePipeline(mfgRenderDevice * rd, mfgPipeline ** pipeline, mfgVer
 	return rd->createPipeline(rd, pipeline, vs, ps);
 }
 
-mfgError mfgDestroyPipeline(mfgRenderDevice * rd, mfgPipeline * pipeline)
+void mfgDestroyPipeline(void * pipeline)
 {
-	return rd->destroyPipeline(rd, pipeline);
+	((mfgRenderDeviceObject*)pipeline)->renderDevice->destroyPipeline(pipeline);
 }
 
 mfgError mfgSetPipeline(mfgRenderDevice * rd, mfgPipeline * pipeline)
@@ -146,9 +146,9 @@ mfgError mfgCreateConstantBuffer(mfgRenderDevice * rd, mfgConstantBuffer ** cb, 
 	return rd->createConstantBuffer(rd, cb, size, data, usage);
 }
 
-mfgError mfgDestroyConstantBuffer(mfgRenderDevice * rd, mfgConstantBuffer * cb)
+void mfgDestroyConstantBuffer(void * cb)
 {
-	return rd->destroyConstantBuffer(rd, cb);
+	((mfgRenderDeviceObject*)cb)->renderDevice->destroyConstantBuffer(cb);
 }
 
 mfgError mfgMapConstantBuffer(mfgRenderDevice * rd, mfgConstantBuffer * cb, void ** memory)
@@ -166,9 +166,9 @@ mfgError mfgCreateVertexBuffer(mfgRenderDevice * rd, mfgVertexBuffer ** vb, mfmU
 	return rd->createVertexBuffer(rd, vb, size, data, usage);
 }
 
-mfgError mfgDestroyVertexBuffer(mfgRenderDevice * rd, mfgVertexBuffer * vb)
+void mfgDestroyVertexBuffer(void * vb)
 {
-	return rd->destroyVertexBuffer(rd, vb);
+	((mfgRenderDeviceObject*)vb)->renderDevice->destroyVertexBuffer(vb);
 }
 
 mfgError mfgMapVertexBuffer(mfgRenderDevice * rd, mfgVertexBuffer * vb, void ** memory)
@@ -186,9 +186,9 @@ mfgError mfgCreateVertexLayout(mfgRenderDevice * rd, mfgVertexLayout ** vl, mfmU
 	return rd->createVertexLayout(rd, vl, elementCount, elements, vs);
 }
 
-mfgError mfgDestroyVertexLayout(mfgRenderDevice * rd, mfgVertexLayout * vl)
+void mfgDestroyVertexLayout(void * vl)
 {
-	return rd->destroyVertexLayout(rd, vl);
+	((mfgRenderDeviceObject*)vl)->renderDevice->destroyVertexLayout(vl);
 }
 
 mfgError mfgCreateVertexArray(mfgRenderDevice * rd, mfgVertexArray ** va, mfmU64 vbCount, mfgVertexBuffer ** vbs, mfgVertexLayout * vl)
@@ -196,9 +196,9 @@ mfgError mfgCreateVertexArray(mfgRenderDevice * rd, mfgVertexArray ** va, mfmU64
 	return rd->createVertexArray(rd, va, vbCount, vbs, vl);
 }
 
-mfgError mfgDestroyVertexArray(mfgRenderDevice * rd, mfgVertexArray * va)
+void mfgDestroyVertexArray(void * va)
 {
-	return rd->destroyVertexArray(rd, va);
+	((mfgRenderDeviceObject*)va)->renderDevice->destroyVertexArray(va);
 }
 
 mfgError mfgSetVertexArray(mfgRenderDevice * rd, mfgVertexArray * va)
@@ -211,9 +211,9 @@ mfgError mfgCreateIndexBuffer(mfgRenderDevice * rd, mfgIndexBuffer ** ib, mfmU64
 	return rd->createIndexBuffer(rd, ib, size, data, format, usage);
 }
 
-mfgError mfgDestroyIndexBuffer(mfgRenderDevice * rd, mfgIndexBuffer * ib)
+void mfgDestroyIndexBuffer(void * ib)
 {
-	return rd->destroyIndexBuffer(rd, ib);
+	((mfgRenderDeviceObject*)ib)->renderDevice->destroyIndexBuffer(ib);
 }
 
 mfgError mfgMapIndexBuffer(mfgRenderDevice * rd, mfgIndexBuffer * ib, void ** memory)
@@ -231,9 +231,9 @@ mfgError mfgCreateTexture1D(mfgRenderDevice * rd, mfgTexture1D ** tex, mfmU64 wi
 	return rd->createTexture1D(rd, tex, width, format, data, usage);
 }
 
-mfgError mfgDestroyTexture1D(mfgRenderDevice * rd, mfgTexture1D * tex)
+void mfgDestroyTexture1D(void * tex)
 {
-	return rd->destroyTexture1D(rd, tex);
+	((mfgRenderDeviceObject*)tex)->renderDevice->destroyTexture1D(tex);
 }
 
 mfgError mfgUpdateTexture1D(mfgRenderDevice * rd, mfgTexture1D * tex, mfmU64 dstX, mfmU64 width, const void * data)
@@ -251,9 +251,9 @@ mfgError mfgCreateTexture2D(mfgRenderDevice * rd, mfgTexture2D ** tex, mfmU64 wi
 	return rd->createTexture2D(rd, tex, width, height, format, data, usage);
 }
 
-mfgError mfgDestroyTexture2D(mfgRenderDevice * rd, mfgTexture2D * tex)
+void mfgDestroyTexture2D(void * tex)
 {
-	return rd->destroyTexture2D(rd, tex);
+	((mfgRenderDeviceObject*)tex)->renderDevice->destroyTexture2D(tex);
 }
 
 mfgError mfgUpdateTexture2D(mfgRenderDevice * rd, mfgTexture2D * tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void * data)
@@ -271,9 +271,9 @@ mfgError mfgCreateTexture3D(mfgRenderDevice * rd, mfgTexture3D ** tex, mfmU64 wi
 	return rd->createTexture3D(rd, tex, width, height, depth, format, data, usage);
 }
 
-mfgError mfgDestroyTexture3D(mfgRenderDevice * rd, mfgTexture3D * tex)
+void mfgDestroyTexture3D(void * tex)
 {
-	return rd->destroyTexture3D(rd, tex);
+	((mfgRenderDeviceObject*)tex)->renderDevice->destroyTexture3D(tex);
 }
 
 mfgError mfgUpdateTexture3D(mfgRenderDevice * rd, mfgTexture3D * tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void * data)
@@ -291,9 +291,9 @@ mfgError mfgCreateSampler(mfgRenderDevice * rd, mfgSampler ** sampler, const mfg
 	return rd->createSampler(rd, sampler, desc);
 }
 
-mfgError mfgDestroySampler(mfgRenderDevice * rd, mfgSampler * sampler)
+void mfgDestroySampler(void * sampler)
 {
-	return rd->destroySampler(rd, sampler);
+	((mfgRenderDeviceObject*)sampler)->renderDevice->destroySampler(sampler);
 }
 
 mfgError mfgCreateRasterState(mfgRenderDevice * rd, mfgRasterState ** state, const mfgRasterStateDesc * desc)
@@ -301,9 +301,9 @@ mfgError mfgCreateRasterState(mfgRenderDevice * rd, mfgRasterState ** state, con
 	return rd->createRasterState(rd, state, desc);
 }
 
-mfgError mfgDestroyRasterState(mfgRenderDevice * rd, mfgRasterState * state)
+void mfgDestroyRasterState(void * state)
 {
-	return rd->destroyRasterState(rd, state);
+	((mfgRenderDeviceObject*)state)->renderDevice->destroyRasterState(state);
 }
 
 mfgError mfgSetRasterState(mfgRenderDevice * rd, mfgRasterState * state)
@@ -316,9 +316,9 @@ mfgError mfgCreateDepthStencilState(mfgRenderDevice * rd, mfgDepthStencilState *
 	return rd->createDepthStencilState(rd, state, desc);
 }
 
-mfgError mfgDestroyDepthStencilState(mfgRenderDevice * rd, mfgDepthStencilState * state)
+void mfgDestroyDepthStencilState(void * state)
 {
-	return rd->destroyDepthStencilState(rd, state);
+	((mfgRenderDeviceObject*)state)->renderDevice->destroyDepthStencilState(state);
 }
 
 mfgError mfgSetDepthStencilState(mfgRenderDevice * rd, mfgDepthStencilState * state)
@@ -331,9 +331,9 @@ mfgError mfgCreateBlendState(mfgRenderDevice * rd, mfgBlendState ** state, const
 	return rd->createBlendState(rd, state, desc);
 }
 
-mfgError mfgDestroyBlendState(mfgRenderDevice * rd, mfgBlendState * state)
+void mfgDestroyBlendState(void * state)
 {
-	return rd->destroyBlendState(rd, state);
+	((mfgRenderDeviceObject*)state)->renderDevice->destroyBlendState(state);
 }
 
 mfgError mfgSetBlendState(mfgRenderDevice * rd, mfgBlendState * state)
@@ -346,9 +346,9 @@ mfgError mfgCreateRenderTexture(mfgRenderDevice * rd, mfgRenderTexture ** tex, m
 	return rd->createRenderTexture(rd, tex, width, height, format);
 }
 
-mfgError mfgDestroyRenderTexture(mfgRenderDevice * rd, mfgRenderTexture * tex)
+void mfgDestroyRenderTexture(void * tex)
 {
-	return rd->destroyRenderTexture(rd, tex);
+	((mfgRenderDeviceObject*)tex)->renderDevice->destroyRenderTexture(tex);
 }
 
 mfgError mfgCreateDepthStencilTexture(mfgRenderDevice * rd, mfgDepthStencilTexture ** tex, mfmU64 width, mfmU64 height, mfgEnum format)
@@ -356,9 +356,9 @@ mfgError mfgCreateDepthStencilTexture(mfgRenderDevice * rd, mfgDepthStencilTextu
 	return rd->createDepthStencilTexture(rd, tex, width, height, format);
 }
 
-mfgError mfgDestroyDepthStencilTexture(mfgRenderDevice * rd, mfgDepthStencilTexture * tex)
+void mfgDestroyDepthStencilTexture(void * tex)
 {
-	return rd->destroyDepthStencilTexture(rd, tex);
+	((mfgRenderDeviceObject*)tex)->renderDevice->destroyDepthStencilTexture(tex);
 }
 
 mfgError mfgCreateFramebuffer(mfgRenderDevice * rd, mfgFramebuffer ** fb, mfmU64 textureCount, mfgRenderTexture ** textures, mfgDepthStencilTexture * depthStencilTexture)
@@ -366,9 +366,9 @@ mfgError mfgCreateFramebuffer(mfgRenderDevice * rd, mfgFramebuffer ** fb, mfmU64
 	return rd->createFramebuffer(rd, fb, textureCount, textures, depthStencilTexture);
 }
 
-mfgError mfgDestroyFramebuffer(mfgRenderDevice * rd, mfgFramebuffer * fb)
+void mfgDestroyFramebuffer(void * fb)
 {
-	return rd->destroyFramebuffer(rd, fb);
+	((mfgRenderDeviceObject*)fb)->renderDevice->destroyFramebuffer(fb);
 }
 
 mfgError mfgSetFramebuffer(mfgRenderDevice * rd, mfgFramebuffer * fb)

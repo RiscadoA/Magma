@@ -11,6 +11,11 @@ mfgRenderDevice* renderDevice = NULL;
 mfmBool windowOpen = MFM_TRUE;
 
 mfgVertexShader* vs = NULL;
+mfgPixelShader* ps = NULL;
+mfgPipeline* pp = NULL;
+mfgVertexBuffer* vb = NULL;
+mfgVertexLayout* vl = NULL;
+mfgVertexArray* va = NULL;
 
 void OnClose(void* window)
 {
@@ -52,14 +57,14 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = 0;	// Binding point count
 
 			// Input var 1
-			memcpy(metaDataB + ptr, "position", 9);
+			memcpy(metaDataB + ptr, u8"position", 9);
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = 0x01;	// ID 1
 			metaDataB[ptr++] = MFG_FLOAT4;
 
 			// Output var 1
-			memcpy(metaDataB + ptr, "position", 9);
+			memcpy(metaDataB + ptr, u8"position", 9);
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = 0x00;	// ID 0
@@ -79,11 +84,7 @@ void Main(int argc, char** argv)
 			MFG_BYTECODE_HEADER_MARKER_3,
 			0x02, // Major version 2
 			0x00, // Minor version 0
-			MFG_BYTECODE_DECLF4A, 0x00, 0x02, 0x00, 0x04,
-			MFG_BYTECODE_ASSIGN, 0x00, 0x02, 0x00, 0x01,
-			MFG_BYTECODE_ASSIGN, 0x00, 0x00, 0x00, 0x02,
-			MFG_BYTECODE_GET4CMP, 0x00, 0xF0, 0x00, 0x00, 0x01,
-			MFG_BYTECODE_MULMAT, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+			MFG_BYTECODE_ASSIGN, 0x00, 0x00, 0x00, 0x01,
 		};
 
 		// Create shader
@@ -96,6 +97,94 @@ void Main(int argc, char** argv)
 			abort();
 		}
 	}
+
+	// Load pixel shader
+	{
+		mfgMetaData* metaData = NULL;
+
+		// Load meta data
+		{
+			mfmU8 metaDataB[256];
+			mfmU64 ptr = 0;
+			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_0;
+			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_1;
+			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_2;
+			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_3;
+			metaDataB[ptr++] = MFG_PIXEL_SHADER;
+			metaDataB[ptr++] = 0;	// Input var count
+			metaDataB[ptr++] = 1;	// Output var count
+			metaDataB[ptr++] = 0;	// Binding point count
+
+			// Output var 1
+			memcpy(metaDataB + ptr, u8"color", 6);
+			ptr += 16;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x01;	// ID 1
+			metaDataB[ptr++] = MFG_FLOAT4;
+
+			// Load
+			if (mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL) != MFG_ERROR_OKAY)
+				abort();
+		}
+
+		// Load bytecode
+		mfmU8 bytecode[] =
+		{
+			MFG_BYTECODE_HEADER_MARKER_0,
+			MFG_BYTECODE_HEADER_MARKER_1,
+			MFG_BYTECODE_HEADER_MARKER_2,
+			MFG_BYTECODE_HEADER_MARKER_3,
+			0x02, // Major version 2
+			0x00, // Minor version 0
+			MFG_BYTECODE_LITI4, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+		};
+
+		// Create shader
+		if (mfgCreatePixelShader(renderDevice, &ps, bytecode, sizeof(bytecode), metaData) != MFG_ERROR_OKAY)
+		{
+			mfsUTF8CodeUnit err[512];
+			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsFlush(mfsErrStream);
+			abort();
+		}
+	}
+
+	// Create pipeline
+	if (mfgCreatePipeline(renderDevice, &pp, vs, ps) != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
+
+	// Create vertex buffer
+	/*{
+		struct Vertex
+		{
+			mfmF32 x;
+			mfmF32 y;
+		};
+
+		struct Vertex vertexes[] =
+		{
+			{ 0.0f, 0.0f },
+			{ 1.0f, 0.0f },
+			{ 1.0f, 1.0f },
+		};
+
+		// Create buffer
+		if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+		{
+			mfsUTF8CodeUnit err[512];
+			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsFlush(mfsErrStream);
+			abort();
+		}
+	}*/
 
 	while (windowOpen == MFM_TRUE)
 	{
@@ -111,9 +200,10 @@ void Main(int argc, char** argv)
 			abort();
 	}
 
-	if (mfgDestroyVertexShader(renderDevice, vs) != MFG_ERROR_OKAY)
-		abort();
+	mfgDestroyPipeline(pp);
+	mfgDestroyPixelShader(ps);
+	mfgDestroyVertexShader(vs);
 
-	mfiDestroyGLWindow(window);
 	mfgDestroyOGL4RenderDevice(renderDevice);
+	mfiDestroyGLWindow(window);
 }
