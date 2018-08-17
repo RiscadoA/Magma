@@ -19,6 +19,7 @@ mfgPipeline* pp = NULL;
 mfgVertexBuffer* vb = NULL;
 mfgVertexLayout* vl = NULL;
 mfgVertexArray* va = NULL;
+mfgIndexBuffer* ib = NULL;
 
 struct Vertex
 {
@@ -176,7 +177,7 @@ void Main(int argc, char** argv)
 	}
 
 	// Create vertex buffer
-	if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(struct Vertex) * 3, NULL, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+	if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(struct Vertex) * 4, NULL, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgGetErrorString(renderDevice, err, sizeof(err));
@@ -219,6 +220,24 @@ void Main(int argc, char** argv)
 		abort();
 	}
 
+	// Create index buffer
+	{
+		mfmU8 indices[] =
+		{
+			2, 1, 0,
+			0, 3, 2,
+		};
+
+		if (mfgCreateIndexBuffer(renderDevice, &ib, sizeof(indices), indices, MFG_UBYTE, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+		{
+			mfsUTF8CodeUnit err[512];
+			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsFlush(mfsErrStream);
+			abort();
+		}
+	}
+
 	mfmF32 x = 0.0f;
 
 	while (windowOpen == MFM_TRUE)
@@ -249,20 +268,25 @@ void Main(int argc, char** argv)
 				abort();
 			}
 
-			vertexes[0].x = 1.0f + x;
-			vertexes[0].y = 1.0f;
+			vertexes[0].x = -0.5f + x;
+			vertexes[0].y = -0.5f;
 			vertexes[0].z = 0.0f;
 			vertexes[0].w = 1.0f;
 
-			vertexes[1].x = 0.0f + x;
-			vertexes[1].y = 1.0f;
+			vertexes[1].x = -0.5f + x;
+			vertexes[1].y = +0.5f;
 			vertexes[1].z = 0.0f;
 			vertexes[1].w = 1.0f;
 
-			vertexes[2].x = 0.0f + x;
-			vertexes[2].y = 0.0f;
+			vertexes[2].x = +0.5f + x;
+			vertexes[2].y = +0.5f;
 			vertexes[2].z = 0.0f;
 			vertexes[2].w = 1.0f;
+
+			vertexes[3].x = +0.5f + x;
+			vertexes[3].y = -0.5f;
+			vertexes[3].z = 0.0f;
+			vertexes[3].w = 1.0f;
 
 			if (mfgUnmapVertexBuffer(renderDevice, vb) != MFG_ERROR_OKAY)
 			{
@@ -279,7 +303,9 @@ void Main(int argc, char** argv)
 			abort();
 		if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
 			abort();
-		if (mfgDrawTriangles(renderDevice, 0, 3) != MFG_ERROR_OKAY)
+		if (mfgSetIndexBuffer(renderDevice, ib) != MFG_ERROR_OKAY)
+			abort();
+		if (mfgDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
 			abort();
 
 		if (mfgSwapBuffers(renderDevice) != MFG_ERROR_OKAY)

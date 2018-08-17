@@ -226,6 +226,11 @@ mfgError mfgUnmapIndexBuffer(mfgRenderDevice * rd, mfgIndexBuffer * ib)
 	return rd->unmapIndexBuffer(rd, ib);
 }
 
+mfgError mfgSetIndexBuffer(mfgRenderDevice * rd, mfgIndexBuffer * ib)
+{
+	return rd->setIndexBuffer(rd, ib);
+}
+
 mfgError mfgCreateTexture1D(mfgRenderDevice * rd, mfgTexture1D ** tex, mfmU64 width, mfgEnum format, const void * data, mfgEnum usage)
 {
 	return rd->createTexture1D(rd, tex, width, format, data, usage);

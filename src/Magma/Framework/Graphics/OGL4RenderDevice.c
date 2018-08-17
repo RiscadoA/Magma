@@ -22,34 +22,6 @@
 
 typedef struct
 {
-	mfgRenderDevice base;
-
-	mfiWindow* window;
-
-	void* allocator;
-
-	mfsUTF8CodeUnit errorString[256];
-	mfmU64 errorStringSize;
-
-	mfmPoolAllocator* pool32;
-	mfmU8 pool32Memory[MFG_POOL_32_ELEMENT_COUNT * 32 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_32_ELEMENT_COUNT];
-
-	mfmPoolAllocator* pool64;
-	mfmU8 pool64Memory[MFG_POOL_64_ELEMENT_COUNT * 64 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
-
-	mfmPoolAllocator* pool256;
-	mfmU8 pool256Memory[MFG_POOL_256_ELEMENT_COUNT * 256 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
-
-	mfmPoolAllocator* pool512;
-	mfmU8 pool512Memory[MFG_POOL_512_ELEMENT_COUNT * 512 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_512_ELEMENT_COUNT];
-
-	mfgRasterState* defaultRasterState;
-	mfgDepthStencilState* defaultDepthStencilState;
-	mfgBlendState* defaultBlendState;
-} mfgOGL4RenderDevice;
-
-typedef struct
-{
 	mfgRenderDeviceObject base;
 	GLint program;
 	const mfgMetaData* md;
@@ -97,6 +69,7 @@ typedef struct
 {
 	mfgRenderDeviceObject base;
 	GLint ib;
+	GLenum indexType;
 } mfgOGL4IndexBuffer;
 
 typedef struct
@@ -137,7 +110,7 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	
+
 	GLboolean blendEnabled;
 	GLenum srcFactor;
 	GLenum dstFactor;
@@ -146,6 +119,36 @@ typedef struct
 	GLenum dstAlphaFactor;
 	GLenum alphaBlendOp;
 } mfgOGL4BlendState;
+
+typedef struct
+{
+	mfgRenderDevice base;
+
+	mfiWindow* window;
+
+	void* allocator;
+
+	mfsUTF8CodeUnit errorString[256];
+	mfmU64 errorStringSize;
+
+	mfmPoolAllocator* pool32;
+	mfmU8 pool32Memory[MFG_POOL_32_ELEMENT_COUNT * 32 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_32_ELEMENT_COUNT];
+
+	mfmPoolAllocator* pool64;
+	mfmU8 pool64Memory[MFG_POOL_64_ELEMENT_COUNT * 64 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
+
+	mfmPoolAllocator* pool256;
+	mfmU8 pool256Memory[MFG_POOL_256_ELEMENT_COUNT * 256 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_64_ELEMENT_COUNT];
+
+	mfmPoolAllocator* pool512;
+	mfmU8 pool512Memory[MFG_POOL_512_ELEMENT_COUNT * 512 + sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + MFG_POOL_512_ELEMENT_COUNT];
+
+	mfgRasterState* defaultRasterState;
+	mfgDepthStencilState* defaultDepthStencilState;
+	mfgBlendState* defaultBlendState;
+
+	mfgOGL4IndexBuffer* currentIndexBuffer;
+} mfgOGL4RenderDevice;
 
 #define MFG_RETURN_ERROR(code, msg) {\
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;\
@@ -472,6 +475,136 @@ mfgError mfgOGL4UnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb)
 
 	glBindBuffer(GL_ARRAY_BUFFER, oglVB->vb);
 	glUnmapBuffer(GL_ARRAY_BUFFER);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+
+void mfgOGL4DestroyIndexBuffer(void* buffer)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (buffer == NULL) abort();
+#endif
+	mfgOGL4IndexBuffer* oglIB = buffer;
+	glDeleteBuffers(1, &oglIB->ib);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglIB->base.renderDevice)->pool32, oglIB) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{
+		if (rd == NULL || ib == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate index buffer
+	mfgOGL4IndexBuffer* oglIB = NULL;
+	if (mfmAllocate(oglRD->pool32, &oglIB, sizeof(mfgOGL4IndexBuffer)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate index buffer on pool");
+
+	// Init object
+	oglIB->base.object.destructorFunc = &mfgOGL4DestroyIndexBuffer;
+	oglIB->base.object.referenceCount = 0;
+	oglIB->base.renderDevice = rd;
+
+	// Create index buffer
+	GLenum gl_usage;
+
+	switch (format)
+	{
+		case MFG_UBYTE: oglIB->indexType = GL_UNSIGNED_BYTE; break;
+		case MFG_USHORT: oglIB->indexType = GL_UNSIGNED_SHORT; break;
+		case MFG_UINT: oglIB->indexType = GL_UNSIGNED_INT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported index format");
+	}
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: gl_usage = GL_STATIC_DRAW; break;
+		case MFG_USAGE_STATIC: gl_usage = GL_STATIC_DRAW; break;
+		case MFG_USAGE_DYNAMIC: gl_usage = GL_DYNAMIC_DRAW; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported usage mode");
+	}
+
+	glGenBuffers(1, &oglIB->ib);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oglIB->ib);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, gl_usage);
+
+	*ib = oglIB;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+
+mfgError mfgOGL4MapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{
+		if (rd == NULL || ib == NULL || memory == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Map index buffer
+	mfgOGL4IndexBuffer* oglIB = ib;
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oglIB->ib);
+	*memory = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4UnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{
+		if (rd == NULL || ib == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Unmap index buffer
+	mfgOGL4IndexBuffer* oglIB = ib;
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oglIB->ib);
+	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4SetIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{
+		if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Set index buffer
+	mfgOGL4IndexBuffer* oglIB = ib;
+	if (oglIB == NULL)
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	else
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oglIB->ib);
+
+	oglRD->currentIndexBuffer = oglIB;
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -1185,6 +1318,19 @@ mfgError mfgOGL4DrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
 	return MFG_ERROR_OKAY;
 }
 
+mfgError mfgOGL4DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{
+		if (rd == NULL ||
+			((mfgOGL4RenderDevice*)rd)->currentIndexBuffer == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	}
+#endif
+	glDrawElements(GL_TRIANGLES, count, ((mfgOGL4RenderDevice*)rd)->currentIndexBuffer->indexType, (char*)NULL + offset);
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
 mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
 {
 	// Check if params are valid
@@ -1248,6 +1394,8 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	memset(rd->errorString, '\0', sizeof(rd->errorString));
 	rd->errorStringSize = 0;
 
+	rd->currentIndexBuffer = NULL;
+
 	// Init context
 	glfwMakeContextCurrent((GLFWwindow*)mfiGetGLWindowGLFWHandle(((mfgOGL4RenderDevice*)rd)->window));
 	glewExperimental = GL_TRUE;
@@ -1269,7 +1417,6 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 		glfwSwapInterval(0);
 
 	// Set functions
-
 	rd->base.createVertexShader = &mfgOGL4CreateVertexShader;
 	rd->base.destroyVertexShader = &mfgOGL4DestroyVertexShader;
 	rd->base.createPixelShader = &mfgOGL4CreatePixelShader;
@@ -1287,6 +1434,11 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.createVertexArray = &mfgOGL4CreateVertexArray;
 	rd->base.destroyVertexArray = &mfgOGL4DestroyVertexArray;
 	rd->base.setVertexArray = &mfgOGL4SetVertexArray;
+	rd->base.createIndexBuffer = &mfgOGL4CreateIndexBuffer;
+	rd->base.destroyIndexBuffer = &mfgOGL4DestroyIndexBuffer;
+	rd->base.mapIndexBuffer = &mfgOGL4MapIndexBuffer;
+	rd->base.unmapIndexBuffer = &mfgOGL4UnmapIndexBuffer;
+	rd->base.setIndexBuffer = &mfgOGL4SetIndexBuffer;
 
 	rd->base.createRasterState = &mfgOGL4CreateRasterState;
 	rd->base.destroyRasterState = &mfgOGL4DestroyRasterState;
@@ -1303,6 +1455,7 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.clearStencil = &mfgOGL4ClearStencil;
 	rd->base.swapBuffers = &mfgOGL4SwapBuffers;
 	rd->base.drawTriangles = &mfgOGL4DrawTriangles;
+	rd->base.drawTrianglesIndexed = &mfgOGL4DrawTrianglesIndexed;
 
 	rd->base.getErrorString = &mfgOGL4GetErrorString;
 

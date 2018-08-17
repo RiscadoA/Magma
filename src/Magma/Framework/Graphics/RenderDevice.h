@@ -1060,7 +1060,7 @@ extern "C"
 	/// <param name="ib">Pointer to index buffer handle</param>
 	/// <param name="size">Index buffer size</param>
 	/// <param name="data">Index buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
-	/// <param name="format">Index data format</param>
+	/// <param name="format">Index data format (valid: MFG_UBYTE; MFG_USHORT; MFG_UINT)</param>
 	/// <param name="usage">Index buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
 	///		MFG_ERROR_OKAY if there were no errors.
@@ -1096,6 +1096,17 @@ extern "C"
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfgError mfgUnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+
+	/// <summary>
+	///		Sets the index buffer to use on draw calls.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="ib">Index buffer handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgSetIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
 
 	/// <summary>
 	///		Creates a new texture 1D.
