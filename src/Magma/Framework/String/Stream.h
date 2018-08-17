@@ -147,6 +147,18 @@ extern "C"
 	mfsError mfsPutByte(mfsStream* stream, mfmU8 byte);
 
 	/// <summary>
+	///		Prints a UTF-8 string to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="str">Format UTF-8 string</param>
+	/// <returns>
+	///		MFS_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream or str are NULL.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfsError mfsPutString(mfsStream* stream, const mfsUTF8CodeUnit* str);
+
+	/// <summary>
 	///		Prints a formatted UTF-8 string to a stream.
 	/// </summary>
 	/// <param name="stream">Stream handle</param>

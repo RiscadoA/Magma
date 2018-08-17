@@ -234,6 +234,19 @@ mfsError mfsPutByte(mfsStream * stream, mfmU8 byte)
 	return MFS_ERROR_OKAY;
 }
 
+mfsError mfsPutString(mfsStream * stream, const mfsUTF8CodeUnit * str)
+{
+	while (*str != '\0')
+	{
+		mfsError err = mfsPutByte(stream, *str);
+		if (err != MFS_ERROR_OKAY)
+			return err;
+		++str;
+	}
+
+	return MFS_ERROR_OKAY;
+}
+
 mfsError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, ...)
 {
 	va_list args;
