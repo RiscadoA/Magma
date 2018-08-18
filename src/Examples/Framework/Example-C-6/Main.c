@@ -20,6 +20,8 @@ mfgVertexBuffer* vb = NULL;
 mfgVertexLayout* vl = NULL;
 mfgVertexArray* va = NULL;
 mfgIndexBuffer* ib = NULL;
+mfgConstantBuffer* cb = NULL;
+mfgBindingPoint* cbBP = NULL;
 
 struct Vertex
 {
@@ -66,7 +68,7 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = MFG_VERTEX_SHADER;
 			metaDataB[ptr++] = 1;	// Input var count
 			metaDataB[ptr++] = 1;	// Output var count
-			metaDataB[ptr++] = 0;	// Binding point count
+			metaDataB[ptr++] = 1;	// Binding point count
 
 			// Input var 1
 			strcpy(metaDataB + ptr, u8"position");
@@ -82,6 +84,19 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = 0x01;	// ID 1
 			metaDataB[ptr++] = MFG_FLOAT4;
 
+			// Constant buffer
+			strcpy(metaDataB + ptr, u8"transform");
+			ptr += 16;
+			metaDataB[ptr++] = MFG_CONSTANT_BUFFER;
+			metaDataB[ptr++] = 0x00; // 1 element
+			metaDataB[ptr++] = 0x01;
+			// Elements:
+			{
+				metaDataB[ptr++] = 0x00; // Var index 1
+				metaDataB[ptr++] = 0x02;
+				metaDataB[ptr++] = MFG_FLOAT4;
+			}
+
 			// Load
 			if (mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL) != MFG_ERROR_OKAY)
 				abort();
@@ -96,7 +111,9 @@ void Main(int argc, char** argv)
 			MFG_BYTECODE_HEADER_MARKER_3,
 			0x02, // Major version 2
 			0x00, // Minor version 0
-			MFG_BYTECODE_ASSIGN, 0x00, 0x01, 0x00, 0x00,
+			MFG_BYTECODE_ADD, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
+			MFG_BYTECODE_GET4CMP, 0x00, 0x03, 0x00, 0x01, 0x03,
+			MFG_BYTECODE_LITI1, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01,
 		};
 
 		// Create shader
@@ -177,13 +194,37 @@ void Main(int argc, char** argv)
 	}
 
 	// Create vertex buffer
-	if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(struct Vertex) * 4, NULL, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
 	{
-		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
-		mfsFlush(mfsErrStream);
-		abort();
+		struct Vertex vertexes[4];
+
+		vertexes[0].x = -0.5f;
+		vertexes[0].y = -0.5f;
+		vertexes[0].z = 0.0f;
+		vertexes[0].w = 1.0f;
+
+		vertexes[1].x = -0.5f;
+		vertexes[1].y = +0.5f;
+		vertexes[1].z = 0.0f;
+		vertexes[1].w = 1.0f;
+
+		vertexes[2].x = +0.5f;
+		vertexes[2].y = +0.5f;
+		vertexes[2].z = 0.0f;
+		vertexes[2].w = 1.0f;
+
+		vertexes[3].x = +0.5f;
+		vertexes[3].y = -0.5f;
+		vertexes[3].z = 0.0f;
+		vertexes[3].w = 1.0f;
+
+		if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+		{
+			mfsUTF8CodeUnit err[512];
+			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsFlush(mfsErrStream);
+			abort();
+		}
 	}
 
 	// Create vertex layout
@@ -238,6 +279,26 @@ void Main(int argc, char** argv)
 		}
 	}
 
+	// Create constant buffer
+	if (mfgCreateConstantBuffer(renderDevice, &cb, sizeof(float[4]), NULL, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
+
+	// Get binding point
+	if (mfgGetVertexShaderBindingPoint(renderDevice, &cbBP, vs, u8"transform") != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
+
 	mfmF32 x = 0.0f;
 
 	while (windowOpen == MFM_TRUE)
@@ -255,11 +316,11 @@ void Main(int argc, char** argv)
 		if (mfgClearStencil(renderDevice, 0) != MFG_ERROR_OKAY)
 			abort();
 
-		// Update vertex buffer
+		// Update constant buffer
 		{
-			struct Vertex* vertexes = NULL;
+			float* cbData;
 
-			if (mfgMapVertexBuffer(renderDevice, vb, &vertexes) != MFG_ERROR_OKAY)
+			if (mfgMapConstantBuffer(renderDevice, cb, &cbData) != MFG_ERROR_OKAY)
 			{
 				mfsUTF8CodeUnit err[512];
 				mfgGetErrorString(renderDevice, err, sizeof(err));
@@ -268,27 +329,12 @@ void Main(int argc, char** argv)
 				abort();
 			}
 
-			vertexes[0].x = -0.5f + x;
-			vertexes[0].y = -0.5f;
-			vertexes[0].z = 0.0f;
-			vertexes[0].w = 1.0f;
-
-			vertexes[1].x = -0.5f + x;
-			vertexes[1].y = +0.5f;
-			vertexes[1].z = 0.0f;
-			vertexes[1].w = 1.0f;
-
-			vertexes[2].x = +0.5f + x;
-			vertexes[2].y = +0.5f;
-			vertexes[2].z = 0.0f;
-			vertexes[2].w = 1.0f;
-
-			vertexes[3].x = +0.5f + x;
-			vertexes[3].y = -0.5f;
-			vertexes[3].z = 0.0f;
-			vertexes[3].w = 1.0f;
-
-			if (mfgUnmapVertexBuffer(renderDevice, vb) != MFG_ERROR_OKAY)
+			cbData[0] = x;
+			cbData[1] = 0.0f;
+			cbData[2] = 0.0f;
+			cbData[3] = 1.0f;
+	
+			if (mfgUnmapConstantBuffer(renderDevice, cb) != MFG_ERROR_OKAY)
 			{
 				mfsUTF8CodeUnit err[512];
 				mfgGetErrorString(renderDevice, err, sizeof(err));
@@ -299,6 +345,8 @@ void Main(int argc, char** argv)
 		}
 
 		// Draw vertex array
+		if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
+			abort();
 		if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
 			abort();
 		if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
@@ -312,6 +360,8 @@ void Main(int argc, char** argv)
 			abort();
 	}
 
+	//mfgDestroyConstantBuffer(cb);
+	mfgDestroyIndexBuffer(ib);
 	mfgDestroyVertexArray(va);
 	mfgDestroyVertexLayout(vl);
 	mfgDestroyVertexBuffer(vb);
