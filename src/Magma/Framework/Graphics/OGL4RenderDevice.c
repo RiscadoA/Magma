@@ -293,6 +293,90 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 				glUniformBlockBinding(oglVS->program, oglVS->bps[i].location, oglVS->bps[i].location);
 				oglVS->bps[i].active = GL_TRUE;
 			}
+			else if (bp->type == MFG_TEXTURE_1D)
+			{
+				GLchar buf[256];
+
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFM_ERROR_OKAY)
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
+
+				if (mfsPutString(ss, u8"tex1d_") != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
+				}	
+				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
+				}
+				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				mfsDestroyStringStream(ss);
+
+				oglVS->bps[i].bp = bp;
+				oglVS->bps[i].location = glGetUniformLocation(oglVS->program, buf);
+				oglVS->bps[i].active = GL_TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_2D)
+			{
+				GLchar buf[256];
+
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFM_ERROR_OKAY)
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
+
+				if (mfsPutString(ss, u8"tex2d_") != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
+				}
+				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
+				}
+				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				mfsDestroyStringStream(ss);
+
+				oglVS->bps[i].bp = bp;
+				oglVS->bps[i].location = glGetUniformLocation(oglVS->program, buf);
+				oglVS->bps[i].active = GL_TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_3D)
+			{
+				GLchar buf[256];
+
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFM_ERROR_OKAY)
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
+
+				if (mfsPutString(ss, u8"tex3d_") != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
+				}
+				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
+				}
+				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				mfsDestroyStringStream(ss);
+
+				oglVS->bps[i].bp = bp;
+				oglVS->bps[i].location = glGetUniformLocation(oglVS->program, buf);
+				oglVS->bps[i].active = GL_TRUE;
+			}
 
 			bp = bp->next;
 		}
@@ -394,6 +478,131 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 			mfsPrintFormatUTF8(mfsOutStream, u8"\n");
 			mfsFlush(mfsOutStream);
 			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, infoLog);
+		}
+	}
+
+	// Init binding points
+	for (mfmU16 i = 0; i < 16; ++i)
+		oglPS->bps[i].active = GL_FALSE;
+	{
+		mfgMetaDataBindingPoint* bp = oglPS->md->firstBindingPoint;
+		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
+		{
+			if (bp->type == MFG_CONSTANT_BUFFER)
+			{
+				GLchar buf[256];
+
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFM_ERROR_OKAY)
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
+
+				if (mfsPutString(ss, u8"buf_") != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				if (mfsWrite(ss, bp->name, sizeof(bp->name), NULL) != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				mfsDestroyStringStream(ss);
+
+				oglPS->bps[i].bp = bp;
+				oglPS->bps[i].location = glGetUniformBlockIndex(oglPS->program, buf);
+				glUniformBlockBinding(oglPS->program, oglPS->bps[i].location, oglPS->bps[i].location);
+				oglPS->bps[i].active = GL_TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_1D)
+			{
+				GLchar buf[256];
+
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFM_ERROR_OKAY)
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
+
+				if (mfsPutString(ss, u8"tex1d_") != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
+				}
+				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
+				}
+				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				mfsDestroyStringStream(ss);
+
+				oglPS->bps[i].bp = bp;
+				oglPS->bps[i].location = glGetUniformLocation(oglPS->program, buf);
+				oglPS->bps[i].active = GL_TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_2D)
+			{
+				GLchar buf[256];
+
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFM_ERROR_OKAY)
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
+
+				if (mfsPutString(ss, u8"tex2d_") != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
+				}
+				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
+				}
+				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				mfsDestroyStringStream(ss);
+
+				oglPS->bps[i].bp = bp;
+				oglPS->bps[i].location = glGetUniformLocation(oglPS->program, buf);
+				oglPS->bps[i].active = GL_TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_3D)
+			{
+				GLchar buf[256];
+
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFM_ERROR_OKAY)
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
+
+				if (mfsPutString(ss, u8"tex3d_") != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
+				}
+				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
+				}
+				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				{
+					mfsDestroyStringStream(ss);
+					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+				}
+				mfsDestroyStringStream(ss);
+
+				oglPS->bps[i].bp = bp;
+				oglPS->bps[i].location = glGetUniformLocation(oglPS->program, buf);
+				oglPS->bps[i].active = GL_TRUE;
+			}
+
+			bp = bp->next;
 		}
 	}
 
