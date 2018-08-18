@@ -17,8 +17,42 @@
 	"param 1x1" means the first parameter is 1 byte long;
 	"param 2x4" means the second parameter is 4 bytes long;
 
-	Vertex shader ID '0' is reserved for the out screen position;
-	Pixel shader ID '0' is reserved for the out depth component;
+	Vertex shader predefined inputs:
+		- int "_vertexID";
+		- int "_instanceID";
+
+	Vertex shader outputs:
+		- "_position";
+		- "_out0";
+		- "_out1";
+		- "_out2";
+		- "_out3";
+		- "_out4";
+		- "_out5";
+		- "_out6";
+		- "_out7";
+
+	Pixel shader inputs:
+		- "_fragPosition";
+		- "_in0";
+		- "_in1";
+		- "_in2";
+		- "_in3";
+		- "_in4";
+		- "_in5";
+		- "_in6";
+		- "_in7";
+	
+	Pixel shader outputs:
+		- "_fragDepth";
+		- "_target0";
+		- "_target1";
+		- "_target2";
+		- "_target3";
+		- "_target4";
+		- "_target5";
+		- "_target6";
+		- "_target7";
 */
 
 #ifdef __cplusplus

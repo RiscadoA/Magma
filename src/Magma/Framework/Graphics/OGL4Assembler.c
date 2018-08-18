@@ -1,6 +1,8 @@
 #include "OGL4Assembler.h"
 #include "../Memory/Endianness.h"
 
+#include <string.h>
+
 const static mfmU8 mfgOGL4AssemblerMinorVersion = 0x00;
 
 typedef struct
@@ -75,9 +77,84 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 		{
 			if (var->id == id)
 			{
-				if (mfsPrintFormatUTF8(out, u8"in_%d", id) != MFS_ERROR_OKAY)
-					return MFG_ERROR_FAILED_TO_WRITE;
-				return MFG_ERROR_OKAY;
+				if (data->metaData->shaderType == MFG_VERTEX_SHADER)
+				{
+					if (!strcmp(var->name, u8"_vertexID"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"gl_VertexID") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_instanceID"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"gl_InstanceID") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_%d", var->id) != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+				}
+				else if (data->metaData->shaderType == MFG_PIXEL_SHADER)
+				{
+					if (!strcmp(var->name, u8"_fragPosition"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"gl_FragCoord") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in0"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_0") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in1"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_1") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in2"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_2") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in3"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_3") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in4"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_4") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in5"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_5") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in6"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_6") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+					else if (!strcmp(var->name, u8"_in7"))
+					{
+						if (mfsPrintFormatUTF8(out, u8"in_7") != MFS_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+						return MFG_ERROR_OKAY;
+					}
+				}
 			}
 			var = var->next;
 		}
@@ -85,31 +162,122 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 
 	// Check if it is an output variable
 	{
-		if (id == 0)
-		{
-			if (data->metaData->shaderType == MFG_VERTEX_SHADER)
-			{
-				if (mfsPrintFormatUTF8(out, u8"gl_Position") != MFS_ERROR_OKAY)
-					return MFG_ERROR_FAILED_TO_WRITE;
-				return MFG_ERROR_OKAY;
-			}
-			else if (data->metaData->shaderType == MFG_PIXEL_SHADER)
-			{
-				if (mfsPrintFormatUTF8(out, u8"gl_FragDepth") != MFS_ERROR_OKAY)
-					return MFG_ERROR_FAILED_TO_WRITE;
-				return MFG_ERROR_OKAY;
-			}
-		}
-
 		mfgMetaDataOutputVariable* var = metaData->firstOutputVar;
 		while (var != NULL)
 		{
-			
-			if (var->id == id)
+			if (data->metaData->shaderType == MFG_VERTEX_SHADER)
 			{
-				if (mfsPrintFormatUTF8(out, u8"out_%d", id) != MFS_ERROR_OKAY)
-					return MFG_ERROR_FAILED_TO_WRITE;
-				return MFG_ERROR_OKAY;
+				if (!strcmp(var->name, u8"_position"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"gl_Position") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out0"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_0") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out1"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_1") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out2"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_2") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out3"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_3") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out4"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_4") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out5"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_5") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out6"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_6") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_out7"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"out_7") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+			}
+			else if (data->metaData->shaderType == MFG_PIXEL_SHADER)
+			{
+				if (!strcmp(var->name, u8"_fragDepth"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"gl_FragDepth") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target0"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_0") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target1"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_1") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target2"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_2") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target3"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_3") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target4"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_4") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target5"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_5") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target6"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_6") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
+				else if (!strcmp(var->name, u8"_target7"))
+				{
+					if (mfsPrintFormatUTF8(out, u8"target_7") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					return MFG_ERROR_OKAY;
+				}
 			}
 			var = var->next;
 		}
@@ -390,22 +558,132 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 		mfgMetaDataInputVariable* var = metaData->firstInputVar;
 		while (var != NULL)
 		{
-			if (mfsPrintFormatUTF8(outputStream, u8"layout (location = %d) in ", var->id, var->id, var->id - 1) != MFS_ERROR_OKAY)
-				return MFG_ERROR_FAILED_TO_WRITE;
-
-			mfgError err = mfgOGL4WriteType(var->type, outputStream);
-			if (err != MFG_ERROR_OKAY)
-				return err;
-
 			if (metaData->shaderType == MFG_VERTEX_SHADER)
 			{
-				if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id, var->id - 1) != MFS_ERROR_OKAY)
-					return MFG_ERROR_FAILED_TO_WRITE;
+				if (!strcmp(var->name, u8"_vertexID"))
+				{
+					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPutString(outputStream, u8" gl_VertexID;\n\n") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_instanceID"))
+				{
+					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPutString(outputStream, u8" gl_InstanceID;\n\n") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else
+				{
+					if (mfsPrintFormatUTF8(outputStream, u8"layout (location = %d) in ", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
 			}
 			else if (metaData->shaderType == MFG_PIXEL_SHADER)
 			{
-				if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id, var->id) != MFS_ERROR_OKAY)
-					return MFG_ERROR_FAILED_TO_WRITE;
+				if (!strcmp(var->name, u8"_fragPosition"))
+				{
+					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPutString(outputStream, u8" gl_FragCoord;\n\n") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in0"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 0) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in1"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 1) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in2"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 2) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in3"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 3) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in4"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 4) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in5"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 5) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in6"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 6) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_in7"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 7) in ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else return MFG_ERROR_INVALID_ARGUMENTS;
 			}
 
 			var = var->next;
@@ -419,39 +697,181 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 		{
 			if (metaData->shaderType == MFG_VERTEX_SHADER)
 			{
-				if (var->id == 0)
+				if (!strcmp(var->name, u8"_position"))
 				{
 					if (mfsPrintFormatUTF8(outputStream, u8"out gl_PerVertex\n{\n\tvec4 gl_Position;\n};\n\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
-				else
+				else if (!strcmp(var->name, u8"_out0"))
 				{
-					if (mfsPrintFormatUTF8(outputStream, u8"layout (location = %d) out ", var->id) != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8"layout (location = 0) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id, var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
+				else if (!strcmp(var->name, u8"_out1"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 1) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_out2"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 2) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_out3"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 3) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_out4"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 4) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_out5"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 5) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_out6"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 6) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_out7"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 7) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else return MFG_ERROR_INVALID_ARGUMENTS;
 			}
 			else if (metaData->shaderType == MFG_PIXEL_SHADER)
 			{
-				if (var->id == 0)
+				if (!strcmp(var->name, u8"_fragDepth"))
 				{
-					if (mfsPrintFormatUTF8(outputStream, u8"out float gl_FragDepth;\n\n") != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8"out float gl_FragDepth;\n\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
-				else
+				else if (!strcmp(var->name, u8"_target0"))
 				{
-					if (mfsPrintFormatUTF8(outputStream, u8"layout (location = %d) out ", var->id - 1) != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8"layout (location = 0) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id, var->id - 1) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
+				else if (!strcmp(var->name, u8"_target1"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 1) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_target2"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 2) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_target3"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 3) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_target4"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 4) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_target5"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 5) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_target6"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 6) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else if (!strcmp(var->name, u8"_target7"))
+				{
+					if (mfsPutString(outputStream, u8"layout (location = 7) out ") != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					if (err != MFG_ERROR_OKAY)
+						return err;
+					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				}
+				else return MFG_ERROR_INVALID_ARGUMENTS;
 			}
 
 			var = var->next;

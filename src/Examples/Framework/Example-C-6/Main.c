@@ -69,17 +69,17 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = 0;	// Binding point count
 
 			// Input var 1
-			memcpy(metaDataB + ptr, u8"position", 9);
-			ptr += 16;
-			metaDataB[ptr++] = 0x00;
-			metaDataB[ptr++] = 0x01;	// ID 1
-			metaDataB[ptr++] = MFG_FLOAT4;
-
-			// Output var 1
-			memcpy(metaDataB + ptr, u8"position", 9);
+			strcpy(metaDataB + ptr, u8"position");
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = 0x00;	// ID 0
+			metaDataB[ptr++] = MFG_FLOAT4;
+
+			// Output var 1
+			strcpy(metaDataB + ptr, u8"_position");
+			ptr += 16;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x01;	// ID 1
 			metaDataB[ptr++] = MFG_FLOAT4;
 
 			// Load
@@ -96,7 +96,7 @@ void Main(int argc, char** argv)
 			MFG_BYTECODE_HEADER_MARKER_3,
 			0x02, // Major version 2
 			0x00, // Minor version 0
-			MFG_BYTECODE_ASSIGN, 0x00, 0x00, 0x00, 0x01,
+			MFG_BYTECODE_ASSIGN, 0x00, 0x01, 0x00, 0x00,
 		};
 
 		// Create shader
@@ -128,10 +128,10 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = 0;	// Binding point count
 
 			// Output var 1
-			memcpy(metaDataB + ptr, u8"color", 6);
+			strcpy(metaDataB + ptr, u8"_target0");
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
-			metaDataB[ptr++] = 0x01;	// ID 1
+			metaDataB[ptr++] = 0x00;	// ID 0
 			metaDataB[ptr++] = MFG_FLOAT4;
 
 			// Load
@@ -148,7 +148,7 @@ void Main(int argc, char** argv)
 			MFG_BYTECODE_HEADER_MARKER_3,
 			0x02, // Major version 2
 			0x00, // Minor version 0
-			MFG_BYTECODE_LITI4, 0x00, 0x01,
+			MFG_BYTECODE_LITI4, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x01,
 			0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00,
