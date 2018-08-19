@@ -591,6 +591,7 @@ extern "C"
 	typedef mfgError(*mfgRDGetVertexShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vs, const mfsUTF8CodeUnit* name);
 	typedef mfgError(*mfgRDGetPixelShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* ps, const mfsUTF8CodeUnit* name);
 	typedef mfgError(*mfgRDBindConstantBufferFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
+	typedef mfgError(*mfgRDBindConstantBufferRangeFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size);
 	typedef mfgError(*mfgRDBindTexture1DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
 	typedef mfgError(*mfgRDBindTexture2DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
 	typedef mfgError(*mfgRDBindTexture3DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
@@ -686,6 +687,7 @@ extern "C"
 		mfgRDGetVertexShaderBindingPointFunction getVertexShaderBindingPoint;
 		mfgRDGetPixelShaderBindingPointFunction getPixelShaderBindingPoint;
 		mfgRDBindConstantBufferFunction bindConstantBuffer;
+		mfgRDBindConstantBufferRangeFunction bindConstantBufferRange;
 		mfgRDBindTexture1DFunction bindTexture1D;
 		mfgRDBindTexture2DFunction bindTexture2D;
 		mfgRDBindTexture3DFunction bindTexture3D;
@@ -867,6 +869,20 @@ extern "C"
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfgError mfgBindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
+
+	/// <summary>
+	///		Binds a section of a constant buffer to a binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Binding point handle</param>
+	/// <param name="cb">Constant buffer handle</param>
+	/// <param name="offset">Starting memory offset in the buffer</param>
+	/// <param name="size">Memory size in the buffer</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgBindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size);
 
 	/// <summary>
 	///		Binds a texture 1D to a binding point.

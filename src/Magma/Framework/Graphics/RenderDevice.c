@@ -121,6 +121,11 @@ mfgError mfgBindConstantBuffer(mfgRenderDevice * rd, mfgBindingPoint * bp, mfgCo
 	return rd->bindConstantBuffer(rd, bp, cb);
 }
 
+mfgError mfgBindConstantBufferRange(mfgRenderDevice * rd, mfgBindingPoint * bp, mfgConstantBuffer * cb, mfmU64 offset, mfmU64 size)
+{
+	return rd->bindConstantBufferRange(rd, bp, cb, offset, size);
+}
+
 mfgError mfgBindTexture1D(mfgRenderDevice * rd, mfgBindingPoint * bp, mfgTexture1D * tex)
 {
 	return rd->bindTexture1D(rd, bp, tex);
@@ -181,7 +186,7 @@ mfgError mfgUnmapVertexBuffer(mfgRenderDevice * rd, mfgVertexBuffer * vb)
 	return rd->unmapVertexBuffer(rd, vb);
 }
 
-mfgError mfgCreateVertexLayout(mfgRenderDevice * rd, mfgVertexLayout ** vl, mfmU64 elementCount, const mfgVertexElement ** elements, mfgVertexShader * vs)
+mfgError mfgCreateVertexLayout(mfgRenderDevice * rd, mfgVertexLayout ** vl, mfmU64 elementCount, const mfgVertexElement * elements, mfgVertexShader * vs)
 {
 	return rd->createVertexLayout(rd, vl, elementCount, elements, vs);
 }

@@ -21,20 +21,23 @@
 #define MFG_POOL_256_ELEMENT_COUNT 2048
 #define MFG_POOL_512_ELEMENT_COUNT 2048
 
+typedef struct mfgOGL4Shader mfgOGL4Shader;
+
 typedef struct
 {
 	const mfgMetaDataBindingPoint* bp;
 	GLint location;
 	GLboolean active;
+	mfgOGL4Shader* shader;
 } mfgOGL4BindingPoint;
 
-typedef struct
+struct mfgOGL4Shader
 {
 	mfgRenderDeviceObject base;
 	GLint program;
 	const mfgMetaData* md;
 	mfgOGL4BindingPoint bps[16];
-} mfgOGL4Shader;
+};
 
 typedef struct
 {
@@ -47,6 +50,51 @@ typedef struct
 	mfgRenderDeviceObject base;
 	GLint cb;
 } mfgOGL4ConstantBuffer;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+	GLuint sampler;
+} mfgOGL4Sampler;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+
+	mfmU8 packAligment;
+	GLenum internalFormat;
+	GLenum format;
+	GLenum type;
+	GLuint tex;
+	GLuint width;
+} mfgOGL4Texture1D;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+
+	mfmU8 packAligment;
+	GLenum internalFormat;
+	GLenum format;
+	GLenum type;
+	GLuint tex;
+	GLuint width;
+	GLuint height;
+} mfgOGL4Texture2D;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+
+	mfmU8 packAligment;
+	GLenum internalFormat;
+	GLenum format;
+	GLenum type;
+	GLuint tex;
+	GLuint width;
+	GLuint height;
+	GLuint depth;
+} mfgOGL4Texture3D;
 
 typedef struct
 {
@@ -192,7 +240,7 @@ void mfgOGL4DestroyVertexShader(void* vs)
 #endif
 	mfgOGL4Shader* oglVS = vs;
 	glDeleteProgram(oglVS->program);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVS->base.renderDevice)->pool256, oglVS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVS->base.renderDevice)->pool512, oglVS) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -211,7 +259,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 
 	// Allocate vertex shader
 	mfgOGL4Shader* oglVS = NULL;
-	if (mfmAllocate(oglRD->pool256, &oglVS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool512, &oglVS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex shader on pool");
 
 	// Init object
@@ -259,7 +307,11 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 
 	// Init binding points
 	for (mfmU16 i = 0; i < 16; ++i)
+	{
 		oglVS->bps[i].active = GL_FALSE;
+		oglVS->bps[i].shader = oglVS;
+	}
+
 	{
 		mfgMetaDataBindingPoint* bp = oglVS->md->firstBindingPoint;
 		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
@@ -415,7 +467,7 @@ void mfgOGL4DestroyPixelShader(void* ps)
 #endif
 	mfgOGL4Shader* oglPS = ps;
 	glDeleteProgram(oglPS->program);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPS->base.renderDevice)->pool256, oglPS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPS->base.renderDevice)->pool512, oglPS) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -435,7 +487,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 	
 	// Allocate pixel shader
 	mfgOGL4Shader* oglPS = NULL;
-	if (mfmAllocate(oglRD->pool256, &oglPS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool512, &oglPS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pixel shader on pool");
 
 	// Init object
@@ -483,7 +535,11 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 
 	// Init binding points
 	for (mfmU16 i = 0; i < 16; ++i)
+	{
 		oglPS->bps[i].active = GL_FALSE;
+		oglPS->bps[i].shader = oglPS;
+	}
+
 	{
 		mfgMetaDataBindingPoint* bp = oglPS->md->firstBindingPoint;
 		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
@@ -635,7 +691,7 @@ mfgError mfgOGL4GetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint*
 mfgError mfgOGL4BindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	if (rd == NULL || bp == NULL || cb == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4ConstantBuffer* oglCB = cb;
@@ -644,6 +700,77 @@ mfgError mfgOGL4BindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfg
 		glBindBufferBase(GL_UNIFORM_BUFFER, oglBP->location, 0);
 	else
 		glBindBufferBase(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || bp == NULL || cb == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+	mfgOGL4BindingPoint* oglBP = bp;
+	mfgOGL4ConstantBuffer* oglCB = cb;
+
+	glBindBufferRange(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb, offset, size);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4BindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+	mfgOGL4BindingPoint* oglBP = bp;
+	mfgOGL4Texture1D* oglT = tex;
+
+	glActiveTexture(GL_TEXTURE0 + oglBP->location);
+	if (oglT == NULL)
+		glBindTexture(GL_TEXTURE_1D, 0);
+	else
+		glBindTexture(GL_TEXTURE_1D, oglT->tex);
+	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4BindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+	mfgOGL4BindingPoint* oglBP = bp;
+	mfgOGL4Texture2D* oglT = tex;
+
+	glActiveTexture(GL_TEXTURE0 + oglBP->location);
+	if (oglT == NULL)
+		glBindTexture(GL_TEXTURE_2D, 0);
+	else
+		glBindTexture(GL_TEXTURE_2D, oglT->tex);
+	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+	mfgOGL4BindingPoint* oglBP = bp;
+	mfgOGL4Texture3D* oglT = tex;
+
+	glActiveTexture(GL_TEXTURE0 + oglBP->location);
+	if (oglT == NULL)
+		glBindTexture(GL_TEXTURE_3D, 0);
+	else
+		glBindTexture(GL_TEXTURE_3D, oglT->tex);
+	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -1857,6 +1984,10 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.getVertexShaderBindingPoint = &mfgOGL4GetVertexShaderBindingPoint;
 	rd->base.getPixelShaderBindingPoint = &mfgOGL4GetPixelShaderBindingPoint;
 	rd->base.bindConstantBuffer = &mfgOGL4BindConstantBuffer;
+	rd->base.bindConstantBufferRange = &mfgOGL4BindConstantBufferRange;
+	rd->base.bindTexture1D = &mfgOGL4BindTexture1D;
+	rd->base.bindTexture2D = &mfgOGL4BindTexture2D;
+	rd->base.bindTexture3D = &mfgOGL4BindTexture3D;
 
 	rd->base.createConstantBuffer = &mfgOGL4CreateConstantBuffer;
 	rd->base.destroyConstantBuffer = &mfgOGL4DestroyConstantBuffer;
