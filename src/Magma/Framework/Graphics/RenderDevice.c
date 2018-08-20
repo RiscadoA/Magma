@@ -26,9 +26,9 @@ void mfgDefaultSamplerDesc(mfgSamplerDesc * desc)
 	desc->minFilter = MFG_NEAREST;
 	desc->magFilter = MFG_NEAREST;
 	desc->mipmapFilter = MFG_NONE;
-	desc->adressU = MFG_REPEAT;
-	desc->adressV = MFG_REPEAT;
-	desc->adressW = MFG_REPEAT;
+	desc->adressU = MFG_CLAMP;
+	desc->adressV = MFG_CLAMP;
+	desc->adressW = MFG_CLAMP;
 }
 
 void mfgDefaultRasterStateDesc(mfgRasterStateDesc * desc)

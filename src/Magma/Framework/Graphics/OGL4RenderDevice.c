@@ -54,12 +54,6 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	GLuint sampler;
-} mfgOGL4Sampler;
-
-typedef struct
-{
-	mfgRenderDeviceObject base;
 
 	mfmU8 packAligment;
 	GLenum internalFormat;
@@ -95,6 +89,12 @@ typedef struct
 	GLuint height;
 	GLuint depth;
 } mfgOGL4Texture3D;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+	GLuint sampler;
+} mfgOGL4Sampler;
 
 typedef struct
 {
@@ -771,6 +771,23 @@ mfgError mfgOGL4BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTextu
 	else
 		glBindTexture(GL_TEXTURE_3D, oglT->tex);
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4BindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+	mfgOGL4BindingPoint* oglBP = bp;
+	mfgOGL4Sampler* oglS = sampler;
+
+	if (oglS == NULL)
+		glBindSampler(oglBP->location, 0);
+	else
+		glBindSampler(oglBP->location, oglS->sampler);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -1737,6 +1754,129 @@ mfgError mfgOGL4GenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex)
 	return MFG_ERROR_OKAY;
 }
 
+void mfgOGL4DestroySampler(void* sampler)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (sampler == NULL) abort();
+#endif
+	mfgOGL4Sampler* oglS = sampler;
+	glDeleteSamplers(1, &oglS->sampler);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglS->base.renderDevice)->pool32, oglS) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || sampler == NULL || desc == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate sampler
+	mfgOGL4Sampler* oglS = NULL;
+	if (mfmAllocate(oglRD->pool32, &oglS, sizeof(mfgOGL4Sampler)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate sampler on pool");
+
+	// Init object
+	oglS->base.object.destructorFunc = &mfgOGL4DestroySampler;
+	oglS->base.object.referenceCount = 0;
+	oglS->base.renderDevice = rd;
+
+	// Create sampler
+	GLenum minFilter, magFilter;
+	GLenum wrapS, wrapT, wrapR;
+
+	switch (desc->adressU)
+	{
+		case MFG_REPEAT: wrapS = GL_REPEAT; break;
+		case MFG_MIRROR: wrapS = GL_MIRRORED_REPEAT; break;
+		case MFG_CLAMP: wrapS = GL_CLAMP_TO_EDGE; break;
+		case MFG_BORDER: wrapS = GL_CLAMP_TO_BORDER; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture U adress mode");
+	}
+
+	switch (desc->adressV)
+	{
+		case MFG_REPEAT: wrapT = GL_REPEAT; break;
+		case MFG_MIRROR: wrapT = GL_MIRRORED_REPEAT; break;
+		case MFG_CLAMP: wrapT = GL_CLAMP_TO_EDGE; break;
+		case MFG_BORDER: wrapT = GL_CLAMP_TO_BORDER; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture V adress mode");
+	}
+
+	switch (desc->adressW)
+	{
+		case MFG_REPEAT: wrapR = GL_REPEAT; break;
+		case MFG_MIRROR: wrapR = GL_MIRRORED_REPEAT; break;
+		case MFG_CLAMP: wrapR = GL_CLAMP_TO_EDGE; break;
+		case MFG_BORDER: wrapR = GL_CLAMP_TO_BORDER; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture W adress mode");
+	}
+
+	switch (desc->minFilter)
+	{
+		case MFG_NEAREST:
+			if (desc->mipmapFilter == MFG_NONE)
+				minFilter = GL_NEAREST;
+			else if (desc->mipmapFilter == MFG_NEAREST)
+				minFilter = GL_NEAREST_MIPMAP_NEAREST;
+			else if (desc->mipmapFilter == MFG_LINEAR)
+				minFilter = GL_NEAREST_MIPMAP_LINEAR;
+			else
+				MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture mipmap filter");
+			break;
+
+		case MFG_LINEAR:
+			if (desc->mipmapFilter == MFG_NONE)
+				minFilter = GL_LINEAR;
+			else if (desc->mipmapFilter == MFG_NEAREST)
+				minFilter = GL_LINEAR_MIPMAP_NEAREST;
+			else if (desc->mipmapFilter == MFG_LINEAR)
+				minFilter = GL_LINEAR_MIPMAP_LINEAR;
+			else
+				MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture mipmap filter");
+			break;
+
+		default: 
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture minifying filter");
+			break;
+	}
+	
+	switch (desc->magFilter)
+	{
+		case MFG_NEAREST:
+			magFilter = GL_NEAREST;
+			break;
+
+		case MFG_LINEAR:
+			magFilter = GL_LINEAR;
+			break;
+
+		default:
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture magnifying filter");
+			break;
+	}
+
+	glGenSamplers(1, &oglS->sampler);
+	glSamplerParameteri(oglS->sampler, GL_TEXTURE_MIN_FILTER, minFilter);
+	glSamplerParameteri(oglS->sampler, GL_TEXTURE_MAG_FILTER, magFilter);
+	glSamplerParameteri(oglS->sampler, GL_TEXTURE_WRAP_S, wrapS);
+	glSamplerParameteri(oglS->sampler, GL_TEXTURE_WRAP_T, wrapT);
+	glSamplerParameteri(oglS->sampler, GL_TEXTURE_WRAP_R, wrapR);
+	glSamplerParameterf(oglS->sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc->maxAnisotropy);
+
+	*sampler = oglS;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
 mfgError mfgOGL4ClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
@@ -2388,6 +2528,7 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.bindTexture1D = &mfgOGL4BindTexture1D;
 	rd->base.bindTexture2D = &mfgOGL4BindTexture2D;
 	rd->base.bindTexture3D = &mfgOGL4BindTexture3D;
+	rd->base.bindSampler = &mfgOGL4BindSampler;
 
 	rd->base.createConstantBuffer = &mfgOGL4CreateConstantBuffer;
 	rd->base.destroyConstantBuffer = &mfgOGL4DestroyConstantBuffer;
@@ -2424,8 +2565,8 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.updateTexture3D = &mfgOGL4UpdateTexture3D;
 	rd->base.generateTexture3DMipmaps = &mfgOGL4GenerateTexture3DMipmaps;
 
-	rd->base.createSampler = NULL;
-	rd->base.destroySampler = NULL;
+	rd->base.createSampler = &mfgOGL4CreateSampler;
+	rd->base.destroySampler = &mfgOGL4DestroySampler;
 
 	rd->base.createRasterState = &mfgOGL4CreateRasterState;
 	rd->base.destroyRasterState = &mfgOGL4DestroyRasterState;

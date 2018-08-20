@@ -23,6 +23,7 @@ mfgIndexBuffer* ib = NULL;
 mfgConstantBuffer* cb = NULL;
 mfgBindingPoint* cbBP = NULL;
 mfgTexture2D* tex = NULL;
+mfgSampler* sampler = NULL;
 mfgBindingPoint* texBP = NULL;
 
 struct Vertex
@@ -363,6 +364,24 @@ void Main(int argc, char** argv)
 		}
 	}
 
+	// Create sampler
+	{
+		mfgSamplerDesc desc;
+		mfgDefaultSamplerDesc(&desc);
+
+		desc.minFilter = MFG_LINEAR;
+		desc.magFilter = MFG_LINEAR;
+
+		if (mfgCreateSampler(renderDevice, &sampler, &desc) != MFG_ERROR_OKAY)
+		{
+			mfsUTF8CodeUnit err[512];
+			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsFlush(mfsErrStream);
+			abort();
+		}
+	}
+
 	// Get binding point
 	if (mfgGetPixelShaderBindingPoint(renderDevice, &texBP, ps, u8"texture") != MFG_ERROR_OKAY)
 	{
@@ -423,6 +442,8 @@ void Main(int argc, char** argv)
 			abort();
 		if (mfgBindTexture2D(renderDevice, texBP, tex) != MFG_ERROR_OKAY)
 			abort();
+		if (mfgBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
+			abort();
 		if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
 			abort();
 		if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
@@ -436,6 +457,7 @@ void Main(int argc, char** argv)
 			abort();
 	}
 
+	mfgDestroySampler(sampler);
 	mfgDestroyTexture2D(tex);
 	mfgDestroyConstantBuffer(cb);
 	mfgDestroyIndexBuffer(ib);
