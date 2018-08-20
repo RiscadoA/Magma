@@ -871,7 +871,10 @@ void mfgD3D11DestroyDepthStencilState(void* state)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (state == NULL) abort();
 #endif
-
+	mfgD3D11DepthStencilState* dss = state;
+	dss->state->lpVtbl->Release(dss->state);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)dss->base.renderDevice)->pool32, dss) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc)
@@ -881,6 +884,142 @@ mfgError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilSta
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	mfgD3D11DepthStencilState* dss = NULL;
+	if (mfmAllocate(d3dRD->pool32, &dss, sizeof(mfgD3D11DepthStencilState)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
+
+	D3D11_DEPTH_STENCIL_DESC dsDesc;
+	
+	dsDesc.DepthEnable = (desc->depthEnabled == MFM_TRUE) ? TRUE : FALSE;
+	dsDesc.DepthWriteMask = (desc->depthWriteEnabled == MFM_TRUE) ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+	switch (desc->depthCompare)
+	{
+		case MFG_NEVER: dsDesc.DepthFunc = D3D11_COMPARISON_NEVER; break;
+		case MFG_LESS: dsDesc.DepthFunc = D3D11_COMPARISON_LESS; break;
+		case MFG_LEQUAL: dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL; break;
+		case MFG_GREATER: dsDesc.DepthFunc = D3D11_COMPARISON_GREATER; break;
+		case MFG_GEQUAL: dsDesc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL; break;
+		case MFG_EQUAL: dsDesc.DepthFunc = D3D11_COMPARISON_EQUAL; break;
+		case MFG_NEQUAL: dsDesc.DepthFunc = D3D11_COMPARISON_NOT_EQUAL; break;
+		case MFG_ALWAYS: dsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported depth compare function");
+	}
+
+	dsDesc.StencilEnable = (desc->stencilEnabled == MFM_TRUE) ? TRUE : FALSE;
+	dsDesc.StencilReadMask = desc->stencilReadMask;
+	dsDesc.StencilWriteMask = desc->stencilWriteMask;
+	dss->stencilRef = desc->stencilRef;
+
+	switch (desc->frontFaceDepthFail)
+	{
+		case MFG_KEEP: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP; break;
+		case MFG_ZERO: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_ZERO; break;
+		case MFG_REPLACE: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE; break;
+		case MFG_INCREMENT: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR; break;
+		case MFG_INCREMENT_WRAP: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+		case MFG_DECREMENT: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR; break;
+		case MFG_DECREMENT_WRAP: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+		case MFG_INVERT: dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INVERT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported front face depth fail action");
+	}
+
+	switch (desc->frontFaceStencilFail)
+	{
+		case MFG_KEEP: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP; break;
+		case MFG_ZERO: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_ZERO; break;
+		case MFG_REPLACE: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE; break;
+		case MFG_INCREMENT: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INCR; break;
+		case MFG_INCREMENT_WRAP: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+		case MFG_DECREMENT: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_DECR; break;
+		case MFG_DECREMENT_WRAP: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+		case MFG_INVERT: dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INVERT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported front face stencil fail action");
+	}
+
+	switch (desc->frontFaceStencilPass)
+	{
+		case MFG_KEEP: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP; break;
+		case MFG_ZERO: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_ZERO; break;
+		case MFG_REPLACE: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE; break;
+		case MFG_INCREMENT: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR; break;
+		case MFG_INCREMENT_WRAP: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT; break;
+		case MFG_DECREMENT: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_DECR; break;
+		case MFG_DECREMENT_WRAP: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_DECR_SAT; break;
+		case MFG_INVERT: dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INVERT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported front face stencil pass action");
+	}
+
+	switch (desc->frontFaceStencilCompare)
+	{
+		case MFG_NEVER: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NEVER; break;
+		case MFG_LESS: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS; break;
+		case MFG_LEQUAL: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL; break;
+		case MFG_GREATER: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_GREATER; break;
+		case MFG_GEQUAL: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_GREATER_EQUAL; break;
+		case MFG_EQUAL: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL; break;
+		case MFG_NEQUAL: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL; break;
+		case MFG_ALWAYS: dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported front face stencil compare function");
+	}
+
+	switch (desc->backFaceDepthFail)
+	{
+		case MFG_KEEP: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP; break;
+		case MFG_ZERO: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_ZERO; break;
+		case MFG_REPLACE: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE; break;
+		case MFG_INCREMENT: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR; break;
+		case MFG_INCREMENT_WRAP: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+		case MFG_DECREMENT: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR; break;
+		case MFG_DECREMENT_WRAP: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+		case MFG_INVERT: dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INVERT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported back face depth fail action");
+	}
+
+	switch (desc->backFaceStencilFail)
+	{
+		case MFG_KEEP: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP; break;
+		case MFG_ZERO: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_ZERO; break;
+		case MFG_REPLACE: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE; break;
+		case MFG_INCREMENT: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_INCR; break;
+		case MFG_INCREMENT_WRAP: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_INCR_SAT; break;
+		case MFG_DECREMENT: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_DECR; break;
+		case MFG_DECREMENT_WRAP: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_DECR_SAT; break;
+		case MFG_INVERT: dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_INVERT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported back face stencil fail action");
+	}
+
+	switch (desc->backFaceStencilPass)
+	{
+		case MFG_KEEP: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP; break;
+		case MFG_ZERO: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_ZERO; break;
+		case MFG_REPLACE: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE; break;
+		case MFG_INCREMENT: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR; break;
+		case MFG_INCREMENT_WRAP: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT; break;
+		case MFG_DECREMENT: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_DECR; break;
+		case MFG_DECREMENT_WRAP: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_DECR_SAT; break;
+		case MFG_INVERT: dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INVERT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported back face stencil pass action");
+	}
+
+	switch (desc->backFaceStencilCompare)
+	{
+		case MFG_NEVER: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER; break;
+		case MFG_LESS: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_LESS; break;
+		case MFG_LEQUAL: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL; break;
+		case MFG_GREATER: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_GREATER; break;
+		case MFG_GEQUAL: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_GREATER_EQUAL; break;
+		case MFG_EQUAL: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL; break;
+		case MFG_NEQUAL: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL; break;
+		case MFG_ALWAYS: dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported back face stencil compare function");
+	}
+
+	HRESULT hr = d3dRD->device->lpVtbl->CreateDepthStencilState(d3dRD->device, &dsDesc, &dss->state);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateDepthStencilState failed");
+
+	*state = dss;
 
 	return MFG_ERROR_OKAY;
 }
@@ -905,6 +1044,10 @@ void mfgD3D11DestroyBlendState(void* state)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (state == NULL) abort();
 #endif
+	mfgD3D11BlendState* bs = state;
+	bs->state->lpVtbl->Release(bs->state);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)bs->base.renderDevice)->pool32, bs) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc)
@@ -912,6 +1055,110 @@ mfgError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, co
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || state == NULL || desc == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	mfgD3D11BlendState* bs = NULL;
+	if (mfmAllocate(d3dRD->pool32, &bs, sizeof(mfgD3D11BlendState)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate blend state on pool");
+
+	D3D11_BLEND_DESC bDesc;
+
+	bDesc.AlphaToCoverageEnable = FALSE;
+	bDesc.IndependentBlendEnable = FALSE;
+
+	bDesc.RenderTarget[0].BlendEnable = (desc->blendEnabled == MFM_TRUE) ? TRUE : FALSE;
+
+	switch (desc->blendOperation)
+	{
+		case MFG_ADD: bDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; break;
+		case MFG_SUBTRACT: bDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_SUBTRACT; break;
+		case MFG_REV_SUBTRACT: bDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT; break;
+		case MFG_MIN: bDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_MIN; break;
+		case MFG_MAX: bDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_MAX; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported blend operation");
+	}
+
+	switch (desc->sourceFactor)
+	{
+		case MFG_ZERO: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ZERO; break;
+		case MFG_ONE: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE; break;
+		case MFG_SRC_COLOR: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_SRC_COLOR; break;
+		case MFG_DST_COLOR: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_DEST_COLOR; break;
+		case MFG_INV_DST_COLOR: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_DEST_COLOR; break;
+		case MFG_SRC_ALPHA: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_DEST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: bDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_DEST_ALPHA; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported blend source factor");
+	}
+
+	switch (desc->destinationFactor)
+	{
+		case MFG_ZERO: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO; break;
+		case MFG_ONE: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE; break;
+		case MFG_SRC_COLOR: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_COLOR; break;
+		case MFG_DST_COLOR: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_DEST_COLOR; break;
+		case MFG_INV_DST_COLOR: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_DEST_COLOR; break;
+		case MFG_SRC_ALPHA: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_DEST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: bDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_DEST_ALPHA; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported blend destination factor");
+	}
+
+	switch (desc->blendAlphaOperation)
+	{
+		case MFG_ADD: bDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD; break;
+		case MFG_SUBTRACT: bDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_SUBTRACT; break;
+		case MFG_REV_SUBTRACT: bDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT; break;
+		case MFG_MIN: bDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MIN; break;
+		case MFG_MAX: bDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported blend alpha operation");
+	}
+
+	switch (desc->sourceAlphaFactor)
+	{
+		case MFG_ZERO: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO; break;
+		case MFG_ONE: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE; break;
+		case MFG_SRC_COLOR: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_SRC_COLOR; break;
+		case MFG_DST_COLOR: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_DEST_COLOR; break;
+		case MFG_INV_DST_COLOR: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_DEST_COLOR; break;
+		case MFG_SRC_ALPHA: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_DEST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: bDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_DEST_ALPHA; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported blend source alpha factor");
+	}
+
+	switch (desc->destinationAlphaFactor)
+	{
+		case MFG_ZERO: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO; break;
+		case MFG_ONE: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE; break;
+		case MFG_SRC_COLOR: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_SRC_COLOR; break;
+		case MFG_INV_SRC_COLOR: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_COLOR; break;
+		case MFG_DST_COLOR: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_DEST_COLOR; break;
+		case MFG_INV_DST_COLOR: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_DEST_COLOR; break;
+		case MFG_SRC_ALPHA: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_SRC_ALPHA; break;
+		case MFG_INV_SRC_ALPHA: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA; break;
+		case MFG_DST_ALPHA: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_DEST_ALPHA; break;
+		case MFG_INV_DST_ALPHA: bDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_DEST_ALPHA; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported blend destination alpha factor");
+	}
+
+	bDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	HRESULT hr = d3dRD->device->lpVtbl->CreateBlendState(d3dRD->device, &bDesc, &bs->state);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateBlendState failed");
+
+	*state = bs;
 
 	return MFG_ERROR_OKAY;
 }
