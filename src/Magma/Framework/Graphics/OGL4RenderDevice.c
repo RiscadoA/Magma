@@ -1337,6 +1337,139 @@ mfgError mfgOGL4SetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va)
 	return MFG_ERROR_OKAY;
 }
 
+
+void mfgOGL4DestroyTexture1D(void* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (tex == NULL) abort();
+#endif
+	mfgOGL4Texture1D* oglTex = tex;
+	glDeleteTextures(1, &oglTex->tex);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate texture
+	mfgOGL4Texture1D* oglTex = NULL;
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture1D)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 1D on pool");
+
+	// Init object
+	oglTex->base.object.destructorFunc = &mfgOGL4DestroyTexture1D;
+	oglTex->base.object.referenceCount = 0;
+	oglTex->base.renderDevice = rd;
+
+	// Create texture
+	GLenum gl_usage;
+
+	switch (format)
+	{
+		case MFG_R8SNORM: oglTex->internalFormat = GL_R8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16SNORM: oglTex->internalFormat = GL_R16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8SNORM: oglTex->internalFormat = GL_RG8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16SNORM: oglTex->internalFormat = GL_RG16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8SNORM: oglTex->internalFormat = GL_RGBA8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16SNORM: oglTex->internalFormat = GL_RGBA16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8UNORM: oglTex->internalFormat = GL_R8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16UNORM: oglTex->internalFormat = GL_R16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8UNORM: oglTex->internalFormat = GL_RG8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16UNORM: oglTex->internalFormat = GL_RG16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8UNORM: oglTex->internalFormat = GL_RGBA8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16UNORM: oglTex->internalFormat = GL_RGBA16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8SINT: oglTex->internalFormat = GL_R8I; oglTex->type = GL_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16SINT: oglTex->internalFormat = GL_R16I; oglTex->type = GL_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8SINT: oglTex->internalFormat = GL_RG8I; oglTex->type = GL_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16SINT: oglTex->internalFormat = GL_RG16I; oglTex->type = GL_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8SINT: oglTex->internalFormat = GL_RGBA8I; oglTex->type = GL_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16SINT: oglTex->internalFormat = GL_RGBA16I; oglTex->type = GL_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8UINT: oglTex->internalFormat = GL_R8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16UINT: oglTex->internalFormat = GL_R16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8UINT: oglTex->internalFormat = GL_RG8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16UINT: oglTex->internalFormat = GL_RG16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8UINT: oglTex->internalFormat = GL_RGBA8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16UINT: oglTex->internalFormat = GL_RGBA16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R32FLOAT: oglTex->internalFormat = GL_R32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RED; oglTex->packAligment = 4; break;
+		case MFG_RG32FLOAT: oglTex->internalFormat = GL_RG32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGB32FLOAT: oglTex->internalFormat = GL_RGB32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RGB; oglTex->packAligment = 4; break;
+		case MFG_RGBA32FLOAT: oglTex->internalFormat = GL_RGBA32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture format");
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &oglTex->tex);
+	glBindTexture(GL_TEXTURE_1D, oglTex->tex);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+
+	glPixelStorei(GL_PACK_ALIGNMENT, oglTex->packAligment);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, oglTex->packAligment);
+	if (data == NULL)
+		glTexStorage1D(GL_TEXTURE_1D, 1, oglTex->internalFormat, width);
+	else
+		glTexImage1D(GL_TEXTURE_1D, 0, oglTex->internalFormat, width, 0, oglTex->format, oglTex->type, data);
+
+	*tex = oglTex;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4UpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL || data == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Update texture 1D
+	mfgOGL4Texture1D* oglTex = tex;
+	glBindTexture(GL_TEXTURE_1D, oglTex->tex);
+	glPixelStorei(GL_PACK_ALIGNMENT, oglTex->packAligment);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, oglTex->packAligment);
+	glTexSubImage1D(GL_TEXTURE_1D, 0, dstX, width, oglTex->format, oglTex->type, data);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4GenerateTexture1DMipmaps(mfgRenderDevice* rd, mfgTexture1D* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Generate texture 1D mipmaps
+	mfgOGL4Texture1D* oglTex = tex;
+	glBindTexture(GL_TEXTURE_1D, oglTex->tex);
+	glGenerateMipmap(GL_TEXTURE_1D);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
 void mfgOGL4DestroyTexture2D(void* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
@@ -1361,7 +1494,7 @@ mfgError mfgOGL4CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 
 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
 
-	// Allocate constant buffer
+	// Allocate texture
 	mfgOGL4Texture2D* oglTex = NULL;
 	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture2D)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 2D on pool");
@@ -1461,10 +1594,144 @@ mfgError mfgOGL4GenerateTexture2DMipmaps(mfgRenderDevice* rd, mfgTexture2D* tex)
 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
 
-	// Update texture 2D
+	// Generate texture 2D mipmaps
 	mfgOGL4Texture2D* oglTex = tex;
 	glBindTexture(GL_TEXTURE_2D, oglTex->tex);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+void mfgOGL4DestroyTexture3D(void* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (tex == NULL) abort();
+#endif
+	mfgOGL4Texture3D* oglTex = tex;
+	glDeleteTextures(1, &oglTex->tex);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate texture
+	mfgOGL4Texture3D* oglTex = NULL;
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture3D)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 3D on pool");
+
+	// Init object
+	oglTex->base.object.destructorFunc = &mfgOGL4DestroyTexture3D;
+	oglTex->base.object.referenceCount = 0;
+	oglTex->base.renderDevice = rd;
+
+	// Create texture
+	GLenum gl_usage;
+
+	switch (format)
+	{
+		case MFG_R8SNORM: oglTex->internalFormat = GL_R8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16SNORM: oglTex->internalFormat = GL_R16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8SNORM: oglTex->internalFormat = GL_RG8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16SNORM: oglTex->internalFormat = GL_RG16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8SNORM: oglTex->internalFormat = GL_RGBA8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16SNORM: oglTex->internalFormat = GL_RGBA16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8UNORM: oglTex->internalFormat = GL_R8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16UNORM: oglTex->internalFormat = GL_R16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8UNORM: oglTex->internalFormat = GL_RG8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16UNORM: oglTex->internalFormat = GL_RG16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8UNORM: oglTex->internalFormat = GL_RGBA8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16UNORM: oglTex->internalFormat = GL_RGBA16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8SINT: oglTex->internalFormat = GL_R8I; oglTex->type = GL_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16SINT: oglTex->internalFormat = GL_R16I; oglTex->type = GL_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8SINT: oglTex->internalFormat = GL_RG8I; oglTex->type = GL_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16SINT: oglTex->internalFormat = GL_RG16I; oglTex->type = GL_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8SINT: oglTex->internalFormat = GL_RGBA8I; oglTex->type = GL_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16SINT: oglTex->internalFormat = GL_RGBA16I; oglTex->type = GL_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8UINT: oglTex->internalFormat = GL_R8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16UINT: oglTex->internalFormat = GL_R16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8UINT: oglTex->internalFormat = GL_RG8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16UINT: oglTex->internalFormat = GL_RG16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8UINT: oglTex->internalFormat = GL_RGBA8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16UINT: oglTex->internalFormat = GL_RGBA16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R32FLOAT: oglTex->internalFormat = GL_R32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RED; oglTex->packAligment = 4; break;
+		case MFG_RG32FLOAT: oglTex->internalFormat = GL_RG32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGB32FLOAT: oglTex->internalFormat = GL_RGB32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RGB; oglTex->packAligment = 4; break;
+		case MFG_RGBA32FLOAT: oglTex->internalFormat = GL_RGBA32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture format");
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &oglTex->tex);
+	glBindTexture(GL_TEXTURE_3D, oglTex->tex);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+
+	glPixelStorei(GL_PACK_ALIGNMENT, oglTex->packAligment);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, oglTex->packAligment);
+	if (data == NULL)
+		glTexStorage3D(GL_TEXTURE_3D, 1, oglTex->internalFormat, width, height, depth);
+	else
+		glTexImage3D(GL_TEXTURE_3D, 0, oglTex->internalFormat, width, height, depth, 0, oglTex->format, oglTex->type, data);
+
+	*tex = oglTex;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4UpdateTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL || data == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Update texture 3D
+	mfgOGL4Texture3D* oglTex = tex;
+	glBindTexture(GL_TEXTURE_3D, oglTex->tex);
+	glPixelStorei(GL_PACK_ALIGNMENT, oglTex->packAligment);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, oglTex->packAligment);
+	glTexSubImage3D(GL_TEXTURE_3D, 0, dstX, dstY, dstZ, width, height, depth, oglTex->format, oglTex->type, data);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4GenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Generate texture 3D mipmaps
+	mfgOGL4Texture3D* oglTex = tex;
+	glBindTexture(GL_TEXTURE_3D, oglTex->tex);
+	glGenerateMipmap(GL_TEXTURE_3D);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -2142,20 +2409,20 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.mapIndexBuffer = &mfgOGL4MapIndexBuffer;
 	rd->base.unmapIndexBuffer = &mfgOGL4UnmapIndexBuffer;
 
-	rd->base.createTexture1D = NULL;
-	rd->base.destroyTexture1D = NULL;
-	rd->base.updateTexture1D = NULL;
-	rd->base.generateTexture1DMipmaps = NULL;
+	rd->base.createTexture1D = &mfgOGL4CreateTexture1D;
+	rd->base.destroyTexture1D = &mfgOGL4DestroyTexture1D;
+	rd->base.updateTexture1D = &mfgOGL4UpdateTexture1D;
+	rd->base.generateTexture1DMipmaps = &mfgOGL4GenerateTexture1DMipmaps;
 
 	rd->base.createTexture2D = &mfgOGL4CreateTexture2D;
 	rd->base.destroyTexture2D = &mfgOGL4DestroyTexture2D;
 	rd->base.updateTexture2D = &mfgOGL4UpdateTexture2D;
 	rd->base.generateTexture2DMipmaps = &mfgOGL4GenerateTexture2DMipmaps;
 
-	rd->base.createTexture3D = NULL;
-	rd->base.destroyTexture3D = NULL;
-	rd->base.updateTexture3D = NULL;
-	rd->base.generateTexture3DMipmaps = NULL;
+	rd->base.createTexture3D = &mfgOGL4CreateTexture3D;
+	rd->base.destroyTexture3D = &mfgOGL4DestroyTexture3D;
+	rd->base.updateTexture3D = &mfgOGL4UpdateTexture3D;
+	rd->base.generateTexture3DMipmaps = &mfgOGL4GenerateTexture3DMipmaps;
 
 	rd->base.createSampler = NULL;
 	rd->base.destroySampler = NULL;
