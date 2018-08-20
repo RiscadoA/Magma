@@ -32,11 +32,11 @@ extern "C"
 
 		mfmU8* buffer;
 		mfmU64 bufferSize;
-		mfmU64 bufferHead;
 	} mfsStream;
 
-	extern mfsStream* mfsIn;
-	extern mfsStream* mfsOut;
+	extern mfsStream* mfsInStream;
+	extern mfsStream* mfsOutStream;
+	extern mfsStream* mfsErrStream;
 
 	/// <summary>
 	///		Initializes the stream library.
@@ -145,6 +145,18 @@ extern "C"
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
 	mfsError mfsPutByte(mfsStream* stream, mfmU8 byte);
+
+	/// <summary>
+	///		Prints a UTF-8 string to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="str">Format UTF-8 string</param>
+	/// <returns>
+	///		MFS_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream or str are NULL.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfsError mfsPutString(mfsStream* stream, const mfsUTF8CodeUnit* str);
 
 	/// <summary>
 	///		Prints a formatted UTF-8 string to a stream.

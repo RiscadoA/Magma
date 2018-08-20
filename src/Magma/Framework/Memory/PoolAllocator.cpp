@@ -90,7 +90,7 @@ void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 
 void Magma::Framework::Memory::PoolAllocator::Deallocate(void * ptr)
 {
-	auto err = ::mfmPoolDeallocate(ptr, m_pool);
+	auto err = ::mfmPoolDeallocate(m_pool, ptr);
 	switch (err)
 	{
 		case MFM_ERROR_OKAY:

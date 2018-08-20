@@ -4,9 +4,7 @@
 	Implementation of a pool allocator in C.
 */
 
-#include "Object.h"
-#include "Type.h"
-#include "Error.h"
+#include "Allocator.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -29,13 +27,17 @@ extern "C"
 
 	typedef struct
 	{
-		mfmObject object;
+		mfmAllocator base;
 		mfmPoolAllocatorDesc desc;
 		mfmPoolAllocatorChunk* firstChunk;
 		mfmU64 currentSlotCount;
 		mfmU64 currentFreeSlotCount;
 		mfmU64 currentChunkCount;
+		mfmBool onMemory;
 	} mfmPoolAllocator;
+
+#define MFM_POOL_ALLOCATOR_BASE_SIZE (sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk))
+#define MFM_POOL_ALLOCATOR_SIZE(slotCount, slotSize) (MFM_POOL_ALLOCATOR_BASE_SIZE + slotCount * slotSize + slotCount * sizeof(mfmBool))
 
 	/// <summary>
 	///		Creates a new magma framework memory pool allocator.
@@ -47,7 +49,20 @@ extern "C"
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the pool.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the pool description or allocator pointers are NULL.
 	/// </returns>
-	mfmError mfmCreatePoolAllocator(mfmPoolAllocator** poolAllocator, mfmPoolAllocatorDesc* desc);
+	mfmError mfmCreatePoolAllocator(mfmPoolAllocator** poolAllocator, const mfmPoolAllocatorDesc* desc);
+
+	/// <summary>
+	///		Creates a new magma framework memory pool allocator.
+	/// </summary>
+	/// <param name="poolAllocator">Pointer to allocator pointer</param>
+	/// <param name="desc">Pointer to pool allocator description</param>
+	/// <param name="memory">Pointer to memory adress where the pool allocator will be created</param>
+	/// <param name="memorySize">Size of the reserved memory</param>
+	/// <returns>
+	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the pool description or allocator pointers are NULL or if the pool is marked as expandable or if the pool doesn't fit on the memory passed.
+	/// </returns>
+	mfmError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator** poolAllocator, const mfmPoolAllocatorDesc* desc, void* memory, mfmU64 memorySize);
 
 	/// <summary>
 	///		Destroys a magma framework memory pool allocator.
@@ -72,13 +87,13 @@ extern "C"
 	/// <summary>
 	///		Deallocates on a magma framework memory pool allocator.
 	/// </summary>
-	/// <param name="memory">Pointer to the allocated memory</param>
 	/// <param name="allocator">Magma framework memory pool allocator</param>
+	/// <param name="memory">Pointer to the allocated memory</param>
 	/// <returns>
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_OUT_OF_BOUNDS if the memory is out of the pool bounds.
 	/// </returns>
-	mfmError mfmPoolDeallocate(void* memory, mfmPoolAllocator* allocator);
+	mfmError mfmPoolDeallocate(mfmPoolAllocator* allocator, void* memory);
 
 	/// <summary>
 	///		Gets the number of slots in a pool allocator.

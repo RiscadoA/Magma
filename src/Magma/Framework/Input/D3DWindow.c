@@ -162,12 +162,15 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Set properties
+	d3dWindow->base.type = MFI_D3DWINDOW;
+
 	d3dWindow->width = width;
 	d3dWindow->height = height;
 	d3dWindow->mode = mode;
 
 	// Set destructor
 	d3dWindow->base.object.destructorFunc = &mfiDestroyD3DWindow;
+	d3dWindow->base.object.referenceCount = 0;
 
 	// Set functions
 	d3dWindow->base.pollEvents = &mfiD3DWindowPollEvents;
@@ -444,7 +447,9 @@ int WINAPI WinMain(
 {
 	// Open console
 	AllocConsole();
+
 	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
 	freopen("CONIN$", "r", stdin);
 
 	ghInstance = hInstance;

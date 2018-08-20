@@ -19,6 +19,9 @@ extern "C"
 #define MFI_WINDOWED		0x01
 #define MFI_FULLSCREEN		0x02
 
+#define MFI_D3DWINDOW		0x03
+#define MFI_OGLWINDOW		0x04
+
 	typedef mfmU32 mfiWindowMode;
 
 	typedef mfmU32(*mfiGetWindowWidthFunc)(void*);
@@ -41,6 +44,8 @@ extern "C"
 	typedef struct
 	{
 		mfmObject object;
+
+		mfmU32 type;
 
 		// Reserved for the user to use
 		mfmU64 userAttribute;

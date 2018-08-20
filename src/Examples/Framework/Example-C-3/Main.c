@@ -30,11 +30,11 @@ void Main(int argc, char** argv)
 
 	mfsCloseFile(file);
 
-	err = mfsPrintFormatUTF8(mfsOut, u8"Hello World!\n%d + %d = %f", 2, 3, 2.0f + 3.0f);
+	err = mfsPrintFormatUTF8(mfsOutStream, u8"Hello World!\n%d + %d = %f", 2, 3, 2.0f + 3.0f);
 	if (err != MFS_ERROR_OKAY)
 		abort();
 
-	err = mfsGetByte(mfsIn, NULL);
+	err = mfsGetByte(mfsInStream, NULL);
 	if (err != MFS_ERROR_OKAY)
 		abort();
 }

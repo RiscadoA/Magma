@@ -104,7 +104,7 @@ void Magma::Framework::Input::D3DWindow::WaitForEvents()
 
 #else
 
-Magma::Framework::Input::D3DWindow::D3DWindow(unsigned int width, unsigned int height, const std::string & title, Window::Mode mode)
+Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, Window::Mode mode)
 {
 	throw WindowError("Failed to construct D3DWindow: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }

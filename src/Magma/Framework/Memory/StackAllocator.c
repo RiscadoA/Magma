@@ -1,5 +1,17 @@
 #include "StackAllocator.h"
 
+#include <stdlib.h>
+
+mfmError mfmInternalStackAllocate(void* allocator, void** memory, mfmU64 size)
+{
+	return mfmStackAllocate((mfmStackAllocator*)allocator, memory, size);
+}
+
+mfmError mfmInternalStackDeallocate(void* allocator, void* memory)
+{
+	return mfmStackSetHead(allocator, memory);
+}
+
 mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size)
 {
 	// Check if the arguments are valid
@@ -7,18 +19,47 @@ mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 siz
 		return MFM_ERROR_INVALID_ARGUMENTS;
 	
 	// Allocate memory for the stack allocator
-	mfmU8* memory = (mfmU8*)malloc(sizeof(mfmStackAllocator) + size);
-	if (memory == NULL)
+	mfmU8 * memory = NULL;
+	if (mfmAllocate(NULL, &memory, sizeof(mfmStackAllocator) + size) != MFM_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
 	// Get data pointers
 	*stackAllocator = (mfmStackAllocator*)(memory + 0);
+	(*stackAllocator)->onMemory = MFM_FALSE;
 	(*stackAllocator)->stackSize = size;
 	(*stackAllocator)->stackBegin = memory + sizeof(mfmStackAllocator);
 	(*stackAllocator)->stackHead = memory + sizeof(mfmStackAllocator);
 
+	// Set functions
+	(*stackAllocator)->base.allocate = &mfmInternalStackAllocate;
+	(*stackAllocator)->base.deallocate = &mfmInternalStackDeallocate;
+
 	// Set destructor function
-	(*stackAllocator)->object.destructorFunc = &mfmDestroyStackAllocator;
+	(*stackAllocator)->base.object.destructorFunc = &mfmDestroyStackAllocator;
+
+	// Successfully created a stack allocator
+	return MFM_ERROR_OKAY;
+}
+
+mfmError mfmCreateStackAllocatorOnMemory(mfmStackAllocator ** stackAllocator, mfmU64 size, void * memory, mfmU64 memorySize)
+{
+	// Check if the arguments are valid
+	if (stackAllocator == NULL || size == 0 || memory == NULL || memorySize < sizeof(mfmStackAllocator) + size)
+		return MFM_ERROR_INVALID_ARGUMENTS;
+
+	// Get data pointers
+	*stackAllocator = (mfmStackAllocator*)((mfmU8*)memory + 0);
+	(*stackAllocator)->onMemory = MFM_TRUE;
+	(*stackAllocator)->stackSize = size;
+	(*stackAllocator)->stackBegin = (mfmU8*)memory + sizeof(mfmStackAllocator);
+	(*stackAllocator)->stackHead = (mfmU8*)memory + sizeof(mfmStackAllocator);
+
+	// Set functions
+	(*stackAllocator)->base.allocate = &mfmInternalStackAllocate;
+	(*stackAllocator)->base.deallocate = &mfmInternalStackDeallocate;
+
+	// Set destructor function
+	(*stackAllocator)->base.object.destructorFunc = &mfmDestroyStackAllocator;
 
 	// Successfully created a stack allocator
 	return MFM_ERROR_OKAY;
@@ -26,7 +67,9 @@ mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 siz
 
 void mfmDestroyStackAllocator(void * stackAllocator)
 {
-	free(stackAllocator);
+	if (((mfmStackAllocator*)stackAllocator)->onMemory == MFM_FALSE)
+		if (mfmDeallocate(NULL, stackAllocator) != MFM_ERROR_OKAY)
+			abort();
 }
 
 mfmError mfmStackAllocate(mfmStackAllocator * allocator, void ** memory, mfmU64 size)

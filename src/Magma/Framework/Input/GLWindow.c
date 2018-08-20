@@ -240,12 +240,15 @@ mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	}
 
 	// Set properties
+	glWindow->base.type = MFI_OGLWINDOW;
+
 	glWindow->width = width;
 	glWindow->height = height;
 	glWindow->mode = mode;
 
 	// Set destructor
 	glWindow->base.object.destructorFunc = &mfiDestroyGLWindow;
+	glWindow->base.object.referenceCount = 0;
 
 	// Set functions
 	glWindow->base.pollEvents = &mfiGLWindowPollEvents;
