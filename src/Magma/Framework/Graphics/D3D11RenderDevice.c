@@ -127,19 +127,20 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	
+	ID3D11RasterizerState* state;
 } mfgD3D11RasterState;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	ID3D11DepthStencilState* state;
+	mfmU32 stencilRef;
 } mfgD3D11DepthStencilState;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	ID3D11BlendState* state;
 } mfgD3D11BlendState;
 
 typedef struct
@@ -173,6 +174,20 @@ typedef struct
 	mfgBlendState* defaultBlendState;
 
 	mfgD3D11IndexBuffer* currentIndexBuffer;
+
+	IDXGISwapChain* swapChain;
+	ID3D11Device* device;
+	ID3D11DeviceContext* deviceContext;
+
+	ID3D11Texture2D* backBuffer;
+	ID3D11RenderTargetView* defaultRenderTargetView;
+	ID3D11RenderTargetView** renderTargetViews;
+	mfmU64 renderTargetCount;
+
+	ID3D11Texture2D* depthStencilBuffer;
+	ID3D11DepthStencilView* defaultDepthStencilView;
+	ID3D11DepthStencilView* depthStencilView;
+
 } mfgD3D11RenderDevice;
 
 #define MFG_RETURN_ERROR(code, msg) {\
@@ -338,6 +353,8 @@ mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertex
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+
 
 	return MFG_ERROR_OKAY;
 }
@@ -773,7 +790,10 @@ void mfgD3D11DestroyRasterState(void* state)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (state == NULL) abort();
 #endif
-
+	mfgD3D11RasterState* rs = state;
+	rs->state->lpVtbl->Release(rs->state);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)rs->base.renderDevice)->pool32, rs) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc)
@@ -784,6 +804,50 @@ mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, 
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	mfgD3D11RasterState* rs = NULL;
+	if (mfmAllocate(d3dRD->pool32, &rs, sizeof(mfgD3D11RasterState)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
+
+	D3D11_RASTERIZER_DESC rDesc;
+	rDesc.DepthBias = 0.0f;
+	rDesc.SlopeScaledDepthBias = 0.0f;
+	rDesc.DepthBiasClamp = 0.0f;
+	rDesc.DepthClipEnable = TRUE;
+	rDesc.ScissorEnable = TRUE;
+	rDesc.MultisampleEnable = FALSE;
+	rDesc.AntialiasedLineEnable = FALSE;
+
+	if (desc->cullEnabled == MFM_TRUE)
+	{
+		switch (desc->cullFace)
+		{
+			case MFG_FRONT:	rDesc.CullMode = D3D11_CULL_FRONT; break;
+			case MFG_BACK: rDesc.CullMode = D3D11_CULL_BACK; break;
+			default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported cull face");
+		}
+	}
+	else rDesc.CullMode = D3D11_CULL_NONE;
+
+	switch (desc->frontFace)
+	{
+		case MFG_CW: rDesc.FrontCounterClockwise = FALSE; break;
+		case MFG_CCW: rDesc.FrontCounterClockwise = TRUE; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported front face winding order");
+	}
+
+	switch (desc->rasterMode)
+	{
+		case MFG_WIREFRAME: rDesc.FillMode = D3D11_FILL_WIREFRAME; break;
+		case MFG_FILL: rDesc.FillMode = D3D11_FILL_SOLID; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported rasterizer mode");
+	}
+
+	HRESULT hr = d3dRD->device->lpVtbl->CreateRasterizerState(d3dRD->device, &rDesc, &rs->state);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateRasterizerState failed");
+
+	*state = rs;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -792,8 +856,12 @@ mfgError mfgD3D11SetRasterState(mfgRenderDevice* rd, mfgRasterState* state)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
 	if (state == NULL)
 		return mfgD3D11SetRasterState(rd, ((mfgD3D11RenderDevice*)rd)->defaultRasterState);
+	else
+		d3dRD->deviceContext->lpVtbl->RSSetState(d3dRD->deviceContext, ((mfgD3D11RasterState*)state)->state);
 
 	return MFG_ERROR_OKAY;
 }
@@ -822,8 +890,12 @@ mfgError mfgD3D11SetDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState*
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	
 	if (state == NULL)
-		return mfgD3D11SetDepthStencilState(rd, ((mfgD3D11RenderDevice*)rd)->defaultDepthStencilState);
+		return mfgD3D11SetDepthStencilState(rd, d3dRD->defaultDepthStencilState);
+	else
+		d3dRD->deviceContext->lpVtbl->OMSetDepthStencilState(d3dRD->deviceContext, ((mfgD3D11DepthStencilState*)state)->state, ((mfgD3D11DepthStencilState*)state)->stencilRef);
 
 	return MFG_ERROR_OKAY;
 }
@@ -849,8 +921,15 @@ mfgError mfgD3D11SetBlendState(mfgRenderDevice* rd, mfgBlendState* state)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
 	if (state == NULL)
-		return mfgD3D11SetBlendState(rd, ((mfgD3D11RenderDevice*)rd)->defaultBlendState);
+		return mfgD3D11SetBlendState(rd, d3dRD->defaultBlendState);
+	else
+	{
+		FLOAT color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		d3dRD->deviceContext->lpVtbl->OMSetBlendState(d3dRD->deviceContext, ((mfgD3D11BlendState*)state)->state, color, 0xFFFFFFFF);
+	}
 
 	return MFG_ERROR_OKAY;
 }
@@ -974,7 +1053,110 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 
 	rd->currentIndexBuffer = NULL;
 
-	// Init D3D device and other stuff
+	// Init D3D11 stuff
+	{
+		HRESULT hr;
+
+		// Create device and swap chain
+		{
+			DXGI_SWAP_CHAIN_DESC desc;
+			ZeroMemory(&desc, sizeof(desc));
+
+			desc.BufferCount = 1;
+			desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			desc.OutputWindow = (HWND)mfiGetD3DWindowHandle(window);
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Windowed = ((window->getMode(window)) == MFI_FULLSCREEN) ? FALSE : TRUE;
+
+			UINT flags = 0;
+#ifdef MAGMA_FRAMEWORK_DEBUG
+			flags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+
+			hr = D3D11CreateDeviceAndSwapChain(
+				NULL,
+				D3D_DRIVER_TYPE_HARDWARE,
+				NULL,
+				flags,
+				NULL,
+				NULL,
+				D3D11_SDK_VERSION,
+				&desc,
+				&rd->swapChain,
+				&rd->device,
+				NULL,
+				&rd->deviceContext);
+
+			if (FAILED(hr))
+				return MFG_ERROR_INTERNAL;
+		}
+
+		// Get back buffer
+		{
+			
+			hr = rd->swapChain->lpVtbl->GetBuffer(rd->swapChain, 0, &IID_ID3D11Texture2D, (LPVOID*)&rd->backBuffer);
+			if (FAILED(hr))
+				return MFG_ERROR_INTERNAL;
+		}
+
+		// Create render target view
+		{
+			
+			hr = rd->device->lpVtbl->CreateRenderTargetView(rd->device, rd->backBuffer, NULL, &rd->defaultRenderTargetView);
+			rd->backBuffer->lpVtbl->Release(rd->backBuffer);
+		}
+
+		// Create depth stencil buffer
+		{
+			D3D11_TEXTURE2D_DESC desc;
+			ZeroMemory(&desc, sizeof(desc));
+			desc.Width = window->getWidth(window);
+			desc.Height = window->getHeight(window);
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+
+			hr = rd->device->lpVtbl->CreateTexture2D(rd->device, &desc, NULL, &rd->depthStencilBuffer);
+
+			if (FAILED(hr))
+				return MFG_ERROR_INTERNAL;
+		}
+
+		// Create depth stencil view
+		{
+			hr = rd->device->lpVtbl->CreateDepthStencilView(rd->device, rd->depthStencilBuffer, NULL, &rd->defaultDepthStencilView);
+			if (FAILED(hr))
+				return MFG_ERROR_INTERNAL;
+		}
+
+		// Set default render target
+		rd->deviceContext->lpVtbl->OMSetRenderTargets(rd->deviceContext, 1, &rd->defaultRenderTargetView, rd->defaultDepthStencilView);
+		rd->renderTargetCount = 1;
+
+		// Set default viewport
+		{
+			D3D11_VIEWPORT viewport;
+			ZeroMemory(&viewport, sizeof(viewport));
+
+			viewport.TopLeftX = 0;
+			viewport.TopLeftY = 0;
+			viewport.Width = window->getWidth(window);
+			viewport.Height = window->getHeight(window);
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
+
+			rd->deviceContext->lpVtbl->RSSetViewports(rd->deviceContext, 1, &viewport);
+		}
+	}
 
 	// Set functions
 	rd->base.createVertexShader = &mfgD3D11CreateVertexShader;
