@@ -1,5 +1,5 @@
-﻿#include <Magma/Framework/Input/GLWindow.h>
-#include <Magma/Framework/Graphics/OGL4RenderDevice.h>
+﻿#include <Magma/Framework/Input/D3DWindow.h>
+#include <Magma/Framework/Graphics/D3D11RenderDevice.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <Magma/Framework/String/Stream.h>
 
@@ -48,7 +48,7 @@ void Main(int argc, char** argv)
 {
 	// Open window
 	{
-		if (mfiCreateGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-2") != MFI_ERROR_OKAY)
+		if (mfiCreateD3DWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-6") != MFI_ERROR_OKAY)
 			abort();
 		window->onClose = &OnClose;
 	}
@@ -57,7 +57,7 @@ void Main(int argc, char** argv)
 	{
 		mfgRenderDeviceDesc desc;
 		desc.vsyncEnabled = MFM_TRUE;
-		if(mfgCreateOGL4RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
+		if(mfgCreateD3D11RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
 			abort();
 	}
 
@@ -520,6 +520,6 @@ void Main(int argc, char** argv)
 	mfgDestroyPixelShader(ps);
 	mfgDestroyVertexShader(vs);
 
-	mfgDestroyOGL4RenderDevice(renderDevice);
-	mfiDestroyGLWindow(window);
+	mfgDestroyD3D11RenderDevice(renderDevice);
+	mfiDestroyD3DWindow(window);
 }
