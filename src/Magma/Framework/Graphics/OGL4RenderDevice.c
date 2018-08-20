@@ -99,6 +99,36 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
+
+	GLuint tex;
+	GLuint width;
+	GLuint height;
+
+	mfmU8 packAligment;
+	GLenum internalFormat;
+	GLenum format;
+	GLenum type;
+} mfgOGL4RenderTexture;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+
+	GLuint rbo;
+	GLuint width;
+	GLuint height;
+} mfgOGL4DepthStencilTexture;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
+
+	GLuint fbo;
+} mfgOGL4Framebuffer;
+
+typedef struct
+{
+	mfgRenderDeviceObject base;
 	GLint vb;
 } mfgOGL4VertexBuffer;
 
@@ -776,6 +806,25 @@ mfgError mfgOGL4BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTextu
 	return MFG_ERROR_OKAY;
 }
 
+mfgError mfgOGL4BindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+	mfgOGL4BindingPoint* oglBP = bp;
+	mfgOGL4RenderTexture* oglT = tex;
+
+	glActiveTexture(GL_TEXTURE0 + oglBP->location);
+	if (oglT == NULL)
+		glBindTexture(GL_TEXTURE_2D, 0);
+	else
+		glBindTexture(GL_TEXTURE_2D, oglT->tex);
+	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
 mfgError mfgOGL4BindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
@@ -1445,6 +1494,8 @@ mfgError mfgOGL4CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 
 	else
 		glTexImage1D(GL_TEXTURE_1D, 0, oglTex->internalFormat, width, 0, oglTex->format, oglTex->type, data);
 
+	oglTex->width = width;
+
 	*tex = oglTex;
 
 	MFG_CHECK_GL_ERROR();
@@ -1577,6 +1628,9 @@ mfgError mfgOGL4CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 
 		glTexStorage2D(GL_TEXTURE_2D, 1, oglTex->internalFormat, width, height);
 	else
 		glTexImage2D(GL_TEXTURE_2D, 0, oglTex->internalFormat, width, height, 0, oglTex->format, oglTex->type, data);
+
+	oglTex->width = width;
+	oglTex->height = height;
 
 	*tex = oglTex;
 
@@ -1713,6 +1767,10 @@ mfgError mfgOGL4CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 
 		glTexImage3D(GL_TEXTURE_3D, 0, oglTex->internalFormat, width, height, depth, 0, oglTex->format, oglTex->type, data);
 
 	*tex = oglTex;
+
+	oglTex->width = width;
+	oglTex->height = height;
+	oglTex->depth = depth;
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -1872,6 +1930,247 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 	glSamplerParameterf(oglS->sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc->maxAnisotropy);
 
 	*sampler = oglS;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+void mfgOGL4DestroyRenderTexture(void* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (tex == NULL) abort();
+#endif
+	mfgOGL4RenderTexture* oglTex = tex;
+	glDeleteTextures(1, &oglTex->tex);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate texture
+	mfgOGL4RenderTexture* oglTex = NULL;
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4RenderTexture)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate render texture on pool");
+
+	// Init object
+	oglTex->base.object.destructorFunc = &mfgOGL4DestroyRenderTexture;
+	oglTex->base.object.referenceCount = 0;
+	oglTex->base.renderDevice = rd;
+
+	// Create texture
+	switch (format)
+	{
+		case MFG_R8SNORM: oglTex->internalFormat = GL_R8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16SNORM: oglTex->internalFormat = GL_R16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8SNORM: oglTex->internalFormat = GL_RG8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16SNORM: oglTex->internalFormat = GL_RG16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8SNORM: oglTex->internalFormat = GL_RGBA8_SNORM; oglTex->type = GL_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16SNORM: oglTex->internalFormat = GL_RGBA16_SNORM; oglTex->type = GL_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8UNORM: oglTex->internalFormat = GL_R8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16UNORM: oglTex->internalFormat = GL_R16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8UNORM: oglTex->internalFormat = GL_RG8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16UNORM: oglTex->internalFormat = GL_RG16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8UNORM: oglTex->internalFormat = GL_RGBA8; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16UNORM: oglTex->internalFormat = GL_RGBA16; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8SINT: oglTex->internalFormat = GL_R8I; oglTex->type = GL_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16SINT: oglTex->internalFormat = GL_R16I; oglTex->type = GL_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8SINT: oglTex->internalFormat = GL_RG8I; oglTex->type = GL_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16SINT: oglTex->internalFormat = GL_RG16I; oglTex->type = GL_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8SINT: oglTex->internalFormat = GL_RGBA8I; oglTex->type = GL_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16SINT: oglTex->internalFormat = GL_RGBA16I; oglTex->type = GL_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R8UINT: oglTex->internalFormat = GL_R8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RED; oglTex->packAligment = 1; break;
+		case MFG_R16UINT: oglTex->internalFormat = GL_R16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RED; oglTex->packAligment = 2; break;
+		case MFG_RG8UINT: oglTex->internalFormat = GL_RG8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RG; oglTex->packAligment = 2; break;
+		case MFG_RG16UINT: oglTex->internalFormat = GL_RG16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGBA8UINT: oglTex->internalFormat = GL_RGBA8UI; oglTex->type = GL_UNSIGNED_BYTE; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+		case MFG_RGBA16UINT: oglTex->internalFormat = GL_RGBA16UI; oglTex->type = GL_UNSIGNED_SHORT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		case MFG_R32FLOAT: oglTex->internalFormat = GL_R32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RED; oglTex->packAligment = 4; break;
+		case MFG_RG32FLOAT: oglTex->internalFormat = GL_RG32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RG; oglTex->packAligment = 4; break;
+		case MFG_RGB32FLOAT: oglTex->internalFormat = GL_RGB32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RGB; oglTex->packAligment = 4; break;
+		case MFG_RGBA32FLOAT: oglTex->internalFormat = GL_RGBA32F; oglTex->type = GL_FLOAT; oglTex->format = GL_RGBA; oglTex->packAligment = 4; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture format");
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &oglTex->tex);
+	glBindTexture(GL_TEXTURE_2D, oglTex->tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexStorage2D(GL_TEXTURE_2D, 1, oglTex->internalFormat, width, height);
+
+	oglTex->width = width;
+	oglTex->height = height;
+	
+	*tex = oglTex;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+void mfgOGL4DestroyDepthStencilTexture(void* tex)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (tex == NULL) abort();
+#endif
+	mfgOGL4DepthStencilTexture* oglTex = tex;
+	glDeleteRenderbuffers(1, &oglTex->rbo);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate texture
+	mfgOGL4DepthStencilTexture* oglTex = NULL;
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4DepthStencilTexture)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil texture on pool");
+
+	// Init object
+	oglTex->base.object.destructorFunc = &mfgOGL4DestroyDepthStencilTexture;
+	oglTex->base.object.referenceCount = 0;
+	oglTex->base.renderDevice = rd;
+
+	// Create texture
+	glGenRenderbuffers(1, &oglTex->rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, oglTex->rbo);
+
+	switch (format)
+	{
+		case MFG_DEPTH24STENCIL8: glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); break;
+		case MFG_DEPTH32STENCIL8: glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width, height); break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported depth stencil format");
+	}
+
+	oglTex->width = width;
+	oglTex->height = height;
+
+	*tex = oglTex;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+void mfgOGL4DestroyFramebuffer(void* fb)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (fb == NULL) abort();
+#endif
+	mfgOGL4Framebuffer* oglFB = fb;
+	glDeleteFramebuffers(1, &oglFB->fbo);
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool32, oglFB) != MFM_ERROR_OKAY)
+		abort();
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	GLenum err = glGetError();
+	if (err != 0)
+		abort();
+#endif
+}
+
+mfgError mfgOGL4CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL || fb == NULL || textures == NULL || textureCount == 0) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+
+	// Allocate texture
+	mfgOGL4Framebuffer* oglFB = NULL;
+	if (mfmAllocate(oglRD->pool32, &oglFB, sizeof(mfgOGL4Framebuffer)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate framebuffer on pool");
+
+	// Init object
+	oglFB->base.object.destructorFunc = &mfgOGL4DestroyFramebuffer;
+	oglFB->base.object.referenceCount = 0;
+	oglFB->base.renderDevice = rd;
+
+	// Create framebuffer
+	GLuint width = ((mfgOGL4RenderTexture*)textures[0])->width;
+	GLuint height = ((mfgOGL4RenderTexture*)textures[0])->height;
+
+	glGenFramebuffers(1, &oglFB->fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, oglFB->fbo);
+
+	GLenum* drawBuffers;
+	if (mfmAllocate(oglRD->stack, &drawBuffers, textureCount * sizeof(GLenum)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate draw buffers on stack");
+
+	for (mfmU64 i = 0; i < textureCount; ++i)
+	{
+		if (((mfgOGL4RenderTexture*)textures[i])->width != width ||
+			((mfgOGL4RenderTexture*)textures[i])->height != height)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "All textures must have the same size");
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, ((mfgOGL4RenderTexture*)textures[i])->tex, 0);
+		drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+	}
+
+	glDrawBuffers(textureCount, drawBuffers);
+	if (mfmDeallocate(oglRD->stack, drawBuffers) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to deallocate draw buffers on stack");
+
+	if (depthStencilTexture != NULL)
+	{
+		if (width != ((mfgOGL4DepthStencilTexture*)depthStencilTexture)->width ||
+			height != ((mfgOGL4DepthStencilTexture*)depthStencilTexture)->height)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "The depth stencil texture must have the same size as the color textures");
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, ((mfgOGL4DepthStencilTexture*)depthStencilTexture)->rbo);
+	}
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, "Framebuffer not complete");
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	oglRD->stack;
+
+	*fb = oglFB;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4SetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+#endif
+
+	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
+	mfgOGL4Framebuffer* oglFB = (mfgOGL4Framebuffer*)fb;
+
+	if (oglFB == NULL)
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	else
+		glBindFramebuffer(GL_FRAMEBUFFER, oglFB->fbo);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -2528,6 +2827,7 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.bindTexture1D = &mfgOGL4BindTexture1D;
 	rd->base.bindTexture2D = &mfgOGL4BindTexture2D;
 	rd->base.bindTexture3D = &mfgOGL4BindTexture3D;
+	rd->base.bindRenderTexture = &mfgOGL4BindRenderTexture;
 	rd->base.bindSampler = &mfgOGL4BindSampler;
 
 	rd->base.createConstantBuffer = &mfgOGL4CreateConstantBuffer;
@@ -2578,13 +2878,13 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.destroyBlendState = &mfgOGL4DestroyBlendState;
 	rd->base.setBlendState = &mfgOGL4SetBlendState;
 
-	rd->base.createRenderTexture = NULL;
-	rd->base.destroyRenderTexture = NULL;
-	rd->base.createDepthStencilTexture = NULL;
-	rd->base.destroyDepthStencilTexture = NULL;
-	rd->base.createFramebuffer = NULL;
-	rd->base.destroyFramebuffer = NULL;
-	rd->base.setFramebuffer = NULL;
+	rd->base.createRenderTexture = &mfgOGL4CreateRenderTexture;
+	rd->base.destroyRenderTexture = &mfgOGL4DestroyRenderTexture;
+	rd->base.createDepthStencilTexture = &mfgOGL4CreateDepthStencilTexture;
+	rd->base.destroyDepthStencilTexture = &mfgOGL4DestroyDepthStencilTexture;
+	rd->base.createFramebuffer = &mfgOGL4CreateFramebuffer;
+	rd->base.destroyFramebuffer = &mfgOGL4DestroyFramebuffer;
+	rd->base.setFramebuffer = &mfgOGL4SetFramebuffer;
 
 	rd->base.clearColor = &mfgOGL4ClearColor;
 	rd->base.clearDepth = &mfgOGL4ClearDepth;

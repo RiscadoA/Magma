@@ -25,6 +25,9 @@ mfgBindingPoint* cbBP = NULL;
 mfgTexture2D* tex = NULL;
 mfgSampler* sampler = NULL;
 mfgBindingPoint* texBP = NULL;
+mfgRenderTexture* rt = NULL;
+mfgDepthStencilTexture* dst = NULL;
+mfgFramebuffer* fb = NULL;
 
 struct Vertex
 {
@@ -392,15 +395,54 @@ void Main(int argc, char** argv)
 		abort();
 	}
 
-	mfmF32 x = 0.0f;
+	// Create render texture
+	if (mfgCreateRenderTexture(renderDevice, &rt, 800, 600, MFG_RGBA8UNORM) != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
+
+	// Create depth stencil texture
+	if (mfgCreateDepthStencilTexture(renderDevice, &dst, 800, 600, MFG_DEPTH24STENCIL8) != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
+	
+	// Create framebuffer
+	if (mfgCreateFramebuffer(renderDevice, &fb, 1, &rt, dst) != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
 
 	while (windowOpen == MFM_TRUE)
 	{
 		window->pollEvents(window);
 
-		x += 0.001f;
+		if (mfgSetFramebuffer(renderDevice, fb) != MFG_ERROR_OKAY)
+			abort();
 
 		// Clear
+
+		if (mfgClearColor(renderDevice, 1.0f, 0.0f, 1.0f, 1.0f) != MFG_ERROR_OKAY)
+			abort();
+		if (mfgClearDepth(renderDevice, 1.0f) != MFG_ERROR_OKAY)
+			abort();
+		if (mfgClearStencil(renderDevice, 0) != MFG_ERROR_OKAY)
+			abort();
+
+		if (mfgSetFramebuffer(renderDevice, NULL) != MFG_ERROR_OKAY)
+			abort();
 
 		if (mfgClearColor(renderDevice, 0.0f, 0.0f, 0.2f, 1.0f) != MFG_ERROR_OKAY)
 			abort();
@@ -409,57 +451,66 @@ void Main(int argc, char** argv)
 		if (mfgClearStencil(renderDevice, 0) != MFG_ERROR_OKAY)
 			abort();
 
-		// Update constant buffer
+		// Render rectangle
 		{
-			float* cbData;
-
-			if (mfgMapConstantBuffer(renderDevice, cb, &cbData) != MFG_ERROR_OKAY)
+			// Update constant buffer
 			{
-				mfsUTF8CodeUnit err[512];
-				mfgGetErrorString(renderDevice, err, sizeof(err));
-				mfsPrintFormatUTF8(mfsErrStream, err);
-				mfsFlush(mfsErrStream);
-				abort();
-			}
+				float* cbData;
 
-			cbData[0] = x;
-			cbData[1] = 0.0f;
-			cbData[2] = 0.0f;
-			cbData[3] = 1.0f;
+				if (mfgMapConstantBuffer(renderDevice, cb, &cbData) != MFG_ERROR_OKAY)
+				{
+					mfsUTF8CodeUnit err[512];
+					mfgGetErrorString(renderDevice, err, sizeof(err));
+					mfsPrintFormatUTF8(mfsErrStream, err);
+					mfsFlush(mfsErrStream);
+					abort();
+				}
+
+				cbData[0] = 0.0f;
+				cbData[1] = 0.0f;
+				cbData[2] = 0.0f;
+				cbData[3] = 1.0f;
 	
-			if (mfgUnmapConstantBuffer(renderDevice, cb) != MFG_ERROR_OKAY)
-			{
-				mfsUTF8CodeUnit err[512];
-				mfgGetErrorString(renderDevice, err, sizeof(err));
-				mfsPrintFormatUTF8(mfsErrStream, err);
-				mfsFlush(mfsErrStream);
-				abort();
+				if (mfgUnmapConstantBuffer(renderDevice, cb) != MFG_ERROR_OKAY)
+				{
+					mfsUTF8CodeUnit err[512];
+					mfgGetErrorString(renderDevice, err, sizeof(err));
+					mfsPrintFormatUTF8(mfsErrStream, err);
+					mfsFlush(mfsErrStream);
+					abort();
+				}
 			}
-		}
 
-		// Draw vertex array
-		if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgBindTexture2D(renderDevice, texBP, tex) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgSetIndexBuffer(renderDevice, ib) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
-			abort();
+			// Draw vertex array
+			if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
+				abort();
+			if (mfgBindRenderTexture(renderDevice, texBP, rt) != MFG_ERROR_OKAY)
+				abort();
+			if (mfgBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
+				abort();
+			if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
+				abort();
+			if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
+				abort();
+			if (mfgSetIndexBuffer(renderDevice, ib) != MFG_ERROR_OKAY)
+				abort();
+			if (mfgDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
+				abort();
+		}
 
 		if (mfgSwapBuffers(renderDevice) != MFG_ERROR_OKAY)
 			abort();
 	}
 
+	mfgDestroyFramebuffer(fb);
+	mfgDestroyDepthStencilTexture(dst);
+	mfgDestroyRenderTexture(rt);
+
 	mfgDestroySampler(sampler);
 	mfgDestroyTexture2D(tex);
+
 	mfgDestroyConstantBuffer(cb);
+
 	mfgDestroyIndexBuffer(ib);
 	mfgDestroyVertexArray(va);
 	mfgDestroyVertexLayout(vl);

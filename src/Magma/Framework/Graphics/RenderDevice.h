@@ -595,6 +595,7 @@ extern "C"
 	typedef mfgError(*mfgRDBindTexture1DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
 	typedef mfgError(*mfgRDBindTexture2DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
 	typedef mfgError(*mfgRDBindTexture3DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
+	typedef mfgError(*mfgRDBindRenderTextureFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex);
 	typedef mfgError(*mfgRDBindSamplerFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler);
 
 	typedef mfgError(*mfgRDCreateConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
@@ -691,6 +692,7 @@ extern "C"
 		mfgRDBindTexture1DFunction bindTexture1D;
 		mfgRDBindTexture2DFunction bindTexture2D;
 		mfgRDBindTexture3DFunction bindTexture3D;
+		mfgRDBindRenderTextureFunction bindRenderTexture;
 		mfgRDBindSamplerFunction bindSampler;
 
 		mfgRDCreateConstantBufferFunction createConstantBuffer;
@@ -919,6 +921,18 @@ extern "C"
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfgError mfgBindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
+
+	/// <summary>
+	///		Binds a render texture to a binding point.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="bp">Binding point handle</param>
+	/// <param name="tex">Texture handle</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgBindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex);
 
 	/// <summary>
 	///		Binds a sampler to a binding point.

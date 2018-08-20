@@ -141,6 +141,11 @@ mfgError mfgBindTexture3D(mfgRenderDevice * rd, mfgBindingPoint * bp, mfgTexture
 	return rd->bindTexture3D(rd, bp, tex);
 }
 
+mfgError mfgBindRenderTexture(mfgRenderDevice * rd, mfgBindingPoint * bp, mfgRenderTexture * tex)
+{
+	return rd->bindRenderTexture(rd, bp, tex);
+}
+
 mfgError mfgBindSampler(mfgRenderDevice * rd, mfgBindingPoint * bp, mfgSampler * sampler)
 {
 	return rd->bindSampler(rd, bp, sampler);
