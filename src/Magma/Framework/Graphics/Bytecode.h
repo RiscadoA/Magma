@@ -182,7 +182,7 @@ extern "C"
 #define MFG_BYTECODE_DECLF44A			0x36	// Declares an floating point 4x4 matrix variable array { array starting index stored on param 1x2, element count on param 2x2 }.
 
 	// Variable operations.
-#define MFG_BYTECODE_ASSIGN				0x40	// Performs an assign operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_ASSIGN				0x40	// Performs an assign operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 }
 #define MFG_BYTECODE_ADD				0x41	// Performs an addition operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
 #define MFG_BYTECODE_SUBTRACT			0x42	// Performs a subtraction operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).
 #define MFG_BYTECODE_MULTIPLY			0x43	// Performs a multiplication operation between two variables { variable 1 index on param 1x2, variable index 2 on param 2x2 } (output variable on { param 3x2 }).

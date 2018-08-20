@@ -666,8 +666,8 @@ extern "C"
 	typedef mfgError(*mfgRDSwapBuffersFunction)(mfgRenderDevice* rd);
 
 	// Getter functions
-	typedef mfgError(*mfgRDGetUProperty)(mfgRenderDevice* rd, mfmU32 propID, mfmU32* prop);
-	typedef mfgError(*mfgRDGetFProperty)(mfgRenderDevice* rd, mfmU32 propID, mfmF32* prop);
+	typedef mfgError(*mfgRDGetPropertyI)(mfgRenderDevice* rd, mfgEnum propID, mfmI32* value);
+	typedef mfgError(*mfgRDGetPropertyF)(mfgRenderDevice* rd, mfgEnum propID, mfmF32* value);
 
 	// Error functions
 	typedef mfmBool(*mfgRDGetErrorString)(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize);
@@ -756,8 +756,8 @@ extern "C"
 		mfgRDDrawTrianglesIndexedFunction drawTrianglesIndexed;
 		mfgRDSwapBuffersFunction swapBuffers;
 
-		mfgRDGetUProperty getUProperty;
-		mfgRDGetFProperty getFProperty;
+		mfgRDGetPropertyI getPropertyI;
+		mfgRDGetPropertyF getPropertyF;
 
 		mfgRDGetErrorString getErrorString;
 	};
@@ -1516,6 +1516,30 @@ extern "C"
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfgError mfgSwapBuffers(mfgRenderDevice* rd);
+
+	/// <summary>
+	///		Gets a render device integer property.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="id">Property identifier</param>
+	/// <param name="value">Output property value</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value);
+
+	/// <summary>
+	///		Gets a render device floating point property.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="id">Property identifier</param>
+	/// <param name="value">Output property value</param>
+	/// <returns>
+	///		MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfgError mfgGetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value);
 
 	/// <summary>
 	///		Gets the last error string.

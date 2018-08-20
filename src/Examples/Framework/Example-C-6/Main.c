@@ -22,6 +22,8 @@ mfgVertexArray* va = NULL;
 mfgIndexBuffer* ib = NULL;
 mfgConstantBuffer* cb = NULL;
 mfgBindingPoint* cbBP = NULL;
+mfgTexture2D* tex = NULL;
+mfgBindingPoint* texBP = NULL;
 
 struct Vertex
 {
@@ -29,6 +31,8 @@ struct Vertex
 	mfmF32 y;
 	mfmF32 z;
 	mfmF32 w;
+	mfmF32 u;
+	mfmF32 v;
 };
 
 void OnClose(void* window)
@@ -66,8 +70,8 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_2;
 			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_3;
 			metaDataB[ptr++] = MFG_VERTEX_SHADER;
-			metaDataB[ptr++] = 1;	// Input var count
-			metaDataB[ptr++] = 1;	// Output var count
+			metaDataB[ptr++] = 2;	// Input var count
+			metaDataB[ptr++] = 2;	// Output var count
 			metaDataB[ptr++] = 1;	// Binding point count
 
 			// Input var 1
@@ -77,12 +81,26 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = 0x00;	// ID 0
 			metaDataB[ptr++] = MFG_FLOAT4;
 
+			// Input var 2
+			strcpy(metaDataB + ptr, u8"uvs");
+			ptr += 16;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x03;	// ID 2
+			metaDataB[ptr++] = MFG_FLOAT2;
+
 			// Output var 1
 			strcpy(metaDataB + ptr, u8"_position");
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = 0x01;	// ID 1
 			metaDataB[ptr++] = MFG_FLOAT4;
+
+			// Output var 2
+			strcpy(metaDataB + ptr, u8"_out0");
+			ptr += 16;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x04;	// ID 3
+			metaDataB[ptr++] = MFG_FLOAT2;
 
 			// Constant buffer
 			strcpy(metaDataB + ptr, u8"transform");
@@ -112,8 +130,9 @@ void Main(int argc, char** argv)
 			0x02, // Major version 2
 			0x00, // Minor version 0
 			MFG_BYTECODE_ADD, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
-			MFG_BYTECODE_GET4CMP, 0x00, 0x03, 0x00, 0x01, 0x03,
-			MFG_BYTECODE_LITI1, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01,
+			MFG_BYTECODE_GET4CMP, 0x00, 0xFF, 0x00, 0x01, 0x03,
+			MFG_BYTECODE_LITI1, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x01,
+			MFG_BYTECODE_ASSIGN, 0x00, 0x04, 0x00, 0x03,
 		};
 
 		// Create shader
@@ -140,16 +159,30 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_2;
 			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_3;
 			metaDataB[ptr++] = MFG_PIXEL_SHADER;
-			metaDataB[ptr++] = 0;	// Input var count
+			metaDataB[ptr++] = 1;	// Input var count
 			metaDataB[ptr++] = 1;	// Output var count
-			metaDataB[ptr++] = 0;	// Binding point count
+			metaDataB[ptr++] = 1;	// Binding point count
+
+			// Input var 1
+			strcpy(metaDataB + ptr, u8"_in0");
+			ptr += 16;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x00;	// ID 0
+			metaDataB[ptr++] = MFG_FLOAT2;
 
 			// Output var 1
 			strcpy(metaDataB + ptr, u8"_target0");
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
-			metaDataB[ptr++] = 0x00;	// ID 0
+			metaDataB[ptr++] = 0x01;	// ID 1
 			metaDataB[ptr++] = MFG_FLOAT4;
+
+			// Texture 2D
+			strcpy(metaDataB + ptr, u8"texture");
+			ptr += 16;
+			metaDataB[ptr++] = MFG_TEXTURE_2D;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x02;	// ID 2
 
 			// Load
 			if (mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL) != MFG_ERROR_OKAY)
@@ -165,11 +198,8 @@ void Main(int argc, char** argv)
 			MFG_BYTECODE_HEADER_MARKER_3,
 			0x02, // Major version 2
 			0x00, // Minor version 0
-			MFG_BYTECODE_LITI4, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x01,
-			0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x01,
+			
+			MFG_BYTECODE_SAMPLE2D, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
 		};
 
 		// Create shader
@@ -201,21 +231,29 @@ void Main(int argc, char** argv)
 		vertexes[0].y = -0.5f;
 		vertexes[0].z = 0.0f;
 		vertexes[0].w = 1.0f;
+		vertexes[0].u = 0.0f;
+		vertexes[0].v = 0.0f;
 
 		vertexes[1].x = -0.5f;
 		vertexes[1].y = +0.5f;
 		vertexes[1].z = 0.0f;
 		vertexes[1].w = 1.0f;
+		vertexes[1].u = 0.0f;
+		vertexes[1].v = 1.0f;
 
 		vertexes[2].x = +0.5f;
 		vertexes[2].y = +0.5f;
 		vertexes[2].z = 0.0f;
 		vertexes[2].w = 1.0f;
+		vertexes[2].u = 1.0f;
+		vertexes[2].v = 1.0f;
 
 		vertexes[3].x = +0.5f;
 		vertexes[3].y = -0.5f;
 		vertexes[3].z = 0.0f;
 		vertexes[3].w = 1.0f;
+		vertexes[3].u = 1.0f;
+		vertexes[3].v = 0.0f;
 
 		if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
 		{
@@ -229,9 +267,10 @@ void Main(int argc, char** argv)
 
 	// Create vertex layout
 	{
-		mfgVertexElement elements[1];
+		mfgVertexElement elements[2];
 		
 		mfgDefaultVertexElement(&elements[0]);
+		mfgDefaultVertexElement(&elements[1]);
 
 		elements[0].bufferIndex = 0;
 		strcpy(elements[0].name, u8"position");
@@ -240,8 +279,15 @@ void Main(int argc, char** argv)
 		elements[0].size = 4;
 		elements[0].type = MFG_FLOAT;
 
+		elements[1].bufferIndex = 0;
+		strcpy(elements[1].name, u8"uvs");
+		elements[1].offset = offsetof(struct Vertex, u);
+		elements[1].stride = sizeof(struct Vertex);
+		elements[1].size = 2;
+		elements[1].type = MFG_FLOAT;
+
 		// Create layout
-		if (mfgCreateVertexLayout(renderDevice, &vl, 1, elements, vs) != MFG_ERROR_OKAY)
+		if (mfgCreateVertexLayout(renderDevice, &vl, 2, elements, vs) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgGetErrorString(renderDevice, err, sizeof(err));
@@ -299,6 +345,34 @@ void Main(int argc, char** argv)
 		abort();
 	}
 
+	// Create texture
+	{
+		mfmF32 data[] =
+		{
+			1.0f, 0.0f, 0.0f, 1.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
+		};
+		
+		if (mfgCreateTexture2D(renderDevice, &tex, 2, 2, MFG_RGBA32FLOAT, data, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
+		{
+			mfsUTF8CodeUnit err[512];
+			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsFlush(mfsErrStream);
+			abort();
+		}
+	}
+
+	// Get binding point
+	if (mfgGetPixelShaderBindingPoint(renderDevice, &texBP, ps, u8"texture") != MFG_ERROR_OKAY)
+	{
+		mfsUTF8CodeUnit err[512];
+		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsFlush(mfsErrStream);
+		abort();
+	}
+
 	mfmF32 x = 0.0f;
 
 	while (windowOpen == MFM_TRUE)
@@ -347,6 +421,8 @@ void Main(int argc, char** argv)
 		// Draw vertex array
 		if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
 			abort();
+		if (mfgBindTexture2D(renderDevice, texBP, tex) != MFG_ERROR_OKAY)
+			abort();
 		if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
 			abort();
 		if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
@@ -360,7 +436,8 @@ void Main(int argc, char** argv)
 			abort();
 	}
 
-	//mfgDestroyConstantBuffer(cb);
+	mfgDestroyTexture2D(tex);
+	mfgDestroyConstantBuffer(cb);
 	mfgDestroyIndexBuffer(ib);
 	mfgDestroyVertexArray(va);
 	mfgDestroyVertexLayout(vl);

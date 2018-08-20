@@ -416,6 +416,16 @@ mfgError mfgSwapBuffers(mfgRenderDevice * rd)
 	return rd->swapBuffers(rd);
 }
 
+mfgError mfgGetPropertyI(mfgRenderDevice * rd, mfgEnum id, mfmI32 * value)
+{
+	return rd->getPropertyI(rd, id, value);
+}
+
+mfgError mfgGetPropertyF(mfgRenderDevice * rd, mfgEnum id, mfmF32 * value)
+{
+	return rd->getPropertyF(rd, id, value);
+}
+
 mfmBool mfgGetErrorString(mfgRenderDevice * rd, mfsUTF8CodeUnit * str, mfmU64 maxSize)
 {
 	return rd->getErrorString(rd, str, maxSize);

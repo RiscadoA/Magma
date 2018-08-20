@@ -712,7 +712,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_0;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out1"))
@@ -722,7 +722,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_1;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out2"))
@@ -732,7 +732,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_2;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out3"))
@@ -742,7 +742,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_3;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out4"))
@@ -752,7 +752,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_4;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out5"))
@@ -762,7 +762,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_5;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out6"))
@@ -772,7 +772,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_6;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out7"))
@@ -782,7 +782,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" out_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" out_7;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else return MFG_ERROR_INVALID_ARGUMENTS;
@@ -801,7 +801,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_0;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target1"))
@@ -811,7 +811,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_1;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target2"))
@@ -821,7 +821,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_2;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target3"))
@@ -831,7 +831,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_3;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target4"))
@@ -841,7 +841,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_4;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target5"))
@@ -851,7 +851,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_5;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target6"))
@@ -861,7 +861,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_6;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target7"))
@@ -871,7 +871,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					mfgError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPrintFormatUTF8(outputStream, u8" target_%d;\n\n", var->id) != MFS_ERROR_OKAY)
+					if (mfsPrintFormatUTF8(outputStream, u8" target_7;\n\n", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else return MFG_ERROR_INVALID_ARGUMENTS;
