@@ -56,7 +56,6 @@ struct mfgD3D11PixelShader
 	mfgD3D11BindingPoint bps[16];
 };
 
-
 typedef struct
 {
 	mfgRenderDeviceObject base;
@@ -68,7 +67,7 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	
+	ID3D11Buffer* buffer;
 } mfgD3D11ConstantBuffer;
 
 typedef struct
@@ -116,14 +115,17 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	
+	ID3D11Buffer* buffer;
 } mfgD3D11VertexBuffer;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
 	
-
+	ID3D11InputLayout* inputLayout;
+	UINT offsets[16];
+	UINT strides[16];
+	UINT elementCount;
 } mfgD3D11VertexLayout;
 
 typedef struct
@@ -135,7 +137,8 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	
+	ID3D11Buffer* buffer;
+	DXGI_FORMAT format;
 } mfgD3D11IndexBuffer;
 
 typedef struct
@@ -286,6 +289,7 @@ mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, c
 			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateVertexShader failed");
 	}
 
+	d3dVS->md = metaData;
 	*vs = d3dVS;
 
 	return MFG_ERROR_OKAY;
@@ -377,6 +381,7 @@ mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, con
 			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreatePixelShader failed");
 	}
 
+	d3dPS->md = metaData;
 	*ps = d3dPS;
 
 	return MFG_ERROR_OKAY;
@@ -576,7 +581,11 @@ void mfgD3D11DestroyVertexBuffer(void* buffer)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (buffer == NULL) abort();
 #endif
-	
+
+	mfgD3D11VertexBuffer* d3dVB = buffer;
+	d3dVB->buffer->lpVtbl->Release(d3dVB->buffer);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVB->base.renderDevice)->pool32, d3dVB) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage)
@@ -584,6 +593,57 @@ mfgError mfgD3D11CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, m
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || vb == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
+
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	// Allocate vertex buffer
+	mfgD3D11VertexBuffer* d3dVB = NULL;
+	if (mfmAllocate(d3dRD->pool32, &d3dVB, sizeof(mfgD3D11VertexBuffer)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
+
+	// Init object
+	d3dVB->base.object.destructorFunc = &mfgD3D11DestroyVertexBuffer;
+	d3dVB->base.object.referenceCount = 0;
+	d3dVB->base.renderDevice = rd;
+
+	// Create buffer
+	D3D11_BUFFER_DESC desc;
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_STATIC: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_DYNAMIC: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported usage mode");
+	}
+
+	desc.ByteWidth = size;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.MiscFlags = 0;
+
+	if (data == NULL)
+	{
+		if (usage != MFG_USAGE_DYNAMIC)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Non dynamic buffers must have initial data");
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateBuffer(d3dRD->device, &desc, NULL, &d3dVB->buffer);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateBuffer failed");
+	}
+	else
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+
+		initData.pSysMem = data;
+		initData.SysMemPitch = 0;
+		initData.SysMemSlicePitch = 0;
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateBuffer(d3dRD->device, &desc, &initData, &d3dVB->buffer);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateBuffer failed");
+	}
+
+	*vb = d3dVB;
 
 	return MFG_ERROR_OKAY;
 }
@@ -596,6 +656,14 @@ mfgError mfgD3D11MapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void*
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11VertexBuffer* d3dVB = vb;
+
+	D3D11_MAPPED_SUBRESOURCE map;
+	HRESULT hr = d3dRD->deviceContext->lpVtbl->Map(d3dRD->deviceContext, d3dVB->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Map failed");
+
+	*memory = map.pData;
 
 	return MFG_ERROR_OKAY;
 }
@@ -607,6 +675,8 @@ mfgError mfgD3D11UnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb)
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11VertexBuffer* d3dVB = vb;
+	d3dRD->deviceContext->lpVtbl->Unmap(d3dRD->deviceContext, d3dVB->buffer, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -617,6 +687,10 @@ void mfgD3D11DestroyIndexBuffer(void* buffer)
 	if (buffer == NULL) abort();
 #endif
 	
+	mfgD3D11IndexBuffer* d3dIB = buffer;
+	d3dIB->buffer->lpVtbl->Release(d3dIB->buffer);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dIB->base.renderDevice)->pool32, d3dIB) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage)
@@ -627,6 +701,62 @@ mfgError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfm
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	// Allocate index buffer
+	mfgD3D11IndexBuffer* d3dIB = NULL;
+	if (mfmAllocate(d3dRD->pool32, &d3dIB, sizeof(mfgD3D11VertexBuffer)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate index buffer on pool");
+
+	// Init object
+	d3dIB->base.object.destructorFunc = &mfgD3D11DestroyIndexBuffer;
+	d3dIB->base.object.referenceCount = 0;
+	d3dIB->base.renderDevice = rd;
+
+	// Create buffer
+	D3D11_BUFFER_DESC desc;
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_STATIC: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_DYNAMIC: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported usage mode");
+	}
+
+	switch (format)
+	{
+		case MFG_UBYTE: d3dIB->format = DXGI_FORMAT_R8_UINT; break;
+		case MFG_USHORT: d3dIB->format = DXGI_FORMAT_R16_UINT; break;
+		case MFG_UINT: d3dIB->format = DXGI_FORMAT_R32_UINT; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported index format");
+	}
+
+	desc.ByteWidth = size;
+	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	desc.MiscFlags = 0;
+
+	if (data == NULL)
+	{
+		if (usage != MFG_USAGE_DYNAMIC)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Non dynamic buffers must have initial data");
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateBuffer(d3dRD->device, &desc, NULL, &d3dIB->buffer);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateBuffer failed");
+	}
+	else
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+
+		initData.pSysMem = data;
+		initData.SysMemPitch = 0;
+		initData.SysMemSlicePitch = 0;
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateBuffer(d3dRD->device, &desc, &initData, &d3dIB->buffer);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateBuffer failed");
+	}
+
+	*ib = d3dIB;
 	return MFG_ERROR_OKAY;
 }
 
@@ -638,6 +768,14 @@ mfgError mfgD3D11MapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** 
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11IndexBuffer* d3dIB = ib;
+
+	D3D11_MAPPED_SUBRESOURCE map;
+	HRESULT hr = d3dRD->deviceContext->lpVtbl->Map(d3dRD->deviceContext, d3dIB->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Map failed");
+
+	*memory = map.pData;
 
 	return MFG_ERROR_OKAY;
 }
@@ -649,6 +787,8 @@ mfgError mfgD3D11UnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11IndexBuffer* d3dIB = ib;
+	d3dRD->deviceContext->lpVtbl->Unmap(d3dRD->deviceContext, d3dIB->buffer, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -660,6 +800,8 @@ mfgError mfgD3D11SetIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11IndexBuffer* d3dIB = ib;
+	d3dRD->deviceContext->lpVtbl->IASetIndexBuffer(d3dRD->deviceContext, d3dIB->buffer, d3dIB->format, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -670,6 +812,10 @@ void mfgD3D11DestroyVertexLayout(void* vl)
 	if (vl == NULL) abort();
 #endif
 
+	mfgD3D11VertexLayout* d3dVL = vl;
+	d3dVL->inputLayout->lpVtbl->Release(d3dVL->inputLayout);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVL->base.renderDevice)->pool256, d3dVL) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs)
@@ -679,6 +825,129 @@ mfgError mfgD3D11CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, m
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	// Allocate vertex layout
+	mfgD3D11VertexLayout* d3dVL = NULL;
+	if (mfmAllocate(d3dRD->pool256, &d3dVL, sizeof(mfgD3D11VertexLayout)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex layout on pool");
+
+	// Init object
+	d3dVL->base.object.destructorFunc = &mfgD3D11DestroyVertexLayout;
+	d3dVL->base.object.referenceCount = 0;
+	d3dVL->base.renderDevice = rd;
+
+	// Create input layout
+	if (elementCount > 16)
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Only up to 16 vertex elements are supported");
+	d3dVL->elementCount = elementCount;
+
+	D3D11_INPUT_ELEMENT_DESC inputDesc[16];
+	char names[16][16];
+
+	for (mfmU64 i = 0; i < elementCount; ++i)
+	{
+		ZeroMemory(&inputDesc[i], sizeof(inputDesc[i]));
+
+		// Get semantic name
+		{
+			mfgMetaDataInputVariable* var = ((mfgD3D11VertexShader*)vs)->md->firstInputVar;
+			while (var != NULL)
+			{
+				if (strcmp(var->name, elements[i].name) == 0)
+					break;
+				var = var->next;
+			}
+
+			if (var == NULL)
+				MFG_RETURN_ERROR(MFG_ERROR_NOT_FOUND, u8"Couldn't find vertex element with matching name");
+			snprintf(names[i], 16, u8"IN%dIN", var->id);
+			inputDesc[i].SemanticName = names[i];
+		}
+
+		inputDesc[i].SemanticIndex = 0;
+		inputDesc[i].InputSlot = elements[i].bufferIndex;
+		inputDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		inputDesc[i].AlignedByteOffset = elements[i].offset;
+		inputDesc[i].InstanceDataStepRate = 0;
+		d3dVL->offsets[i] = elements[i].offset;
+		d3dVL->strides[i] = elements[i].stride;
+
+		// Get format
+		switch (elements[i].size)
+		{
+			case 1:
+				switch (elements[i].type)
+				{
+					case MFG_BYTE: inputDesc[i].Format = DXGI_FORMAT_R8_SINT; break;
+					case MFG_SHORT: inputDesc[i].Format = DXGI_FORMAT_R16_SINT; break;
+					case MFG_INT: inputDesc[i].Format = DXGI_FORMAT_R32_SINT; break;
+					case MFG_UBYTE: inputDesc[i].Format = DXGI_FORMAT_R8_UINT; break;
+					case MFG_USHORT: inputDesc[i].Format = DXGI_FORMAT_R16_UINT; break;
+					case MFG_UINT: inputDesc[i].Format = DXGI_FORMAT_R32_UINT; break;
+					case MFG_NBYTE: inputDesc[i].Format = DXGI_FORMAT_R8_SNORM; break;
+					case MFG_NSHORT: inputDesc[i].Format = DXGI_FORMAT_R16_SNORM; break;
+					case MFG_NUBYTE: inputDesc[i].Format = DXGI_FORMAT_R8_UNORM; break;
+					case MFG_NUSHORT: inputDesc[i].Format = DXGI_FORMAT_R16_UNORM; break;
+					case MFG_FLOAT: inputDesc[i].Format = DXGI_FORMAT_R32_FLOAT; break;
+					default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported element type");
+				}
+				break;
+			case 2:
+				switch (elements[i].type)
+				{
+					case MFG_BYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8_SINT; break;
+					case MFG_SHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16_SINT; break;
+					case MFG_INT: inputDesc[i].Format = DXGI_FORMAT_R32G32_SINT; break;
+					case MFG_UBYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8_UINT; break;
+					case MFG_USHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16_UINT; break;
+					case MFG_UINT: inputDesc[i].Format = DXGI_FORMAT_R32G32_UINT; break;
+					case MFG_NBYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8_SNORM; break;
+					case MFG_NSHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16_SNORM; break;
+					case MFG_NUBYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8_UNORM; break;
+					case MFG_NUSHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16_UNORM; break;
+					case MFG_FLOAT: inputDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT; break;
+					default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported element type");
+				}
+				break;
+			case 3:
+				switch (elements[i].type)
+				{
+					case MFG_INT: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_SINT; break;
+					case MFG_UINT: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_UINT; break;
+					case MFG_FLOAT: inputDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
+					default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported element type");
+				}
+				break;
+			case 4:
+				switch (elements[i].type)
+				{
+					case MFG_BYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_SINT; break;
+					case MFG_SHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SINT; break;
+					case MFG_INT: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_SINT; break;
+					case MFG_UBYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UINT; break;
+					case MFG_USHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_UINT; break;
+					case MFG_UINT: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT; break;
+					case MFG_NBYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_SNORM; break;
+					case MFG_NSHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SNORM; break;
+					case MFG_NUBYTE: inputDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UNORM; break;
+					case MFG_NUSHORT: inputDesc[i].Format = DXGI_FORMAT_R16G16B16A16_UNORM; break;
+					case MFG_FLOAT: inputDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
+					default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported element type");
+				}
+				break;
+			default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported element size");
+		}
+	}
+
+	HRESULT hr = d3dRD->device->lpVtbl->CreateInputLayout(
+		d3dRD->device,
+		inputDesc,
+		elementCount,
+		((mfgD3D11VertexShader*)vs)->blob->lpVtbl->GetBufferPointer(((mfgD3D11VertexShader*)vs)->blob),
+		((mfgD3D11VertexShader*)vs)->blob->lpVtbl->GetBufferSize(((mfgD3D11VertexShader*)vs)->blob),
+		&d3dVL->inputLayout);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateInputLayout failed");
 
 	return MFG_ERROR_OKAY;
 }
