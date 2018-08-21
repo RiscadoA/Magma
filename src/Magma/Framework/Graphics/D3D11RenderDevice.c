@@ -131,7 +131,9 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	
+	ID3D11Buffer* buffers[16];
+	UINT bufferCount;
+	mfgD3D11VertexLayout* layout;
 } mfgD3D11VertexArray;
 
 typedef struct
@@ -949,6 +951,8 @@ mfgError mfgD3D11CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, m
 	if (FAILED(hr))
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateInputLayout failed");
 
+	*vl = d3dVL;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -957,6 +961,10 @@ void mfgD3D11DestroyVertexArray(void* va)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (va == NULL) abort();
 #endif
+
+	mfgD3D11VertexArray* d3dVA = va;
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVA->base.renderDevice)->pool256, d3dVA) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 bufferCount, mfgVertexBuffer** buffers, mfgVertexLayout* vl)
@@ -966,6 +974,25 @@ mfgError mfgD3D11CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfm
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	// Allocate vertex array
+	mfgD3D11VertexArray* d3dVA = NULL;
+	if (mfmAllocate(d3dRD->pool256, &d3dVA, sizeof(mfgD3D11VertexArray)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
+
+	// Init object
+	d3dVA->base.object.destructorFunc = &mfgD3D11DestroyVertexArray;
+	d3dVA->base.object.referenceCount = 0;
+	d3dVA->base.renderDevice = rd;
+
+	if (bufferCount > 16)
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Vertex arrays can only have up to 16 vertex buffers");
+	d3dVA->bufferCount = bufferCount;
+	for (mfmU64 i = 0; i < bufferCount; ++i)
+		d3dVA->buffers[i] = ((mfgD3D11VertexBuffer*)buffers[i])->buffer;
+	d3dVA->layout = vl;
+
+	*va = d3dVA;
 
 	return MFG_ERROR_OKAY;
 }
@@ -977,6 +1004,10 @@ mfgError mfgD3D11SetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va)
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11VertexArray* d3dVA = va;
+
+	d3dRD->deviceContext->lpVtbl->IASetInputLayout(d3dRD->deviceContext, d3dVA->layout->inputLayout);
+	d3dRD->deviceContext->lpVtbl->IASetVertexBuffers(d3dRD->deviceContext, 0, d3dVA->bufferCount, d3dVA->buffers, d3dVA->layout->strides, d3dVA->layout->offsets);
 
 	return MFG_ERROR_OKAY;
 }
