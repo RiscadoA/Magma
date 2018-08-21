@@ -743,7 +743,7 @@ mfgError mfgOGL4BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4ConstantBuffer* oglCB = cb;
 
-	glBindBufferRange(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb, offset, size);
+	glBindBufferRange(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb, offset * 16, size * 16);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -2718,6 +2718,48 @@ mfgError mfgOGL4DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 
 	return MFG_ERROR_OKAY;
 }
 
+mfgError mfgOGL4GetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	GLint out;
+
+	if (id == MFG_MAX_ANISOTROPY)
+		glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &out);
+	else if (id == MFG_CONSTANT_ALIGN)
+		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &out);
+	else
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	*value = out;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4GetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	GLfloat out;
+
+	if (id == MFG_MAX_ANISOTROPY)
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &out);
+	else if (id == MFG_CONSTANT_ALIGN)
+		glGetFloatv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &out);
+	else
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	*value = out;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
 mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
 {
 	// Check if params are valid
@@ -2892,8 +2934,8 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.drawTrianglesIndexed = &mfgOGL4DrawTrianglesIndexed;
 	rd->base.swapBuffers = &mfgOGL4SwapBuffers;
 
-	rd->base.getPropertyI = NULL;
-	rd->base.getPropertyF = NULL;
+	rd->base.getPropertyI = &mfgOGL4GetPropertyI;
+	rd->base.getPropertyF = &mfgOGL4GetPropertyF;
 
 	rd->base.getErrorString = &mfgOGL4GetErrorString;
 

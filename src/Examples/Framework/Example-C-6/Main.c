@@ -484,13 +484,13 @@ void Main(int argc, char** argv)
 			}
 
 			// Draw vertex array
+			if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
+				abort();
 			if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgBindRenderTexture(renderDevice, texBP, rt) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
-				abort();
-			if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
 				abort();

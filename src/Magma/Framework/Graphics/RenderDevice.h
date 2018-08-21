@@ -114,6 +114,7 @@ extern "C"
 #define MFG_DEPTH32STENCIL8 0x59
 
 #define MFG_MAX_ANISOTROPY	0x5A
+#define MFG_CONSTANT_ALIGN	0x5B
 
 	typedef mfmI32 mfgEnum;
 	
@@ -878,8 +879,8 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="cb">Constant buffer handle</param>
-	/// <param name="offset">Starting memory offset in the buffer</param>
-	/// <param name="size">Memory size in the buffer</param>
+	/// <param name="offset">Starting memory offset in the buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
+	/// <param name="size">Memory size in the buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
 	/// <returns>
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.

@@ -14,7 +14,7 @@
 
 #include <windows.h>
 #include <windowsx.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
 #include <d3dcompiler.h>
 
 #pragma comment (lib, "d3d11.lib")
@@ -194,8 +194,8 @@ typedef struct
 	mfgBlendState* defaultBlendState;
 
 	IDXGISwapChain* swapChain;
-	ID3D11Device* device;
-	ID3D11DeviceContext* deviceContext;
+	ID3D11Device1* device;
+	ID3D11DeviceContext1* deviceContext;
 
 	ID3D11Texture2D* backBuffer;
 	ID3D11RenderTargetView* defaultRenderTargetView;
@@ -498,6 +498,25 @@ mfgError mfgD3D11BindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mf
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
 	
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11BindingPoint* d3dBP = bp;
+	mfgD3D11ConstantBuffer* d3dCB = cb;
+
+	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
+	{
+		if (d3dCB == NULL)
+			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
+	}
+	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
+	{
+		if (d3dCB == NULL)
+			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -507,6 +526,28 @@ mfgError mfgD3D11BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* b
 	if (rd == NULL || bp == NULL || cb == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
 	
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11BindingPoint* d3dBP = bp;
+	mfgD3D11ConstantBuffer* d3dCB = cb;
+
+	UINT d3dOffset = offset;
+	UINT d3dSize = size;
+
+	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
+	{
+		if (d3dCB == NULL)
+			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, NULL, NULL, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
+	}
+	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
+	{
+		if (d3dCB == NULL)
+			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, NULL, NULL, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -1841,6 +1882,46 @@ mfgError mfgD3D11DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64
 	return MFG_ERROR_OKAY;
 }
 
+mfgError mfgD3D11GetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	INT out;
+
+	if (id == MFG_MAX_ANISOTROPY)
+		out = 16;
+	else if (id == MFG_CONSTANT_ALIGN)
+		out = 16;
+	else
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	*value = out;
+
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgD3D11GetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	FLOAT out;
+
+	if (id == MFG_MAX_ANISOTROPY)
+		out = 16.0f;
+	else if (id == MFG_CONSTANT_ALIGN)
+		out = 16.0f;
+	else
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	*value = out;
+
+	return MFG_ERROR_OKAY;
+}
+
 mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
 {
 	// Check if params are valid
@@ -1934,13 +2015,20 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 #endif
 
 
+			D3D11_SDK_VERSION;
+
+			D3D_FEATURE_LEVEL levels[] =
+			{
+				D3D_FEATURE_LEVEL_11_1,
+			};
+
 			hr = D3D11CreateDeviceAndSwapChain(
 				NULL,
 				D3D_DRIVER_TYPE_HARDWARE,
 				NULL,
 				flags,
-				NULL,
-				NULL,
+				levels,
+				1,
 				D3D11_SDK_VERSION,
 				&desc,
 				&rd->swapChain,
@@ -2098,8 +2186,8 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 	rd->base.drawTrianglesIndexed = &mfgD3D11DrawTrianglesIndexed;
 	rd->base.swapBuffers = &mfgD3D11SwapBuffers;
 
-	rd->base.getPropertyI = NULL;
-	rd->base.getPropertyF = NULL;
+	rd->base.getPropertyI = &mfgD3D11GetPropertyI;
+	rd->base.getPropertyF = &mfgD3D11GetPropertyF;
 
 	rd->base.getErrorString = &mfgD3D11GetErrorString;
 
