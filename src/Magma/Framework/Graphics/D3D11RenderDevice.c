@@ -74,19 +74,31 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	mfmU32 width;
+	mfmU32 formatSize;
+	ID3D11Texture1D* texture;
+	ID3D11ShaderResourceView* view;
 } mfgD3D11Texture1D;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	mfmU32 width;
+	mfmU32 height;
+	mfmU32 formatSize;
+	ID3D11Texture2D* texture;
+	ID3D11ShaderResourceView* view;
 } mfgD3D11Texture2D;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	mfmU32 width;
+	mfmU32 height;
+	mfmU32 depth;
+	mfmU32 formatSize;
+	ID3D11Texture3D* texture;
+	ID3D11ShaderResourceView* view;
 } mfgD3D11Texture3D;
 
 typedef struct
@@ -556,7 +568,26 @@ mfgError mfgD3D11BindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
-	
+
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11BindingPoint* d3dBP = bp;
+	mfgD3D11Texture1D* d3dTex = tex;
+
+	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
+	{
+		if (tex == NULL)
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
+	{
+		if (tex == NULL)
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -565,7 +596,26 @@ mfgError mfgD3D11BindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
+
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11BindingPoint* d3dBP = bp;
+	mfgD3D11Texture2D* d3dTex = tex;
 	
+	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
+	{
+		if (tex == NULL)
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
+	{
+		if (tex == NULL)
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -574,7 +624,26 @@ mfgError mfgD3D11BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
-	
+
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11BindingPoint* d3dBP = bp;
+	mfgD3D11Texture3D* d3dTex = tex;
+
+	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
+	{
+		if (tex == NULL)
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
+	{
+		if (tex == NULL)
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		else
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -1203,6 +1272,12 @@ void mfgD3D11DestroyTexture1D(void* tex)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (tex == NULL) abort();
 #endif
+
+	mfgD3D11Texture1D* d3dTex = tex;
+	d3dTex->view->lpVtbl->Release(d3dTex->view);
+	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage)
@@ -1211,14 +1286,133 @@ mfgError mfgD3D11CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	// Allocate texture
+	mfgD3D11Texture1D* d3dTex = NULL;
+	if (mfmAllocate(d3dRD->pool64, &d3dTex, sizeof(mfgD3D11Texture1D)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 1D on pool");
+
+	// Init object
+	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyTexture1D;
+	d3dTex->base.object.referenceCount = 0;
+	d3dTex->base.renderDevice = rd;
+
+	// Create texture
+	D3D11_TEXTURE1D_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width = width;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_STATIC: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_DYNAMIC: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported usage mode");
+	}
+
+	if (usage != MFG_USAGE_STATIC)
+	{
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	}
+	else
+	{
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.MiscFlags = 0;
+	}
+
+	switch (format)
+	{
+		case MFG_R8SNORM: desc.Format = DXGI_FORMAT_R8_SNORM; d3dTex->formatSize = 1; break;
+		case MFG_R16SNORM: desc.Format = DXGI_FORMAT_R16_SNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG8SNORM: desc.Format = DXGI_FORMAT_R8G8_SNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG16SNORM: desc.Format = DXGI_FORMAT_R16G16_SNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8SNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_SNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16SNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_SNORM; d3dTex->formatSize = 4; break;
+
+		case MFG_R8UNORM: desc.Format = DXGI_FORMAT_R8_UNORM; d3dTex->formatSize = 1; break;
+		case MFG_R16UNORM: desc.Format = DXGI_FORMAT_R16_UNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG8UNORM: desc.Format = DXGI_FORMAT_R8G8_UNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG16UNORM: desc.Format = DXGI_FORMAT_R16G16_UNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8UNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16UNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; d3dTex->formatSize = 4; break;
+
+		case MFG_R8SINT: desc.Format = DXGI_FORMAT_R8_SINT; d3dTex->formatSize = 1; break;
+		case MFG_R16SINT: desc.Format = DXGI_FORMAT_R16_SINT; d3dTex->formatSize = 2; break;
+		case MFG_RG8SINT: desc.Format = DXGI_FORMAT_R8G8_SINT; d3dTex->formatSize = 2; break;
+		case MFG_RG16SINT: desc.Format = DXGI_FORMAT_R16G16_SINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8SINT: desc.Format = DXGI_FORMAT_R8G8B8A8_SINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16SINT: desc.Format = DXGI_FORMAT_R16G16B16A16_SINT; d3dTex->formatSize = 4; break;
+
+		case MFG_R8UINT: desc.Format = DXGI_FORMAT_R8_UINT; d3dTex->formatSize = 1; break;
+		case MFG_R16UINT: desc.Format = DXGI_FORMAT_R16_UINT; d3dTex->formatSize = 2; break;
+		case MFG_RG8UINT: desc.Format = DXGI_FORMAT_R8G8_UINT; d3dTex->formatSize = 2; break;
+		case MFG_RG16UINT: desc.Format = DXGI_FORMAT_R16G16_UINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8UINT: desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16UINT: desc.Format = DXGI_FORMAT_R16G16B16A16_UINT; d3dTex->formatSize = 4; break;
+
+		case MFG_R32FLOAT: desc.Format = DXGI_FORMAT_R32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RG32FLOAT: desc.Format = DXGI_FORMAT_R32G32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RGB32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; d3dTex->formatSize = 4; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture format");
+	}
+
+	if (data == NULL)
+	{
+		if (usage == MFG_USAGE_STATIC)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Static textures must have initial data");
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture1D(d3dRD->device, &desc, NULL, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture1D failed");
+	}
+	else
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = data;
+		initData.SysMemPitch = 0;
+		initData.SysMemSlicePitch = 0;
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture1D(d3dRD->device, &desc, &initData, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture1D failed");
+	}
+
+	// Create view
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateShaderResourceView(d3dRD->device, d3dTex->texture, NULL, &d3dTex->view);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateShaderResourceView failed");
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
 mfgError mfgD3D11UpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data)
 {
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11Texture1D* d3dTex = tex;
+
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL || data == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	if (dstX + width > d3dTex->width)
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Update coordinates are out of bounds");
 #endif
+
+	D3D11_BOX dstBox;
+	dstBox.back = 1;
+	dstBox.front = 0;
+	dstBox.left = dstX;
+	dstBox.right = dstX + width;
+	dstBox.top = 1;
+	dstBox.bottom = 0;
+
+	d3dRD->deviceContext->lpVtbl->UpdateSubresource(d3dRD->deviceContext, d3dTex->texture, 0, &dstBox, data, 0, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -1229,6 +1423,11 @@ mfgError mfgD3D11GenerateTexture1DMipmaps(mfgRenderDevice* rd, mfgTexture1D* tex
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11Texture1D* d3dTex = tex;
+
+	d3dRD->deviceContext->lpVtbl->GenerateMips(d3dRD->deviceContext, d3dTex->view);
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -1237,6 +1436,12 @@ void mfgD3D11DestroyTexture2D(void* tex)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (tex == NULL) abort();
 #endif
+
+	mfgD3D11Texture2D* d3dTex = tex;
+	d3dTex->view->lpVtbl->Release(d3dTex->view);
+	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage)
@@ -1245,16 +1450,141 @@ mfgError mfgD3D11CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	// Allocate texture
+	mfgD3D11Texture2D* d3dTex = NULL;
+	if (mfmAllocate(d3dRD->pool64, &d3dTex, sizeof(mfgD3D11Texture2D)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 2D on pool");
+
+	// Init object
+	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyTexture2D;
+	d3dTex->base.object.referenceCount = 0;
+	d3dTex->base.renderDevice = rd;
+
+	// Create texture
+	D3D11_TEXTURE2D_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width = width;
+	desc.Height = height;
+	d3dTex->width = width;
+	d3dTex->height = height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_STATIC: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_DYNAMIC: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported usage mode");
+	}
+
+	if (usage != MFG_USAGE_STATIC)
+	{
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	}
+	else
+	{
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.MiscFlags = 0;
+	}
+
+	switch (format)
+	{
+		case MFG_R8SNORM: desc.Format = DXGI_FORMAT_R8_SNORM; d3dTex->formatSize = 1; break;
+		case MFG_R16SNORM: desc.Format = DXGI_FORMAT_R16_SNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG8SNORM: desc.Format = DXGI_FORMAT_R8G8_SNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG16SNORM: desc.Format = DXGI_FORMAT_R16G16_SNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8SNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_SNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16SNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_SNORM; d3dTex->formatSize = 4; break;
+
+		case MFG_R8UNORM: desc.Format = DXGI_FORMAT_R8_UNORM; d3dTex->formatSize = 1; break;
+		case MFG_R16UNORM: desc.Format = DXGI_FORMAT_R16_UNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG8UNORM: desc.Format = DXGI_FORMAT_R8G8_UNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG16UNORM: desc.Format = DXGI_FORMAT_R16G16_UNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8UNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16UNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; d3dTex->formatSize = 4; break;
+
+		case MFG_R8SINT: desc.Format = DXGI_FORMAT_R8_SINT; d3dTex->formatSize = 1; break;
+		case MFG_R16SINT: desc.Format = DXGI_FORMAT_R16_SINT; d3dTex->formatSize = 2; break;
+		case MFG_RG8SINT: desc.Format = DXGI_FORMAT_R8G8_SINT; d3dTex->formatSize = 2; break;
+		case MFG_RG16SINT: desc.Format = DXGI_FORMAT_R16G16_SINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8SINT: desc.Format = DXGI_FORMAT_R8G8B8A8_SINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16SINT: desc.Format = DXGI_FORMAT_R16G16B16A16_SINT; d3dTex->formatSize = 4; break;
+
+		case MFG_R8UINT: desc.Format = DXGI_FORMAT_R8_UINT; d3dTex->formatSize = 1; break;
+		case MFG_R16UINT: desc.Format = DXGI_FORMAT_R16_UINT; d3dTex->formatSize = 2; break;
+		case MFG_RG8UINT: desc.Format = DXGI_FORMAT_R8G8_UINT; d3dTex->formatSize = 2; break;
+		case MFG_RG16UINT: desc.Format = DXGI_FORMAT_R16G16_UINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8UINT: desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16UINT: desc.Format = DXGI_FORMAT_R16G16B16A16_UINT; d3dTex->formatSize = 4; break;
+
+		case MFG_R32FLOAT: desc.Format = DXGI_FORMAT_R32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RG32FLOAT: desc.Format = DXGI_FORMAT_R32G32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RGB32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; d3dTex->formatSize = 4; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture format");
+	}
+
+	if (data == NULL)
+	{
+		if (usage == MFG_USAGE_STATIC)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Static textures must have initial data");
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture2D(d3dRD->device, &desc, NULL, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture2D failed");
+	}
+	else
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = data;
+		initData.SysMemPitch = d3dTex->formatSize * width;
+		initData.SysMemSlicePitch = 0;
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture2D(d3dRD->device, &desc, &initData, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture2D failed");
+	}
+
+	// Create view
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateShaderResourceView(d3dRD->device, d3dTex->texture, NULL, &d3dTex->view);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateShaderResourceView failed");
+	}
+
+	*tex = d3dTex;
+
 	return MFG_ERROR_OKAY;
 }
 
 mfgError mfgD3D11UpdateTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data)
 {
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11Texture2D* d3dTex = tex;
+
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL || data == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	if (dstX + width > d3dTex->width ||
+		dstY + height > d3dTex->height)
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Update coordinates are out of bounds");
 #endif
 
-	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	D3D11_BOX dstBox;
+	dstBox.back = 1;
+	dstBox.front = 0;
+	dstBox.left = dstX;
+	dstBox.right = dstX + width;
+	dstBox.top = dstY;
+	dstBox.bottom = dstY + height;
+
+	d3dRD->deviceContext->lpVtbl->UpdateSubresource(d3dRD->deviceContext, d3dTex->texture, 0, &dstBox, data, d3dTex->formatSize * width, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -1265,7 +1595,10 @@ mfgError mfgD3D11GenerateTexture2DMipmaps(mfgRenderDevice* rd, mfgTexture2D* tex
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
-	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11Texture2D* d3dTex = tex;
+
+	d3dRD->deviceContext->lpVtbl->GenerateMips(d3dRD->deviceContext, d3dTex->view);
 
 	return MFG_ERROR_OKAY;
 }
@@ -1276,6 +1609,11 @@ void mfgD3D11DestroyTexture3D(void* tex)
 	if (tex == NULL) abort();
 #endif
 
+	mfgD3D11Texture3D* d3dTex = tex;
+	d3dTex->view->lpVtbl->Release(d3dTex->view);
+	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage)
@@ -1286,16 +1624,137 @@ mfgError mfgD3D11CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	// Allocate texture
+	mfgD3D11Texture3D* d3dTex = NULL;
+	if (mfmAllocate(d3dRD->pool64, &d3dTex, sizeof(mfgD3D11Texture3D)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 3D on pool");
+
+	// Init object
+	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyTexture3D;
+	d3dTex->base.object.referenceCount = 0;
+	d3dTex->base.renderDevice = rd;
+
+	// Create texture
+	D3D11_TEXTURE3D_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width = width;
+	desc.Height = height;
+	desc.Depth = depth;
+	d3dTex->width = width;
+	d3dTex->height = height;
+	d3dTex->depth = depth;
+	desc.MipLevels = 1;
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_STATIC: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_DYNAMIC: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported usage mode");
+	}
+
+	if (usage != MFG_USAGE_STATIC)
+	{
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	}
+	else
+	{
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.MiscFlags = 0;
+	}
+
+	switch (format)
+	{
+		case MFG_R8SNORM: desc.Format = DXGI_FORMAT_R8_SNORM; d3dTex->formatSize = 1; break;
+		case MFG_R16SNORM: desc.Format = DXGI_FORMAT_R16_SNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG8SNORM: desc.Format = DXGI_FORMAT_R8G8_SNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG16SNORM: desc.Format = DXGI_FORMAT_R16G16_SNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8SNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_SNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16SNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_SNORM; d3dTex->formatSize = 4; break;
+
+		case MFG_R8UNORM: desc.Format = DXGI_FORMAT_R8_UNORM; d3dTex->formatSize = 1; break;
+		case MFG_R16UNORM: desc.Format = DXGI_FORMAT_R16_UNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG8UNORM: desc.Format = DXGI_FORMAT_R8G8_UNORM; d3dTex->formatSize = 2; break;
+		case MFG_RG16UNORM: desc.Format = DXGI_FORMAT_R16G16_UNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8UNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16UNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; d3dTex->formatSize = 4; break;
+
+		case MFG_R8SINT: desc.Format = DXGI_FORMAT_R8_SINT; d3dTex->formatSize = 1; break;
+		case MFG_R16SINT: desc.Format = DXGI_FORMAT_R16_SINT; d3dTex->formatSize = 2; break;
+		case MFG_RG8SINT: desc.Format = DXGI_FORMAT_R8G8_SINT; d3dTex->formatSize = 2; break;
+		case MFG_RG16SINT: desc.Format = DXGI_FORMAT_R16G16_SINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8SINT: desc.Format = DXGI_FORMAT_R8G8B8A8_SINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16SINT: desc.Format = DXGI_FORMAT_R16G16B16A16_SINT; d3dTex->formatSize = 4; break;
+
+		case MFG_R8UINT: desc.Format = DXGI_FORMAT_R8_UINT; d3dTex->formatSize = 1; break;
+		case MFG_R16UINT: desc.Format = DXGI_FORMAT_R16_UINT; d3dTex->formatSize = 2; break;
+		case MFG_RG8UINT: desc.Format = DXGI_FORMAT_R8G8_UINT; d3dTex->formatSize = 2; break;
+		case MFG_RG16UINT: desc.Format = DXGI_FORMAT_R16G16_UINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA8UINT: desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA16UINT: desc.Format = DXGI_FORMAT_R16G16B16A16_UINT; d3dTex->formatSize = 4; break;
+
+		case MFG_R32FLOAT: desc.Format = DXGI_FORMAT_R32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RG32FLOAT: desc.Format = DXGI_FORMAT_R32G32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RGB32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; d3dTex->formatSize = 4; break;
+		case MFG_RGBA32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; d3dTex->formatSize = 4; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture format");
+	}
+
+	if (data == NULL)
+	{
+		if (usage == MFG_USAGE_STATIC)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Static textures must have initial data");
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture3D(d3dRD->device, &desc, NULL, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture3D failed");
+	}
+	else
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = data;
+		initData.SysMemPitch = d3dTex->formatSize * width;
+		initData.SysMemSlicePitch = d3dTex->formatSize * width * height;
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture3D(d3dRD->device, &desc, &initData, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture3D failed");
+	}
+
+	// Create view
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateShaderResourceView(d3dRD->device, d3dTex->texture, NULL, &d3dTex->view);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateShaderResourceView failed");
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
 mfgError mfgD3D11UpdateTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data)
 {
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11Texture3D* d3dTex = tex;
+
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL || data == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	if (dstX + width > d3dTex->width ||
+		dstY + height > d3dTex->height ||
+		dstZ + depth > d3dTex->depth)
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Update coordinates are out of bounds");
 #endif
 
-	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	D3D11_BOX dstBox;
+	dstBox.back = dstZ;
+	dstBox.front = dstZ + depth;
+	dstBox.left = dstX;
+	dstBox.right = dstX + width;
+	dstBox.top = dstY;
+	dstBox.bottom = dstY + height;
+
+	d3dRD->deviceContext->lpVtbl->UpdateSubresource(d3dRD->deviceContext, d3dTex->texture, 0, &dstBox, data, d3dTex->formatSize * width, d3dTex->formatSize * width * height);
 
 	return MFG_ERROR_OKAY;
 }
@@ -1306,7 +1765,10 @@ mfgError mfgD3D11GenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
-	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11Texture3D* d3dTex = tex;
+
+	d3dRD->deviceContext->lpVtbl->GenerateMips(d3dRD->deviceContext, d3dTex->view);
 
 	return MFG_ERROR_OKAY;
 }
