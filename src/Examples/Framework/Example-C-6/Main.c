@@ -498,6 +498,8 @@ void Main(int argc, char** argv)
 				abort();
 			if (mfgDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
 				abort();
+			if (mfgBindRenderTexture(renderDevice, texBP, NULL) != MFG_ERROR_OKAY)
+				abort();
 		}
 
 		if (mfgSwapBuffers(renderDevice) != MFG_ERROR_OKAY)

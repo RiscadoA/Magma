@@ -112,20 +112,28 @@ typedef struct
 {
 	mfgRenderDeviceObject base;
 	ID3D11Texture2D* texture;
-	ID3D11ShaderResourceView* view;
+	mfmU32 width;
+	mfmU32 height;
+	ID3D11DepthStencilView* view;
 	ID3D11RenderTargetView* target;
 } mfgD3D11RenderTexture;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	ID3D11Texture2D* texture;
+	mfmU32 width;
+	mfmU32 height;
+	ID3D11DepthStencilView* view;
 } mfgD3D11DepthStencilTexture;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	ID3D11RenderTargetView* renderTargets[8];
+	UINT renderTargetCount;
+	ID3D11DepthStencilView* depthStencilView;
+	D3D11_VIEWPORT viewport;
 } mfgD3D11Framebuffer;
 
 typedef struct
@@ -784,6 +792,8 @@ mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertex
 	d3dPP->pixel = ps;
 	++vs->object.referenceCount;
 	++ps->object.referenceCount;
+
+	*pp = d3dPP;
 
 	return MFG_ERROR_OKAY;
 }
@@ -1965,6 +1975,13 @@ void mfgD3D11DestroyRenderTexture(void* tex)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (tex == NULL) abort();
 #endif
+
+	mfgD3D11RenderTexture* d3dTex = tex;
+	d3dTex->target->lpVtbl->Release(d3dTex->target);
+	d3dTex->view->lpVtbl->Release(d3dTex->view);
+	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
@@ -1975,6 +1992,93 @@ mfgError mfgD3D11CreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	// Allocate texture
+	mfgD3D11RenderTexture* d3dTex = NULL;
+	if (mfmAllocate(d3dRD->pool64, &d3dTex, sizeof(mfgD3D11RenderTexture)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate render texture on pool");
+
+	// Init object
+	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyRenderTexture;
+	d3dTex->base.object.referenceCount = 0;
+	d3dTex->base.renderDevice = rd;
+
+	// Create texture
+	D3D11_TEXTURE2D_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width = width;
+	desc.Height = height;
+	d3dTex->width = width;
+	d3dTex->height = height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.CPUAccessFlags = 0;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	desc.MiscFlags = 0;
+
+	switch (format)
+	{
+		case MFG_R8SNORM: desc.Format = DXGI_FORMAT_R8_SNORM; break;
+		case MFG_R16SNORM: desc.Format = DXGI_FORMAT_R16_SNORM; break;
+		case MFG_RG8SNORM: desc.Format = DXGI_FORMAT_R8G8_SNORM; break;
+		case MFG_RG16SNORM: desc.Format = DXGI_FORMAT_R16G16_SNORM; break;
+		case MFG_RGBA8SNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_SNORM; break;
+		case MFG_RGBA16SNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_SNORM; break;
+
+		case MFG_R8UNORM: desc.Format = DXGI_FORMAT_R8_UNORM; break;
+		case MFG_R16UNORM: desc.Format = DXGI_FORMAT_R16_UNORM; break;
+		case MFG_RG8UNORM: desc.Format = DXGI_FORMAT_R8G8_UNORM; break;
+		case MFG_RG16UNORM: desc.Format = DXGI_FORMAT_R16G16_UNORM; break;
+		case MFG_RGBA8UNORM: desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; break;
+		case MFG_RGBA16UNORM: desc.Format = DXGI_FORMAT_R16G16B16A16_UNORM; break;
+
+		case MFG_R8SINT: desc.Format = DXGI_FORMAT_R8_SINT; break;
+		case MFG_R16SINT: desc.Format = DXGI_FORMAT_R16_SINT; break;
+		case MFG_RG8SINT: desc.Format = DXGI_FORMAT_R8G8_SINT; break;
+		case MFG_RG16SINT: desc.Format = DXGI_FORMAT_R16G16_SINT; break;
+		case MFG_RGBA8SINT: desc.Format = DXGI_FORMAT_R8G8B8A8_SINT; break;
+		case MFG_RGBA16SINT: desc.Format = DXGI_FORMAT_R16G16B16A16_SINT; break;
+
+		case MFG_R8UINT: desc.Format = DXGI_FORMAT_R8_UINT; break;
+		case MFG_R16UINT: desc.Format = DXGI_FORMAT_R16_UINT; break;
+		case MFG_RG8UINT: desc.Format = DXGI_FORMAT_R8G8_UINT; break;
+		case MFG_RG16UINT: desc.Format = DXGI_FORMAT_R16G16_UINT; break;
+		case MFG_RGBA8UINT: desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; break;
+		case MFG_RGBA16UINT: desc.Format = DXGI_FORMAT_R16G16B16A16_UINT; break;
+
+		case MFG_R32FLOAT: desc.Format = DXGI_FORMAT_R32_FLOAT; break;
+		case MFG_RG32FLOAT: desc.Format = DXGI_FORMAT_R32G32_FLOAT; break;
+		case MFG_RGB32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32_FLOAT; break;
+		case MFG_RGBA32FLOAT: desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported render texture format");
+	}
+
+	// Create texture
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture2D(d3dRD->device, &desc, NULL, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture2D failed");
+	}
+
+	// Create resource view
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateShaderResourceView(d3dRD->device, d3dTex->texture, NULL, &d3dTex->view);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateShaderResourceView failed");
+	}
+
+	// Create render target view
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateRenderTargetView(d3dRD->device, d3dTex->texture, NULL, &d3dTex->target);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateRenderTargetView failed");
+	}
+
+	*tex = d3dTex;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -1983,6 +2087,12 @@ void mfgD3D11DestroyDepthStencilTexture(void* tex)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (tex == NULL) abort();
 #endif
+
+	mfgD3D11DepthStencilTexture* d3dTex = tex;
+	d3dTex->view->lpVtbl->Release(d3dTex->view);
+	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
@@ -1990,6 +2100,58 @@ mfgError mfgD3D11CreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilT
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	// Allocate texture
+	mfgD3D11DepthStencilTexture* d3dTex = NULL;
+	if (mfmAllocate(d3dRD->pool64, &d3dTex, sizeof(mfgD3D11DepthStencilTexture)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil texture on pool");
+
+	// Init object
+	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyDepthStencilTexture;
+	d3dTex->base.object.referenceCount = 0;
+	d3dTex->base.renderDevice = rd;
+
+	// Create texture
+	D3D11_TEXTURE2D_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width = width;
+	desc.Height = height;
+	d3dTex->width = width;
+	d3dTex->height = height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.CPUAccessFlags = 0;
+	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	desc.MiscFlags = 0;
+
+	switch (format)
+	{
+		case MFG_DEPTH24STENCIL8: desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; break;
+		case MFG_DEPTH32STENCIL8: desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT; break;
+
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported depth stencil texture format");
+	}
+
+	// Create texture
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateTexture2D(d3dRD->device, &desc, NULL, &d3dTex->texture);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateTexture2D failed");
+	}
+
+	// Create depth stencil view
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateDepthStencilView(d3dRD->device, d3dTex->texture, NULL, &d3dTex->view);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateDepthStencilView failed");
+	}
+
+	*tex = d3dTex;
 
 	return MFG_ERROR_OKAY;
 }
@@ -2000,6 +2162,9 @@ void mfgD3D11DestroyFramebuffer(void* fb)
 	if (fb == NULL) abort();
 #endif
 
+	mfgD3D11Framebuffer* d3dFB = fb;
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dFB->base.renderDevice)->pool256, d3dFB) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture)
@@ -2010,6 +2175,47 @@ mfgError mfgD3D11CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfm
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	// Allocate framebuffer
+	mfgD3D11Framebuffer* d3dFB = NULL;
+	if (mfmAllocate(d3dRD->pool256, &d3dFB, sizeof(mfgD3D11Framebuffer)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate framebuffer on pool");
+
+	// Init object
+	d3dFB->base.object.destructorFunc = &mfgD3D11DestroyFramebuffer;
+	d3dFB->base.object.referenceCount = 0;
+	d3dFB->base.renderDevice = rd;
+
+	// Create framebuffer
+	if (textureCount > 8)
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"There can only be up to 8 color textures attached to a framebuffer");
+
+	mfmF32 width = ((mfgD3D11RenderTexture*)textures[0])->width;
+	mfmF32 height = ((mfgD3D11RenderTexture*)textures[0])->height;
+
+	d3dFB->renderTargetCount = textureCount;
+	for (mfmU64 i = 0; i < textureCount; ++i)
+	{
+		if (width != ((mfgD3D11RenderTexture*)textures[i])->width ||
+			height != ((mfgD3D11RenderTexture*)textures[i])->height)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"All color textures attached to a framebuffer must have the same width and height");
+		d3dFB->renderTargets[i] = ((mfgD3D11RenderTexture*)textures[i])->target;
+	}
+
+	if (depthStencilTexture == NULL)
+		d3dFB->depthStencilView = NULL;
+	else
+		d3dFB->depthStencilView = ((mfgD3D11DepthStencilTexture*)depthStencilTexture)->view;
+
+	// Set viewport
+	d3dFB->viewport.TopLeftX = 0;
+	d3dFB->viewport.TopLeftY = 0;
+	d3dFB->viewport.Width = width;
+	d3dFB->viewport.Height = height;
+	d3dFB->viewport.MinDepth = 0.0f;
+	d3dFB->viewport.MaxDepth = 1.0f;
+
+	*fb = d3dFB;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -2018,6 +2224,39 @@ mfgError mfgD3D11SetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11Framebuffer* d3dFB = fb;
+
+	if (d3dFB == NULL)
+	{
+		// Set default framebuffer
+		d3dRD->renderTargetViews = &d3dRD->defaultRenderTargetView;
+		d3dRD->renderTargetCount = 1;
+		d3dRD->depthStencilView = d3dRD->defaultDepthStencilView;
+
+		D3D11_VIEWPORT viewport;
+		ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = d3dRD->window->getWidth(d3dRD->window);
+		viewport.Height = d3dRD->window->getHeight(d3dRD->window);
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+		d3dRD->deviceContext->lpVtbl->RSSetViewports(d3dRD->deviceContext, 1, &viewport);
+	}
+	else
+	{
+		d3dRD->renderTargetViews = d3dFB->renderTargets;
+		d3dRD->renderTargetCount = d3dFB->renderTargetCount;
+		d3dRD->depthStencilView = d3dFB->depthStencilView;
+
+		d3dRD->deviceContext->lpVtbl->RSSetViewports(d3dRD->deviceContext, 1, &d3dFB->viewport);
+	}
+
+	d3dRD->deviceContext->lpVtbl->OMSetRenderTargets(d3dRD->deviceContext, d3dRD->renderTargetCount, d3dRD->renderTargetViews, d3dRD->depthStencilView);
 
 	return MFG_ERROR_OKAY;
 }
