@@ -33,7 +33,7 @@
 		- "_out7";
 
 	Pixel shader inputs:
-		- "_fragPosition";
+		- "_position";
 		- "_in0";
 		- "_in1";
 		- "_in2";
@@ -44,7 +44,7 @@
 		- "_in7";
 	
 	Pixel shader outputs:
-		- "_fragDepth";
+		- "_depth";
 		- "_target0";
 		- "_target1";
 		- "_target2";

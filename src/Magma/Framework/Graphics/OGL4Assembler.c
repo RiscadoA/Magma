@@ -21,7 +21,7 @@ typedef struct
 	mfgComponentReference references[128];
 } mfgAssemblerData;
 
-mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
+static mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
 {
 	if (out == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -66,7 +66,7 @@ mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
+static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 {
 	const mfgMetaData* metaData = data->metaData;
 
@@ -100,7 +100,7 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 				}
 				else if (data->metaData->shaderType == MFG_PIXEL_SHADER)
 				{
-					if (!strcmp(var->name, u8"_fragPosition"))
+					if (!strcmp(var->name, u8"_position"))
 					{
 						if (mfsPrintFormatUTF8(out, u8"gl_FragCoord") != MFS_ERROR_OKAY)
 							return MFG_ERROR_FAILED_TO_WRITE;
@@ -596,7 +596,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			}
 			else if (metaData->shaderType == MFG_PIXEL_SHADER)
 			{
-				if (!strcmp(var->name, u8"_fragPosition"))
+				if (!strcmp(var->name, u8"_position"))
 				{
 					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -789,7 +789,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			}
 			else if (metaData->shaderType == MFG_PIXEL_SHADER)
 			{
-				if (!strcmp(var->name, u8"_fragDepth"))
+				if (!strcmp(var->name, u8"_depth"))
 				{
 					if (mfsPutString(outputStream, u8"out float gl_FragDepth;\n\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;

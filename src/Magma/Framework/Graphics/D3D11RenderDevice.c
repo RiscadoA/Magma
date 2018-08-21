@@ -26,29 +26,43 @@
 #define MFG_POOL_256_ELEMENT_COUNT 2048
 #define MFG_POOL_512_ELEMENT_COUNT 2048
 
-typedef struct mfgD3D11Shader mfgD3D11Shader;
+typedef struct mfgD3D11VertexShader mfgD3D11VertexShader;
+typedef struct mfgD3D11PixelShader mfgD3D11PixelShader;
 
 typedef struct
 {
 	const mfgMetaDataBindingPoint* bp;
-
-
-
-	mfgD3D11Shader* shader;
+	mfgEnum shaderType;
+	UINT index;
+	BOOL active;
 } mfgD3D11BindingPoint;
 
-struct mfgD3D11Shader
+struct mfgD3D11VertexShader
 {
 	mfgRenderDeviceObject base;
 	
 	const mfgMetaData* md;
+	ID3D11VertexShader* shader;
+	ID3DBlob* blob;
 	mfgD3D11BindingPoint bps[16];
 };
+
+struct mfgD3D11PixelShader
+{
+	mfgRenderDeviceObject base;
+	const mfgMetaData* md;
+	ID3D11PixelShader* shader;
+	ID3DBlob* blob;
+	mfgD3D11BindingPoint bps[16];
+};
+
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
 	
+	mfgD3D11VertexShader* vertex;
+	mfgD3D11PixelShader* pixel;
 } mfgD3D11Pipeline;
 
 typedef struct
@@ -213,6 +227,10 @@ void mfgD3D11DestroyVertexShader(void* vs)
 	if (vs == NULL) abort();
 #endif
 
+	mfgD3D11VertexShader* d3dVS = vs;
+	d3dVS->shader->lpVtbl->Release(d3dVS->shader);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVS->base.renderDevice)->pool512, d3dVS) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData)
@@ -223,6 +241,53 @@ mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, c
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	// Allocate vertex shader
+	mfgD3D11VertexShader* d3dVS = NULL;
+	if (mfmAllocate(d3dRD->pool512, &d3dVS, sizeof(mfgD3D11VertexShader)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex shader on pool");
+
+	// Init object
+	d3dVS->base.object.destructorFunc = &mfgD3D11DestroyVertexShader;
+	d3dVS->base.object.referenceCount = 0;
+	d3dVS->base.renderDevice = rd;
+
+	// Create string stream
+	mfsStream* ss;
+	char buffer[4096];
+	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), d3dRD->stack) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for mfgD3D11Assemble");
+	mfgError err = mfgD3D11Assemble(bytecode, bytecodeSize, metaData, ss);
+	if (err != MFG_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgD3D11Assemble failed");
+	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+	{
+		mfsDestroyStringStream(ss);
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+	}
+
+	mfsDestroyStringStream(ss);
+	mfsPutString(mfsOutStream, buffer);
+
+	// Compile shader
+	{
+		ID3DBlob* errorMessages;
+		HRESULT hr = D3DCompile(buffer, sizeof(buffer), NULL, NULL, NULL, "VS", "vs_4_0", D3D10_SHADER_PACK_MATRIX_COLUMN_MAJOR, 0, &d3dVS->blob, &errorMessages);
+		if (FAILED(hr))
+		{
+			mfsPutString(mfsErrStream, errorMessages->lpVtbl->GetBufferPointer(errorMessages));
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"D3DCompile failed");
+		}
+	}
+
+	// Create shader
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreateVertexShader(d3dRD->device, d3dVS->blob->lpVtbl->GetBufferPointer(d3dVS->blob), d3dVS->blob->lpVtbl->GetBufferSize(d3dVS->blob), NULL, &d3dVS->shader);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateVertexShader failed");
+	}
+
+	*vs = d3dVS;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -231,17 +296,17 @@ mfgError mfgD3D11GetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoin
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL || vs == NULL || name == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
-	mfgD3D11Shader* d3dVS = vs;
+	mfgD3D11VertexShader* d3dVS = vs;
 
-	/*for (mfmU64 i = 0; i < 16; ++i)
-		if (d3dVS->bps[i].active == GL_TRUE)
+	for (mfmU64 i = 0; i < 16; ++i)
+		if (d3dVS->bps[i].active == TRUE)
 		{
 			if (strcmp(name, d3dVS->bps[i].bp->name) == 0)
 			{
 				*bp = &d3dVS->bps[i];
 				return MFG_ERROR_OKAY;
 			}
-		}*/
+		}
 
 	return MFG_ERROR_NOT_FOUND;
 }
@@ -252,6 +317,10 @@ void mfgD3D11DestroyPixelShader(void* ps)
 	if (ps == NULL) abort();
 #endif
 
+	mfgD3D11PixelShader* d3dPS = ps;
+	d3dPS->shader->lpVtbl->Release(d3dPS->shader);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPS->base.renderDevice)->pool512, d3dPS) != MFM_ERROR_OKAY)
+		abort();
 }
 
 
@@ -263,6 +332,53 @@ mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, con
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	// Allocate pixel shader
+	mfgD3D11PixelShader* d3dPS = NULL;
+	if (mfmAllocate(d3dRD->pool512, &d3dPS, sizeof(mfgD3D11PixelShader)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pixel shader on pool");
+
+	// Init object
+	d3dPS->base.object.destructorFunc = &mfgD3D11DestroyPixelShader;
+	d3dPS->base.object.referenceCount = 0;
+	d3dPS->base.renderDevice = rd;
+
+	// Create string stream
+	mfsStream* ss;
+	char buffer[4096];
+	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), d3dRD->stack) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for mfgD3D11Assemble");
+	mfgError err = mfgD3D11Assemble(bytecode, bytecodeSize, metaData, ss);
+	if (err != MFG_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgD3D11Assemble failed");
+	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+	{
+		mfsDestroyStringStream(ss);
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
+	}
+
+	mfsDestroyStringStream(ss);
+	mfsPutString(mfsOutStream, buffer);
+
+	// Compile shader
+	{
+		ID3DBlob* errorMessages;
+		HRESULT hr = D3DCompile(buffer, sizeof(buffer), NULL, NULL, NULL, "PS", "ps_4_0", D3D10_SHADER_PACK_MATRIX_COLUMN_MAJOR, 0, &d3dPS->blob, &errorMessages);
+		if (FAILED(hr))
+		{
+			mfsPutString(mfsErrStream, errorMessages->lpVtbl->GetBufferPointer(errorMessages));
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"D3DCompile failed");
+		}
+	}
+
+	// Create shader
+	{
+		HRESULT hr = d3dRD->device->lpVtbl->CreatePixelShader(d3dRD->device, d3dPS->blob->lpVtbl->GetBufferPointer(d3dPS->blob), d3dPS->blob->lpVtbl->GetBufferSize(d3dPS->blob), NULL, &d3dPS->shader);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreatePixelShader failed");
+	}
+
+	*ps = d3dPS;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -271,6 +387,17 @@ mfgError mfgD3D11GetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL || ps == NULL || name == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
+	mfgD3D11PixelShader* d3dPS = ps;
+
+	for (mfmU64 i = 0; i < 16; ++i)
+		if (d3dPS->bps[i].active == TRUE)
+		{
+			if (strcmp(name, d3dPS->bps[i].bp->name) == 0)
+			{
+				*bp = &d3dPS->bps[i];
+				return MFG_ERROR_OKAY;
+			}
+		}
 
 	return MFG_ERROR_NOT_FOUND;
 }
@@ -343,7 +470,12 @@ void mfgD3D11DestroyPipeline(void* pp)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (pp == NULL) abort();
 #endif
-	
+
+	mfgD3D11Pipeline* d3dPP = pp;
+	--d3dPP->vertex->base.object.referenceCount;
+	--d3dPP->pixel->base.object.referenceCount;
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPP->base.renderDevice)->pool32, d3dPP) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexShader* vs, mfgPixelShader* ps)
@@ -354,7 +486,21 @@ mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertex
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
+	// Allocate pixel shader
+	mfgD3D11Pipeline* d3dPP = NULL;
+	if (mfmAllocate(d3dRD->pool32, &d3dPP, sizeof(mfgD3D11Pipeline)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
 
+	// Init object
+	d3dPP->base.object.destructorFunc = &mfgD3D11DestroyPipeline;
+	d3dPP->base.object.referenceCount = 0;
+	d3dPP->base.renderDevice = rd;
+
+	// Init pipeline
+	d3dPP->vertex = vs;
+	d3dPP->pixel = ps;
+	++vs->object.referenceCount;
+	++ps->object.referenceCount;
 
 	return MFG_ERROR_OKAY;
 }
@@ -366,7 +512,18 @@ mfgError mfgD3D11SetPipeline(mfgRenderDevice* rd, mfgPipeline* pp)
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11Pipeline* d3dPP = pp;
 
+	if (d3dPP == NULL)
+	{
+		d3dRD->deviceContext->lpVtbl->VSSetShader(d3dRD->deviceContext, NULL, NULL, 0);
+		d3dRD->deviceContext->lpVtbl->PSSetShader(d3dRD->deviceContext, NULL, NULL, 0);
+	}
+	else
+	{
+		d3dRD->deviceContext->lpVtbl->VSSetShader(d3dRD->deviceContext, d3dPP->vertex->shader, NULL, 0);
+		d3dRD->deviceContext->lpVtbl->PSSetShader(d3dRD->deviceContext, d3dPP->pixel->shader, NULL, 0);
+	}
 	
 	return MFG_ERROR_OKAY;
 }
@@ -808,6 +965,10 @@ mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, 
 	if (mfmAllocate(d3dRD->pool32, &rs, sizeof(mfgD3D11RasterState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
+	rs->base.object.destructorFunc = &mfgD3D11DestroyRasterState;
+	rs->base.object.referenceCount = 0;
+	rs->base.renderDevice = rd;
+
 	D3D11_RASTERIZER_DESC rDesc;
 	rDesc.DepthBias = 0.0f;
 	rDesc.SlopeScaledDepthBias = 0.0f;
@@ -888,6 +1049,10 @@ mfgError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilSta
 	mfgD3D11DepthStencilState* dss = NULL;
 	if (mfmAllocate(d3dRD->pool32, &dss, sizeof(mfgD3D11DepthStencilState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
+
+	dss->base.object.destructorFunc = &mfgD3D11DestroyDepthStencilState;
+	dss->base.object.referenceCount = 0;
+	dss->base.renderDevice = rd;
 
 	D3D11_DEPTH_STENCIL_DESC dsDesc;
 	
@@ -1060,6 +1225,10 @@ mfgError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, co
 	mfgD3D11BlendState* bs = NULL;
 	if (mfmAllocate(d3dRD->pool32, &bs, sizeof(mfgD3D11BlendState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate blend state on pool");
+
+	bs->base.object.destructorFunc = &mfgD3D11DestroyBlendState;
+	bs->base.object.referenceCount = 0;
+	bs->base.renderDevice = rd;
 
 	D3D11_BLEND_DESC bDesc;
 
