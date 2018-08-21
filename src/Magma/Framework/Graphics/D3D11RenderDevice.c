@@ -16,6 +16,7 @@
 #include <windowsx.h>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
+#include <float.h>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
@@ -104,13 +105,15 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	
+	ID3D11SamplerState* sampler;
 } mfgD3D11Sampler;
 
 typedef struct
 {
 	mfgRenderDeviceObject base;
-
+	ID3D11Texture2D* texture;
+	ID3D11ShaderResourceView* view;
+	ID3D11RenderTargetView* target;
 } mfgD3D11RenderTexture;
 
 typedef struct
@@ -517,14 +520,20 @@ mfgError mfgD3D11BindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mf
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (d3dCB == NULL)
-			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11Buffer* buf = NULL;
+			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &buf);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
 		if (d3dCB == NULL)
-			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11Buffer* buf = NULL;
+			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &buf);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
 	}
@@ -548,14 +557,20 @@ mfgError mfgD3D11BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* b
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (d3dCB == NULL)
-			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, NULL, NULL, NULL);
+		{
+			ID3D11Buffer* buf = NULL;
+			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, &buf, NULL, NULL);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
 		if (d3dCB == NULL)
-			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, NULL, NULL, NULL);
+		{
+			ID3D11Buffer* buf = NULL;
+			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, &buf, NULL, NULL);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
 	}
@@ -576,14 +591,20 @@ mfgError mfgD3D11BindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (tex == NULL)
-			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
 		if (tex == NULL)
-			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
 	}
@@ -604,14 +625,20 @@ mfgError mfgD3D11BindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (tex == NULL)
-			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
 		if (tex == NULL)
-			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
 	}
@@ -632,14 +659,20 @@ mfgError mfgD3D11BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (tex == NULL)
-			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
 		if (tex == NULL)
-			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, NULL);
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
 		else
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
 	}
@@ -652,7 +685,32 @@ mfgError mfgD3D11BindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfg
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
-	
+
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11BindingPoint* d3dBP = bp;
+	mfgD3D11RenderTexture* d3dTex = tex;
+
+	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
+	{
+		if (tex == NULL)
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
+		else
+			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
+	{
+		if (tex == NULL)
+		{
+			ID3D11ShaderResourceView* view = NULL;
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
+		}
+		else
+			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -662,6 +720,31 @@ mfgError mfgD3D11BindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSample
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
 	
+	mfgD3D11RenderDevice* d3dRD = rd;
+	mfgD3D11BindingPoint* d3dBP = bp;
+	mfgD3D11Sampler* d3dSampler = sampler;
+
+	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
+	{
+		if (d3dSampler == NULL)
+		{
+			ID3D11SamplerState* smplr = NULL;
+			d3dRD->deviceContext->lpVtbl->VSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &smplr);
+		}
+		else
+			d3dRD->deviceContext->lpVtbl->VSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
+	}
+	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
+	{
+		if (d3dSampler == NULL)
+		{
+			ID3D11SamplerState* smplr = NULL;
+			d3dRD->deviceContext->lpVtbl->PSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &smplr);
+		}
+		else
+			d3dRD->deviceContext->lpVtbl->PSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
+	}
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -1390,6 +1473,8 @@ mfgError mfgD3D11CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64
 			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateShaderResourceView failed");
 	}
 
+	*tex = d3dTex;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -1730,6 +1815,8 @@ mfgError mfgD3D11CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64
 			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateShaderResourceView failed");
 	}
 
+	*tex = d3dTex;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -1778,6 +1865,11 @@ void mfgD3D11DestroySampler(void* sampler)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (sampler == NULL) abort();
 #endif
+
+	mfgD3D11Sampler* d3dS = sampler;
+	d3dS->sampler->lpVtbl->Release(d3dS->sampler);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dS->base.renderDevice)->pool32, d3dS) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc)
@@ -1787,6 +1879,83 @@ mfgError mfgD3D11CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const 
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
+	// Allocate sampler
+	mfgD3D11Sampler* d3dS = NULL;
+	if (mfmAllocate(d3dRD->pool32, &d3dS, sizeof(mfgD3D11Sampler)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate sampler on pool");
+
+	// Init object
+	d3dS->base.object.destructorFunc = &mfgD3D11DestroySampler;
+	d3dS->base.object.referenceCount = 0;
+	d3dS->base.renderDevice = rd;
+
+	// Create sampler
+	D3D11_SAMPLER_DESC d3dDesc;
+
+	if (desc->maxAnisotropy > 1)
+		d3dDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	else if (desc->minFilter == MFG_NEAREST && desc->mipmapFilter != MFG_LINEAR && desc->magFilter == MFG_NEAREST)
+		d3dDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	else if (desc->minFilter == MFG_LINEAR && desc->mipmapFilter != MFG_LINEAR && desc->magFilter == MFG_NEAREST)
+		d3dDesc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+	else if (desc->minFilter == MFG_LINEAR && desc->mipmapFilter != MFG_LINEAR && desc->magFilter == MFG_LINEAR)
+		d3dDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	else if (desc->minFilter == MFG_NEAREST && desc->mipmapFilter != MFG_LINEAR && desc->magFilter == MFG_LINEAR)
+		d3dDesc.Filter = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+	else if (desc->minFilter == MFG_NEAREST && desc->mipmapFilter == MFG_LINEAR && desc->magFilter == MFG_NEAREST)
+		d3dDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+	else if (desc->minFilter == MFG_LINEAR && desc->mipmapFilter == MFG_LINEAR && desc->magFilter == MFG_NEAREST)
+		d3dDesc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+	else if (desc->minFilter == MFG_LINEAR && desc->mipmapFilter == MFG_LINEAR && desc->magFilter == MFG_LINEAR)
+		d3dDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	else if (desc->minFilter == MFG_NEAREST && desc->mipmapFilter == MFG_LINEAR && desc->magFilter == MFG_LINEAR)
+		d3dDesc.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+	else
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture filter");
+
+	switch (desc->addressU)
+	{
+		case MFG_REPEAT: d3dDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; break;
+		case MFG_MIRROR: d3dDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR; break;
+		case MFG_CLAMP: d3dDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP; break;
+		case MFG_BORDER: d3dDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture U address mode");
+	}
+
+	switch (desc->addressV)
+	{
+		case MFG_REPEAT: d3dDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; break;
+		case MFG_MIRROR: d3dDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR; break;
+		case MFG_CLAMP: d3dDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP; break;
+		case MFG_BORDER: d3dDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture V address mode");
+	}
+
+	switch (desc->addressW)
+	{
+		case MFG_REPEAT: d3dDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP; break;
+		case MFG_MIRROR: d3dDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR; break;
+		case MFG_CLAMP: d3dDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP; break;
+		case MFG_BORDER: d3dDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture W address mode");
+	}
+
+	d3dDesc.BorderColor[0] = desc->borderColor[0];
+	d3dDesc.BorderColor[1] = desc->borderColor[1];
+	d3dDesc.BorderColor[2] = desc->borderColor[2];
+	d3dDesc.BorderColor[3] = desc->borderColor[3];
+	d3dDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	d3dDesc.MaxAnisotropy = desc->maxAnisotropy;
+	d3dDesc.MinLOD = -FLT_MAX;
+	d3dDesc.MaxLOD = +FLT_MAX;
+	d3dDesc.MipLODBias = 0.0f;
+
+	HRESULT hr = d3dRD->device->lpVtbl->CreateSamplerState(d3dRD->device, &d3dDesc, &d3dS->sampler);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateSamplerState failed");
+
+	*sampler = d3dS;
 
 	return MFG_ERROR_OKAY;
 }

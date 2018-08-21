@@ -252,7 +252,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfgEnum adressU;
+		mfgEnum addressU;
 
 		/// <summary>
 		///		Texture adress mode on coordinate V.
@@ -262,7 +262,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfgEnum adressV;
+		mfgEnum addressV;
 
 		/// <summary>
 		///		Texture adress mode on coordinate W.
@@ -272,7 +272,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfgEnum adressW;
+		mfgEnum addressW;
 	} mfgSamplerDesc;
 
 	void mfgDefaultSamplerDesc(mfgSamplerDesc* desc);

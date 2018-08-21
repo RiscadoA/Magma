@@ -1849,7 +1849,7 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 	GLenum minFilter, magFilter;
 	GLenum wrapS, wrapT, wrapR;
 
-	switch (desc->adressU)
+	switch (desc->addressU)
 	{
 		case MFG_REPEAT: wrapS = GL_REPEAT; break;
 		case MFG_MIRROR: wrapS = GL_MIRRORED_REPEAT; break;
@@ -1858,7 +1858,7 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture U adress mode");
 	}
 
-	switch (desc->adressV)
+	switch (desc->addressV)
 	{
 		case MFG_REPEAT: wrapT = GL_REPEAT; break;
 		case MFG_MIRROR: wrapT = GL_MIRRORED_REPEAT; break;
@@ -1867,7 +1867,7 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture V adress mode");
 	}
 
-	switch (desc->adressW)
+	switch (desc->addressW)
 	{
 		case MFG_REPEAT: wrapR = GL_REPEAT; break;
 		case MFG_MIRROR: wrapR = GL_MIRRORED_REPEAT; break;
