@@ -1,5 +1,5 @@
-﻿#include <Magma/Framework/Input/D3DWindow.h>
-#include <Magma/Framework/Graphics/D3D11RenderDevice.h>
+﻿#include <Magma/Framework/Graphics/D3D11RenderDevice.h>
+#include <Magma/Framework/Graphics/OGL4RenderDevice.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <Magma/Framework/String/Stream.h>
 
@@ -93,18 +93,19 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = MFG_FLOAT2;
 
 			// Output var 1
+			strcpy(metaDataB + ptr, u8"_out0");
+			ptr += 16;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x04;	// ID 4
+			metaDataB[ptr++] = MFG_FLOAT2;
+
+			// Output var 2
 			strcpy(metaDataB + ptr, u8"_position");
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = 0x01;	// ID 1
 			metaDataB[ptr++] = MFG_FLOAT4;
 
-			// Output var 2
-			strcpy(metaDataB + ptr, u8"_out0");
-			ptr += 16;
-			metaDataB[ptr++] = 0x00;
-			metaDataB[ptr++] = 0x04;	// ID 3
-			metaDataB[ptr++] = MFG_FLOAT2;
 
 			// Constant buffer
 			strcpy(metaDataB + ptr, u8"transform");
@@ -206,6 +207,11 @@ void Main(int argc, char** argv)
 			0x00, // Minor version 0
 			
 			MFG_BYTECODE_SAMPLE2D, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
+			MFG_BYTECODE_LITI4, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
 		};
 
 		// Create shader
@@ -431,7 +437,7 @@ void Main(int argc, char** argv)
 	{
 		window->pollEvents(window);
 
-		if (mfgSetFramebuffer(renderDevice, fb) != MFG_ERROR_OKAY)
+		/*if (mfgSetFramebuffer(renderDevice, fb) != MFG_ERROR_OKAY)
 			abort();
 
 		// Clear
@@ -444,7 +450,7 @@ void Main(int argc, char** argv)
 			abort();
 
 		if (mfgSetFramebuffer(renderDevice, NULL) != MFG_ERROR_OKAY)
-			abort();
+			abort();*/
 
 		if (mfgClearColor(renderDevice, 0.0f, 0.0f, 0.2f, 1.0f) != MFG_ERROR_OKAY)
 			abort();
@@ -488,7 +494,7 @@ void Main(int argc, char** argv)
 				abort();
 			if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgBindRenderTexture(renderDevice, texBP, rt) != MFG_ERROR_OKAY)
+			if (mfgBindTexture2D(renderDevice, texBP, tex) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
 				abort();
@@ -498,8 +504,8 @@ void Main(int argc, char** argv)
 				abort();
 			if (mfgDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgBindRenderTexture(renderDevice, texBP, NULL) != MFG_ERROR_OKAY)
-				abort();
+			//if (mfgBindRenderTexture(renderDevice, texBP, NULL) != MFG_ERROR_OKAY)
+			//	abort();
 		}
 
 		if (mfgSwapBuffers(renderDevice) != MFG_ERROR_OKAY)

@@ -1,4 +1,5 @@
 #include "Stream.h"
+#include "../Memory/Allocator.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -68,15 +69,16 @@ mfsError mfsFileSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
 	return MFS_ERROR_OKAY;
 }
 
-void mfsDestroyFileStream(void* stream)
+static void mfsDestroyFileStream(void* stream)
 {
-	free(stream);
+	if (mfmDeallocate(NULL, stream) != MFM_ERROR_OKAY)
+		abort();
 }
 
-mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSize)
+static mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSize)
 {
-	mfsFileStream* stream = (mfsFileStream*)malloc(sizeof(mfsFileStream));
-	if (stream == NULL)
+	mfsFileStream* stream = NULL;
+	if (mfmAllocate(NULL, &stream, sizeof(mfsFileStream)) != MFM_ERROR_OKAY)
 		abort();
 
 	stream->base.object.destructorFunc = &mfsDestroyFileStream;
@@ -90,6 +92,8 @@ mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSize)
 	stream->base.write = &mfsFileWrite;
 	stream->base.flush = &mfsFileFlush;
 	stream->base.setBuffer = &mfsFileSetBuffer;
+
+	return stream;
 }
 
 void mfsInitStream()

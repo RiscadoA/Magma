@@ -10,33 +10,33 @@ namespace Magma
 		namespace Memory
 		{
 			/// <summary>
-			///		Encapsulates the magma framework C pool32 allocator (declared on PoolAllocator.h)
+			///		Encapsulates the magma framework C pool48 allocator (declared on PoolAllocator.h)
 			/// </summary>
 			class PoolAllocator final
 			{
 			public:
 				/// <summary>
-				///		Creates a simple pool32 allocator.
+				///		Creates a simple pool48 allocator.
 				/// </summary>
 				/// <param name="elementSize">Pool allocator slot size in bytes</param>
 				/// <param name="elementCount">Pool allocator slot count</param>
-				/// <param name="expandable">Is the pool32 expandable?</param>
+				/// <param name="expandable">Is the pool48 expandable?</param>
 				PoolAllocator(mfmU64 slotSize, mfmU64 slotCount, bool expandable = false);
 
 				/// <summary>
-				///		Destroys a simple pool32 allocator.
+				///		Destroys a simple pool48 allocator.
 				/// </summary>
 				~PoolAllocator();
 
 				/// <summary>
-				///		Allocates on a simple pool32 allocator.
+				///		Allocates on a simple pool48 allocator.
 				/// </summary>
 				/// <param name="size">Allocation size</param>
 				/// <returns>Returns the allocated memory pointer</returns>
 				void* Allocate(mfmU64 size);
 
 				/// <summary>
-				///		Deallocates on a simple pool32 allocator.
+				///		Deallocates on a simple pool48 allocator.
 				/// </summary>
 				/// <param name="ptr">Pointer to previously allocated memory returned by Allocate</param>
 				void Deallocate(void* ptr);

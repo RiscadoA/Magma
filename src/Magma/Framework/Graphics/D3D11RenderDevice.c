@@ -17,15 +17,18 @@
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
 #include <float.h>
+#include <math.h>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 #pragma comment (lib, "dxguid.lib")
 
-#define MFG_POOL_32_ELEMENT_COUNT 2048
+#define MFG_POOL_48_ELEMENT_COUNT 2048
 #define MFG_POOL_64_ELEMENT_COUNT 2048
 #define MFG_POOL_256_ELEMENT_COUNT 2048
 #define MFG_POOL_512_ELEMENT_COUNT 2048
+
+#define MFG_D3D11_SHADER_MAX_BP_COUNT 8
 
 typedef struct mfgD3D11VertexShader mfgD3D11VertexShader;
 typedef struct mfgD3D11PixelShader mfgD3D11PixelShader;
@@ -46,7 +49,7 @@ struct mfgD3D11VertexShader
 	const mfgMetaData* md;
 	ID3D11VertexShader* shader;
 	ID3DBlob* blob;
-	mfgD3D11BindingPoint bps[16];
+	mfgD3D11BindingPoint bps[MFG_D3D11_SHADER_MAX_BP_COUNT];
 };
 
 struct mfgD3D11PixelShader
@@ -55,7 +58,7 @@ struct mfgD3D11PixelShader
 	const mfgMetaData* md;
 	ID3D11PixelShader* shader;
 	ID3DBlob* blob;
-	mfgD3D11BindingPoint bps[16];
+	mfgD3D11BindingPoint bps[MFG_D3D11_SHADER_MAX_BP_COUNT];
 };
 
 typedef struct
@@ -130,7 +133,7 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	ID3D11RenderTargetView* renderTargets[8];
+	ID3D11RenderTargetView* renderTargets[MFG_D3D11_SHADER_MAX_BP_COUNT];
 	UINT renderTargetCount;
 	ID3D11DepthStencilView* depthStencilView;
 	D3D11_VIEWPORT viewport;
@@ -197,8 +200,8 @@ typedef struct
 	mfsUTF8CodeUnit errorString[256];
 	mfmU64 errorStringSize;
 
-	mfmPoolAllocator* pool32;
-	mfmU8 pool32Memory[MFM_POOL_ALLOCATOR_SIZE(MFG_POOL_32_ELEMENT_COUNT, 32)];
+	mfmPoolAllocator* pool48;
+	mfmU8 pool48Memory[MFM_POOL_ALLOCATOR_SIZE(MFG_POOL_48_ELEMENT_COUNT, 48)];
 
 	mfmPoolAllocator* pool64;
 	mfmU8 pool64Memory[MFM_POOL_ALLOCATOR_SIZE(MFG_POOL_64_ELEMENT_COUNT, 64)];
@@ -228,6 +231,8 @@ typedef struct
 	ID3D11Texture2D* depthStencilBuffer;
 	ID3D11DepthStencilView* defaultDepthStencilView;
 	ID3D11DepthStencilView* depthStencilView;
+
+	BOOL vsyncOn;
 
 } mfgD3D11RenderDevice;
 
@@ -316,7 +321,7 @@ mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, c
 	d3dVS->md = metaData;
 
 	// Get binding points
-	for (mfmU16 i = 0; i < 16; ++i)
+	for (mfmU16 i = 0; i < MFG_D3D11_SHADER_MAX_BP_COUNT; ++i)
 	{
 		d3dVS->bps[i].active = FALSE;
 		d3dVS->bps[i].shader = d3dVS;
@@ -325,7 +330,7 @@ mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, c
 
 	{
 		mfgMetaDataBindingPoint* bp = d3dVS->md->firstBindingPoint;
-		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
+		for (mfmU16 i = 0; i < MFG_D3D11_SHADER_MAX_BP_COUNT && bp != NULL; ++i)
 		{
 			if (bp->type == MFG_CONSTANT_BUFFER)
 			{
@@ -368,7 +373,7 @@ mfgError mfgD3D11GetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoin
 #endif
 	mfgD3D11VertexShader* d3dVS = vs;
 
-	for (mfmU64 i = 0; i < 16; ++i)
+	for (mfmU64 i = 0; i < MFG_D3D11_SHADER_MAX_BP_COUNT; ++i)
 		if (d3dVS->bps[i].active == TRUE)
 		{
 			if (strcmp(name, d3dVS->bps[i].bp->name) == 0)
@@ -450,7 +455,7 @@ mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, con
 	d3dPS->md = metaData;
 
 	// Get binding points
-	for (mfmU16 i = 0; i < 16; ++i)
+	for (mfmU16 i = 0; i < MFG_D3D11_SHADER_MAX_BP_COUNT; ++i)
 	{
 		d3dPS->bps[i].active = FALSE;
 		d3dPS->bps[i].shader = d3dPS;
@@ -459,7 +464,7 @@ mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, con
 
 	{
 		mfgMetaDataBindingPoint* bp = d3dPS->md->firstBindingPoint;
-		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
+		for (mfmU16 i = 0; i < MFG_D3D11_SHADER_MAX_BP_COUNT && bp != NULL; ++i)
 		{
 			if (bp->type == MFG_CONSTANT_BUFFER)
 			{
@@ -502,7 +507,7 @@ mfgError mfgD3D11GetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint
 #endif
 	mfgD3D11PixelShader* d3dPS = ps;
 
-	for (mfmU64 i = 0; i < 16; ++i)
+	for (mfmU64 i = 0; i < MFG_D3D11_SHADER_MAX_BP_COUNT; ++i)
 		if (d3dPS->bps[i].active == TRUE)
 		{
 			if (strcmp(name, d3dPS->bps[i].bp->name) == 0)
@@ -765,7 +770,7 @@ void mfgD3D11DestroyPipeline(void* pp)
 	mfgD3D11Pipeline* d3dPP = pp;
 	--d3dPP->vertex->base.object.referenceCount;
 	--d3dPP->pixel->base.object.referenceCount;
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPP->base.renderDevice)->pool32, d3dPP) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPP->base.renderDevice)->pool48, d3dPP) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -779,7 +784,7 @@ mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertex
 
 	// Allocate pixel shader
 	mfgD3D11Pipeline* d3dPP = NULL;
-	if (mfmAllocate(d3dRD->pool32, &d3dPP, sizeof(mfgD3D11Pipeline)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &d3dPP, sizeof(mfgD3D11Pipeline)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
 
 	// Init object
@@ -829,7 +834,7 @@ void mfgD3D11DestroyConstantBuffer(void* buffer)
 	
 	mfgD3D11ConstantBuffer* d3dCB = buffer;
 	d3dCB->buffer->lpVtbl->Release(d3dCB->buffer);
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dCB->base.renderDevice)->pool32, d3dCB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dCB->base.renderDevice)->pool48, d3dCB) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -842,9 +847,9 @@ mfgError mfgD3D11CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** c
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
 
-	// Allocate vertex buffer
+	// Allocate constant buffer
 	mfgD3D11ConstantBuffer* d3dCB = NULL;
-	if (mfmAllocate(d3dRD->pool32, &d3dCB, sizeof(mfgD3D11ConstantBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &d3dCB, sizeof(mfgD3D11ConstantBuffer)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate constant buffer on pool");
 
 	// Init object
@@ -934,7 +939,7 @@ void mfgD3D11DestroyVertexBuffer(void* buffer)
 
 	mfgD3D11VertexBuffer* d3dVB = buffer;
 	d3dVB->buffer->lpVtbl->Release(d3dVB->buffer);
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVB->base.renderDevice)->pool32, d3dVB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVB->base.renderDevice)->pool48, d3dVB) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -948,7 +953,7 @@ mfgError mfgD3D11CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, m
 
 	// Allocate vertex buffer
 	mfgD3D11VertexBuffer* d3dVB = NULL;
-	if (mfmAllocate(d3dRD->pool32, &d3dVB, sizeof(mfgD3D11VertexBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &d3dVB, sizeof(mfgD3D11VertexBuffer)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
 
 	// Init object
@@ -1039,7 +1044,7 @@ void mfgD3D11DestroyIndexBuffer(void* buffer)
 	
 	mfgD3D11IndexBuffer* d3dIB = buffer;
 	d3dIB->buffer->lpVtbl->Release(d3dIB->buffer);
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dIB->base.renderDevice)->pool32, d3dIB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dIB->base.renderDevice)->pool48, d3dIB) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -1053,7 +1058,7 @@ mfgError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfm
 
 	// Allocate index buffer
 	mfgD3D11IndexBuffer* d3dIB = NULL;
-	if (mfmAllocate(d3dRD->pool32, &d3dIB, sizeof(mfgD3D11VertexBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &d3dIB, sizeof(mfgD3D11VertexBuffer)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate index buffer on pool");
 
 	// Init object
@@ -1878,7 +1883,7 @@ void mfgD3D11DestroySampler(void* sampler)
 
 	mfgD3D11Sampler* d3dS = sampler;
 	d3dS->sampler->lpVtbl->Release(d3dS->sampler);
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dS->base.renderDevice)->pool32, d3dS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dS->base.renderDevice)->pool48, d3dS) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -1892,7 +1897,7 @@ mfgError mfgD3D11CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const 
 
 	// Allocate sampler
 	mfgD3D11Sampler* d3dS = NULL;
-	if (mfmAllocate(d3dRD->pool32, &d3dS, sizeof(mfgD3D11Sampler)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &d3dS, sizeof(mfgD3D11Sampler)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate sampler on pool");
 
 	// Init object
@@ -2266,24 +2271,40 @@ mfgError mfgD3D11ClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, m
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	
+	FLOAT color[4] = { r, g, b, a };
+
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	for (mfmU64 i = 0; i < d3dRD->renderTargetCount; ++i)
+		d3dRD->deviceContext->lpVtbl->ClearRenderTargetView(d3dRD->deviceContext, d3dRD->renderTargetViews[i], color);
 
 	return MFG_ERROR_OKAY;
 }
 
 mfgError mfgD3D11ClearDepth(mfgRenderDevice* rd, mfmF32 depth)
 {
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	if (d3dRD->depthStencilView == NULL) MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Failed to clear depth, no depth stencil texture assigned on the current framebuffer");
 #endif
+
+	d3dRD->deviceContext->lpVtbl->ClearDepthStencilView(d3dRD->deviceContext, d3dRD->depthStencilView, D3D11_CLEAR_DEPTH, depth, 0);
 
 	return MFG_ERROR_OKAY;
 }
 
 mfgError mfgD3D11ClearStencil(mfgRenderDevice* rd, mfmI32 stencil)
 {
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	if (d3dRD->depthStencilView == NULL) MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Failed to clear stencil, no depth stencil texture assigned on the current framebuffer");
 #endif
+
+	d3dRD->deviceContext->lpVtbl->ClearDepthStencilView(d3dRD->deviceContext, d3dRD->depthStencilView, D3D11_CLEAR_STENCIL, 0, stencil);
 
 	return MFG_ERROR_OKAY;
 }
@@ -2293,6 +2314,12 @@ mfgError mfgD3D11SwapBuffers(mfgRenderDevice* rd)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	
+	if (d3dRD->vsyncOn == FALSE)
+		d3dRD->swapChain->lpVtbl->Present(d3dRD->swapChain, 0, 0);
+	else
+		d3dRD->swapChain->lpVtbl->Present(d3dRD->swapChain, 1, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -2304,7 +2331,7 @@ void mfgD3D11DestroyRasterState(void* state)
 #endif
 	mfgD3D11RasterState* rs = state;
 	rs->state->lpVtbl->Release(rs->state);
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)rs->base.renderDevice)->pool32, rs) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)rs->base.renderDevice)->pool48, rs) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -2317,7 +2344,7 @@ mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
 	mfgD3D11RasterState* rs = NULL;
-	if (mfmAllocate(d3dRD->pool32, &rs, sizeof(mfgD3D11RasterState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &rs, sizeof(mfgD3D11RasterState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
 	rs->base.object.destructorFunc = &mfgD3D11DestroyRasterState;
@@ -2389,7 +2416,7 @@ void mfgD3D11DestroyDepthStencilState(void* state)
 #endif
 	mfgD3D11DepthStencilState* dss = state;
 	dss->state->lpVtbl->Release(dss->state);
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)dss->base.renderDevice)->pool32, dss) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)dss->base.renderDevice)->pool48, dss) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -2402,7 +2429,7 @@ mfgError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilSta
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
 	mfgD3D11DepthStencilState* dss = NULL;
-	if (mfmAllocate(d3dRD->pool32, &dss, sizeof(mfgD3D11DepthStencilState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &dss, sizeof(mfgD3D11DepthStencilState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
 
 	dss->base.object.destructorFunc = &mfgD3D11DestroyDepthStencilState;
@@ -2566,7 +2593,7 @@ void mfgD3D11DestroyBlendState(void* state)
 #endif
 	mfgD3D11BlendState* bs = state;
 	bs->state->lpVtbl->Release(bs->state);
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)bs->base.renderDevice)->pool32, bs) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)bs->base.renderDevice)->pool48, bs) != MFM_ERROR_OKAY)
 		abort();
 }
 
@@ -2578,7 +2605,7 @@ mfgError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, co
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
 	mfgD3D11BlendState* bs = NULL;
-	if (mfmAllocate(d3dRD->pool32, &bs, sizeof(mfgD3D11BlendState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool48, &bs, sizeof(mfgD3D11BlendState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate blend state on pool");
 
 	bs->base.object.destructorFunc = &mfgD3D11DestroyBlendState;
@@ -2737,7 +2764,11 @@ mfgError mfgD3D11DrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
-	
+
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	d3dRD->deviceContext->lpVtbl->IASetPrimitiveTopology(d3dRD->deviceContext, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	d3dRD->deviceContext->lpVtbl->Draw(d3dRD->deviceContext, count, offset);
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -2747,7 +2778,9 @@ mfgError mfgD3D11DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64
 	if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
 	
-
+	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	d3dRD->deviceContext->lpVtbl->IASetPrimitiveTopology(d3dRD->deviceContext, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	d3dRD->deviceContext->lpVtbl->DrawIndexed(d3dRD->deviceContext, count, offset, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -2807,9 +2840,9 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 	{
 		mfmPoolAllocatorDesc desc;
 		desc.expandable = MFM_FALSE;
-		desc.slotCount = MFG_POOL_32_ELEMENT_COUNT;
-		desc.slotSize = 32;
-		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool32, &desc, rd->pool32Memory, sizeof(rd->pool32Memory));
+		desc.slotCount = MFG_POOL_48_ELEMENT_COUNT;
+		desc.slotSize = 48;
+		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool48, &desc, rd->pool48Memory, sizeof(rd->pool48Memory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
@@ -2861,6 +2894,7 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 	rd->allocator = allocator;
 	memset(rd->errorString, '\0', sizeof(rd->errorString));
 	rd->errorStringSize = 0;
+	rd->vsyncOn = (desc->vsyncEnabled == MFM_TRUE) ? TRUE : FALSE;
 
 	// Init D3D11 stuff
 	{
@@ -3097,6 +3131,10 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 			return err;
 	}
 
+	rd->renderTargetViews = &rd->defaultRenderTargetView;
+	rd->renderTargetCount = 1;
+	rd->depthStencilView = rd->defaultDepthStencilView;
+
 	// Successfully inited render device
 	*renderDevice = rd;
 	return MFG_ERROR_OKAY;
@@ -3119,7 +3157,14 @@ void mfgDestroyD3D11RenderDevice(void * renderDevice)
 	mfmDestroyPoolAllocator(rd->pool512);
 	mfmDestroyPoolAllocator(rd->pool256);
 	mfmDestroyPoolAllocator(rd->pool64);
-	mfmDestroyPoolAllocator(rd->pool32);
+	mfmDestroyPoolAllocator(rd->pool48);
+
+	// Release D3D11 stuff
+	rd->defaultRenderTargetView->lpVtbl->Release(rd->defaultRenderTargetView);
+	rd->defaultDepthStencilView->lpVtbl->Release(rd->defaultDepthStencilView);
+	rd->swapChain->lpVtbl->Release(rd->swapChain);
+	rd->deviceContext->lpVtbl->Release(rd->deviceContext);
+	rd->device->lpVtbl->Release(rd->device);
 
 	// Deallocate render device
 	if (mfmDeallocate(rd->allocator, rd) != MFM_ERROR_OKAY)
