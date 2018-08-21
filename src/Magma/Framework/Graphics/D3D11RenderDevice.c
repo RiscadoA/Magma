@@ -35,6 +35,7 @@ typedef struct
 	mfgEnum shaderType;
 	UINT index;
 	BOOL active;
+	void* shader;
 } mfgD3D11BindingPoint;
 
 struct mfgD3D11VertexShader
@@ -192,8 +193,6 @@ typedef struct
 	mfgDepthStencilState* defaultDepthStencilState;
 	mfgBlendState* defaultBlendState;
 
-	mfgD3D11IndexBuffer* currentIndexBuffer;
-
 	IDXGISwapChain* swapChain;
 	ID3D11Device* device;
 	ID3D11DeviceContext* deviceContext;
@@ -292,6 +291,48 @@ mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, c
 	}
 
 	d3dVS->md = metaData;
+
+	// Get binding points
+	for (mfmU16 i = 0; i < 16; ++i)
+	{
+		d3dVS->bps[i].active = FALSE;
+		d3dVS->bps[i].shader = d3dVS;
+		d3dVS->bps[i].shaderType = MFG_VERTEX_SHADER;
+	}
+
+	{
+		mfgMetaDataBindingPoint* bp = d3dVS->md->firstBindingPoint;
+		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
+		{
+			if (bp->type == MFG_CONSTANT_BUFFER)
+			{
+				d3dVS->bps[i].bp = bp;
+				d3dVS->bps[i].index = bp->id;
+				d3dVS->bps[i].active = TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_1D)
+			{
+				d3dVS->bps[i].bp = bp;
+				d3dVS->bps[i].index = bp->id;
+				d3dVS->bps[i].active = TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_2D)
+			{
+				d3dVS->bps[i].bp = bp;
+				d3dVS->bps[i].index = bp->id;
+				d3dVS->bps[i].active = TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_3D)
+			{
+				d3dVS->bps[i].bp = bp;
+				d3dVS->bps[i].index = bp->id;
+				d3dVS->bps[i].active = TRUE;
+			}
+
+			bp = bp->next;
+		}
+	}
+
 	*vs = d3dVS;
 
 	return MFG_ERROR_OKAY;
@@ -384,6 +425,48 @@ mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, con
 	}
 
 	d3dPS->md = metaData;
+
+	// Get binding points
+	for (mfmU16 i = 0; i < 16; ++i)
+	{
+		d3dPS->bps[i].active = FALSE;
+		d3dPS->bps[i].shader = d3dPS;
+		d3dPS->bps[i].shaderType = MFG_PIXEL_SHADER;
+	}
+
+	{
+		mfgMetaDataBindingPoint* bp = d3dPS->md->firstBindingPoint;
+		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
+		{
+			if (bp->type == MFG_CONSTANT_BUFFER)
+			{
+				d3dPS->bps[i].bp = bp;
+				d3dPS->bps[i].index = bp->id;
+				d3dPS->bps[i].active = TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_1D)
+			{
+				d3dPS->bps[i].bp = bp;
+				d3dPS->bps[i].index = bp->id;
+				d3dPS->bps[i].active = TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_2D)
+			{
+				d3dPS->bps[i].bp = bp;
+				d3dPS->bps[i].index = bp->id;
+				d3dPS->bps[i].active = TRUE;
+			}
+			else if (bp->type == MFG_TEXTURE_3D)
+			{
+				d3dPS->bps[i].bp = bp;
+				d3dPS->bps[i].index = bp->id;
+				d3dPS->bps[i].active = TRUE;
+			}
+
+			bp = bp->next;
+		}
+	}
+
 	*ps = d3dPS;
 
 	return MFG_ERROR_OKAY;
@@ -541,6 +624,10 @@ void mfgD3D11DestroyConstantBuffer(void* buffer)
 	if (buffer == NULL) abort();
 #endif
 	
+	mfgD3D11ConstantBuffer* d3dCB = buffer;
+	d3dCB->buffer->lpVtbl->Release(d3dCB->buffer);
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dCB->base.renderDevice)->pool32, d3dCB) != MFM_ERROR_OKAY)
+		abort();
 }
 
 mfgError mfgD3D11CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage)
@@ -552,6 +639,55 @@ mfgError mfgD3D11CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** c
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
 
+	// Allocate vertex buffer
+	mfgD3D11ConstantBuffer* d3dCB = NULL;
+	if (mfmAllocate(d3dRD->pool32, &d3dCB, sizeof(mfgD3D11ConstantBuffer)) != MFM_ERROR_OKAY)
+		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate constant buffer on pool");
+
+	// Init object
+	d3dCB->base.object.destructorFunc = &mfgD3D11DestroyConstantBuffer;
+	d3dCB->base.object.referenceCount = 0;
+	d3dCB->base.renderDevice = rd;
+
+	// Create buffer
+	D3D11_BUFFER_DESC desc;
+
+	switch (usage)
+	{
+		case MFG_USAGE_DEFAULT: desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_STATIC: desc.Usage = D3D11_USAGE_IMMUTABLE; desc.CPUAccessFlags = 0; break;
+		case MFG_USAGE_DYNAMIC: desc.Usage = D3D11_USAGE_DYNAMIC; desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; break;
+		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported usage mode");
+	}
+
+	desc.ByteWidth = ceil(((mfmF32)size) / 16) * 16;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.MiscFlags = 0;
+
+	if (data == NULL)
+	{
+		if (usage != MFG_USAGE_DYNAMIC)
+			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Non dynamic buffers must have initial data");
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateBuffer(d3dRD->device, &desc, NULL, &d3dCB->buffer);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateBuffer failed");
+	}
+	else
+	{
+		D3D11_SUBRESOURCE_DATA initData;
+
+		initData.pSysMem = data;
+		initData.SysMemPitch = 0;
+		initData.SysMemSlicePitch = 0;
+
+		HRESULT hr = d3dRD->device->lpVtbl->CreateBuffer(d3dRD->device, &desc, &initData, &d3dCB->buffer);
+		if (FAILED(hr))
+			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateBuffer failed");
+	}
+
+	*cb = d3dCB;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -562,8 +698,15 @@ mfgError mfgD3D11MapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb, v
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11ConstantBuffer* d3dCB = cb;
 
-	
+	D3D11_MAPPED_SUBRESOURCE map;
+	HRESULT hr = d3dRD->deviceContext->lpVtbl->Map(d3dRD->deviceContext, d3dCB->buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+	if (FAILED(hr))
+		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Map failed");
+
+	*memory = map.pData;
+
 	return MFG_ERROR_OKAY;
 }
 
@@ -574,6 +717,8 @@ mfgError mfgD3D11UnmapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb)
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
+	mfgD3D11ConstantBuffer* d3dCB = cb;
+	d3dRD->deviceContext->lpVtbl->Unmap(d3dRD->deviceContext, d3dCB->buffer, 0);
 
 	return MFG_ERROR_OKAY;
 }
@@ -726,7 +871,6 @@ mfgError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfm
 
 	switch (format)
 	{
-		case MFG_UBYTE: d3dIB->format = DXGI_FORMAT_R8_UINT; break;
 		case MFG_USHORT: d3dIB->format = DXGI_FORMAT_R16_UINT; break;
 		case MFG_UINT: d3dIB->format = DXGI_FORMAT_R32_UINT; break;
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported index format");
@@ -1689,7 +1833,7 @@ mfgError mfgD3D11DrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
 mfgError mfgD3D11DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	if (rd == NULL || ((mfgD3D11RenderDevice*)rd)->currentIndexBuffer == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+	if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
 #endif
 	
 
@@ -1766,8 +1910,6 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 	rd->allocator = allocator;
 	memset(rd->errorString, '\0', sizeof(rd->errorString));
 	rd->errorStringSize = 0;
-
-	rd->currentIndexBuffer = NULL;
 
 	// Init D3D11 stuff
 	{

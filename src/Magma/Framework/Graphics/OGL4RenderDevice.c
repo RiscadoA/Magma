@@ -387,7 +387,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}	
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -415,7 +415,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -443,7 +443,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -615,7 +615,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -643,7 +643,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -671,7 +671,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -1137,7 +1137,6 @@ mfgError mfgOGL4CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU
 
 	switch (format)
 	{
-		case MFG_UBYTE: oglIB->indexType = GL_UNSIGNED_BYTE; break;
 		case MFG_USHORT: oglIB->indexType = GL_UNSIGNED_SHORT; break;
 		case MFG_UINT: oglIB->indexType = GL_UNSIGNED_INT; break;
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported index format");

@@ -1090,7 +1090,7 @@ extern "C"
 	/// <param name="ib">Pointer to index buffer handle</param>
 	/// <param name="size">Index buffer size</param>
 	/// <param name="data">Index buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
-	/// <param name="format">Index data format (valid: MFG_UBYTE; MFG_USHORT; MFG_UINT)</param>
+	/// <param name="format">Index data format (valid: MFG_USHORT; MFG_UINT)</param>
 	/// <param name="usage">Index buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
 	///		MFG_ERROR_OKAY if there were no errors.

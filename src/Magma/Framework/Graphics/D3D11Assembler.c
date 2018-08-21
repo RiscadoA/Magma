@@ -307,7 +307,7 @@ static mfgError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream
 			else if (bp->type == MFG_TEXTURE_1D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex1d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -317,7 +317,7 @@ static mfgError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex2d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -327,7 +327,7 @@ static mfgError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex3d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -503,7 +503,7 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 			if (bp->type == MFG_CONSTANT_BUFFER)
 			{
 				mfgMetaDataConstantBuffer* cb = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"cbuffer buf_%s\n{\n", bp->name) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"cbuffer buf_%s : register(b%d)\n{\n", bp->name, bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 
 				mfgMetaDataConstantBufferVariable* var = cb->firstVariable;
@@ -528,25 +528,25 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 			else if (bp->type == MFG_TEXTURE_1D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"Texture1D tex1d_%d : register(t%d);\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"Texture1D tex1d_%d : register(t%d);\n", bp->id, bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex1d_%d_sampler : register(s%d);\n\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex1d_%d_sampler : register(s%d);\n\n", bp->id, bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
 				mfgMetaDataTexture2D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"Texture2D tex2d_%d : register(t%d);\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"Texture2D tex2d_%d : register(t%d);\n", bp->id, bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex2d_%d_sampler : register(s%d);\n\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex2d_%d_sampler : register(s%d);\n\n", bp->id, bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
 				mfgMetaDataTexture3D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"Texture3D tex3d_%d : register(t%d);\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"Texture3D tex3d_%d : register(t%d);\n", bp->id, bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex3d_%d_sampler : register(s%d);\n\n", tex->id, tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"SamplerState tex3d_%d_sampler : register(s%d);\n\n", bp->id, bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else

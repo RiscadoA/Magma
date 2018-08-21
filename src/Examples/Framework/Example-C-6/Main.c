@@ -110,6 +110,8 @@ void Main(int argc, char** argv)
 			strcpy(metaDataB + ptr, u8"transform");
 			ptr += 16;
 			metaDataB[ptr++] = MFG_CONSTANT_BUFFER;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x00;	// ID 0
 			metaDataB[ptr++] = 0x00; // 1 element
 			metaDataB[ptr++] = 0x01;
 			// Elements:
@@ -313,13 +315,13 @@ void Main(int argc, char** argv)
 
 	// Create index buffer
 	{
-		mfmU8 indices[] =
+		mfmU16 indices[] =
 		{
 			2, 1, 0,
 			0, 3, 2,
 		};
 
-		if (mfgCreateIndexBuffer(renderDevice, &ib, sizeof(indices), indices, MFG_UBYTE, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+		if (mfgCreateIndexBuffer(renderDevice, &ib, sizeof(indices), indices, MFG_USHORT, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgGetErrorString(renderDevice, err, sizeof(err));

@@ -309,7 +309,7 @@ static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			else if (bp->type == MFG_TEXTURE_1D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex1d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -319,7 +319,7 @@ static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex2d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -329,7 +329,7 @@ static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex3d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -530,19 +530,19 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			else if (bp->type == MFG_TEXTURE_1D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler1D tex1d_%d;\n\n", tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler1D tex1d_%d;\n\n", bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
 				mfgMetaDataTexture2D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler2D tex2d_%d;\n\n", tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler2D tex2d_%d;\n\n", bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
 				mfgMetaDataTexture3D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler3D tex3d_%d;\n\n", tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler3D tex3d_%d;\n\n", bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else

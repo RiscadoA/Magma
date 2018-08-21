@@ -192,6 +192,10 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 			// Get type
 			bp->type = metaData[readPtr++];
 
+			// Get index
+			mfmFromBigEndian2(metaData + readPtr, &bp->id);
+			readPtr += 2;
+
 			if (bp->type == MFG_CONSTANT_BUFFER)
 			{
 				mfgMetaDataConstantBuffer* cb = (mfgMetaDataConstantBuffer*)bp;
@@ -227,28 +231,16 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 			{
 				mfgMetaDataTexture1D* tex = (mfgMetaDataTexture1D*)bp;
 				writePtr += sizeof(mfgMetaDataTexture1D);
-
-				// Get index
-				mfmFromBigEndian2(metaData + readPtr, &tex->id);
-				readPtr += 2;
 			}
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
 				mfgMetaDataTexture2D* tex = (mfgMetaDataTexture2D*)bp;
 				writePtr += sizeof(mfgMetaDataTexture2D);
-
-				// Get index
-				mfmFromBigEndian2(metaData + readPtr, &tex->id);
-				readPtr += 2;
 			}
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
 				mfgMetaDataTexture3D* tex = (mfgMetaDataTexture3D*)bp;
 				writePtr += sizeof(mfgMetaDataTexture3D);
-
-				// Get index
-				mfmFromBigEndian2(metaData + readPtr, &tex->id);
-				readPtr += 2;
 			}
 			else
 			{
