@@ -1,4 +1,4 @@
-﻿#include <Magma/Framework/Input/GLWindow.h>
+﻿#include <Magma/Framework/Graphics/D3D11RenderDevice.h>
 #include <Magma/Framework/Graphics/OGL4RenderDevice.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <Magma/Framework/String/Stream.h>
@@ -44,12 +44,19 @@ void OnClose(void* window)
 	windowOpen = MFM_FALSE;
 }
 
+//#define USE_GL
+
 void Main(int argc, char** argv)
 {
 	// Open window
 	{
-		if (mfiCreateGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-2") != MFI_ERROR_OKAY)
+#ifdef USE_GL
+		if (mfiCreateGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-6") != MFI_ERROR_OKAY)
 			abort();
+#else
+		if (mfiCreateD3DWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-6") != MFI_ERROR_OKAY)
+			abort();
+#endif
 		window->onClose = &OnClose;
 	}
 
@@ -57,8 +64,13 @@ void Main(int argc, char** argv)
 	{
 		mfgRenderDeviceDesc desc;
 		desc.vsyncEnabled = MFM_TRUE;
-		if(mfgCreateOGL4RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
+#ifdef USE_GL
+		if (mfgCreateOGL4RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
 			abort();
+#else
+		if(mfgCreateD3D11RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
+			abort();
+#endif
 	}
 
 	// Load vertex shader
@@ -93,23 +105,26 @@ void Main(int argc, char** argv)
 			metaDataB[ptr++] = MFG_FLOAT2;
 
 			// Output var 1
+			strcpy(metaDataB + ptr, u8"_out0");
+			ptr += 16;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x04;	// ID 4
+			metaDataB[ptr++] = MFG_FLOAT2;
+
+			// Output var 2
 			strcpy(metaDataB + ptr, u8"_position");
 			ptr += 16;
 			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = 0x01;	// ID 1
 			metaDataB[ptr++] = MFG_FLOAT4;
 
-			// Output var 2
-			strcpy(metaDataB + ptr, u8"_out0");
-			ptr += 16;
-			metaDataB[ptr++] = 0x00;
-			metaDataB[ptr++] = 0x04;	// ID 3
-			metaDataB[ptr++] = MFG_FLOAT2;
 
 			// Constant buffer
 			strcpy(metaDataB + ptr, u8"transform");
 			ptr += 16;
 			metaDataB[ptr++] = MFG_CONSTANT_BUFFER;
+			metaDataB[ptr++] = 0x00;
+			metaDataB[ptr++] = 0x00;	// ID 0
 			metaDataB[ptr++] = 0x00; // 1 element
 			metaDataB[ptr++] = 0x01;
 			// Elements:
@@ -204,6 +219,11 @@ void Main(int argc, char** argv)
 			0x00, // Minor version 0
 			
 			MFG_BYTECODE_SAMPLE2D, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
+			/*MFG_BYTECODE_LITI4, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x01,*/
 		};
 
 		// Create shader
@@ -259,7 +279,7 @@ void Main(int argc, char** argv)
 		vertexes[3].u = 1.0f;
 		vertexes[3].v = 0.0f;
 
-		if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+		if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgGetErrorString(renderDevice, err, sizeof(err));
@@ -313,13 +333,13 @@ void Main(int argc, char** argv)
 
 	// Create index buffer
 	{
-		mfmU8 indices[] =
+		mfmU16 indices[] =
 		{
 			2, 1, 0,
 			0, 3, 2,
 		};
 
-		if (mfgCreateIndexBuffer(renderDevice, &ib, sizeof(indices), indices, MFG_UBYTE, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+		if (mfgCreateIndexBuffer(renderDevice, &ib, sizeof(indices), indices, MFG_USHORT, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgGetErrorString(renderDevice, err, sizeof(err));
@@ -425,30 +445,26 @@ void Main(int argc, char** argv)
 		abort();
 	}
 
+	float x = 0.0f;
+
 	while (windowOpen == MFM_TRUE)
 	{
 		window->pollEvents(window);
 
 		if (mfgSetFramebuffer(renderDevice, fb) != MFG_ERROR_OKAY)
 			abort();
+		
+		x += 0.0001f;
 
 		// Clear
 
 		if (mfgClearColor(renderDevice, 1.0f, 0.0f, 1.0f, 1.0f) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgClearDepth(renderDevice, 1.0f) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgClearStencil(renderDevice, 0) != MFG_ERROR_OKAY)
 			abort();
 
 		if (mfgSetFramebuffer(renderDevice, NULL) != MFG_ERROR_OKAY)
 			abort();
 
 		if (mfgClearColor(renderDevice, 0.0f, 0.0f, 0.2f, 1.0f) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgClearDepth(renderDevice, 1.0f) != MFG_ERROR_OKAY)
-			abort();
-		if (mfgClearStencil(renderDevice, 0) != MFG_ERROR_OKAY)
 			abort();
 
 		// Render rectangle
@@ -466,7 +482,7 @@ void Main(int argc, char** argv)
 					abort();
 				}
 
-				cbData[0] = 0.0f;
+				cbData[0] = 0.0f + x;
 				cbData[1] = 0.0f;
 				cbData[2] = 0.0f;
 				cbData[3] = 1.0f;
@@ -482,19 +498,21 @@ void Main(int argc, char** argv)
 			}
 
 			// Draw vertex array
+			if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
+				abort();
 			if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgBindRenderTexture(renderDevice, texBP, rt) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
-				abort();
 			if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgSetIndexBuffer(renderDevice, ib) != MFG_ERROR_OKAY)
 				abort();
 			if (mfgDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
+				abort();
+			if (mfgBindRenderTexture(renderDevice, texBP, NULL) != MFG_ERROR_OKAY)
 				abort();
 		}
 
@@ -520,6 +538,11 @@ void Main(int argc, char** argv)
 	mfgDestroyPixelShader(ps);
 	mfgDestroyVertexShader(vs);
 
+#ifdef USE_GL
 	mfgDestroyOGL4RenderDevice(renderDevice);
 	mfiDestroyGLWindow(window);
+#else
+	mfgDestroyD3D11RenderDevice(renderDevice);
+	mfiDestroyD3DWindow(window);
+#endif
 }

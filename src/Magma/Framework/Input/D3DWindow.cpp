@@ -7,55 +7,55 @@
 
 #include <sstream>
 
-void mfiWindowCloseCallback(void* window)
+static void mfiWindowCloseCallback(void* window)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnClose.Fire();
 }
 
-void mfiWindowKeyDownCallback(void* window, mfiKeyCode code, mfiKeyMods mods)
+static void mfiWindowKeyDownCallback(void* window, mfiKeyCode code, mfiKeyMods mods)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnKeyDown.Fire((Magma::Framework::Input::Keyboard)code, (Magma::Framework::Input::KeyModifiers)mods);
 }
 
-void mfiWindowKeyUpCallback(void* window, mfiKeyCode code, mfiKeyMods mods)
+static void mfiWindowKeyUpCallback(void* window, mfiKeyCode code, mfiKeyMods mods)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnKeyUp.Fire((Magma::Framework::Input::Keyboard)code, (Magma::Framework::Input::KeyModifiers)mods);
 }
 
-void mfiWindowMouseMoveCallback(void* window, mfmF32 x, mfmF32 y)
+static void mfiWindowMouseMoveCallback(void* window, mfmF32 x, mfmF32 y)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseMove.Fire(x, y);
 }
 
-void mfiWindowMouseDownCallback(void* window, mfiMouseButton button)
+static void mfiWindowMouseDownCallback(void* window, mfiMouseButton button)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseDown.Fire((Magma::Framework::Input::Mouse)button);
 }
 
-void mfiWindowMouseUpCallback(void* window, mfiMouseButton button)
+static void mfiWindowMouseUpCallback(void* window, mfiMouseButton button)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseUp.Fire((Magma::Framework::Input::Mouse)button);
 }
 
-void mfiWindowMouseScrollCallback(void* window, mfmF32 delta)
+static void mfiWindowMouseScrollCallback(void* window, mfmF32 delta)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseScroll.Fire(delta);
 }
 
-void mfiWindowMouseEnterCallback(void* window)
+static void mfiWindowMouseEnterCallback(void* window)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseEnter.Fire();
 }
 
-void mfiWindowMouseLeaveCallback(void* window)
+static void mfiWindowMouseLeaveCallback(void* window)
 {
 	auto win = (mfiWindow*)window;
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseLeave.Fire();

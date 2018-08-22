@@ -6,6 +6,7 @@
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 
 #include <GLFW/glfw3.h>
+#include "../Memory/Allocator.h"
 
 typedef struct
 {
@@ -226,8 +227,8 @@ mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	if (currentWindow != NULL)
 		return MFI_ERROR_ALREADY_INITIALIZED;
 
-	mfiGLWindow* glWindow = malloc(sizeof(mfiGLWindow));
-	if (glWindow == NULL)
+	mfiGLWindow* glWindow = NULL;
+	if (mfmAllocate(NULL, &glWindow, sizeof(mfiGLWindow)) != MFM_ERROR_OKAY)
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Init GLFW
@@ -235,7 +236,7 @@ mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	if (glfwInit() != GLFW_TRUE)
 	{
 		// Failed to init
-		free(glWindow);
+		mfmDeallocate(NULL, glWindow);
 		return MFI_ERROR_INTERNAL;
 	}
 
@@ -320,7 +321,7 @@ void mfiDestroyGLWindow(void * window)
 	// Destroy window
 	mfiGLWindow* glWindow = (mfiGLWindow*)window;
 	glfwDestroyWindow(glWindow->glfwWindow);
-	free(glWindow);
+	mfmDeallocate(NULL, glWindow);
 	currentWindow = NULL;
 
 	// Terminate GLFW

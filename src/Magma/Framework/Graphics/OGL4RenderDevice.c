@@ -16,10 +16,13 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#define MFG_POOL_32_ELEMENT_COUNT 2048
+#define MFG_POOL_48_ELEMENT_COUNT 2048
 #define MFG_POOL_64_ELEMENT_COUNT 2048
 #define MFG_POOL_256_ELEMENT_COUNT 2048
 #define MFG_POOL_512_ELEMENT_COUNT 2048
+
+#define MFG_OGL4_SHADER_MAX_BP_COUNT 8
+#define MFG_OGL4_SHADER_MAX_ELEMENT_COUNT 8
 
 typedef struct mfgOGL4Shader mfgOGL4Shader;
 
@@ -36,7 +39,7 @@ struct mfgOGL4Shader
 	mfgRenderDeviceObject base;
 	GLint program;
 	const mfgMetaData* md;
-	mfgOGL4BindingPoint bps[16];
+	mfgOGL4BindingPoint bps[MFG_OGL4_SHADER_MAX_BP_COUNT];
 };
 
 typedef struct
@@ -147,7 +150,7 @@ typedef struct
 typedef struct
 {
 	mfgRenderDeviceObject base;
-	mfgOGL4VertexElement elements[14];
+	mfgOGL4VertexElement elements[MFG_OGL4_SHADER_MAX_ELEMENT_COUNT];
 	mfmU64 elementCount;
 	mfgOGL4Shader* vs;
 } mfgOGL4VertexLayout;
@@ -224,8 +227,8 @@ typedef struct
 	mfsUTF8CodeUnit errorString[256];
 	mfmU64 errorStringSize;
 
-	mfmPoolAllocator* pool32;
-	mfmU8 pool32Memory[MFM_POOL_ALLOCATOR_SIZE(MFG_POOL_32_ELEMENT_COUNT, 32)];
+	mfmPoolAllocator* pool48;
+	mfmU8 pool48Memory[MFM_POOL_ALLOCATOR_SIZE(MFG_POOL_48_ELEMENT_COUNT, 48)];
 
 	mfmPoolAllocator* pool64;
 	mfmU8 pool64Memory[MFM_POOL_ALLOCATOR_SIZE(MFG_POOL_64_ELEMENT_COUNT, 64)];
@@ -336,7 +339,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 	}
 
 	// Init binding points
-	for (mfmU16 i = 0; i < 16; ++i)
+	for (mfmU16 i = 0; i < MFG_OGL4_SHADER_MAX_BP_COUNT; ++i)
 	{
 		oglVS->bps[i].active = GL_FALSE;
 		oglVS->bps[i].shader = oglVS;
@@ -344,7 +347,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 
 	{
 		mfgMetaDataBindingPoint* bp = oglVS->md->firstBindingPoint;
-		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
+		for (mfmU16 i = 0; i < MFG_OGL4_SHADER_MAX_BP_COUNT && bp != NULL; ++i)
 		{
 			if (bp->type == MFG_CONSTANT_BUFFER)
 			{
@@ -387,7 +390,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}	
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -415,7 +418,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -443,7 +446,7 @@ mfgError mfgOGL4CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, co
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -477,7 +480,7 @@ mfgError mfgOGL4GetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint
 #endif
 	mfgOGL4Shader* oglVS = vs;
 	
-	for (mfmU64 i = 0; i < 16; ++i)
+	for (mfmU64 i = 0; i < MFG_OGL4_SHADER_MAX_BP_COUNT; ++i)
 		if (oglVS->bps[i].active == GL_TRUE)
 		{
 			if (strcmp(name, oglVS->bps[i].bp->name) == 0)
@@ -564,7 +567,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 	}
 
 	// Init binding points
-	for (mfmU16 i = 0; i < 16; ++i)
+	for (mfmU16 i = 0; i < MFG_OGL4_SHADER_MAX_BP_COUNT; ++i)
 	{
 		oglPS->bps[i].active = GL_FALSE;
 		oglPS->bps[i].shader = oglPS;
@@ -572,7 +575,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 
 	{
 		mfgMetaDataBindingPoint* bp = oglPS->md->firstBindingPoint;
-		for (mfmU16 i = 0; i < 16 && bp != NULL; ++i)
+		for (mfmU16 i = 0; i < MFG_OGL4_SHADER_MAX_BP_COUNT && bp != NULL; ++i)
 		{
 			if (bp->type == MFG_CONSTANT_BUFFER)
 			{
@@ -615,7 +618,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -643,7 +646,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -671,7 +674,7 @@ mfgError mfgOGL4CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, cons
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", ((mfgMetaDataTexture1D*)bp)->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -705,7 +708,7 @@ mfgError mfgOGL4GetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint*
 #endif
 	mfgOGL4Shader* oglPS = ps;
 
-	for (mfmU64 i = 0; i < 16; ++i)
+	for (mfmU64 i = 0; i < MFG_OGL4_SHADER_MAX_BP_COUNT; ++i)
 		if (oglPS->bps[i].active == GL_TRUE)
 		{
 			if (strcmp(name, oglPS->bps[i].bp->name) == 0)
@@ -743,7 +746,7 @@ mfgError mfgOGL4BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4ConstantBuffer* oglCB = cb;
 
-	glBindBufferRange(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb, offset, size);
+	glBindBufferRange(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb, offset * 16, size * 16);
 
 	MFG_CHECK_GL_ERROR();
 	return MFG_ERROR_OKAY;
@@ -849,7 +852,7 @@ void mfgOGL4DestroyPipeline(void* pp)
 #endif
 	mfgOGL4Pipeline* oglPP = pp;
 	glDeleteProgramPipelines(1, &oglPP->pipeline);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool32, oglPP) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool48, oglPP) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -868,7 +871,7 @@ mfgError mfgOGL4CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexS
 
 	// Allocate pipeline
 	mfgOGL4Pipeline* oglPP = NULL;
-	if (mfmAllocate(oglRD->pool32, &oglPP, sizeof(mfgOGL4Pipeline)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglPP, sizeof(mfgOGL4Pipeline)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
 
 	// Init object
@@ -913,7 +916,7 @@ void mfgOGL4DestroyConstantBuffer(void* buffer)
 #endif
 	mfgOGL4ConstantBuffer* oglCB = buffer;
 	glDeleteBuffers(1, &oglCB->cb);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglCB->base.renderDevice)->pool32, oglCB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglCB->base.renderDevice)->pool48, oglCB) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -932,7 +935,7 @@ mfgError mfgOGL4CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** cb
 
 	// Allocate constant buffer
 	mfgOGL4ConstantBuffer* oglCB = NULL;
-	if (mfmAllocate(oglRD->pool32, &oglCB, sizeof(mfgOGL4ConstantBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglCB, sizeof(mfgOGL4ConstantBuffer)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate constant buffer on pool");
 
 	// Init object
@@ -1005,7 +1008,7 @@ void mfgOGL4DestroyVertexBuffer(void* buffer)
 #endif
 	mfgOGL4VertexBuffer* oglVB = buffer;
 	glDeleteBuffers(1, &oglVB->vb);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVB->base.renderDevice)->pool32, oglVB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVB->base.renderDevice)->pool48, oglVB) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1026,7 +1029,7 @@ mfgError mfgOGL4CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mf
 
 	// Allocate vertex buffer
 	mfgOGL4VertexBuffer* oglVB = NULL;
-	if (mfmAllocate(oglRD->pool32, &oglVB, sizeof(mfgOGL4VertexBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglVB, sizeof(mfgOGL4VertexBuffer)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
 
 	// Init object
@@ -1103,7 +1106,7 @@ void mfgOGL4DestroyIndexBuffer(void* buffer)
 #endif
 	mfgOGL4IndexBuffer* oglIB = buffer;
 	glDeleteBuffers(1, &oglIB->ib);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglIB->base.renderDevice)->pool32, oglIB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglIB->base.renderDevice)->pool48, oglIB) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1124,7 +1127,7 @@ mfgError mfgOGL4CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU
 
 	// Allocate index buffer
 	mfgOGL4IndexBuffer* oglIB = NULL;
-	if (mfmAllocate(oglRD->pool32, &oglIB, sizeof(mfgOGL4IndexBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglIB, sizeof(mfgOGL4IndexBuffer)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate index buffer on pool");
 
 	// Init object
@@ -1137,7 +1140,6 @@ mfgError mfgOGL4CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU
 
 	switch (format)
 	{
-		case MFG_UBYTE: oglIB->indexType = GL_UNSIGNED_BYTE; break;
 		case MFG_USHORT: oglIB->indexType = GL_UNSIGNED_SHORT; break;
 		case MFG_UINT: oglIB->indexType = GL_UNSIGNED_INT; break;
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported index format");
@@ -1243,7 +1245,7 @@ void mfgOGL4DestroyVertexLayout(void* vl)
 mfgError mfgOGL4CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL || vl == NULL || elementCount == 0 || elementCount > 14 || vs == NULL || elements == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	{ if (rd == NULL || vl == NULL || elementCount == 0 || elementCount > MFG_OGL4_SHADER_MAX_ELEMENT_COUNT || vs == NULL || elements == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
@@ -1331,7 +1333,7 @@ void mfgOGL4DestroyVertexArray(void* va)
 #endif
 	mfgOGL4VertexArray* oglVA = va;
 	glDeleteVertexArrays(1, &oglVA->va);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool32, oglVA) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool48, oglVA) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1350,7 +1352,7 @@ mfgError mfgOGL4CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU
 
 	// Allocate vertex array
 	mfgOGL4VertexArray* oglVA = NULL;
-	if (mfmAllocate(oglRD->pool32, &oglVA, sizeof(mfgOGL4VertexArray)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglVA, sizeof(mfgOGL4VertexArray)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
 	mfgOGL4VertexLayout* oglVL = vl;
 
@@ -1819,7 +1821,7 @@ void mfgOGL4DestroySampler(void* sampler)
 #endif
 	mfgOGL4Sampler* oglS = sampler;
 	glDeleteSamplers(1, &oglS->sampler);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglS->base.renderDevice)->pool32, oglS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglS->base.renderDevice)->pool48, oglS) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1838,7 +1840,7 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 
 	// Allocate sampler
 	mfgOGL4Sampler* oglS = NULL;
-	if (mfmAllocate(oglRD->pool32, &oglS, sizeof(mfgOGL4Sampler)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglS, sizeof(mfgOGL4Sampler)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate sampler on pool");
 
 	// Init object
@@ -1850,7 +1852,7 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 	GLenum minFilter, magFilter;
 	GLenum wrapS, wrapT, wrapR;
 
-	switch (desc->adressU)
+	switch (desc->addressU)
 	{
 		case MFG_REPEAT: wrapS = GL_REPEAT; break;
 		case MFG_MIRROR: wrapS = GL_MIRRORED_REPEAT; break;
@@ -1859,7 +1861,7 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture U adress mode");
 	}
 
-	switch (desc->adressV)
+	switch (desc->addressV)
 	{
 		case MFG_REPEAT: wrapT = GL_REPEAT; break;
 		case MFG_MIRROR: wrapT = GL_MIRRORED_REPEAT; break;
@@ -1868,7 +1870,7 @@ mfgError mfgOGL4CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const m
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported texture V adress mode");
 	}
 
-	switch (desc->adressW)
+	switch (desc->addressW)
 	{
 		case MFG_REPEAT: wrapR = GL_REPEAT; break;
 		case MFG_MIRROR: wrapR = GL_MIRRORED_REPEAT; break;
@@ -2085,7 +2087,7 @@ void mfgOGL4DestroyFramebuffer(void* fb)
 #endif
 	mfgOGL4Framebuffer* oglFB = fb;
 	glDeleteFramebuffers(1, &oglFB->fbo);
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool32, oglFB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool48, oglFB) != MFM_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2104,7 +2106,7 @@ mfgError mfgOGL4CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU
 
 	// Allocate texture
 	mfgOGL4Framebuffer* oglFB = NULL;
-	if (mfmAllocate(oglRD->pool32, &oglFB, sizeof(mfgOGL4Framebuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglFB, sizeof(mfgOGL4Framebuffer)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate framebuffer on pool");
 
 	// Init object
@@ -2719,6 +2721,48 @@ mfgError mfgOGL4DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 
 	return MFG_ERROR_OKAY;
 }
 
+mfgError mfgOGL4GetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	GLint out;
+
+	if (id == MFG_MAX_ANISOTROPY)
+		glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &out);
+	else if (id == MFG_CONSTANT_ALIGN)
+		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &out);
+	else
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	*value = out;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
+mfgError mfgOGL4GetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	GLfloat out;
+
+	if (id == MFG_MAX_ANISOTROPY)
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &out);
+	else if (id == MFG_CONSTANT_ALIGN)
+		glGetFloatv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &out);
+	else
+		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	*value = out;
+
+	MFG_CHECK_GL_ERROR();
+	return MFG_ERROR_OKAY;
+}
+
 mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
 {
 	// Check if params are valid
@@ -2734,9 +2778,9 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	{
 		mfmPoolAllocatorDesc desc;
 		desc.expandable = MFM_FALSE;
-		desc.slotCount = MFG_POOL_32_ELEMENT_COUNT;
+		desc.slotCount = MFG_POOL_48_ELEMENT_COUNT;
 		desc.slotSize = 32;
-		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool32, &desc, rd->pool32Memory, sizeof(rd->pool32Memory));
+		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool48, &desc, rd->pool48Memory, sizeof(rd->pool48Memory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
@@ -2893,8 +2937,8 @@ mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* w
 	rd->base.drawTrianglesIndexed = &mfgOGL4DrawTrianglesIndexed;
 	rd->base.swapBuffers = &mfgOGL4SwapBuffers;
 
-	rd->base.getPropertyI = NULL;
-	rd->base.getPropertyF = NULL;
+	rd->base.getPropertyI = &mfgOGL4GetPropertyI;
+	rd->base.getPropertyF = &mfgOGL4GetPropertyF;
 
 	rd->base.getErrorString = &mfgOGL4GetErrorString;
 
@@ -2956,7 +3000,7 @@ void mfgDestroyOGL4RenderDevice(void * renderDevice)
 	mfmDestroyPoolAllocator(rd->pool512);
 	mfmDestroyPoolAllocator(rd->pool256);
 	mfmDestroyPoolAllocator(rd->pool64);
-	mfmDestroyPoolAllocator(rd->pool32);
+	mfmDestroyPoolAllocator(rd->pool48);
 
 	// Deallocate render device
 	if (mfmDeallocate(rd->allocator, rd) != MFM_ERROR_OKAY)

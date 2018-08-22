@@ -33,7 +33,7 @@
 		- "_out7";
 
 	Pixel shader inputs:
-		- "_fragPosition";
+		- "_position";
 		- "_in0";
 		- "_in1";
 		- "_in2";
@@ -44,7 +44,7 @@
 		- "_in7";
 	
 	Pixel shader outputs:
-		- "_fragDepth";
+		- "_depth";
 		- "_target0";
 		- "_target1";
 		- "_target2";
@@ -114,17 +114,18 @@ extern "C"
 	// [number of binding points]
 	//		- 16 bytes for binding point name with null terminator.
 	//		- (mfmU8) binding point type.
+	//		- (mfmU16) variable index.
 	//		if type = MFG_CONSTANT_BUFFER then
 	//			- (mfmU16) variable count.
 	//			[variable count]
 	//				- (mfmU16) variable index.
 	//				- (mfmU8) variable type.
 	//		else if type = MFG_TEXTURE_1D then
-	//			- (mfmU16) variable index.
+	//			NONE
 	//		else if type = MFG_TEXTURE_2D then
-	//			- (mfmU16) variable index.
+	//			NONE
 	//		else if type = MFG_TEXTURE_3D then
-	//			- (mfmU16) variable index.
+	//			NONE
 
 	// Binary bytecode instruction file structure:
 	// -------------------- HEADER --------------------
@@ -292,6 +293,7 @@ typedef struct
 {
 	mfsUTF8CodeUnit name[16];
 	mfmU8 type;
+	mfmU16 id;
 	void* next;
 } mfgMetaDataBindingPoint;
 
@@ -312,19 +314,16 @@ typedef struct
 typedef struct
 {
 	mfgMetaDataBindingPoint base;
-	mfmU16 id;
 } mfgMetaDataTexture1D;
 
 typedef struct
 {
 	mfgMetaDataBindingPoint base;
-	mfmU16 id;
 } mfgMetaDataTexture2D;
 
 typedef struct
 {
 	mfgMetaDataBindingPoint base;
-	mfmU16 id;
 } mfgMetaDataTexture3D;
 
 typedef struct

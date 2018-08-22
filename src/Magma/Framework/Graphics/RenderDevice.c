@@ -21,19 +21,19 @@ void mfgDefaultSamplerDesc(mfgSamplerDesc * desc)
 	desc->borderColor[0] = 0.0f;
 	desc->borderColor[1] = 0.0f;
 	desc->borderColor[2] = 0.0f;
-	desc->borderColor[3] = 0.0f;
+	desc->borderColor[3] = 1.0f;
 	desc->maxAnisotropy = 1;
 	desc->minFilter = MFG_NEAREST;
 	desc->magFilter = MFG_NEAREST;
 	desc->mipmapFilter = MFG_NONE;
-	desc->adressU = MFG_CLAMP;
-	desc->adressV = MFG_CLAMP;
-	desc->adressW = MFG_CLAMP;
+	desc->addressU = MFG_CLAMP;
+	desc->addressV = MFG_CLAMP;
+	desc->addressW = MFG_CLAMP;
 }
 
 void mfgDefaultRasterStateDesc(mfgRasterStateDesc * desc)
 {
-	desc->cullEnabled = MFM_TRUE;
+	desc->cullEnabled = MFM_FALSE;
 	desc->frontFace = MFG_CCW;
 	desc->cullFace = MFG_BACK;
 	desc->rasterMode = MFG_FILL;
@@ -41,8 +41,8 @@ void mfgDefaultRasterStateDesc(mfgRasterStateDesc * desc)
 
 void mfgDefaultDepthStencilStateDesc(mfgDepthStencilStateDesc * desc)
 {
-	desc->depthEnabled = MFM_TRUE;
-	desc->depthWriteEnabled = MFM_TRUE;
+	desc->depthEnabled = MFM_FALSE;
+	desc->depthWriteEnabled = MFM_FALSE;
 	desc->depthNear = 0.0f;
 	desc->depthFar = 1.0f;
 	desc->depthCompare = MFG_LESS;

@@ -21,7 +21,7 @@ typedef struct
 	mfgComponentReference references[128];
 } mfgAssemblerData;
 
-mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
+static mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
 {
 	if (out == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -66,7 +66,7 @@ mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
+static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 {
 	const mfgMetaData* metaData = data->metaData;
 
@@ -100,7 +100,7 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 				}
 				else if (data->metaData->shaderType == MFG_PIXEL_SHADER)
 				{
-					if (!strcmp(var->name, u8"_fragPosition"))
+					if (!strcmp(var->name, u8"_position"))
 					{
 						if (mfsPrintFormatUTF8(out, u8"gl_FragCoord") != MFS_ERROR_OKAY)
 							return MFG_ERROR_FAILED_TO_WRITE;
@@ -309,7 +309,7 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 			else if (bp->type == MFG_TEXTURE_1D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex1d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -319,7 +319,7 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex2d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -329,7 +329,7 @@ mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (tex->id == id)
+				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex3d_%d", id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -530,19 +530,19 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			else if (bp->type == MFG_TEXTURE_1D)
 			{
 				mfgMetaDataTexture1D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler1D tex1d_%d;\n\n", tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler1D tex1d_%d;\n\n", bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
 				mfgMetaDataTexture2D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler2D tex2d_%d;\n\n", tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler2D tex2d_%d;\n\n", bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
 				mfgMetaDataTexture3D* tex = bp;
-				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler3D tex3d_%d;\n\n", tex->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"uniform sampler3D tex3d_%d;\n\n", bp->id) != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
 			else
@@ -596,7 +596,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			}
 			else if (metaData->shaderType == MFG_PIXEL_SHADER)
 			{
-				if (!strcmp(var->name, u8"_fragPosition"))
+				if (!strcmp(var->name, u8"_position"))
 				{
 					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
@@ -789,7 +789,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			}
 			else if (metaData->shaderType == MFG_PIXEL_SHADER)
 			{
-				if (!strcmp(var->name, u8"_fragDepth"))
+				if (!strcmp(var->name, u8"_depth"))
 				{
 					if (mfsPutString(outputStream, u8"out float gl_FragDepth;\n\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;

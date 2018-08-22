@@ -114,6 +114,7 @@ extern "C"
 #define MFG_DEPTH32STENCIL8 0x59
 
 #define MFG_MAX_ANISOTROPY	0x5A
+#define MFG_CONSTANT_ALIGN	0x5B
 
 	typedef mfmI32 mfgEnum;
 	
@@ -251,7 +252,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfgEnum adressU;
+		mfgEnum addressU;
 
 		/// <summary>
 		///		Texture adress mode on coordinate V.
@@ -261,7 +262,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfgEnum adressV;
+		mfgEnum addressV;
 
 		/// <summary>
 		///		Texture adress mode on coordinate W.
@@ -271,7 +272,7 @@ extern "C"
 		///			MFG_CLAMP;
 		///			MFG_BORDER;
 		/// </summary>
-		mfgEnum adressW;
+		mfgEnum addressW;
 	} mfgSamplerDesc;
 
 	void mfgDefaultSamplerDesc(mfgSamplerDesc* desc);
@@ -878,8 +879,8 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="cb">Constant buffer handle</param>
-	/// <param name="offset">Starting memory offset in the buffer</param>
-	/// <param name="size">Memory size in the buffer</param>
+	/// <param name="offset">Starting memory offset in the buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
+	/// <param name="size">Memory size in the buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
 	/// <returns>
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
@@ -1090,7 +1091,7 @@ extern "C"
 	/// <param name="ib">Pointer to index buffer handle</param>
 	/// <param name="size">Index buffer size</param>
 	/// <param name="data">Index buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
-	/// <param name="format">Index data format (valid: MFG_UBYTE; MFG_USHORT; MFG_UINT)</param>
+	/// <param name="format">Index data format (valid: MFG_USHORT; MFG_UINT)</param>
 	/// <param name="usage">Index buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
 	///		MFG_ERROR_OKAY if there were no errors.
