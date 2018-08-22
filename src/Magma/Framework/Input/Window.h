@@ -5,7 +5,7 @@
 
 #include "Keyboard.h"
 #include "Mouse.h"
-#include "Entry.h"
+#include "../Entry.h"
 
 /*
 	Abstract C window type.

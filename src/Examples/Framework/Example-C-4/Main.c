@@ -1,12 +1,15 @@
-﻿#include <Magma/Framework/Input/Entry.h>
+﻿#include <Magma/Framework/Entry.h>
 #include <Magma/Framework/Graphics/Bytecode.h>
 #include <Magma/Framework/Graphics/D3D11Assembler.h>
 #include <Magma/Framework/String/Stream.h>
 #include <stdlib.h>
 #include <string.h>
 
-void Main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
+
 	mfgError err = MFG_ERROR_OKAY;
 
 	mfmU8 metaData[256];
@@ -108,4 +111,7 @@ void Main(int argc, char** argv)
 	mfgUnloadMetaData(loadedData);
 
 	for (;;);
+
+	mfTerminate();
+	return 0;
 }

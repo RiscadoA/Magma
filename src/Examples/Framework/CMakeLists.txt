@@ -1,18 +1,17 @@
 # ./src/Examples/Framework/CMakeLists.txt
 
-add_subdirectory(Example-1/)
-add_subdirectory(Example-2/)
-add_subdirectory(Example-3/)
-add_subdirectory(Example-4/)
-add_subdirectory(Example-5/)
-add_subdirectory(Example-6/)
-add_subdirectory(Example-7/)
-add_subdirectory(Example-8/)
-add_subdirectory(Example-9/)
-
-add_subdirectory(Example-C-1/)
-add_subdirectory(Example-C-2/)
-add_subdirectory(Example-C-3/)
-add_subdirectory(Example-C-4/)
-add_subdirectory(Example-C-5/)
-add_subdirectory(Example-C-6/)
+file(GLOB sub-dirs RELATIVE ${CMAKE_CURRENT_LIST_DIR} "*")
+foreach(dir ${sub-dirs})
+	if(IS_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/${dir})
+		file(GLOB_RECURSE files 
+			"${CMAKE_CURRENT_LIST_DIR}/${dir}/*.hpp"
+			"${CMAKE_CURRENT_LIST_DIR}/${dir}/*.cpp"
+			"${CMAKE_CURRENT_LIST_DIR}/${dir}/*.h"
+			"${CMAKE_CURRENT_LIST_DIR}/${dir}/*.c")
+		message(STATUS ${files})
+		add_executable(${dir} ${files})
+		target_link_libraries(${dir} Magma-Framework)
+		include_directories(${CMAKE_CURRENT_LIST_DIR}/../../)
+		include_directories(${CMAKE_CURRENT_LIST_DIR}/../../../extern/glm/)
+	endif()
+endforeach()

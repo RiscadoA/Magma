@@ -100,22 +100,36 @@ void mfsInitStream()
 {
 	// Initialize mfsInStream stream
 	mfsInStream = mfsCreateFileStream(stdin, mfsInDefaultBuffer, sizeof(mfsInDefaultBuffer));
+	mfsInStream->object.referenceCount++;
 	
 	// Initialize mfsOutStream stream
 	mfsOutStream = mfsCreateFileStream(stdout, mfsOutDefaultBuffer, sizeof(mfsOutDefaultBuffer));
+	mfsOutStream->object.referenceCount++;
 
 	// Initialize mfsErrStream stream
 	mfsErrStream = mfsCreateFileStream(stderr, mfsErrDefaultBuffer, sizeof(mfsErrDefaultBuffer));
+	mfsErrStream->object.referenceCount++;
 }
 
 void mfsTerminateStream()
 {
 	if (mfsInStream != NULL)
+	{
+		--mfsInStream->object.referenceCount;
 		mfsInStream->object.destructorFunc(mfsInStream);
+	}
+
 	if (mfsOutStream != NULL)
+	{
+		--mfsOutStream->object.referenceCount;
 		mfsOutStream->object.destructorFunc(mfsOutStream);
+	}
+
 	if (mfsErrStream != NULL)
+	{
+		--mfsErrStream->object.referenceCount;
 		mfsErrStream->object.destructorFunc(mfsErrStream);
+	}
 }
 
 mfsError mfsWrite(mfsStream * stream, const mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize)

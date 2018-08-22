@@ -1,4 +1,4 @@
-﻿#include <Magma/Framework/Input/Entry.h>
+﻿#include <Magma/Framework/Entry.h>
 #include <Magma/Framework/Graphics/Bytecode.h>
 #include <Magma/Framework/Graphics/D3D11Assembler.h>
 #include <Magma/Framework/Graphics/OGL4Assembler.h>
@@ -6,11 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-void Main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
+
 	mfgError err = MFG_ERROR_OKAY;
-
-
 	mfgMetaData* metaData = NULL;
 
 	// Load meta data
@@ -95,4 +96,7 @@ void Main(int argc, char** argv)
 
 	// Unload meta data
 	mfgUnloadMetaData(metaData);
+
+	mfTerminate();
+	return 0;
 }

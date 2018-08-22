@@ -21,8 +21,6 @@ typedef struct
 } mfiD3DWindow;
 
 static mfiD3DWindow* currentWindow = NULL;
-static HINSTANCE ghInstance = NULL;
-static int gnCmdShow = 0;
 
 mfiKeyCode mfiWindowsToKeyCode(int key)
 {
@@ -192,6 +190,9 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 	d3dWindow->base.onMouseUp = NULL;
 	d3dWindow->base.onMouseDown = NULL;
 
+	// Get instance
+	HINSTANCE instance = GetModuleHandle(NULL);
+
 	// Open window
 	{
 		WNDCLASSEX wc;
@@ -199,7 +200,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 		wc.cbSize = sizeof(WNDCLASSEX);
 		wc.style = CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc = WindowProc;
-		wc.hInstance = ghInstance;
+		wc.hInstance = instance;
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 		wc.lpszClassName = "mfiD3DWindowWindowed";
@@ -212,7 +213,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 		wc.cbSize = sizeof(WNDCLASSEX);
 		wc.style = CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc = WindowProc;
-		wc.hInstance = ghInstance;
+		wc.hInstance = instance;
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 		// wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 		wc.lpszClassName = "mfiD3DWindowFullscreen";
@@ -240,7 +241,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 				windowRect.bottom - windowRect.top,
 				NULL,
 				NULL,
-				ghInstance,
+				instance,
 				NULL);
 		} break;
 
@@ -263,7 +264,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 				windowRect.bottom - windowRect.top,
 				NULL,
 				NULL,
-				ghInstance,
+				instance,
 				NULL);
 		} break;
 
@@ -274,7 +275,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 		}
 	}
 
-	ShowWindow(d3dWindow->hwnd, gnCmdShow);
+	ShowWindow(d3dWindow->hwnd, SW_SHOWNORMAL);
 	currentWindow = d3dWindow;
 	*window = d3dWindow;
 
@@ -304,8 +305,8 @@ void * mfiGetD3DWindowHandle(void * window)
 	return NULL;
 #endif
 }
-
-#if defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
+ 
+#ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 
 LRESULT CALLBACK WindowProc(
 	HWND hWnd,
@@ -435,28 +436,6 @@ LRESULT CALLBACK WindowProc(
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		} break;
 	}
-
-	return 0;
-}
-
-int WINAPI WinMain(
-	HINSTANCE hInstance,
-	HINSTANCE hpPrevInstance,
-	LPSTR lpCmdLine,
-	int nCmdShow)
-{
-	// Open console
-	AllocConsole();
-
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
-	freopen("CONIN$", "r", stdin);
-
-	ghInstance = hInstance;
-	gnCmdShow = nCmdShow;
-
-	// Run program
-	mfEntry(0, NULL);
 
 	return 0;
 }

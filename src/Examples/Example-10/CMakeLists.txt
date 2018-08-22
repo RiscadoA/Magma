@@ -7,11 +7,7 @@ file(GLOB_RECURSE Example_10_Source
 )
 
 # Add files as executable
-if (MAGMA_FRAMEWORK_USE_DIRECTX)
-	add_executable(Example-10 WIN32 ${Example_10_Source})
-else()
-	add_executable(Example-10 ${Example_10_Source})
-endif()
+add_executable(Example-10 ${Example_10_Source})
 
 set_target_properties (Example-10 PROPERTIES FOLDER Examples)
 

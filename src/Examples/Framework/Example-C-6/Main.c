@@ -46,8 +46,11 @@ void OnClose(void* window)
 
 //#define USE_GL
 
-void Main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
+
 	// Open window
 	{
 #ifdef USE_GL
@@ -545,4 +548,7 @@ void Main(int argc, char** argv)
 	mfgDestroyD3D11RenderDevice(renderDevice);
 	mfiDestroyD3DWindow(window);
 #endif
+
+	mfTerminate();
+	return 0;
 }
