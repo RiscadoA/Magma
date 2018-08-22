@@ -1223,9 +1223,8 @@ mfgError mfgD3D11CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, m
 		inputDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 		inputDesc[i].AlignedByteOffset = elements[i].offset;
 		inputDesc[i].InstanceDataStepRate = 0;
-		d3dVL->offsets[i] = elements[i].offset;
-		d3dVL->strides[i] = elements[i].stride;
-
+		d3dVL->offsets[elements[i].bufferIndex] = 0;
+		d3dVL->strides[elements[i].bufferIndex] = elements[i].stride;
 		// Get format
 		switch (elements[i].size)
 		{
@@ -2355,8 +2354,8 @@ mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, 
 	rDesc.DepthBias = 0.0f;
 	rDesc.SlopeScaledDepthBias = 0.0f;
 	rDesc.DepthBiasClamp = 0.0f;
-	rDesc.DepthClipEnable = TRUE;
-	rDesc.ScissorEnable = TRUE;
+	rDesc.DepthClipEnable = FALSE;
+	rDesc.ScissorEnable = FALSE;
 	rDesc.MultisampleEnable = FALSE;
 	rDesc.AntialiasedLineEnable = FALSE;
 
@@ -2917,8 +2916,6 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 #ifdef MAGMA_FRAMEWORK_DEBUG
 			flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-
-
 			D3D11_SDK_VERSION;
 
 			D3D_FEATURE_LEVEL levels[] =

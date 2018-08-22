@@ -79,13 +79,13 @@ static mfgError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream
 				{
 					if (!strcmp(var->name, u8"_vertexID"))
 					{
-						if (mfsPrintFormatUTF8(out, u8"input.SV_VertexID") != MFS_ERROR_OKAY)
+						if (mfsPrintFormatUTF8(out, u8"input.vertexID") != MFS_ERROR_OKAY)
 							return MFG_ERROR_FAILED_TO_WRITE;
 						return MFG_ERROR_OKAY;
 					}
 					else if (!strcmp(var->name, u8"_instanceID"))
 					{
-						if (mfsPrintFormatUTF8(out, u8"input.SV_InstanceID") != MFS_ERROR_OKAY)
+						if (mfsPrintFormatUTF8(out, u8"input.instanceID") != MFS_ERROR_OKAY)
 							return MFG_ERROR_FAILED_TO_WRITE;
 						return MFG_ERROR_OKAY;
 					}
@@ -100,7 +100,7 @@ static mfgError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream
 				{
 					if (!strcmp(var->name, u8"_position"))
 					{
-						if (mfsPrintFormatUTF8(out, u8"input.SV_Position") != MFS_ERROR_OKAY)
+						if (mfsPrintFormatUTF8(out, u8"input.position") != MFS_ERROR_OKAY)
 							return MFG_ERROR_FAILED_TO_WRITE;
 						return MFG_ERROR_OKAY;
 					}
@@ -169,7 +169,7 @@ static mfgError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream
 				{
 					if (!strcmp(var->name, u8"_position"))
 					{
-						if (mfsPrintFormatUTF8(out, u8"output.SV_Position") != MFS_ERROR_OKAY)
+						if (mfsPrintFormatUTF8(out, u8"output.position") != MFS_ERROR_OKAY)
 							return MFG_ERROR_FAILED_TO_WRITE;
 						return MFG_ERROR_OKAY;
 					}
@@ -226,7 +226,7 @@ static mfgError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream
 				{
 					if (!strcmp(var->name, u8"_depth"))
 					{
-						if (mfsPrintFormatUTF8(out, u8"output.SV_Depth") != MFS_ERROR_OKAY)
+						if (mfsPrintFormatUTF8(out, u8"output.depth") != MFS_ERROR_OKAY)
 							return MFG_ERROR_FAILED_TO_WRITE;
 						return MFG_ERROR_OKAY;
 					}
@@ -578,7 +578,7 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 					mfgError err = mfgD3D11WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPutString(outputStream, u8" SV_VertexID : SV_VertexID;\n") != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8" vertexID : SV_VertexID;\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_instanceID"))
@@ -586,7 +586,7 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 					mfgError err = mfgD3D11WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPutString(outputStream, u8" SV_InstanceID : SV_InstanceID;\n") != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8" instanceID : SV_InstanceID;\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else
@@ -605,7 +605,7 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 					mfgError err = mfgD3D11WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPutString(outputStream, u8" SV_Position : SV_Position;\n") != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8" position : SV_Position;\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_in0"))
@@ -700,7 +700,7 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 					mfgError err = mfgD3D11WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPutString(outputStream, u8" SV_Position : SV_Position;\n") != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8" position : SV_Position;\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_out0"))
@@ -776,7 +776,7 @@ mfgError mfgD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgM
 					mfgError err = mfgD3D11WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
-					if (mfsPutString(outputStream, u8" SV_Depth : SV_Depth;\n") != MFS_ERROR_OKAY)
+					if (mfsPutString(outputStream, u8" depth : SV_Depth;\n") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				}
 				else if (!strcmp(var->name, u8"_target0"))
