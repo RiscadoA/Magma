@@ -10,9 +10,11 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	String::Stream obj = mfsOutStream;
-	obj.PutString(u8"test\ntest2");
-	obj.Flush();
+	mfsUTF8CodeUnit str[256];
+	String::InStream.ReadUntil(str, sizeof(str), u8"\n");
+
+	String::OutStream.PutString(str);
+	String::OutStream.Flush();
 
 	Magma::Framework::Terminate();
 

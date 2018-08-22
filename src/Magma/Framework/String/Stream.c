@@ -18,7 +18,7 @@ typedef struct
 	FILE* file;
 } mfsFileStream;
 
-mfsError mfsFileWrite(void* stream, const mfmU8* data, mfmU64 dataSize, mfmU64* outSize)
+static mfsError mfsFileWrite(void* stream, const mfmU8* data, mfmU64 dataSize, mfmU64* outSize)
 {
 	mfsFileStream* fileStream = (mfsFileStream*)stream;
 
@@ -29,7 +29,7 @@ mfsError mfsFileWrite(void* stream, const mfmU8* data, mfmU64 dataSize, mfmU64* 
 	return MFS_ERROR_OKAY;
 }
 
-mfsError mfsFileRead(void* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize)
+static mfsError mfsFileRead(void* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize)
 {
 	mfsFileStream* fileStream = (mfsFileStream*)stream;
 
@@ -40,7 +40,7 @@ mfsError mfsFileRead(void* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize
 	return MFS_ERROR_OKAY;
 }
 
-mfsError mfsFileFlush(void* stream)
+static mfsError mfsFileFlush(void* stream)
 {
 	mfsFileStream* fileStream = (mfsFileStream*)stream;
 	int ret = fflush(fileStream->file);
@@ -49,7 +49,7 @@ mfsError mfsFileFlush(void* stream)
 	return MFS_ERROR_OKAY;
 }
 
-mfsError mfsFileSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
+static mfsError mfsFileSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
 {
 	mfsFileStream* fileStream = (mfsFileStream*)stream;
 

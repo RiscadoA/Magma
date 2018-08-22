@@ -41,6 +41,30 @@ namespace Magma
 				void PutString(const mfsUTF8CodeUnit* str);
 
 				/// <summary>
+				///		Reads raw data from a stream.
+				/// </summary>
+				/// <param name="data">Data pointer</param>
+				/// <param name="size">Data size in bytes</param>
+				/// <returns>The size of the data read in bytes</returns>
+				mfmU64 Read(void* data, mfmU64 size);
+
+				/// <summary>
+				///		Reads a string from a stream until a terminator string is found.
+				/// </summary>
+				/// <param name="data">Output string pointer</param>
+				/// <param name="maxSize">Max string size in bytes (including null terminator)</param>
+				/// <param name="terminator">Terminator string</param>
+				/// <returns>The size of the string read in bytes (including null terminator)</returns>
+				mfmU64 ReadUntil(mfsUTF8CodeUnit* data, mfmU64 maxSize, const mfsUTF8CodeUnit* terminator);
+
+				/// <summary>
+				///		Gets a single byte from a stream.
+				/// </summary>
+				/// <param name="byte">Output byte</param>
+				/// <returns>True if the byte was read, otherwise false (EOF reached)</returns>
+				bool GetByte(mfmU8& byte);
+
+				/// <summary>
 				///		Flushes the stream.
 				/// </summary>
 				void Flush();
