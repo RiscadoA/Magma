@@ -1,6 +1,8 @@
 #include "D3DWindow.h"
 #include "Config.h"
 
+#include "../Memory/Allocator.h"
+
 #ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 #include <Windows.h>
 #include <windowsx.h>
@@ -149,14 +151,14 @@ mfiWindowMode mfiGetD3DWindowMode(void* window)
 
 #endif
 
-mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
+mfError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
 {
 #ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 	if (currentWindow != NULL)
 		return MFI_ERROR_ALREADY_INITIALIZED;
 
-	mfiD3DWindow* d3dWindow = malloc(sizeof(mfiD3DWindow));
-	if (d3dWindow == NULL)
+	mfiD3DWindow* d3dWindow = NULL;
+	if (mfmAllocate(NULL, &d3dWindow, sizeof(mfiD3DWindow)) != MFM_ERROR_OKAY)
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Set properties
@@ -167,8 +169,12 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 	d3dWindow->mode = mode;
 
 	// Set destructor
+	{
+		mfError err = mfmInitObject(&d3dWindow->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dWindow->base.object.destructorFunc = &mfiDestroyD3DWindow;
-	d3dWindow->base.object.referenceCount = 0;
 
 	// Set functions
 	d3dWindow->base.pollEvents = &mfiD3DWindowPollEvents;
@@ -270,7 +276,8 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 
 		default:
 		{
-			free(d3dWindow);
+			if (mfmDeallocate(NULL, d3dWindow) != MFM_ERROR_OKAY)
+				abort();
 			return MFI_ERROR_INVALID_ARGUMENTS;
 		}
 	}
@@ -291,7 +298,10 @@ void mfiDestroyD3DWindow(void * window)
 	// Destroy window
 	mfiD3DWindow* d3dWindow = (mfiD3DWindow*)window;
 	DestroyWindow(d3dWindow->hwnd);
-	free(d3dWindow);
+	if (mfmDestroyObject(&d3dWindow->base.object) != MFM_ERROR_OKAY)
+		abort();
+	if (mfmDeallocate(NULL, d3dWindow) != MFM_ERROR_OKAY)
+		abort();
 	currentWindow = NULL;
 #endif
 }

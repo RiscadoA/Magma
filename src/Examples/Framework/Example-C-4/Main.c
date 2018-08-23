@@ -10,7 +10,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfgError err = MFG_ERROR_OKAY;
+	mfError err = MFG_ERROR_OKAY;
 
 	mfmU8 metaData[256];
 	mfmU64 ptr = 0;

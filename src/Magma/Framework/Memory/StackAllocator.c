@@ -2,17 +2,17 @@
 
 #include <stdlib.h>
 
-mfmError mfmInternalStackAllocate(void* allocator, void** memory, mfmU64 size)
+mfError mfmInternalStackAllocate(void* allocator, void** memory, mfmU64 size)
 {
 	return mfmStackAllocate((mfmStackAllocator*)allocator, memory, size);
 }
 
-mfmError mfmInternalStackDeallocate(void* allocator, void* memory)
+mfError mfmInternalStackDeallocate(void* allocator, void* memory)
 {
 	return mfmStackSetHead(allocator, memory);
 }
 
-mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size)
+mfError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size)
 {
 	// Check if the arguments are valid
 	if (stackAllocator == NULL || size == 0)
@@ -41,7 +41,7 @@ mfmError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 siz
 	return MFM_ERROR_OKAY;
 }
 
-mfmError mfmCreateStackAllocatorOnMemory(mfmStackAllocator ** stackAllocator, mfmU64 size, void * memory, mfmU64 memorySize)
+mfError mfmCreateStackAllocatorOnMemory(mfmStackAllocator ** stackAllocator, mfmU64 size, void * memory, mfmU64 memorySize)
 {
 	// Check if the arguments are valid
 	if (stackAllocator == NULL || size == 0 || memory == NULL || memorySize < sizeof(mfmStackAllocator) + size)
@@ -72,7 +72,7 @@ void mfmDestroyStackAllocator(void * stackAllocator)
 			abort();
 }
 
-mfmError mfmStackAllocate(mfmStackAllocator * allocator, void ** memory, mfmU64 size)
+mfError mfmStackAllocate(mfmStackAllocator * allocator, void ** memory, mfmU64 size)
 {
 	// Check if allocation fits on the stack
 	if (allocator->stackHead + size > allocator->stackBegin + allocator->stackSize)
@@ -84,7 +84,7 @@ mfmError mfmStackAllocate(mfmStackAllocator * allocator, void ** memory, mfmU64 
 	return MFM_ERROR_OKAY;
 }
 
-mfmError mfmStackSetHead(mfmStackAllocator * allocator, void * head)
+mfError mfmStackSetHead(mfmStackAllocator * allocator, void * head)
 {
 	// Check if new head is out of bounds
 	if (head < allocator->stackBegin || head > allocator->stackBegin + allocator->stackSize)

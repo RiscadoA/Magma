@@ -32,7 +32,7 @@ extern "C"
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the stack.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the allocator pointer is null or the size is invalid.
 	/// </returns>
-	mfmError mfmCreateStackAllocator(mfmStackAllocator** stackAllocator, mfmU64 size);
+	mfError mfmCreateStackAllocator(mfmStackAllocator** stackAllocator, mfmU64 size);
 
 	/// <summary>
 	///		Creates a new magma framework memory stack allocator.
@@ -46,7 +46,7 @@ extern "C"
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the stack.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the allocator pointer is null or the size is invalid.
 	/// </returns>
-	mfmError mfmCreateStackAllocatorOnMemory(mfmStackAllocator** stackAllocator, mfmU64 size, void* memory, mfmU64 memorySize);
+	mfError mfmCreateStackAllocatorOnMemory(mfmStackAllocator** stackAllocator, mfmU64 size, void* memory, mfmU64 memorySize);
 
 	/// <summary>
 	///		Destroys a magma framework memory stack allocator.
@@ -64,7 +64,7 @@ extern "C"
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if the stack overflowed.
 	/// </returns>
-	mfmError mfmStackAllocate(mfmStackAllocator* allocator, void** memory, mfmU64 size);
+	mfError mfmStackAllocate(mfmStackAllocator* allocator, void** memory, mfmU64 size);
 
 	/// <summary>
 	///		Sets the stack head on a magma framework memory stack allocator.
@@ -75,7 +75,7 @@ extern "C"
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_OUT_OF_BOUNDS if the head is out of the stack bounds.
 	/// </returns>
-	mfmError mfmStackSetHead(mfmStackAllocator* allocator, void* head);
+	mfError mfmStackSetHead(mfmStackAllocator* allocator, void* head);
 
 #ifdef __cplusplus
 }

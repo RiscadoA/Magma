@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-mfmError mfmAllocate(void * allocator, void ** memory, mfmU64 size)
+mfError mfmAllocate(void * allocator, void ** memory, mfmU64 size)
 {
 	if (memory == NULL || size == 0)
 		return MFM_ERROR_INVALID_ARGUMENTS;
@@ -16,10 +16,13 @@ mfmError mfmAllocate(void * allocator, void ** memory, mfmU64 size)
 			return MFM_ERROR_OKAY;
 	}
 	else
-		return ((mfmAllocator*)allocator)->allocate(allocator, memory, size);
+	{
+		mfError err = ((mfmAllocator*)allocator)->allocate(allocator, memory, size);
+		return err;
+	}
 }
 
-mfmError mfmDeallocate(void * allocator, void * memory)
+mfError mfmDeallocate(void * allocator, void * memory)
 {
 	if (memory == NULL)
 		return MFM_ERROR_INVALID_ARGUMENTS;
@@ -30,5 +33,8 @@ mfmError mfmDeallocate(void * allocator, void * memory)
 		return MFM_ERROR_OKAY;
 	}
 	else
-		return ((mfmAllocator*)allocator)->deallocate(allocator, memory);
+	{
+		mfError err = ((mfmAllocator*)allocator)->deallocate(allocator, memory);
+		return err;
+	}
 }

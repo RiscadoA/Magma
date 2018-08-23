@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Exception.hpp"
+#include "Allocator.hpp"
 #include "StackAllocator.h"
 
 namespace Magma
@@ -12,36 +13,28 @@ namespace Magma
 			/// <summary>
 			///		Encapsulates the magma framework C stack allocator declared on StackAllocator.h.
 			/// </summary>
-			class StackAllocator final
+			class StackAllocator final : public Allocator
 			{
 			public:
-				/// <summary>
-				///		Creates a simple stack allocator
-				/// </summary>
-				/// <param name="size">Stack allocator size in bytes</param>
-				StackAllocator(mfmU64 size);
-
-				/// <summary>
-				///		Destroys a simple stack allocator
-				/// </summary>
-				~StackAllocator();
-
-				/// <summary>
-				///		Allocates on a simple stack allocator
-				/// </summary>
-				/// <param name="size">Allocation size</param>
-				/// <returns>Returns the allocated memory pointer</returns>
-				void* Allocate(mfmU64 size);
-
-				/// <summary>
-				///		Sets the stack head of the allocator.
-				/// </summary>
-				/// <param name="head">New allocator stack head</param>
-				void SetHead(void* head);
-
-			private:
-				::mfmStackAllocator* m_stack;
+				using Allocator::Allocator;
 			};
+
+			/// <summary>
+			///		Creates a stack allocator.
+			/// </summary>
+			/// <param name="size">Stack allocator size</param>
+			/// <returns>Stack allocator handle</returns>
+			StackAllocator CreateStackAllocator(mfmU64 size);
+
+			/// <summary>
+			///		Creates a stack allocator on a predefined memory region.
+			///		Use the macro MFM_STACK_ALLOCATOR_SIZE to get the minimum memory size that a stack allocator of a certain size needs.
+			/// </summary>
+			/// <param name="size">Stack allocator size</param>
+			/// <param name="memory">Memory region</param>
+			/// <param name="memorySize">Memory region size</param>
+			/// <returns>Stack allocator handle</returns>
+			StackAllocator CreateStackAllocatorOnMemory(mfmU64 size, void* memory, mfmU64 memorySize);
 		}
 	}
 }

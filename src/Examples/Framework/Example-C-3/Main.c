@@ -16,7 +16,7 @@ int main(int argc, const char** argv)
 		't',
 	};
 
-	mfsError err;
+	mfError err;
 
 	mfsStream* file;
 	err = mfsOpenFile(&file, MFS_FILE_WRITE, u8"../../../../../../resources/Example-C-3/test.txt");

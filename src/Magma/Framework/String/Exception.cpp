@@ -1,6 +1,6 @@
 #include "Exception.hpp"
 
-const mfsUTF8CodeUnit * Magma::Framework::String::ErrorToString(mfsError err)
+const mfsUTF8CodeUnit * Magma::Framework::String::ErrorToString(mfError err)
 {
 	switch (err)
 	{

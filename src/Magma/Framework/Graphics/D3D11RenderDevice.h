@@ -20,7 +20,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
-	mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc* desc, void* allocator);
+	mfError mfgCreateD3D11RenderDevice(mfgRenderDevice** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc* desc, void* allocator);
 
 	/// <summary>
 	///		Destroys a Direct3D 11 render device.

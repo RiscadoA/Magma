@@ -8,7 +8,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfmError err = MFM_ERROR_OKAY;
+	mfError err = MFM_ERROR_OKAY;
 	mfmPoolAllocator* pool48;
 
 	// Create pool48

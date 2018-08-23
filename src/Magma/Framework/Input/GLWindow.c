@@ -1,7 +1,8 @@
 #include "GLWindow.h"
 #include "Config.h"
+#include "../String/Stream.h"
 
-#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 
@@ -137,7 +138,8 @@ mfiWindowMode mfiGetGLWindowMode(void* window)
 
 void mfiGLFWErrorCallback(int err, const char* errMsg)
 {
-	fprintf(stderr, "mfiGLWindow GLFW error caught:\n%s\n", errMsg);
+	if (mfsPrintFormatUTF8(mfsErrStream, u8"mfiGLWindow GLFW error caught : \n%s\n", errMsg) != MFS_ERROR_OKAY)
+		abort();
 }
 
 void mfiGLFWWindowCloseCallback(GLFWwindow* window)
@@ -221,7 +223,7 @@ void mfiGLFWCursorEnterCallback(GLFWwindow* window, int enter)
 
 #endif
 
-mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
+mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
 {
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	if (currentWindow != NULL)
@@ -248,8 +250,12 @@ mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	glWindow->mode = mode;
 
 	// Set destructor
+	{
+		mfError err = mfmInitObject(&glWindow->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	glWindow->base.object.destructorFunc = &mfiDestroyGLWindow;
-	glWindow->base.object.referenceCount = 0;
 
 	// Set functions
 	glWindow->base.pollEvents = &mfiGLWindowPollEvents;
@@ -283,14 +289,16 @@ mfiError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 		glWindow->glfwWindow = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);
 	else
 	{
-		free(glWindow);
+		if (mfmDeallocate(NULL, glWindow) != MFM_ERROR_OKAY)
+			abort();
 		return MFI_ERROR_INVALID_ARGUMENTS;
 	}
 
 	// Check if the window creation succeded
 	if (glWindow->glfwWindow == NULL)
 	{
-		free(glWindow);
+		if (mfmDeallocate(NULL, glWindow) != MFM_ERROR_OKAY)
+			abort();
 		return MFI_ERROR_INTERNAL;
 	}
 
@@ -321,7 +329,10 @@ void mfiDestroyGLWindow(void * window)
 	// Destroy window
 	mfiGLWindow* glWindow = (mfiGLWindow*)window;
 	glfwDestroyWindow(glWindow->glfwWindow);
-	mfmDeallocate(NULL, glWindow);
+	if (mfmDestroyObject(&glWindow->base.object) != MFM_ERROR_OKAY)
+		abort();
+	if (mfmDeallocate(NULL, glWindow) != MFM_ERROR_OKAY)
+		abort();
 	currentWindow = NULL;
 
 	// Terminate GLFW

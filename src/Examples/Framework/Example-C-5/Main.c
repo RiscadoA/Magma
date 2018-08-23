@@ -11,7 +11,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfgError err = MFG_ERROR_OKAY;
+	mfError err = MFG_ERROR_OKAY;
 	mfgMetaData* metaData = NULL;
 
 	// Load meta data
@@ -35,7 +35,7 @@ int main(int argc, const char** argv)
 		metaDataB[ptr++] = MFG_FLOAT4;
 
 		// Output var 1
-		memcpy(metaDataB + ptr, "position", 9);
+		memcpy(metaDataB + ptr, "_position", 10);
 		ptr += 16;
 		metaDataB[ptr++] = 0x00;
 		metaDataB[ptr++] = 0x00;	// ID 0
@@ -45,6 +45,8 @@ int main(int argc, const char** argv)
 		memcpy(metaDataB + ptr, "buf1", 5);
 		ptr += 16;
 		metaDataB[ptr++] = MFG_CONSTANT_BUFFER;
+		metaDataB[ptr++] = 0x00; // ID 0
+		metaDataB[ptr++] = 0x00;
 		metaDataB[ptr++] = 0x00; // 2 elements
 		metaDataB[ptr++] = 0x02;
 		// Elements:
@@ -96,6 +98,8 @@ int main(int argc, const char** argv)
 
 	// Unload meta data
 	mfgUnloadMetaData(metaData);
+
+	mfsGetByte(mfsInStream, NULL);
 
 	mfTerminate();
 	return 0;

@@ -18,7 +18,7 @@ extern "C"
 #define MFS_ERROR_FAILED_TO_READ_ALL	0x0108
 #define MFS_ERROR_FAILED_TO_WRITE_ALL	0x0109
 
-	typedef mfmI32 mfsError;
+	typedef mfmU32 mfError;
 
 #ifdef __cplusplus
 }

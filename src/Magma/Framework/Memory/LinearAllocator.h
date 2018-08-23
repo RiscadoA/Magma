@@ -32,7 +32,7 @@ extern "C"
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the stack.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the allocator pointer is null or the size is invalid.
 	/// </returns>
-	mfmError mfmCreateLinearAllocator(mfmLinearAllocator** linearAllocator, mfmU64 size);
+	mfError mfmCreateLinearAllocator(mfmLinearAllocator** linearAllocator, mfmU64 size);
 
 	/// <summary>
 	///		Creates a new magma framework memory linear allocator.
@@ -46,7 +46,7 @@ extern "C"
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the stack.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the allocator pointer is null or the size is invalid.
 	/// </returns>
-	mfmError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator** linearAllocator, mfmU64 size, void* memory, mfmU64 memorySize);
+	mfError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator** linearAllocator, mfmU64 size, void* memory, mfmU64 memorySize);
 
 	/// <summary>
 	///		Destroys a magma framework memory linear allocator.
@@ -64,7 +64,7 @@ extern "C"
 	///		Returns MFM_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if the linear buffer overflows.
 	/// </returns>
-	mfmError mfmLinearAllocate(mfmLinearAllocator* linearAllocator, void** memory, mfmU64 size);
+	mfError mfmLinearAllocate(mfmLinearAllocator* linearAllocator, void** memory, mfmU64 size);
 
 	/// <summary>
 	///		Resets the head on a magma framework memory linear allocator.

@@ -1,6 +1,6 @@
 #include "Exception.hpp"
 
-const mfsUTF8CodeUnit * Magma::Framework::Memory::ErrorToString(mfmError err)
+const mfsUTF8CodeUnit * Magma::Framework::Memory::ErrorToString(mfError err)
 {
 	switch (err)
 	{
@@ -18,6 +18,8 @@ const mfsUTF8CodeUnit * Magma::Framework::Memory::ErrorToString(mfmError err)
 			return u8"Invalid arguments";
 		case MFM_ERROR_UNSUPPORTED_FUNCTION:
 			return u8"Unsupported function";
+		case MFM_ERROR_STILL_HAS_REFERENCES:
+			return u8"Still has references";
 		default:
 			return u8"Unknown error";
 	}

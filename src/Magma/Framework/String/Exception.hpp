@@ -43,7 +43,7 @@ namespace Magma
 			/// </summary>
 			/// <param name="err">Error code</param>
 			/// <returns>String pointer</returns>
-			const mfsUTF8CodeUnit* ErrorToString(mfsError err);
+			const mfsUTF8CodeUnit* ErrorToString(mfError err);
 		}
 	}
 }

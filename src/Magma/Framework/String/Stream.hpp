@@ -18,8 +18,7 @@ namespace Magma
 			public:
 				using Object::Object;
 				using Object::operator=;
-
-				Stream(const Memory::Object& object);
+				inline Stream(const Memory::Object& object) : Memory::Object(object) {}
 
 				/// <summary>
 				///		Writes raw data into a stream.

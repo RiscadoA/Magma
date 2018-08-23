@@ -12,7 +12,7 @@ typedef struct
 	mfmU64 readHead;
 } mfsStringStream;
 
-mfsError mfsStringStreamRead(void* stream, mfmU8* data, mfmU64 size, mfmU64* readSize)
+mfError mfsStringStreamRead(void* stream, mfmU8* data, mfmU64 size, mfmU64* readSize)
 {
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
@@ -43,7 +43,7 @@ mfsError mfsStringStreamRead(void* stream, mfmU8* data, mfmU64 size, mfmU64* rea
 	}
 }
 
-mfsError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU64* writeSize)
+mfError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU64* writeSize)
 {
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
@@ -74,13 +74,13 @@ mfsError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU
 	}
 }
 
-mfsError mfsStringStreamFlush(void* stream)
+mfError mfsStringStreamFlush(void* stream)
 {
 	// Do nothing
 	return MFS_ERROR_OKAY;
 }
 
-mfsError mfsStringStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 size)
+mfError mfsStringStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 size)
 {
 	mfsStringStream* str = (mfsStringStream*)stream;
 	str->readHead = 0;
@@ -92,14 +92,18 @@ mfsError mfsStringStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 size)
 	return MFS_ERROR_OKAY;
 }
 
-mfsError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, void * allocator)
+mfError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, void * allocator)
 {
 	mfsStringStream* str = NULL;
 	if (mfmAllocate(allocator, &str, sizeof(mfsStringStream)) != MFM_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
+	{
+		mfError err = mfmInitObject(&str->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	str->base.object.destructorFunc = &mfsDestroyStringStream;
-	str->base.object.referenceCount = 0;
 
 	str->base.buffer = buffer;
 	str->base.bufferSize = size;
@@ -111,6 +115,8 @@ mfsError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size,
 	str->base.setBuffer = &mfsStringStreamSetBuffer;
 
 	str->allocator = allocator;
+	if (str->allocator != NULL)
+		++((mfmObject*)str->allocator)->referenceCount;
 	str->writeHead = 0;
 	str->readHead = 0;
 
@@ -124,11 +130,15 @@ void mfsDestroyStringStream(mfsStream * stream)
 	if (stream == NULL)
 		abort();
 	mfsStringStream* str = (mfsStringStream*)stream;
+	if (str->allocator != NULL)
+		--((mfmObject*)str->allocator)->referenceCount;
+	if (mfmDestroyObject(&str->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(str->allocator, str) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfsError mfsClearStringStream(mfsStream * stream)
+mfError mfsClearStringStream(mfsStream * stream)
 {
 	if (stream == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;

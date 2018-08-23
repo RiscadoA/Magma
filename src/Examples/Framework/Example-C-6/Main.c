@@ -44,7 +44,7 @@ void OnClose(void* window)
 	windowOpen = MFM_FALSE;
 }
 
-//#define USE_GL
+#define USE_GL
 
 int main(int argc, const char** argv)
 {

@@ -17,6 +17,8 @@ namespace Magma
 			{
 			public:
 				using Object::Object;
+				using Object::operator=;
+				inline Allocator(const Memory::Object& object) : Memory::Object(object) {}
 
 				/// <summary>
 				///		Allocates data on this allocator.

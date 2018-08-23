@@ -14,7 +14,7 @@ namespace Magma
 			/// <summary>
 			///		Thrown when there is an error related to memory allocation.
 			/// </summary>
-			class AllocationError : public std::runtime_error
+			class AllocatorError : public std::runtime_error
 			{
 			public:
 				using std::runtime_error::runtime_error;
@@ -34,7 +34,7 @@ namespace Magma
 			/// </summary>
 			/// <param name="err">Error code</param>
 			/// <returns>String pointer</returns>
-			const mfsUTF8CodeUnit* ErrorToString(mfmError err);
+			const mfsUTF8CodeUnit* ErrorToString(mfError err);
 		}
 	}
 }
