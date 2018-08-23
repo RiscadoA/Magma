@@ -21,7 +21,7 @@ typedef struct
 	mfgComponentReference references[128];
 } mfgAssemblerData;
 
-static mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
+static mfError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
 {
 	if (out == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -60,13 +60,13 @@ static mfgError mfgOGL4WriteType(mfmU8 type, mfsStream* out)
 
 	else return MFG_ERROR_INVALID_DATA;
 
-	mfsError err = mfsPrintFormatUTF8(out, str);
+	mfError err = mfsPrintFormatUTF8(out, str);
 	if (err != MFS_ERROR_OKAY)
 		return MFG_ERROR_FAILED_TO_WRITE;
 	return MFG_ERROR_OKAY;
 }
 
-static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
+static mfError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* out)
 {
 	const mfgMetaData* metaData = data->metaData;
 
@@ -350,7 +350,7 @@ static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			if (id == data->references[i].id)
 			{
 				// Get variable reference
-				mfgError err = mfgOGL4PutID(data->references[i].varID, data, out);
+				mfError err = mfgOGL4PutID(data->references[i].varID, data, out);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 
@@ -448,7 +448,7 @@ static mfgError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData, mfsStream* outputStream)
+mfError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData, mfsStream* outputStream)
 {
 	mfgAssemblerData assemblerData;
 	assemblerData.metaData = metaData;
@@ -481,7 +481,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			u8"// This GLSL shader was automatically generated from binary bytecode by the mfgOGL4Assemble function\n"
 			u8"// Vertex shader\n"
 			u8"// DO NOT MODIFY THIS FILE BY HAND\n\n#version 410 core\n\n";
-		mfsError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
+		mfError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
 		if (err != MFS_ERROR_OKAY)
 			return MFG_ERROR_FAILED_TO_WRITE;
 	}
@@ -491,7 +491,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			u8"// This GLSL shader was automatically generated from binary bytecode by the mfgOGL4Assemble function\n"
 			u8"// Pixel shader\n"
 			u8"// DO NOT MODIFY THIS FILE BY HAND\n\n#version 410 core\n\n";
-		mfsError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
+		mfError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
 		if (err != MFS_ERROR_OKAY)
 			return MFG_ERROR_FAILED_TO_WRITE;
 	}
@@ -514,7 +514,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 					if (mfsPutByte(outputStream, '\t') != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 
@@ -547,7 +547,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 			}
 			else
 			{
-				mfsError err = mfsPrintFormatUTF8(outputStream, u8"// UNSUPPORTED BINDING POINT TYPE '%x'\n\n", bp->type);
+				mfError err = mfsPrintFormatUTF8(outputStream, u8"// UNSUPPORTED BINDING POINT TYPE '%x'\n\n", bp->type);
 				if (err != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 			}
@@ -567,7 +567,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPutString(outputStream, u8" gl_VertexID;\n\n") != MFS_ERROR_OKAY)
@@ -577,7 +577,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPutString(outputStream, u8" gl_InstanceID;\n\n") != MFS_ERROR_OKAY)
@@ -587,7 +587,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPrintFormatUTF8(outputStream, u8"layout (location = %d) in ", var->id) != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -600,7 +600,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPutString(outputStream, u8" gl_FragCoord;\n\n") != MFS_ERROR_OKAY)
@@ -610,7 +610,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 0) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -620,7 +620,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 1) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -630,7 +630,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 2) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -640,7 +640,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 3) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -650,7 +650,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 4) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -660,7 +660,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 5) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -670,7 +670,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 6) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -680,7 +680,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 7) in ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" in_%d;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -709,7 +709,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 0) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_0;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -719,7 +719,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 1) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_1;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -729,7 +729,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 2) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_2;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -739,7 +739,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 3) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_3;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -749,7 +749,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 4) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_4;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -759,7 +759,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 5) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_5;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -769,7 +769,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 6) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_6;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -779,7 +779,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 7) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" out_7;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -798,7 +798,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 0) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_0;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -808,7 +808,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 1) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_1;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -818,7 +818,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 2) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_2;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -828,7 +828,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 3) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_3;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -838,7 +838,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 4) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_4;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -848,7 +848,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 5) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_5;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -858,7 +858,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 6) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_6;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -868,7 +868,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				{
 					if (mfsPutString(outputStream, u8"layout (location = 7) out ") != MFS_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
-					mfgError err = mfgOGL4WriteType(var->type, outputStream);
+					mfError err = mfgOGL4WriteType(var->type, outputStream);
 					if (err != MFG_ERROR_OKAY)
 						return err;
 					if (mfsPrintFormatUTF8(outputStream, u8" target_7;\n\n", var->id) != MFS_ERROR_OKAY)
@@ -886,7 +886,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 		const mfsUTF8CodeUnit str[] =
 			u8"void main()\n"
 			u8"{\n";
-		mfsError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
+		mfError err = mfsWrite(outputStream, str, sizeof(str) - 1, NULL);
 		if (err != MFS_ERROR_OKAY)
 			return MFG_ERROR_FAILED_TO_WRITE;
 	}
@@ -1301,7 +1301,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1326,7 +1326,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1356,7 +1356,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1386,7 +1386,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1416,7 +1416,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1446,7 +1446,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1476,7 +1476,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1504,7 +1504,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = !") != MFS_ERROR_OKAY)
@@ -1527,7 +1527,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = -") != MFS_ERROR_OKAY)
@@ -1552,7 +1552,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1582,7 +1582,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1612,7 +1612,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1642,7 +1642,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1672,7 +1672,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1702,7 +1702,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -1728,7 +1728,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id1 = 0;
 				mfmFromBigEndian2(it + 1, &id1);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = true;\n") != MFS_ERROR_OKAY)
@@ -1744,7 +1744,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id1 = 0;
 				mfmFromBigEndian2(it + 1, &id1);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = false;\n") != MFS_ERROR_OKAY)
@@ -1762,7 +1762,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmI32 value = 0;
 				mfmFromBigEndian4(it + 3, &value);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = %d;\n", value) != MFS_ERROR_OKAY)
@@ -1781,7 +1781,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmI32 values[2];
 				mfmFromBigEndian4(it + 3, &values[0]);
 				mfmFromBigEndian4(it + 3 + 4, &values[1]);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ivec2(%d, %d);\n", values[0], values[1]) != MFS_ERROR_OKAY)
@@ -1801,7 +1801,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian4(it + 3, &values[0]);
 				mfmFromBigEndian4(it + 3 + 4, &values[1]);
 				mfmFromBigEndian4(it + 3 + 8, &values[2]);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ivec3(%d, %d, %d);\n", values[0], values[1], values[2]) != MFS_ERROR_OKAY)
@@ -1822,7 +1822,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian4(it + 3 + 4, &values[1]);
 				mfmFromBigEndian4(it + 3 + 8, &values[2]);
 				mfmFromBigEndian4(it + 3 + 12, &values[3]);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ivec4(%d, %d, %d, %d);\n", values[0], values[1], values[2], values[3]) != MFS_ERROR_OKAY)
@@ -1840,7 +1840,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmF32 value = 0;
 				mfmFromBigEndian4(it + 3, &value);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = %f;\n", value) != MFS_ERROR_OKAY)
@@ -1859,7 +1859,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmF32 values[2];
 				mfmFromBigEndian4(it + 3, &values[0]);
 				mfmFromBigEndian4(it + 3 + 4, &values[1]);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = vec2(%f, %f);\n", values[0], values[1]) != MFS_ERROR_OKAY)
@@ -1879,7 +1879,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian4(it + 3, &values[0]);
 				mfmFromBigEndian4(it + 3 + 4, &values[1]);
 				mfmFromBigEndian4(it + 3 + 8, &values[2]);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = vec3(%f, %f, %f);\n", values[0], values[1], values[2]) != MFS_ERROR_OKAY)
@@ -1900,7 +1900,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian4(it + 3 + 4, &values[1]);
 				mfmFromBigEndian4(it + 3 + 8, &values[2]);
 				mfmFromBigEndian4(it + 3 + 12, &values[3]);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = vec4(%f, %f, %f, %f);\n", values[0], values[1], values[2], values[3]) != MFS_ERROR_OKAY)
@@ -2120,7 +2120,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 						return MFG_ERROR_FAILED_TO_WRITE;
 				if (mfsPrintFormatUTF8(outputStream, u8"while (") != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8")\n") != MFS_ERROR_OKAY)
@@ -2139,7 +2139,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 						return MFG_ERROR_FAILED_TO_WRITE;
 				if (mfsPrintFormatUTF8(outputStream, u8"if (") != MFS_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8")\n") != MFS_ERROR_OKAY)
@@ -2170,7 +2170,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ") != MFS_ERROR_OKAY)
@@ -2202,7 +2202,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = texture(") != MFS_ERROR_OKAY)
@@ -2230,7 +2230,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = cos(") != MFS_ERROR_OKAY)
@@ -2253,7 +2253,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = sin(") != MFS_ERROR_OKAY)
@@ -2276,7 +2276,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = tan(") != MFS_ERROR_OKAY)
@@ -2299,7 +2299,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = acos(") != MFS_ERROR_OKAY)
@@ -2322,7 +2322,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = asin(") != MFS_ERROR_OKAY)
@@ -2345,7 +2345,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = atan(") != MFS_ERROR_OKAY)
@@ -2368,7 +2368,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = degrees(") != MFS_ERROR_OKAY)
@@ -2391,7 +2391,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = radians(") != MFS_ERROR_OKAY)
@@ -2414,7 +2414,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = exp(") != MFS_ERROR_OKAY)
@@ -2437,7 +2437,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = log(") != MFS_ERROR_OKAY)
@@ -2460,7 +2460,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = exp2(") != MFS_ERROR_OKAY)
@@ -2483,7 +2483,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = log2(") != MFS_ERROR_OKAY)
@@ -2508,7 +2508,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = pow(") != MFS_ERROR_OKAY)
@@ -2536,7 +2536,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = sqrt(") != MFS_ERROR_OKAY)
@@ -2559,7 +2559,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = inversesqrt(") != MFS_ERROR_OKAY)
@@ -2582,7 +2582,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = abs(") != MFS_ERROR_OKAY)
@@ -2605,7 +2605,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = sign(") != MFS_ERROR_OKAY)
@@ -2628,7 +2628,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = floor(") != MFS_ERROR_OKAY)
@@ -2651,7 +2651,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = ceil(") != MFS_ERROR_OKAY)
@@ -2674,7 +2674,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = round(") != MFS_ERROR_OKAY)
@@ -2697,7 +2697,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 1, &id1);
 				mfmU16 id2 = 0;
 				mfmFromBigEndian2(it + 3, &id2);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = fract(") != MFS_ERROR_OKAY)
@@ -2724,7 +2724,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 5, &id3);
 				mfmU16 id4 = 0;
 				mfmFromBigEndian2(it + 7, &id4);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = lerp(") != MFS_ERROR_OKAY)
@@ -2761,7 +2761,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 5, &id3);
 				mfmU16 id4 = 0;
 				mfmFromBigEndian2(it + 7, &id4);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = clamp(") != MFS_ERROR_OKAY)
@@ -2796,7 +2796,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = dot(") != MFS_ERROR_OKAY)
@@ -2826,7 +2826,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = cross(") != MFS_ERROR_OKAY)
@@ -2856,7 +2856,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = reflect(") != MFS_ERROR_OKAY)
@@ -2886,7 +2886,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = min(") != MFS_ERROR_OKAY)
@@ -2916,7 +2916,7 @@ mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMe
 				mfmFromBigEndian2(it + 3, &id2);
 				mfmU16 id3 = 0;
 				mfmFromBigEndian2(it + 5, &id3);
-				mfgError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				mfError err = mfgOGL4PutID(id1, &assemblerData, outputStream);
 				if (err != MFG_ERROR_OKAY)
 					return err;
 				if (mfsPrintFormatUTF8(outputStream, u8" = max(") != MFS_ERROR_OKAY)

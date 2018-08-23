@@ -12,8 +12,8 @@
 extern "C"
 {
 #endif
-	typedef mfmError (*mfmAllocateFunction)(void* allocator, void** memory, mfmU64 size);
-	typedef mfmError (*mfmDeallocateFunction)(void* allocator, void* memory);
+	typedef mfError (*mfmAllocateFunction)(void* allocator, void** memory, mfmU64 size);
+	typedef mfError (*mfmDeallocateFunction)(void* allocator, void* memory);
 
 	typedef struct
 	{
@@ -34,7 +34,7 @@ extern "C"
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if memory is NULL or size is 0.
 	///		Returns other errors specific to the allocator type.
 	/// </returns>
-	mfmError mfmAllocate(void* allocator, void** memory, mfmU64 size);
+	mfError mfmAllocate(void* allocator, void** memory, mfmU64 size);
 
 	/// <summary>
 	///		Deallocates on a magma framework memory allocator.
@@ -47,7 +47,7 @@ extern "C"
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if memory is NULL.
 	///		Returns other errors specific to the allocator type.
 	/// </returns>
-	mfmError mfmDeallocate(void* allocator, void* memory);
+	mfError mfmDeallocate(void* allocator, void* memory);
 
 #ifdef __cplusplus
 }

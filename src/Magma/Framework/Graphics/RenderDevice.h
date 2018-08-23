@@ -581,95 +581,95 @@ extern "C"
 	void mfgDefaultBlendStateDesc(mfgBlendStateDesc* desc);
 
 	// Shader functions
-	typedef mfgError(*mfgRDCreateVertexShaderFunction)(mfgRenderDevice* rd, mfgVertexShader** vs, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
+	typedef mfError(*mfgRDCreateVertexShaderFunction)(mfgRenderDevice* rd, mfgVertexShader** vs, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
 	typedef void(*mfgRDDestroyVertexShaderFunction)(void* vs);
-	typedef mfgError(*mfgRDCreatePixelShaderFunction)(mfgRenderDevice* rd, mfgPixelShader** ps, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
+	typedef mfError(*mfgRDCreatePixelShaderFunction)(mfgRenderDevice* rd, mfgPixelShader** ps, const mfmU8* bc, mfmU64 bcSize, const mfgMetaData* md);
 	typedef void(*mfgRDDestroyPixelShaderFunction)(void* ps);
-	typedef mfgError(*mfgRDCreatePipelineFunction)(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexShader* vs, mfgPixelShader* ps);
+	typedef mfError(*mfgRDCreatePipelineFunction)(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexShader* vs, mfgPixelShader* ps);
 	typedef void(*mfgRDDestroyPipelineFunction)(void* pp);
-	typedef mfgError(*mfgRDSetPipelineFunction)(mfgRenderDevice* rd, mfgPipeline* pp);
+	typedef mfError(*mfgRDSetPipelineFunction)(mfgRenderDevice* rd, mfgPipeline* pp);
 
-	typedef mfgError(*mfgRDGetVertexShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vs, const mfsUTF8CodeUnit* name);
-	typedef mfgError(*mfgRDGetPixelShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* ps, const mfsUTF8CodeUnit* name);
-	typedef mfgError(*mfgRDBindConstantBufferFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
-	typedef mfgError(*mfgRDBindConstantBufferRangeFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size);
-	typedef mfgError(*mfgRDBindTexture1DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
-	typedef mfgError(*mfgRDBindTexture2DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
-	typedef mfgError(*mfgRDBindTexture3DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
-	typedef mfgError(*mfgRDBindRenderTextureFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex);
-	typedef mfgError(*mfgRDBindSamplerFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler);
+	typedef mfError(*mfgRDGetVertexShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vs, const mfsUTF8CodeUnit* name);
+	typedef mfError(*mfgRDGetPixelShaderBindingPointFunction)(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* ps, const mfsUTF8CodeUnit* name);
+	typedef mfError(*mfgRDBindConstantBufferFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
+	typedef mfError(*mfgRDBindConstantBufferRangeFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size);
+	typedef mfError(*mfgRDBindTexture1DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
+	typedef mfError(*mfgRDBindTexture2DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
+	typedef mfError(*mfgRDBindTexture3DFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
+	typedef mfError(*mfgRDBindRenderTextureFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex);
+	typedef mfError(*mfgRDBindSamplerFunction)(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler);
 
-	typedef mfgError(*mfgRDCreateConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
+	typedef mfError(*mfgRDCreateConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
 	typedef void(*mfgRDDestroyConstantBufferFunction)(void* cb);
-	typedef mfgError(*mfgRDMapConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory);
-	typedef mfgError(*mfgRDUnmapConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer* cb);
+	typedef mfError(*mfgRDMapConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory);
+	typedef mfError(*mfgRDUnmapConstantBufferFunction)(mfgRenderDevice* rd, mfgConstantBuffer* cb);
 
 	// Vertex functions
-	typedef mfgError(*mfgRDCreateVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage);
+	typedef mfError(*mfgRDCreateVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage);
 	typedef void(*mfgRDDestroyVertexBufferFunction)(void* vb);
-	typedef mfgError(*mfgRDMapVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory);
-	typedef mfgError(*mfgRDUnmapVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer* vb);
-	typedef mfgError(*mfgRDCreateVertexLayoutFunction)(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs);
+	typedef mfError(*mfgRDMapVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory);
+	typedef mfError(*mfgRDUnmapVertexBufferFunction)(mfgRenderDevice* rd, mfgVertexBuffer* vb);
+	typedef mfError(*mfgRDCreateVertexLayoutFunction)(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs);
 	typedef void(*mfgRDDestroyVertexLayoutFunction)(void* vl);
-	typedef mfgError(*mfgRDCreateVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 vbCount, mfgVertexBuffer** vbs, mfgVertexLayout* vl);
+	typedef mfError(*mfgRDCreateVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 vbCount, mfgVertexBuffer** vbs, mfgVertexLayout* vl);
 	typedef void(*mfgRDDestroyVertexArrayFunction)(void* va);
-	typedef mfgError(*mfgRDSetVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray* va);
-	typedef mfgError(*mfgRDCreateIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage);
+	typedef mfError(*mfgRDSetVertexArrayFunction)(mfgRenderDevice* rd, mfgVertexArray* va);
+	typedef mfError(*mfgRDCreateIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage);
 	typedef void(*mfgRDDestroyIndexBufferFunction)(void* ib);
-	typedef mfgError(*mfgRDSetIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
-	typedef mfgError(*mfgRDMapIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory);
-	typedef mfgError(*mfgRDUnmapIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+	typedef mfError(*mfgRDSetIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+	typedef mfError(*mfgRDMapIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory);
+	typedef mfError(*mfgRDUnmapIndexBufferFunction)(mfgRenderDevice* rd, mfgIndexBuffer* ib);
 
 	// Texture functions
-	typedef mfgError(*mfgRDCreateTexture1DFunction)(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage);
+	typedef mfError(*mfgRDCreateTexture1DFunction)(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage);
 	typedef void(*mfgRDDestroyTexture1DFunction)(void* tex);
-	typedef mfgError(*mfgRDUpdateTexture1DFunction)(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data);
-	typedef mfgError(*mfgRDGenerateTexture1DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture1D* tex);
+	typedef mfError(*mfgRDUpdateTexture1DFunction)(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data);
+	typedef mfError(*mfgRDGenerateTexture1DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture1D* tex);
 
-	typedef mfgError(*mfgRDCreateTexture2DFunction)(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage);
+	typedef mfError(*mfgRDCreateTexture2DFunction)(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage);
 	typedef void(*mfgRDDestroyTexture2DFunction)(void* tex);
-	typedef mfgError(*mfgRDUpdateTexture2DFunction)(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
-	typedef mfgError(*mfgRDGenerateTexture2DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture2D* tex);
+	typedef mfError(*mfgRDUpdateTexture2DFunction)(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
+	typedef mfError(*mfgRDGenerateTexture2DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture2D* tex);
 
-	typedef mfgError(*mfgRDCreateTexture3DFunction)(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage);
+	typedef mfError(*mfgRDCreateTexture3DFunction)(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage);
 	typedef void(*mfgRDDestroyTexture3DFunction)(void* tex);
-	typedef mfgError(*mfgRDUpdateTexture3DFunction)(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data);
-	typedef mfgError(*mfgRDGenerateTexture3DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture3D* tex);
+	typedef mfError(*mfgRDUpdateTexture3DFunction)(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data);
+	typedef mfError(*mfgRDGenerateTexture3DMipmapsFunction)(mfgRenderDevice* rd, mfgTexture3D* tex);
 
-	typedef mfgError(*mfgRDCreateSamplerFunction)(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc);
+	typedef mfError(*mfgRDCreateSamplerFunction)(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc);
 	typedef void(*mfgRDDestroySamplerFunction)(void* sampler);
 
 	// Raster/depth stencil/blend state functions
-	typedef mfgError(*mfgRDCreateRasterStateFunction)(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc);
+	typedef mfError(*mfgRDCreateRasterStateFunction)(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc);
 	typedef void(*mfgRDDestroyRasterStateFunction)(void* state);
-	typedef mfgError(*mfgRDSetRasterStateFunction)(mfgRenderDevice* rd, mfgRasterState* state);
-	typedef mfgError(*mfgRDCreateDepthStencilStateFunction)(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc);
+	typedef mfError(*mfgRDSetRasterStateFunction)(mfgRenderDevice* rd, mfgRasterState* state);
+	typedef mfError(*mfgRDCreateDepthStencilStateFunction)(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc);
 	typedef void(*mfgRDDestroyDepthStencilFunction)(void* state);
-	typedef mfgError(*mfgRDSetDepthStencilFunction)(mfgRenderDevice* rd, mfgDepthStencilState* state);
-	typedef mfgError(*mfgRDCreateBlendStateFunction)(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc);
+	typedef mfError(*mfgRDSetDepthStencilFunction)(mfgRenderDevice* rd, mfgDepthStencilState* state);
+	typedef mfError(*mfgRDCreateBlendStateFunction)(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc);
 	typedef void(*mfgRDDestroyBlendStateFunction)(void* state);
-	typedef mfgError(*mfgRDSetBlendStateFunction)(mfgRenderDevice* rd, mfgBlendState* state);
+	typedef mfError(*mfgRDSetBlendStateFunction)(mfgRenderDevice* rd, mfgBlendState* state);
 
 	// Framebuffer functions
-	typedef mfgError(*mfgRDCreateRenderTextureFunction)(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+	typedef mfError(*mfgRDCreateRenderTextureFunction)(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
 	typedef void(*mfgRDDestroyRenderTextureFunction)(void* tex);
-	typedef mfgError(*mfgRDCreateDepthStencilTextureFunction)(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+	typedef mfError(*mfgRDCreateDepthStencilTextureFunction)(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
 	typedef void(*mfgRDDestroyDepthStencilTextureFunction)(void* tex);
-	typedef mfgError(*mfgRDCreateFramebufferFunction)(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture);
+	typedef mfError(*mfgRDCreateFramebufferFunction)(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture);
 	typedef void(*mfgRDDestroyFramebufferFunction)(void* fb);
-	typedef mfgError(*mfgRDSetFramebufferFunction)(mfgRenderDevice* rd, mfgFramebuffer* fb);
+	typedef mfError(*mfgRDSetFramebufferFunction)(mfgRenderDevice* rd, mfgFramebuffer* fb);
 
 	// Draw functions
-	typedef mfgError(*mfgRDClearColorFunction)(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
-	typedef mfgError(*mfgRDClearDepthFunction)(mfgRenderDevice* rd, mfmF32 depth);
-	typedef mfgError(*mfgRDClearStencilFunction)(mfgRenderDevice* rd, mfmI32 stencil);
-	typedef mfgError(*mfgRDDrawTrianglesFunction)(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
-	typedef mfgError(*mfgRDDrawTrianglesIndexedFunction)(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
-	typedef mfgError(*mfgRDSwapBuffersFunction)(mfgRenderDevice* rd);
+	typedef mfError(*mfgRDClearColorFunction)(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
+	typedef mfError(*mfgRDClearDepthFunction)(mfgRenderDevice* rd, mfmF32 depth);
+	typedef mfError(*mfgRDClearStencilFunction)(mfgRenderDevice* rd, mfmI32 stencil);
+	typedef mfError(*mfgRDDrawTrianglesFunction)(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
+	typedef mfError(*mfgRDDrawTrianglesIndexedFunction)(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
+	typedef mfError(*mfgRDSwapBuffersFunction)(mfgRenderDevice* rd);
 
 	// Getter functions
-	typedef mfgError(*mfgRDGetPropertyI)(mfgRenderDevice* rd, mfgEnum propID, mfmI32* value);
-	typedef mfgError(*mfgRDGetPropertyF)(mfgRenderDevice* rd, mfgEnum propID, mfmF32* value);
+	typedef mfError(*mfgRDGetPropertyI)(mfgRenderDevice* rd, mfgEnum propID, mfmI32* value);
+	typedef mfError(*mfgRDGetPropertyF)(mfgRenderDevice* rd, mfgEnum propID, mfmF32* value);
 
 	// Error functions
 	typedef mfmBool(*mfgRDGetErrorString)(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize);
@@ -777,7 +777,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
+	mfError mfgCreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
 
 	/// <summary>
 	///		Destroys a vertex shader.
@@ -797,7 +797,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** pixelShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
+	mfError mfgCreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** pixelShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
 
 	/// <summary>
 	///		Destroys a pixel shader.
@@ -816,7 +816,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreatePipeline(mfgRenderDevice* rd, mfgPipeline** pipeline, mfgVertexShader* vs, mfgPixelShader* ps);
+	mfError mfgCreatePipeline(mfgRenderDevice* rd, mfgPipeline** pipeline, mfgVertexShader* vs, mfgPixelShader* ps);
 
 	/// <summary>
 	///		Destroys a pipeline.
@@ -833,7 +833,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSetPipeline(mfgRenderDevice* rd, mfgPipeline* pipeline);
+	mfError mfgSetPipeline(mfgRenderDevice* rd, mfgPipeline* pipeline);
 
 	/// <summary>
 	///		Gets a vertex shader binding point.
@@ -846,7 +846,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgGetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vertexShader, const mfsUTF8CodeUnit* name);
+	mfError mfgGetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vertexShader, const mfsUTF8CodeUnit* name);
 
 	/// <summary>
 	///		Gets a pixel shader binding point.
@@ -859,7 +859,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgGetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* pixelShader, const mfsUTF8CodeUnit* name);
+	mfError mfgGetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* pixelShader, const mfsUTF8CodeUnit* name);
 
 	/// <summary>
 	///		Binds a constant buffer to a binding point.
@@ -871,7 +871,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgBindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
+	mfError mfgBindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb);
 
 	/// <summary>
 	///		Binds a section of a constant buffer to a binding point.
@@ -885,7 +885,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgBindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size);
+	mfError mfgBindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size);
 
 	/// <summary>
 	///		Binds a texture 1D to a binding point.
@@ -897,7 +897,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgBindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
+	mfError mfgBindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex);
 
 	/// <summary>
 	///		Binds a texture 2D to a binding point.
@@ -909,7 +909,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgBindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
+	mfError mfgBindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex);
 
 	/// <summary>
 	///		Binds a texture 3D to a binding point.
@@ -921,7 +921,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgBindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
+	mfError mfgBindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex);
 
 	/// <summary>
 	///		Binds a render texture to a binding point.
@@ -933,7 +933,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgBindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex);
+	mfError mfgBindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex);
 
 	/// <summary>
 	///		Binds a sampler to a binding point.
@@ -945,7 +945,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgBindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler);
+	mfError mfgBindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler);
 
 	/// <summary>
 	///		Creates a new constant buffer.
@@ -959,7 +959,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
+	mfError mfgCreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
 	
 	/// <summary>
 	///		Destroys a constant buffer.
@@ -977,7 +977,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgMapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory);
+	mfError mfgMapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory);
 
 	/// <summary>
 	///		Unmaps the constant buffer pointer data.
@@ -988,7 +988,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgUnmapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb);
+	mfError mfgUnmapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb);
 
 	/// <summary>
 	///		Creates a new vertex buffer.
@@ -1002,7 +1002,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage);
+	mfError mfgCreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage);
 	
 	/// <summary>
 	///		Destroys a vertex buffer.
@@ -1020,7 +1020,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgMapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory);
+	mfError mfgMapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory);
 
 	/// <summary>
 	///		Unmaps the vertex buffer pointer data.
@@ -1031,7 +1031,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgUnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb);
+	mfError mfgUnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb);
 
 	/// <summary>
 	///		Creates a new vertex layout.
@@ -1045,7 +1045,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs);
+	mfError mfgCreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs);
 
 	/// <summary>
 	///		Destroys a vertex layout.
@@ -1065,7 +1065,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 vbCount, mfgVertexBuffer** vbs, mfgVertexLayout* vl);
+	mfError mfgCreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 vbCount, mfgVertexBuffer** vbs, mfgVertexLayout* vl);
 
 	/// <summary>
 	///		Destroys a vertex array.
@@ -1082,7 +1082,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va);
+	mfError mfgSetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va);
 
 	/// <summary>
 	///		Creates a new index buffer.
@@ -1097,7 +1097,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage);
+	mfError mfgCreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage);
 
 	/// <summary>
 	///		Destroys an index buffer.
@@ -1115,7 +1115,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgMapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory);
+	mfError mfgMapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory);
 
 	/// <summary>
 	///		Unmaps the index buffer pointer data.
@@ -1126,7 +1126,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgUnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+	mfError mfgUnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
 
 	/// <summary>
 	///		Sets the index buffer to use on draw calls.
@@ -1137,7 +1137,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSetIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
+	mfError mfgSetIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib);
 
 	/// <summary>
 	///		Creates a new texture 1D.
@@ -1152,7 +1152,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage);
+	mfError mfgCreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage);
 
 	/// <summary>
 	///		Destroys a texture 1D.
@@ -1172,7 +1172,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgUpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data);
+	mfError mfgUpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data);
 
 	/// <summary>
 	///		Generatesd mipmaps a texture 1D.
@@ -1183,7 +1183,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgGenerateTexture1DMipmaps(mfgRenderDevice* rd, mfgTexture1D* tex);
+	mfError mfgGenerateTexture1DMipmaps(mfgRenderDevice* rd, mfgTexture1D* tex);
 
 	/// <summary>
 	///		Creates a new texture 2D.
@@ -1199,7 +1199,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage);
+	mfError mfgCreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage);
 
 	/// <summary>
 	///		Destroys a texture 2D.
@@ -1221,7 +1221,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgUpdateTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
+	mfError mfgUpdateTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
 
 	/// <summary>
 	///		Generates mipmaps a texture 2D.
@@ -1232,7 +1232,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgGenerateTexture2DMipmaps(mfgRenderDevice* rd, mfgTexture2D* tex);
+	mfError mfgGenerateTexture2DMipmaps(mfgRenderDevice* rd, mfgTexture2D* tex);
 
 	/// <summary>
 	///		Creates a new texture 3D.
@@ -1249,7 +1249,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage);
+	mfError mfgCreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage);
 
 	/// <summary>
 	///		Destroys a texture 3D.
@@ -1273,7 +1273,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgUpdateTexture3D(mfgRenderDevice * rd, mfgTexture3D * tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void * data);
+	mfError mfgUpdateTexture3D(mfgRenderDevice * rd, mfgTexture3D * tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void * data);
 
 	/// <summary>
 	///		Generates mipmaps on a texture 3D.
@@ -1284,7 +1284,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgGenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex);
+	mfError mfgGenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex);
 
 	/// <summary>
 	///		Creates a new sampler.
@@ -1296,7 +1296,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc);
+	mfError mfgCreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc);
 
 	/// <summary>
 	///		Destroys a sampler.
@@ -1314,7 +1314,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc);
+	mfError mfgCreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc);
 
 	/// <summary>
 	///		Destroys a rasterizer state.
@@ -1331,7 +1331,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSetRasterState(mfgRenderDevice* rd, mfgRasterState* state);
+	mfError mfgSetRasterState(mfgRenderDevice* rd, mfgRasterState* state);
 
 	/// <summary>
 	///		Creates a new depth stencil state.
@@ -1343,7 +1343,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc);
+	mfError mfgCreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc);
 
 	/// <summary>
 	///		Destroys a depth stencil state.
@@ -1360,7 +1360,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSetDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState* state);
+	mfError mfgSetDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState* state);
 
 	/// <summary>
 	///		Creates a new blend state.
@@ -1372,7 +1372,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc);
+	mfError mfgCreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc);
 
 	/// <summary>
 	///		Destroys a blend state.
@@ -1389,7 +1389,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSetBlendState(mfgRenderDevice* rd, mfgBlendState* state);
+	mfError mfgSetBlendState(mfgRenderDevice* rd, mfgBlendState* state);
 
 	/// <summary>
 	///		Creates a new render texture.
@@ -1403,7 +1403,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+	mfError mfgCreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
 
 	/// <summary>
 	///		Destroys a render texture.
@@ -1423,7 +1423,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
+	mfError mfgCreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
 
 	/// <summary>
 	///		Destroys a depth stencil texture.
@@ -1443,7 +1443,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgCreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture);
+	mfError mfgCreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture);
 
 	/// <summary>
 	///		Destroys a framebuffer.
@@ -1460,7 +1460,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb);
+	mfError mfgSetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb);
 
 	/// <summary>
 	///		Clears the current framebuffer color buffers.
@@ -1474,7 +1474,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
+	mfError mfgClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
 
 	/// <summary>
 	///		Clears the current framebuffer depth buffer.
@@ -1485,7 +1485,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgClearDepth(mfgRenderDevice* rd, mfmF32 depth);
+	mfError mfgClearDepth(mfgRenderDevice* rd, mfmF32 depth);
 
 	/// <summary>
 	///		Clears the current framebuffer stencil buffer.
@@ -1496,7 +1496,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgClearStencil(mfgRenderDevice* rd, mfmI32 stencil);
+	mfError mfgClearStencil(mfgRenderDevice* rd, mfmI32 stencil);
 
 	/// <summary>
 	///		Draws the triangles stored in the currently active vertex array using the currently active pipeline.
@@ -1508,7 +1508,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgDrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
+	mfError mfgDrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
 
 	/// <summary>
 	///		Draws the triangles stored in the currently active vertex array using the currently active pipeline and index buffer.
@@ -1520,7 +1520,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgDrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
+	mfError mfgDrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count);
 
 	/// <summary>
 	///		Swaps the front and back buffers (displays the stuff drawn until this point).
@@ -1530,7 +1530,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgSwapBuffers(mfgRenderDevice* rd);
+	mfError mfgSwapBuffers(mfgRenderDevice* rd);
 
 	/// <summary>
 	///		Gets a render device integer property.
@@ -1542,7 +1542,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgGetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value);
+	mfError mfgGetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value);
 
 	/// <summary>
 	///		Gets a render device floating point property.
@@ -1554,7 +1554,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfgError mfgGetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value);
+	mfError mfgGetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value);
 
 	/// <summary>
 	///		Gets the last error string.

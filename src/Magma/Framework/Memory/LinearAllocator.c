@@ -2,17 +2,17 @@
 
 #include <stdlib.h>
 
-mfmError mfmInternalLinearAllocate(void* allocator, void** memory, mfmU64 size)
+mfError mfmInternalLinearAllocate(void* allocator, void** memory, mfmU64 size)
 {
 	return mfmLinearAllocate((mfmLinearAllocator*)allocator, memory, size);
 }
 
-mfmError mfmInternalLinearDeallocate(void* allocator, void* memory)
+mfError mfmInternalLinearDeallocate(void* allocator, void* memory)
 {
 	return MFM_ERROR_UNSUPPORTED_FUNCTION;
 }
 
-mfmError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 size)
+mfError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 size)
 {
 	// Check if the arguments are valid
 	if (linearAllocator == NULL || size == 0)
@@ -41,7 +41,7 @@ mfmError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 
 	return MFM_ERROR_OKAY;
 }
 
-mfmError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator ** linearAllocator, mfmU64 size, void * memory, mfmU64 memorySize)
+mfError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator ** linearAllocator, mfmU64 size, void * memory, mfmU64 memorySize)
 {
 	// Check if the arguments are valid
 	if (linearAllocator == NULL || size == 0 || memory == NULL || memorySize < sizeof(mfmLinearAllocator) + size)
@@ -72,7 +72,7 @@ void mfmDestroyLinearAllocator(void * linearAllocator)
 			abort();
 }
 
-mfmError mfmLinearAllocate(mfmLinearAllocator * linearAllocator, void ** memory, mfmU64 size)
+mfError mfmLinearAllocate(mfmLinearAllocator * linearAllocator, void ** memory, mfmU64 size)
 {
 	// Check if allocation fits on the linear buffer
 	if (linearAllocator->head + size > linearAllocator->begin + linearAllocator->size)

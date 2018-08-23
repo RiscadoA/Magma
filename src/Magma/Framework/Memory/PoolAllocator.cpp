@@ -20,21 +20,21 @@ Magma::Framework::Memory::PoolAllocator::PoolAllocator(mfmU64 slotSize, mfmU64 s
 			std::stringstream ss;
 			ss << "Failed to create PoolAllocator:" << std::endl;
 			ss << "mfmCreatePoolAllocator returned MFM_ERROR_ALLOCATION_FAILED";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		case MFM_ERROR_INVALID_ARGUMENTS:
 		{
 			std::stringstream ss;
 			ss << "Failed to create PoolAllocator:" << std::endl;
 			ss << "mfmCreatePoolAllocator returned MFM_ERROR_INVALID_ARGUMENTS";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		default:
 		{
 			std::stringstream ss;
 			ss << "Failed to create PoolAllocator:" << std::endl;
 			ss << "mfmCreatePoolAllocator returned '" << err << "'";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 	}
 }
@@ -59,7 +59,7 @@ void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 			ss << "Failed to allocate on PoolAllocator:" << std::endl;
 			ss << "The pool has no more free slots:" << std::endl;
 			ss << "mfmPoolAllocate returned MFM_ERROR_ALLOCATOR_OVERFLOW";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		case MFM_ERROR_ALLOCATION_TOO_BIG:
 		{
@@ -67,7 +67,7 @@ void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 			ss << "Failed to allocate on PoolAllocator:" << std::endl;
 			ss << "The requested allocation size is bigger than each slot size:" << std::endl;
 			ss << "mfmPoolAllocate returned MFM_ERROR_ALLOCATION_TOO_BIG";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		case MFM_ERROR_ALLOCATION_FAILED:
 		{
@@ -75,14 +75,14 @@ void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 			ss << "Failed to allocate on PoolAllocator:" << std::endl;
 			ss << "Pool expansion allocation failed:" << std::endl;
 			ss << "mfmPoolAllocate returned MFM_ERROR_ALLOCATION_FAILED";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		default:
 		{
 			std::stringstream ss;
 			ss << "Failed to allocate on PoolAllocator:" << std::endl;
 			ss << "mfmPoolAllocate returned '" << err << "'";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 	}
 	return memory;
@@ -101,14 +101,14 @@ void Magma::Framework::Memory::PoolAllocator::Deallocate(void * ptr)
 			ss << "Failed to deallocate on PoolAllocator:" << std::endl;
 			ss << "The passed memory pointer is out of the pool bounds:" << std::endl;
 			ss << "mfmPoolDeallocate returned MFM_ERROR_OUT_OF_BOUNDS";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		default:
 		{
 			std::stringstream ss;
 			ss << "Failed to deallocate on PoolAllocator:" << std::endl;
 			ss << "mfmPoolDeallocate returned '" << err << "'";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 	}
 }

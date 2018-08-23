@@ -5,12 +5,15 @@
 #include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
 #include <Magma/Framework/Graphics/OGL410Assembler.hpp>
 #include <Magma/Framework/Memory/Endianness.hpp>
-#include <Magma/Framework/Input/Entry.h>
+#include <Magma/Framework/Entry.h>
 
 using namespace Magma::Framework;
 
-void Main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
+
 	Files::FileSystem* fileSystem = new Files::STDFileSystem("../../../../../../resources/");
 
 	{
@@ -134,4 +137,7 @@ void Main(int argc, char** argv)
 	getchar();
 
 	delete fileSystem;
+
+	mfTerminate();
+	return 0;
 }

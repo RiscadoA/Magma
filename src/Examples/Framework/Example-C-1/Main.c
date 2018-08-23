@@ -1,11 +1,14 @@
 ﻿#include <Magma/Framework/Memory/PoolAllocator.h>
-#include <Magma/Framework/Input/Entry.h>
+#include <Magma/Framework/Entry.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-void Main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
-	mfmError err = MFM_ERROR_OKAY;
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
+
+	mfError err = MFM_ERROR_OKAY;
 	mfmPoolAllocator* pool48;
 
 	// Create pool48
@@ -81,4 +84,7 @@ void Main(int argc, char** argv)
 
 	printf("Program finished. Enter any input to quit.\n");
 	getchar();
+
+	mfTerminate();
+	return 0;
 }

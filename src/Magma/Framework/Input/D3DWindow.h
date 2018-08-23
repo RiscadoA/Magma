@@ -25,7 +25,7 @@ extern "C"
 	///		Returns MFI_ERROR_INVALID_ARGUMENTS if any of the parameters are invalid.
 	///		Returns MFI_ERROR_INTERNAL if the internal library failed to open the window.
 	/// </returns>
-	mfiError mfiCreateD3DWindow(mfiWindow** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit* title);
+	mfError mfiCreateD3DWindow(mfiWindow** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit* title);
 
 	/// <summary>
 	///		Destroys a window previously created with mfiCreateD3DWindow.

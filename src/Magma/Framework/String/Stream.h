@@ -17,10 +17,10 @@ extern "C"
 #define MFS_FILE_READ	0x01
 #define MFS_FILE_WRITE	0x02
 
-	typedef mfsError(*mfsStreamReadFunction)(void*, mfmU8*, mfmU64, mfmU64*);
-	typedef mfsError(*mfsStreamWriteFunction)(void*, const mfmU8*, mfmU64, mfmU64*);
-	typedef mfsError(*mfsStreamFlushFunction)(void*);
-	typedef mfsError(*mfsStreamSetBufferFunction)(void*, mfmU8*, mfmU64);
+	typedef mfError(*mfsStreamReadFunction)(void*, mfmU8*, mfmU64, mfmU64*);
+	typedef mfError(*mfsStreamWriteFunction)(void*, const mfmU8*, mfmU64, mfmU64*);
+	typedef mfError(*mfsStreamFlushFunction)(void*);
+	typedef mfError(*mfsStreamSetBufferFunction)(void*, mfmU8*, mfmU64);
 	
 	typedef struct
 	{
@@ -60,7 +60,7 @@ extern "C"
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL or data is NULL.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsWrite(mfsStream* stream, const mfmU8* data, mfmU64 dataSize, mfmU64* outSize);
+	mfError mfsWrite(mfsStream* stream, const mfmU8* data, mfmU64 dataSize, mfmU64* outSize);
 
 	/// <summary>
 	///		Reads raw data from a stream.
@@ -74,7 +74,7 @@ extern "C"
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL or data is NULL.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsRead(mfsStream* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize);
+	mfError mfsRead(mfsStream* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize);
 
 	/// <summary>
 	///		Flushes a stream if the stream is buffered.
@@ -85,7 +85,7 @@ extern "C"
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsFlush(mfsStream* stream);
+	mfError mfsFlush(mfsStream* stream);
 
 	/// <summary>
 	///		Sets the buffer that is used for internal stream operations.
@@ -98,7 +98,7 @@ extern "C"
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsSetBuffer(mfsStream* stream, mfmU8* buffer, mfmU64 bufferSize);
+	mfError mfsSetBuffer(mfsStream* stream, mfmU8* buffer, mfmU64 bufferSize);
 
 	/// <summary>
 	///		Opens a file stream using the stdio.h library.
@@ -111,7 +111,7 @@ extern "C"
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream or path are NULL or if the <paramref name="mode">file mode</paramref> is invalid.
 	///		MFS_ERROR_INTERNAL if the system couldn't open the file on the specified <paramref name="path">path</paramref>.
 	/// </returns>
-	mfsError mfsOpenFile(mfsStream** stream, mfmU32 mode, const mfsUTF8CodeUnit* path);
+	mfError mfsOpenFile(mfsStream** stream, mfmU32 mode, const mfsUTF8CodeUnit* path);
 
 	/// <summary>
 	///		Closes a file stream opened by mfsOpenFile.
@@ -131,7 +131,7 @@ extern "C"
 	///		MFS_ERROR_FAILED_TO_READ_ALL if the stream couldn't read the byte.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsGetByte(mfsStream* stream, mfmU8* byte);
+	mfError mfsGetByte(mfsStream* stream, mfmU8* byte);
 
 	/// <summary>
 	///		Writes a byte to a stream.
@@ -144,7 +144,7 @@ extern "C"
 	///		MFS_ERROR_FAILED_TO_WRITE_ALL if the stream couldn't write the byte.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsPutByte(mfsStream* stream, mfmU8 byte);
+	mfError mfsPutByte(mfsStream* stream, mfmU8 byte);
 
 	/// <summary>
 	///		Prints a UTF-8 string to a stream.
@@ -156,7 +156,7 @@ extern "C"
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream or str are NULL.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsPutString(mfsStream* stream, const mfsUTF8CodeUnit* str);
+	mfError mfsPutString(mfsStream* stream, const mfsUTF8CodeUnit* str);
 
 	/// <summary>
 	///		Prints a formatted UTF-8 string to a stream.
@@ -168,7 +168,7 @@ extern "C"
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream or format are NULL.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfsError mfsPrintFormatUTF8(mfsStream* stream, const mfsUTF8CodeUnit* format, ...);
+	mfError mfsPrintFormatUTF8(mfsStream* stream, const mfsUTF8CodeUnit* format, ...);
 
 #ifdef __cplusplus
 }

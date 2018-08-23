@@ -1,4 +1,4 @@
-﻿#include <Magma/Framework/Input/Entry.h>
+﻿#include <Magma/Framework/Entry.h>
 #include <Magma/Framework/Graphics/Bytecode.h>
 #include <Magma/Framework/Graphics/D3D11Assembler.h>
 #include <Magma/Framework/Graphics/OGL4Assembler.h>
@@ -6,11 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-void Main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
-	mfgError err = MFG_ERROR_OKAY;
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
 
-
+	mfError err = MFG_ERROR_OKAY;
 	mfgMetaData* metaData = NULL;
 
 	// Load meta data
@@ -34,7 +35,7 @@ void Main(int argc, char** argv)
 		metaDataB[ptr++] = MFG_FLOAT4;
 
 		// Output var 1
-		memcpy(metaDataB + ptr, "position", 9);
+		memcpy(metaDataB + ptr, "_position", 10);
 		ptr += 16;
 		metaDataB[ptr++] = 0x00;
 		metaDataB[ptr++] = 0x00;	// ID 0
@@ -44,6 +45,8 @@ void Main(int argc, char** argv)
 		memcpy(metaDataB + ptr, "buf1", 5);
 		ptr += 16;
 		metaDataB[ptr++] = MFG_CONSTANT_BUFFER;
+		metaDataB[ptr++] = 0x00; // ID 0
+		metaDataB[ptr++] = 0x00;
 		metaDataB[ptr++] = 0x00; // 2 elements
 		metaDataB[ptr++] = 0x02;
 		// Elements:
@@ -95,4 +98,9 @@ void Main(int argc, char** argv)
 
 	// Unload meta data
 	mfgUnloadMetaData(metaData);
+
+	mfsGetByte(mfsInStream, NULL);
+
+	mfTerminate();
+	return 0;
 }

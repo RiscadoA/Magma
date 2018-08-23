@@ -103,8 +103,11 @@ void CleanScene(Scene& scene)
 	delete scene.fileSystem;
 }
 
-void Main(int argc, char** argv) try
+int main(int argc, const char** argv) try
 {
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
+
 	Scene scene;
 
 	LoadScene(scene);
@@ -175,6 +178,9 @@ void Main(int argc, char** argv) try
 	}
 
 	CleanScene(scene);
+
+	mfTerminate();
+	return 0;
 }
 catch (Framework::Graphics::RenderDeviceError& e)
 {

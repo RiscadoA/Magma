@@ -16,9 +16,9 @@ extern "C"
 		void* allocator;
 	} mfgPNGTextureData;
 
-	mfgError mfgLoadPNG(const mfmU8* data, mfmU64 size, mfgPNGTextureData** textureData, void* allocator);
+	mfError mfgLoadPNG(const mfmU8* data, mfmU64 size, mfgPNGTextureData** textureData, void* allocator);
 
-	mfgError mfgUnloadPNG(mfgPNGTextureData* textureData);
+	mfError mfgUnloadPNG(mfgPNGTextureData* textureData);
 
 #ifdef __cplusplus
 }

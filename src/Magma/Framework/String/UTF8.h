@@ -30,7 +30,7 @@ extern "C"
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="chr">chr</paramref> or <paramref name="size">size</paramref> are NULL.
 	///		Returns MFS_ERROR_INVALID_UTF8 if the character at <paramref name="chr">chr</paramref> is invalid.
 	/// </returns>
-	mfsError mfsGetUTF8CharSize(const mfsUTF8CodeUnit* chr, mfmU64* size);
+	mfError mfsGetUTF8CharSize(const mfsUTF8CodeUnit* chr, mfmU64* size);
 
 	/// <summary>
 	///		Gets the size of a unicode point value if it was encoded in UTF-8.
@@ -42,7 +42,7 @@ extern "C"
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="size">size</paramref> is NULL.
 	///		Returns MFS_ERROR_INVALID_UNICODE if the unicode point value is invalid.
 	/// </returns>
-	mfsError mfsGetSizeAsUTF8(mfsUnicodePoint up, mfmU64* size);
+	mfError mfsGetSizeAsUTF8(mfsUnicodePoint up, mfmU64* size);
 
 	/// <summary>
 	///		Gets the unicode point value of a UTF-8 character.
@@ -54,7 +54,7 @@ extern "C"
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="chr">chr</paramref> or <paramref name="up">up</paramref> are NULL.
 	///		Returns MFS_ERROR_INVALID_UTF8 if the UTF-8 character at <paramref name="chr">chr</paramref> is invalid UTF-8.
 	/// </returns>
-	mfsError mfsGetUTF8Char(const mfsUTF8CodeUnit* chr, mfsUnicodePoint* up);
+	mfError mfsGetUTF8Char(const mfsUTF8CodeUnit* chr, mfsUnicodePoint* up);
 
 	/// <summary>
 	///		Sets the unicode point value of a UTF-8 character.
@@ -69,7 +69,7 @@ extern "C"
 	///		Returns MFS_ERROR_INVALID_UNICODE if the character unicode point value is invalid.
 	///		Returns MFS_ERROR_CHARACTER_TOO_BIG if the character size as UTF-8 is bigger than <paramref name="maxChrSize">maxChrSize</paramref>.
 	/// </returns>
-	mfsError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit* chr, mfmU64* chrSize, mfmU64 maxChrSize);
+	mfError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit* chr, mfmU64* chrSize, mfmU64 maxChrSize);
 
 #ifdef __cplusplus
 }

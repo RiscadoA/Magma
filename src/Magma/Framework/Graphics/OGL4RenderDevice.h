@@ -20,7 +20,7 @@ extern "C"
 	///		MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
-	mfgError mfgCreateOGL4RenderDevice(mfgRenderDevice** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc* desc, void* allocator);
+	mfError mfgCreateOGL4RenderDevice(mfgRenderDevice** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc* desc, void* allocator);
 
 	/// <summary>
 	///		Destroys an OpenGL 4 render device.

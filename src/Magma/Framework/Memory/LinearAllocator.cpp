@@ -15,21 +15,21 @@ Magma::Framework::Memory::LinearAllocator::LinearAllocator(mfmU64 size)
 			std::stringstream ss;
 			ss << "Failed to create LinearAllocator:" << std::endl;
 			ss << "mfmCreateLinearAllocator returned MFM_ERROR_ALLOCATION_FAILED";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		case MFM_ERROR_INVALID_ARGUMENTS:
 		{
 			std::stringstream ss;
 			ss << "Failed to create LinearAllocator:" << std::endl;
 			ss << "mfmCreateLinearAllocator returned MFM_ERROR_INVALID_ARGUMENTS";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		default:
 		{
 			std::stringstream ss;
 			ss << "Failed to create LinearAllocator:" << std::endl;
 			ss << "mfmCreateLinearAllocator returned '" << err << "'";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 	}
 }
@@ -53,14 +53,14 @@ void * Magma::Framework::Memory::LinearAllocator::Allocate(mfmU64 size)
 			std::stringstream ss;
 			ss << "Failed to allocate on LinearAllocator:" << std::endl;
 			ss << "mfmLinearAllocate returned MFM_ERROR_ALLOCATOR_OVERFLOW";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 		default:
 		{
 			std::stringstream ss;
 			ss << "Failed to allocate on LinearAllocator:" << std::endl;
 			ss << "mfmLinearAllocate returned '" << err << "'";
-			throw AllocationError(ss.str());
+			throw AllocatorError(ss.str());
 		}
 	}
 	return memory;

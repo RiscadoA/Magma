@@ -261,11 +261,14 @@ void mfgD3D11DestroyVertexShader(void* vs)
 
 	mfgD3D11VertexShader* d3dVS = vs;
 	d3dVS->shader->lpVtbl->Release(d3dVS->shader);
+	
+	if (mfmDestroyObject(&d3dVS->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVS->base.renderDevice)->pool512, d3dVS) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData)
+mfError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || vs == NULL || bytecode == NULL || metaData == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -279,16 +282,20 @@ mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, c
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex shader on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dVS->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dVS->base.object.destructorFunc = &mfgD3D11DestroyVertexShader;
-	d3dVS->base.object.referenceCount = 0;
 	d3dVS->base.renderDevice = rd;
 
 	// Create string stream
 	mfsStream* ss;
 	char buffer[4096];
-	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), d3dRD->stack) != MFM_ERROR_OKAY)
+	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), d3dRD->stack) != MFS_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for mfgD3D11Assemble");
-	mfgError err = mfgD3D11Assemble(bytecode, bytecodeSize, metaData, ss);
+	mfError err = mfgD3D11Assemble(bytecode, bytecodeSize, metaData, ss);
 	if (err != MFG_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgD3D11Assemble failed");
 	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
@@ -366,7 +373,7 @@ mfgError mfgD3D11CreateVertexShader(mfgRenderDevice* rd, mfgVertexShader** vs, c
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11GetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vs, const mfsUTF8CodeUnit* name)
+mfError mfgD3D11GetVertexShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgVertexShader* vs, const mfsUTF8CodeUnit* name)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL || vs == NULL || name == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -394,12 +401,13 @@ void mfgD3D11DestroyPixelShader(void* ps)
 
 	mfgD3D11PixelShader* d3dPS = ps;
 	d3dPS->shader->lpVtbl->Release(d3dPS->shader);
+	if (mfmDestroyObject(&d3dPS->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPS->base.renderDevice)->pool512, d3dPS) != MFM_ERROR_OKAY)
 		abort();
 }
 
-
-mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData)
+mfError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || ps == NULL || bytecode == NULL || metaData == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -413,16 +421,20 @@ mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, con
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pixel shader on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dPS->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dPS->base.object.destructorFunc = &mfgD3D11DestroyPixelShader;
-	d3dPS->base.object.referenceCount = 0;
 	d3dPS->base.renderDevice = rd;
 
 	// Create string stream
 	mfsStream* ss;
 	char buffer[4096];
-	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), d3dRD->stack) != MFM_ERROR_OKAY)
+	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), d3dRD->stack) != MFS_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for mfgD3D11Assemble");
-	mfgError err = mfgD3D11Assemble(bytecode, bytecodeSize, metaData, ss);
+	mfError err = mfgD3D11Assemble(bytecode, bytecodeSize, metaData, ss);
 	if (err != MFG_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgD3D11Assemble failed");
 	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
@@ -500,7 +512,7 @@ mfgError mfgD3D11CreatePixelShader(mfgRenderDevice* rd, mfgPixelShader** ps, con
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11GetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* ps, const mfsUTF8CodeUnit* name)
+mfError mfgD3D11GetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint** bp, mfgPixelShader* ps, const mfsUTF8CodeUnit* name)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL || ps == NULL || name == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -520,7 +532,7 @@ mfgError mfgD3D11GetPixelShaderBindingPoint(mfgRenderDevice* rd, mfgBindingPoint
 	return MFG_ERROR_NOT_FOUND;
 }
 
-mfgError mfgD3D11BindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb)
+mfError mfgD3D11BindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -554,7 +566,7 @@ mfgError mfgD3D11BindConstantBuffer(mfgRenderDevice* rd, mfgBindingPoint* bp, mf
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size)
+mfError mfgD3D11BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgConstantBuffer* cb, mfmU64 offset, mfmU64 size)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL || cb == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -591,7 +603,7 @@ mfgError mfgD3D11BindConstantBufferRange(mfgRenderDevice* rd, mfgBindingPoint* b
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11BindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex)
+mfError mfgD3D11BindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture1D* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -625,7 +637,7 @@ mfgError mfgD3D11BindTexture1D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11BindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex)
+mfError mfgD3D11BindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture2D* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -659,7 +671,7 @@ mfgError mfgD3D11BindTexture2D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex)
+mfError mfgD3D11BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgTexture3D* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -693,7 +705,7 @@ mfgError mfgD3D11BindTexture3D(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgText
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11BindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex)
+mfError mfgD3D11BindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgRenderTexture* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -727,7 +739,7 @@ mfgError mfgD3D11BindRenderTexture(mfgRenderDevice* rd, mfgBindingPoint* bp, mfg
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11BindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler)
+mfError mfgD3D11BindSampler(mfgRenderDevice* rd, mfgBindingPoint* bp, mfgSampler* sampler)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || bp == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -770,11 +782,13 @@ void mfgD3D11DestroyPipeline(void* pp)
 	mfgD3D11Pipeline* d3dPP = pp;
 	--d3dPP->vertex->base.object.referenceCount;
 	--d3dPP->pixel->base.object.referenceCount;
+	if (mfmDestroyObject(&d3dPP->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPP->base.renderDevice)->pool48, d3dPP) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexShader* vs, mfgPixelShader* ps)
+mfError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexShader* vs, mfgPixelShader* ps)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || pp == NULL || vs == NULL || ps == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -788,8 +802,12 @@ mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertex
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dPP->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dPP->base.object.destructorFunc = &mfgD3D11DestroyPipeline;
-	d3dPP->base.object.referenceCount = 0;
 	d3dPP->base.renderDevice = rd;
 
 	// Init pipeline
@@ -803,7 +821,7 @@ mfgError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertex
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SetPipeline(mfgRenderDevice* rd, mfgPipeline* pp)
+mfError mfgD3D11SetPipeline(mfgRenderDevice* rd, mfgPipeline* pp)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -834,11 +852,13 @@ void mfgD3D11DestroyConstantBuffer(void* buffer)
 	
 	mfgD3D11ConstantBuffer* d3dCB = buffer;
 	d3dCB->buffer->lpVtbl->Release(d3dCB->buffer);
+	if (mfmDestroyObject(&d3dCB->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dCB->base.renderDevice)->pool48, d3dCB) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage)
+mfError mfgD3D11CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || cb == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -853,8 +873,12 @@ mfgError mfgD3D11CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** c
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate constant buffer on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dCB->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dCB->base.object.destructorFunc = &mfgD3D11DestroyConstantBuffer;
-	d3dCB->base.object.referenceCount = 0;
 	d3dCB->base.renderDevice = rd;
 
 	// Create buffer
@@ -899,7 +923,7 @@ mfgError mfgD3D11CreateConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer** c
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11MapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory)
+mfError mfgD3D11MapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb, void** memory)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || cb == NULL || memory == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -918,7 +942,7 @@ mfgError mfgD3D11MapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb, v
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11UnmapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb)
+mfError mfgD3D11UnmapConstantBuffer(mfgRenderDevice* rd, mfgConstantBuffer* cb)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || cb == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -939,11 +963,13 @@ void mfgD3D11DestroyVertexBuffer(void* buffer)
 
 	mfgD3D11VertexBuffer* d3dVB = buffer;
 	d3dVB->buffer->lpVtbl->Release(d3dVB->buffer);
+	if (mfmDestroyObject(&d3dVB->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVB->base.renderDevice)->pool48, d3dVB) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage)
+mfError mfgD3D11CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || vb == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -957,8 +983,12 @@ mfgError mfgD3D11CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, m
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dVB->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dVB->base.object.destructorFunc = &mfgD3D11DestroyVertexBuffer;
-	d3dVB->base.object.referenceCount = 0;
 	d3dVB->base.renderDevice = rd;
 
 	// Create buffer
@@ -1004,7 +1034,7 @@ mfgError mfgD3D11CreateVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer** vb, m
 }
 
 
-mfgError mfgD3D11MapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory)
+mfError mfgD3D11MapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void** memory)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 		if (rd == NULL || vb == NULL || memory == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -1023,7 +1053,7 @@ mfgError mfgD3D11MapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb, void*
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11UnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb)
+mfError mfgD3D11UnmapVertexBuffer(mfgRenderDevice* rd, mfgVertexBuffer* vb)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || vb == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -1048,7 +1078,7 @@ void mfgD3D11DestroyIndexBuffer(void* buffer)
 		abort();
 }
 
-mfgError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage)
+mfError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || ib == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -1062,8 +1092,12 @@ mfgError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfm
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate index buffer on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dIB->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dIB->base.object.destructorFunc = &mfgD3D11DestroyIndexBuffer;
-	d3dIB->base.object.referenceCount = 0;
 	d3dIB->base.renderDevice = rd;
 
 	// Create buffer
@@ -1115,7 +1149,7 @@ mfgError mfgD3D11CreateIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer** ib, mfm
 }
 
 
-mfgError mfgD3D11MapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory)
+mfError mfgD3D11MapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** memory)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || ib == NULL || memory == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -1134,7 +1168,7 @@ mfgError mfgD3D11MapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib, void** 
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11UnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
+mfError mfgD3D11UnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || ib == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -1147,7 +1181,7 @@ mfgError mfgD3D11UnmapIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SetIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
+mfError mfgD3D11SetIndexBuffer(mfgRenderDevice* rd, mfgIndexBuffer* ib)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -1168,11 +1202,13 @@ void mfgD3D11DestroyVertexLayout(void* vl)
 
 	mfgD3D11VertexLayout* d3dVL = vl;
 	d3dVL->inputLayout->lpVtbl->Release(d3dVL->inputLayout);
+	if (mfmDestroyObject(&d3dVL->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVL->base.renderDevice)->pool256, d3dVL) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs)
+mfError mfgD3D11CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, mfmU64 elementCount, const mfgVertexElement* elements, mfgVertexShader* vs)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || vl == NULL || elementCount == 0 || elementCount > 14 || vs == NULL || elements == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1186,8 +1222,12 @@ mfgError mfgD3D11CreateVertexLayout(mfgRenderDevice* rd, mfgVertexLayout** vl, m
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex layout on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dVL->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dVL->base.object.destructorFunc = &mfgD3D11DestroyVertexLayout;
-	d3dVL->base.object.referenceCount = 0;
 	d3dVL->base.renderDevice = rd;
 
 	// Create input layout
@@ -1314,11 +1354,13 @@ void mfgD3D11DestroyVertexArray(void* va)
 #endif
 
 	mfgD3D11VertexArray* d3dVA = va;
+	if (mfmDestroyObject(&d3dVA->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVA->base.renderDevice)->pool256, d3dVA) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 bufferCount, mfgVertexBuffer** buffers, mfgVertexLayout* vl)
+mfError mfgD3D11CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfmU64 bufferCount, mfgVertexBuffer** buffers, mfgVertexLayout* vl)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || va == NULL || bufferCount == 0 || vl == NULL || buffers == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1332,8 +1374,12 @@ mfgError mfgD3D11CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfm
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dVA->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dVA->base.object.destructorFunc = &mfgD3D11DestroyVertexArray;
-	d3dVA->base.object.referenceCount = 0;
 	d3dVA->base.renderDevice = rd;
 
 	if (bufferCount > 16)
@@ -1348,7 +1394,7 @@ mfgError mfgD3D11CreateVertexArray(mfgRenderDevice* rd, mfgVertexArray** va, mfm
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va)
+mfError mfgD3D11SetVertexArray(mfgRenderDevice* rd, mfgVertexArray* va)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || va == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1373,11 +1419,13 @@ void mfgD3D11DestroyTexture1D(void* tex)
 	mfgD3D11Texture1D* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDestroyObject(&d3dTex->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage)
+mfError mfgD3D11CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1391,8 +1439,12 @@ mfgError mfgD3D11CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 1D on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dTex->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyTexture1D;
-	d3dTex->base.object.referenceCount = 0;
 	d3dTex->base.renderDevice = rd;
 
 	// Create texture
@@ -1492,7 +1544,7 @@ mfgError mfgD3D11CreateTexture1D(mfgRenderDevice* rd, mfgTexture1D** tex, mfmU64
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11UpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data)
+mfError mfgD3D11UpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data)
 {
 	mfgD3D11RenderDevice* d3dRD = rd;
 	mfgD3D11Texture1D* d3dTex = tex;
@@ -1516,7 +1568,7 @@ mfgError mfgD3D11UpdateTexture1D(mfgRenderDevice* rd, mfgTexture1D* tex, mfmU64 
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11GenerateTexture1DMipmaps(mfgRenderDevice* rd, mfgTexture1D* tex)
+mfError mfgD3D11GenerateTexture1DMipmaps(mfgRenderDevice* rd, mfgTexture1D* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1539,11 +1591,13 @@ void mfgD3D11DestroyTexture2D(void* tex)
 	mfgD3D11Texture2D* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDestroyObject(&d3dTex->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage)
+mfError mfgD3D11CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1557,8 +1611,12 @@ mfgError mfgD3D11CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 2D on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dTex->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyTexture2D;
-	d3dTex->base.object.referenceCount = 0;
 	d3dTex->base.renderDevice = rd;
 
 	// Create texture
@@ -1663,7 +1721,7 @@ mfgError mfgD3D11CreateTexture2D(mfgRenderDevice* rd, mfgTexture2D** tex, mfmU64
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11UpdateTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data)
+mfError mfgD3D11UpdateTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data)
 {
 	mfgD3D11RenderDevice* d3dRD = rd;
 	mfgD3D11Texture2D* d3dTex = tex;
@@ -1688,7 +1746,7 @@ mfgError mfgD3D11UpdateTexture2D(mfgRenderDevice* rd, mfgTexture2D* tex, mfmU64 
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11GenerateTexture2DMipmaps(mfgRenderDevice* rd, mfgTexture2D* tex)
+mfError mfgD3D11GenerateTexture2DMipmaps(mfgRenderDevice* rd, mfgTexture2D* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1711,11 +1769,13 @@ void mfgD3D11DestroyTexture3D(void* tex)
 	mfgD3D11Texture3D* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDestroyObject(&d3dTex->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage)
+mfError mfgD3D11CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1729,8 +1789,12 @@ mfgError mfgD3D11CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 3D on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dTex->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyTexture3D;
-	d3dTex->base.object.referenceCount = 0;
 	d3dTex->base.renderDevice = rd;
 
 	// Create texture
@@ -1834,7 +1898,7 @@ mfgError mfgD3D11CreateTexture3D(mfgRenderDevice* rd, mfgTexture3D** tex, mfmU64
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11UpdateTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data)
+mfError mfgD3D11UpdateTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data)
 {
 	mfgD3D11RenderDevice* d3dRD = rd;
 	mfgD3D11Texture3D* d3dTex = tex;
@@ -1860,7 +1924,7 @@ mfgError mfgD3D11UpdateTexture3D(mfgRenderDevice* rd, mfgTexture3D* tex, mfmU64 
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11GenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex)
+mfError mfgD3D11GenerateTexture3DMipmaps(mfgRenderDevice* rd, mfgTexture3D* tex)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1882,11 +1946,13 @@ void mfgD3D11DestroySampler(void* sampler)
 
 	mfgD3D11Sampler* d3dS = sampler;
 	d3dS->sampler->lpVtbl->Release(d3dS->sampler);
+	if (mfmDestroyObject(&d3dS->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dS->base.renderDevice)->pool48, d3dS) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc)
+mfError mfgD3D11CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const mfgSamplerDesc* desc)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || sampler == NULL || desc == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -1900,8 +1966,12 @@ mfgError mfgD3D11CreateSampler(mfgRenderDevice* rd, mfgSampler** sampler, const 
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate sampler on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dS->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dS->base.object.destructorFunc = &mfgD3D11DestroySampler;
-	d3dS->base.object.referenceCount = 0;
 	d3dS->base.renderDevice = rd;
 
 	// Create sampler
@@ -1984,11 +2054,13 @@ void mfgD3D11DestroyRenderTexture(void* tex)
 	d3dTex->target->lpVtbl->Release(d3dTex->target);
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDestroyObject(&d3dTex->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
+mfError mfgD3D11CreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2002,8 +2074,12 @@ mfgError mfgD3D11CreateRenderTexture(mfgRenderDevice* rd, mfgRenderTexture** tex
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate render texture on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dTex->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyRenderTexture;
-	d3dTex->base.object.referenceCount = 0;
 	d3dTex->base.renderDevice = rd;
 
 	// Create texture
@@ -2095,11 +2171,13 @@ void mfgD3D11DestroyDepthStencilTexture(void* tex)
 	mfgD3D11DepthStencilTexture* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
+	if (mfmDestroyObject(&d3dTex->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
+mfError mfgD3D11CreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || tex == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2113,8 +2191,12 @@ mfgError mfgD3D11CreateDepthStencilTexture(mfgRenderDevice* rd, mfgDepthStencilT
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil texture on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dTex->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dTex->base.object.destructorFunc = &mfgD3D11DestroyDepthStencilTexture;
-	d3dTex->base.object.referenceCount = 0;
 	d3dTex->base.renderDevice = rd;
 
 	// Create texture
@@ -2167,11 +2249,13 @@ void mfgD3D11DestroyFramebuffer(void* fb)
 #endif
 
 	mfgD3D11Framebuffer* d3dFB = fb;
+	if (mfmDestroyObject(&d3dFB->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dFB->base.renderDevice)->pool256, d3dFB) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture)
+mfError mfgD3D11CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfmU64 textureCount, mfgRenderTexture** textures, mfgDepthStencilTexture* depthStencilTexture)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || fb == NULL || textures == NULL || textureCount == 0) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2185,8 +2269,12 @@ mfgError mfgD3D11CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfm
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate framebuffer on pool");
 
 	// Init object
+	{
+		mfError err = mfmInitObject(&d3dFB->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dFB->base.object.destructorFunc = &mfgD3D11DestroyFramebuffer;
-	d3dFB->base.object.referenceCount = 0;
 	d3dFB->base.renderDevice = rd;
 
 	// Create framebuffer
@@ -2223,7 +2311,7 @@ mfgError mfgD3D11CreateFramebuffer(mfgRenderDevice* rd, mfgFramebuffer** fb, mfm
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb)
+mfError mfgD3D11SetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2265,7 +2353,7 @@ mfgError mfgD3D11SetFramebuffer(mfgRenderDevice* rd, mfgFramebuffer* fb)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11ClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a)
+mfError mfgD3D11ClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2280,7 +2368,7 @@ mfgError mfgD3D11ClearColor(mfgRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, m
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11ClearDepth(mfgRenderDevice* rd, mfmF32 depth)
+mfError mfgD3D11ClearDepth(mfgRenderDevice* rd, mfmF32 depth)
 {
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
@@ -2294,7 +2382,7 @@ mfgError mfgD3D11ClearDepth(mfgRenderDevice* rd, mfmF32 depth)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11ClearStencil(mfgRenderDevice* rd, mfmI32 stencil)
+mfError mfgD3D11ClearStencil(mfgRenderDevice* rd, mfmI32 stencil)
 {
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 
@@ -2308,7 +2396,7 @@ mfgError mfgD3D11ClearStencil(mfgRenderDevice* rd, mfmI32 stencil)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SwapBuffers(mfgRenderDevice* rd)
+mfError mfgD3D11SwapBuffers(mfgRenderDevice* rd)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2330,11 +2418,13 @@ void mfgD3D11DestroyRasterState(void* state)
 #endif
 	mfgD3D11RasterState* rs = state;
 	rs->state->lpVtbl->Release(rs->state);
+	if (mfmDestroyObject(&rs->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)rs->base.renderDevice)->pool48, rs) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc)
+mfError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, const mfgRasterStateDesc* desc)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || state == NULL || desc == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2346,8 +2436,12 @@ mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, 
 	if (mfmAllocate(d3dRD->pool48, &rs, sizeof(mfgD3D11RasterState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
+	{
+		mfError err = mfmInitObject(&rs->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	rs->base.object.destructorFunc = &mfgD3D11DestroyRasterState;
-	rs->base.object.referenceCount = 0;
 	rs->base.renderDevice = rd;
 
 	D3D11_RASTERIZER_DESC rDesc;
@@ -2393,7 +2487,7 @@ mfgError mfgD3D11CreateRasterState(mfgRenderDevice* rd, mfgRasterState** state, 
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SetRasterState(mfgRenderDevice* rd, mfgRasterState* state)
+mfError mfgD3D11SetRasterState(mfgRenderDevice* rd, mfgRasterState* state)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2415,11 +2509,13 @@ void mfgD3D11DestroyDepthStencilState(void* state)
 #endif
 	mfgD3D11DepthStencilState* dss = state;
 	dss->state->lpVtbl->Release(dss->state);
+	if (mfmDestroyObject(&dss->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)dss->base.renderDevice)->pool48, dss) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc)
+mfError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState** state, const mfgDepthStencilStateDesc* desc)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || state == NULL || desc == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2431,8 +2527,12 @@ mfgError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilSta
 	if (mfmAllocate(d3dRD->pool48, &dss, sizeof(mfgD3D11DepthStencilState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
 
+	{
+		mfError err = mfmInitObject(&dss->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	dss->base.object.destructorFunc = &mfgD3D11DestroyDepthStencilState;
-	dss->base.object.referenceCount = 0;
 	dss->base.renderDevice = rd;
 
 	D3D11_DEPTH_STENCIL_DESC dsDesc;
@@ -2570,7 +2670,7 @@ mfgError mfgD3D11CreateDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilSta
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SetDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState* state)
+mfError mfgD3D11SetDepthStencilState(mfgRenderDevice* rd, mfgDepthStencilState* state)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2592,11 +2692,13 @@ void mfgD3D11DestroyBlendState(void* state)
 #endif
 	mfgD3D11BlendState* bs = state;
 	bs->state->lpVtbl->Release(bs->state);
+	if (mfmDestroyObject(&bs->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)bs->base.renderDevice)->pool48, bs) != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc)
+mfError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, const mfgBlendStateDesc* desc)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL || state == NULL || desc == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2607,8 +2709,12 @@ mfgError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, co
 	if (mfmAllocate(d3dRD->pool48, &bs, sizeof(mfgD3D11BlendState)) != MFM_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate blend state on pool");
 
+	{
+		mfError err = mfmInitObject(&bs->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	bs->base.object.destructorFunc = &mfgD3D11DestroyBlendState;
-	bs->base.object.referenceCount = 0;
 	bs->base.renderDevice = rd;
 
 	D3D11_BLEND_DESC bDesc;
@@ -2713,7 +2819,7 @@ mfgError mfgD3D11CreateBlendState(mfgRenderDevice* rd, mfgBlendState** state, co
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11SetBlendState(mfgRenderDevice* rd, mfgBlendState* state)
+mfError mfgD3D11SetBlendState(mfgRenderDevice* rd, mfgBlendState* state)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2758,7 +2864,7 @@ mfmBool mfgD3D11GetErrorString(mfgRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64
 	return MFM_TRUE;
 }
 
-mfgError mfgD3D11DrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
+mfError mfgD3D11DrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
@@ -2771,7 +2877,7 @@ mfgError mfgD3D11DrawTriangles(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
+mfError mfgD3D11DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64 count)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -2784,7 +2890,7 @@ mfgError mfgD3D11DrawTrianglesIndexed(mfgRenderDevice* rd, mfmU64 offset, mfmU64
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11GetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value)
+mfError mfgD3D11GetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -2804,7 +2910,7 @@ mfgError mfgD3D11GetPropertyI(mfgRenderDevice* rd, mfgEnum id, mfmI32* value)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgD3D11GetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value)
+mfError mfgD3D11GetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (rd == NULL || value == NULL) return MFG_ERROR_INVALID_ARGUMENTS;
@@ -2824,7 +2930,7 @@ mfgError mfgD3D11GetPropertyF(mfgRenderDevice* rd, mfgEnum id, mfmF32* value)
 	return MFG_ERROR_OKAY;
 }
 
-mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
+mfError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
 {
 	// Check if params are valid
 	if (renderDevice == NULL || window == NULL || desc == NULL || window->type != MFI_D3DWINDOW)
@@ -2841,7 +2947,7 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 		desc.expandable = MFM_FALSE;
 		desc.slotCount = MFG_POOL_48_ELEMENT_COUNT;
 		desc.slotSize = 48;
-		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool48, &desc, rd->pool48Memory, sizeof(rd->pool48Memory));
+		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool48, &desc, rd->pool48Memory, sizeof(rd->pool48Memory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
@@ -2852,7 +2958,7 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 		desc.expandable = MFM_FALSE;
 		desc.slotCount = MFG_POOL_64_ELEMENT_COUNT;
 		desc.slotSize = 64;
-		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool64, &desc, rd->pool64Memory, sizeof(rd->pool64Memory));
+		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool64, &desc, rd->pool64Memory, sizeof(rd->pool64Memory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
@@ -2863,7 +2969,7 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 		desc.expandable = MFM_FALSE;
 		desc.slotCount = MFG_POOL_256_ELEMENT_COUNT;
 		desc.slotSize = 256;
-		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool256, &desc, rd->pool256Memory, sizeof(rd->pool256Memory));
+		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool256, &desc, rd->pool256Memory, sizeof(rd->pool256Memory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
@@ -2874,21 +2980,25 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 		desc.expandable = MFM_FALSE;
 		desc.slotCount = MFG_POOL_512_ELEMENT_COUNT;
 		desc.slotSize = 512;
-		mfmError err = mfmCreatePoolAllocatorOnMemory(&rd->pool512, &desc, rd->pool512Memory, sizeof(rd->pool512Memory));
+		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool512, &desc, rd->pool512Memory, sizeof(rd->pool512Memory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
 	// Create stack
 	{
-		mfmError err = mfmCreateStackAllocatorOnMemory(&rd->stack, 2048, rd->stackMemory, sizeof(rd->stackMemory));
+		mfError err = mfmCreateStackAllocatorOnMemory(&rd->stack, 2048, rd->stackMemory, sizeof(rd->stackMemory));
 		if (err != MFM_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
 	// Initialize some properties
+	{
+		mfError err = mfmInitObject(&rd->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	rd->base.object.destructorFunc = &mfgDestroyD3D11RenderDevice;
-	rd->base.object.referenceCount = 0;
 	rd->window = window;
 	rd->allocator = allocator;
 	memset(rd->errorString, '\0', sizeof(rd->errorString));
@@ -3096,7 +3206,7 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 	{
 		mfgRasterStateDesc desc;
 		mfgDefaultRasterStateDesc(&desc);
-		mfgError err = mfgCreateRasterState(rd, &rd->defaultRasterState, &desc);
+		mfError err = mfgCreateRasterState(rd, &rd->defaultRasterState, &desc);
 		if (err != MFG_ERROR_OKAY)
 			return err;
 		err = mfgSetRasterState(rd, rd->defaultRasterState);
@@ -3108,7 +3218,7 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 	{
 		mfgDepthStencilStateDesc desc;
 		mfgDefaultDepthStencilStateDesc(&desc);
-		mfgError err = mfgCreateDepthStencilState(rd, &rd->defaultDepthStencilState, &desc);
+		mfError err = mfgCreateDepthStencilState(rd, &rd->defaultDepthStencilState, &desc);
 		if (err != MFG_ERROR_OKAY)
 			return err;
 		err = mfgSetDepthStencilState(rd, rd->defaultDepthStencilState);
@@ -3120,7 +3230,7 @@ mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* 
 	{
 		mfgBlendStateDesc desc;
 		mfgDefaultBlendStateDesc(&desc);
-		mfgError err = mfgCreateBlendState(rd, &rd->defaultBlendState, &desc);
+		mfError err = mfgCreateBlendState(rd, &rd->defaultBlendState, &desc);
 		if (err != MFG_ERROR_OKAY)
 			return err;
 		err = mfgSetBlendState(rd, rd->defaultBlendState);
@@ -3164,13 +3274,15 @@ void mfgDestroyD3D11RenderDevice(void * renderDevice)
 	rd->device->lpVtbl->Release(rd->device);
 
 	// Deallocate render device
+	if (mfmDestroyObject(&rd->base.object) != MFM_ERROR_OKAY)
+		abort();
 	if (mfmDeallocate(rd->allocator, rd) != MFM_ERROR_OKAY)
 		abort();
 }
 
 #else
 
-mfgError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
+mfError mfgCreateD3D11RenderDevice(mfgRenderDevice ** renderDevice, mfiWindow* window, const mfgRenderDeviceDesc * desc, void * allocator)
 {
 	return MFG_ERROR_NOT_SUPPORTED;
 }

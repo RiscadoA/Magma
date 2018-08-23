@@ -11,9 +11,12 @@ void OnClose(void* window)
 	windowOpen = MFM_FALSE;
 }
 
-void Main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
-	mfiError err = mfiCreateGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-2");
+	if (mfInit(argc, argv) != MF_ERROR_OKAY)
+		abort();
+
+	mfError err = mfiCreateGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-2");
 	if (err != MFI_ERROR_OKAY)
 		abort();
 
@@ -25,4 +28,7 @@ void Main(int argc, char** argv)
 	}
 
 	mfiDestroyGLWindow(window);
+
+	mfTerminate();
+	return 0;
 }

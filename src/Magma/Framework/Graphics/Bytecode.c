@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outData, void * allocator)
+mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outData, void * allocator)
 {
 	if (metaData == 0 || outData == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -34,7 +34,7 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 	if (bindingPointCount == 0)
 	{
 		// Allocate the memory needed
-		mfmError err = mfmAllocate(
+		mfError err = mfmAllocate(
 			allocator,
 			&memory,
 			sizeof(mfgMetaData) +
@@ -55,6 +55,7 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 		{
 			readPtr += 16;
 			mfmU8 type = metaData[readPtr++];
+			readPtr += 2;
 			if (type == MFG_CONSTANT_BUFFER)
 			{
 				bpAllocSize += sizeof(mfgMetaDataConstantBuffer);
@@ -87,7 +88,7 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 		}
 
 		// Allocate the memory needed
-		mfmError err = mfmAllocate(
+		mfError err = mfmAllocate(
 			allocator,
 			&memory,
 			sizeof(mfgMetaData) +
@@ -101,8 +102,12 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 
 	// Init meta data struct
 	(*outData) = (mfgMetaData*)memory;
+	{
+		mfError err = mfmInitObject(&(*outData)->object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}	
 	(*outData)->object.destructorFunc = &mfgUnloadMetaData;
-	(*outData)->object.referenceCount = 0;
 	(*outData)->allocator = allocator;
 	(*outData)->inputVarCount = inputVarCount;
 	(*outData)->outputVarCount = outputVarCount;
@@ -255,12 +260,15 @@ mfgError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** out
 
 void mfgUnloadMetaData(void * metaData)
 {
-	mfmError err = mfmDeallocate(((mfgMetaData*)metaData)->allocator, metaData);
-	if (err != MFG_ERROR_OKAY)
+	mfError err = mfmDestroyObject(&((mfgMetaData*)metaData)->object);
+	if (err != MFM_ERROR_OKAY)
+		abort();
+	err = mfmDeallocate(((mfgMetaData*)metaData)->allocator, metaData);
+	if (err != MFM_ERROR_OKAY)
 		abort();
 }
 
-mfgError mfgGetMetaDataInput(const mfgMetaData * metaData, const mfsUTF8CodeUnit * name, const mfgMetaDataInputVariable ** inputVar)
+mfError mfgGetMetaDataInput(const mfgMetaData * metaData, const mfsUTF8CodeUnit * name, const mfgMetaDataInputVariable ** inputVar)
 {
 	if (metaData == NULL || name == NULL || inputVar == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -293,7 +301,7 @@ mfgError mfgGetMetaDataInput(const mfgMetaData * metaData, const mfsUTF8CodeUnit
 	return MFG_ERROR_NOT_FOUND;
 }
 
-mfgError mfgGetMetaDataOutput(const mfgMetaData * metaData, const mfsUTF8CodeUnit * name, const mfgMetaDataOutputVariable ** outputVar)
+mfError mfgGetMetaDataOutput(const mfgMetaData * metaData, const mfsUTF8CodeUnit * name, const mfgMetaDataOutputVariable ** outputVar)
 {
 	if (metaData == NULL || name == NULL || outputVar == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -326,7 +334,7 @@ mfgError mfgGetMetaDataOutput(const mfgMetaData * metaData, const mfsUTF8CodeUni
 	return MFG_ERROR_NOT_FOUND;
 }
 
-mfgError mfgGetMetaDataBindingPoint(const mfgMetaData * metaData, const mfsUTF8CodeUnit * name, const mfgMetaDataBindingPoint ** bindingPoint)
+mfError mfgGetMetaDataBindingPoint(const mfgMetaData * metaData, const mfsUTF8CodeUnit * name, const mfgMetaDataBindingPoint ** bindingPoint)
 {
 	if (metaData == NULL || name == NULL || bindingPoint == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;

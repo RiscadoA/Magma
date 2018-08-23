@@ -12,7 +12,7 @@ extern "C"
 	/// <summary>
 	/// 	Assembles binary bytecode and meta data into a GLSL shader.
 	/// </summary>
-	mfgError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData, mfsStream* outputStream);
+	mfError mfgOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData, mfsStream* outputStream);
 
 #ifdef __cplusplus
 }

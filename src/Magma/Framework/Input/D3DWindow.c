@@ -1,6 +1,8 @@
 #include "D3DWindow.h"
 #include "Config.h"
 
+#include "../Memory/Allocator.h"
+
 #ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 #include <Windows.h>
 #include <windowsx.h>
@@ -21,8 +23,6 @@ typedef struct
 } mfiD3DWindow;
 
 static mfiD3DWindow* currentWindow = NULL;
-static HINSTANCE ghInstance = NULL;
-static int gnCmdShow = 0;
 
 mfiKeyCode mfiWindowsToKeyCode(int key)
 {
@@ -151,14 +151,14 @@ mfiWindowMode mfiGetD3DWindowMode(void* window)
 
 #endif
 
-mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
+mfError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
 {
 #ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 	if (currentWindow != NULL)
 		return MFI_ERROR_ALREADY_INITIALIZED;
 
-	mfiD3DWindow* d3dWindow = malloc(sizeof(mfiD3DWindow));
-	if (d3dWindow == NULL)
+	mfiD3DWindow* d3dWindow = NULL;
+	if (mfmAllocate(NULL, &d3dWindow, sizeof(mfiD3DWindow)) != MFM_ERROR_OKAY)
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Set properties
@@ -169,8 +169,12 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 	d3dWindow->mode = mode;
 
 	// Set destructor
+	{
+		mfError err = mfmInitObject(&d3dWindow->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	d3dWindow->base.object.destructorFunc = &mfiDestroyD3DWindow;
-	d3dWindow->base.object.referenceCount = 0;
 
 	// Set functions
 	d3dWindow->base.pollEvents = &mfiD3DWindowPollEvents;
@@ -192,6 +196,9 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 	d3dWindow->base.onMouseUp = NULL;
 	d3dWindow->base.onMouseDown = NULL;
 
+	// Get instance
+	HINSTANCE instance = GetModuleHandle(NULL);
+
 	// Open window
 	{
 		WNDCLASSEX wc;
@@ -199,7 +206,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 		wc.cbSize = sizeof(WNDCLASSEX);
 		wc.style = CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc = WindowProc;
-		wc.hInstance = ghInstance;
+		wc.hInstance = instance;
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 		wc.lpszClassName = "mfiD3DWindowWindowed";
@@ -212,7 +219,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 		wc.cbSize = sizeof(WNDCLASSEX);
 		wc.style = CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc = WindowProc;
-		wc.hInstance = ghInstance;
+		wc.hInstance = instance;
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 		// wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 		wc.lpszClassName = "mfiD3DWindowFullscreen";
@@ -240,7 +247,7 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 				windowRect.bottom - windowRect.top,
 				NULL,
 				NULL,
-				ghInstance,
+				instance,
 				NULL);
 		} break;
 
@@ -263,18 +270,19 @@ mfiError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mf
 				windowRect.bottom - windowRect.top,
 				NULL,
 				NULL,
-				ghInstance,
+				instance,
 				NULL);
 		} break;
 
 		default:
 		{
-			free(d3dWindow);
+			if (mfmDeallocate(NULL, d3dWindow) != MFM_ERROR_OKAY)
+				abort();
 			return MFI_ERROR_INVALID_ARGUMENTS;
 		}
 	}
 
-	ShowWindow(d3dWindow->hwnd, gnCmdShow);
+	ShowWindow(d3dWindow->hwnd, SW_SHOWNORMAL);
 	currentWindow = d3dWindow;
 	*window = d3dWindow;
 
@@ -290,7 +298,10 @@ void mfiDestroyD3DWindow(void * window)
 	// Destroy window
 	mfiD3DWindow* d3dWindow = (mfiD3DWindow*)window;
 	DestroyWindow(d3dWindow->hwnd);
-	free(d3dWindow);
+	if (mfmDestroyObject(&d3dWindow->base.object) != MFM_ERROR_OKAY)
+		abort();
+	if (mfmDeallocate(NULL, d3dWindow) != MFM_ERROR_OKAY)
+		abort();
 	currentWindow = NULL;
 #endif
 }
@@ -304,8 +315,8 @@ void * mfiGetD3DWindowHandle(void * window)
 	return NULL;
 #endif
 }
-
-#if defined(MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT)
+ 
+#ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 
 LRESULT CALLBACK WindowProc(
 	HWND hWnd,
@@ -435,28 +446,6 @@ LRESULT CALLBACK WindowProc(
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		} break;
 	}
-
-	return 0;
-}
-
-int WINAPI WinMain(
-	HINSTANCE hInstance,
-	HINSTANCE hpPrevInstance,
-	LPSTR lpCmdLine,
-	int nCmdShow)
-{
-	// Open console
-	AllocConsole();
-
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
-	freopen("CONIN$", "r", stdin);
-
-	ghInstance = hInstance;
-	gnCmdShow = nCmdShow;
-
-	// Run program
-	mfEntry(0, NULL);
 
 	return 0;
 }

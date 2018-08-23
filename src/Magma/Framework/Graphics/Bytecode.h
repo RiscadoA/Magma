@@ -352,7 +352,7 @@ typedef struct
 ///		Returns MFG_ALLOCATION_FAILED if there was an allocation error.
 ///		Returns MFG_ERROR_INVALID_DATA if the binary meta data is invalid (if it has no marker, or if the data is too small, etc).
 /// </returns>
-mfgError mfgLoadMetaData(const mfmU8* metaData, mfmU64 size, mfgMetaData** outData, void* allocator);
+mfError mfgLoadMetaData(const mfmU8* metaData, mfmU64 size, mfgMetaData** outData, void* allocator);
 
 /// <summary>
 ///		Unloads shader meta data that was loaded by mfgLoadMetaData.
@@ -371,7 +371,7 @@ void mfgUnloadMetaData(void* metaData);
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
 ///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
 /// </returns>
-mfgError mfgGetMetaDataInput(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataInputVariable** inputVar);
+mfError mfgGetMetaDataInput(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataInputVariable** inputVar);
 
 /// <summary>
 ///		Gets a meta data output variable from a shader meta data object.
@@ -384,7 +384,7 @@ mfgError mfgGetMetaDataInput(const mfgMetaData* metaData, const mfsUTF8CodeUnit*
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
 ///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
 /// </returns>
-mfgError mfgGetMetaDataOutput(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataOutputVariable** outputVar);
+mfError mfgGetMetaDataOutput(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataOutputVariable** outputVar);
 
 /// <summary>
 ///		Gets a meta data binding point from a shader meta data object.
@@ -397,7 +397,7 @@ mfgError mfgGetMetaDataOutput(const mfgMetaData* metaData, const mfsUTF8CodeUnit
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
 ///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
 /// </returns>
-mfgError mfgGetMetaDataBindingPoint(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataBindingPoint** bindingPoint);
+mfError mfgGetMetaDataBindingPoint(const mfgMetaData* metaData, const mfsUTF8CodeUnit* name, const mfgMetaDataBindingPoint** bindingPoint);
 
 #ifdef __cplusplus
 }
