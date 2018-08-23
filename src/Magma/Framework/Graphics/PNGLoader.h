@@ -16,8 +16,26 @@ extern "C"
 		void* allocator;
 	} mfgPNGTextureData;
 
-	mfError mfgLoadPNG(const mfmU8* data, mfmU64 size, mfgPNGTextureData** textureData, void* allocator);
+	/// <summary>
+	///		Loads a texture from a PNG file.
+	/// </summary>
+	/// <param name="stream">Input data stream handle</param>
+	/// <param name="textureData">Out texture data</param>
+	/// <param name="allocator">Allocator to use</param>
+	/// <returns>
+	///		Returns MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns an error code.
+	/// </returns>
+	mfError mfgLoadPNG(void* stream, mfgPNGTextureData** textureData, void* allocator);
 
+	/// <summary>
+	///		Unloads a texture previously loaded by mfgLoadPNG.
+	/// </summary>
+	/// <param name="textureData">Texture data pointer</param>
+	/// <returns>
+	///		Returns MFG_ERROR_OKAY if there were no errors.
+	///		Otherwise returns an error code.
+	/// </returns>
 	mfError mfgUnloadPNG(mfgPNGTextureData* textureData);
 
 #ifdef __cplusplus
