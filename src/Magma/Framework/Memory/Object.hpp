@@ -39,17 +39,18 @@ namespace Magma
 				///		Gets the currently set object (throws error when there isn't an object set).
 				/// </summary>
 				/// <returns>Reference to the currently set object</returns>
-				mfmObject& Get();
+				mfmObject& Get() const;
 
 				Object& operator=(mfmObject& obj);
-				mfmObject* operator->();
+				Object& operator=(Object obj);
+				mfmObject* operator->() const;
 
 				/// <summary>
 				///		Gets a pointer to the currently set object without checking if it is NULL or not.
 				///		USE WITH CAUTION.
 				/// </summary>
 				/// <returns>Currently set pointer</returns>
-				inline mfmObject* GetNoChecks() { return m_obj; }
+				inline mfmObject* GetNoChecks() const { return m_obj; }
 
 			private:
 				mfmObject* m_obj;

@@ -14,9 +14,14 @@ int main(int argc, const char** argv)
 	mfsUTF8CodeUnit buffer[256];
 	memset(buffer, 0, sizeof(buffer));
 
-	String::Stream ss = String::CreateStringStream(buffer, sizeof(buffer));
+
+	Memory::Object obj = String::CreateStringStream(buffer, sizeof(buffer));
+
+	String::StringStream ss = obj;
 	ss.PutString(u8"Sample text");
 	ss.Release();
+
+	obj.Release();
 
 	String::OutStream.PutString(buffer);
 

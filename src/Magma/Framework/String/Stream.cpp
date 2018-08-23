@@ -20,6 +20,12 @@ void Magma::Framework::String::TerminateStreams()
 	OutStream.Release();
 }
 
+Magma::Framework::String::Stream::Stream(const Memory::Object & object)
+	: Memory::Object(object)
+{
+
+}
+
 mfmU64 Magma::Framework::String::Stream::Write(const void * data, mfmU64 size)
 {
 	mfmU64 writtenSize = 0;

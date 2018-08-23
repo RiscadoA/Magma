@@ -67,7 +67,7 @@ bool Magma::Framework::Memory::Object::Release()
 	return true;
 }
 
-mfmObject & Magma::Framework::Memory::Object::Get()
+mfmObject & Magma::Framework::Memory::Object::Get() const
 {
 	if (m_obj == nullptr)
 		throw NullPointerError("Failed to get object, object is NULL (wasn't set or was already released)");
@@ -80,7 +80,16 @@ Magma::Framework::Memory::Object & Magma::Framework::Memory::Object::operator=(m
 	return *this;
 }
 
-mfmObject * Magma::Framework::Memory::Object::operator->()
+Magma::Framework::Memory::Object & Magma::Framework::Memory::Object::operator=(Object obj)
+{
+	if (obj.GetNoChecks() == nullptr)
+		this->Release();
+	else
+		this->Set(obj.Get());
+	return *this;
+}
+
+mfmObject * Magma::Framework::Memory::Object::operator->() const
 {
 	return &this->Get();
 }
