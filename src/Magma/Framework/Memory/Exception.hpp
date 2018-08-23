@@ -30,6 +30,15 @@ namespace Magma
 			};
 
 			/// <summary>
+			///		Thrown when there is an error related to objects.
+			/// </summary>
+			class ObjectError : public std::runtime_error
+			{
+			public:
+				using std::runtime_error::runtime_error;
+			};
+
+			/// <summary>
 			///		Gets a string that describes an error code.
 			/// </summary>
 			/// <param name="err">Error code</param>

@@ -12,12 +12,18 @@ extern "C"
 	typedef struct
 	{
 		mfmDestructor destructorFunc;
-		mfmU64 referenceCount;
+		volatile mfmI32 m_referenceCount;
 	} mfmObject;
 
 	mfError mfmInitObject(mfmObject* obj);
 
 	mfError mfmDestroyObject(mfmObject* obj);
+
+	mfError mfmIncObjectRef(mfmObject* obj);
+
+	mfError mfmDecObjectRef(mfmObject* obj);
+
+	mfError mfmGetObjectRefCount(mfmObject* obj, mfmI32* refCount);
 
 #ifdef __cplusplus
 }

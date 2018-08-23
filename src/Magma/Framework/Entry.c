@@ -8,9 +8,12 @@ mfError mfInit(int argc, const char** argv)
 {
 	if (mfInitialized == MFM_TRUE)
 		return MF_ERROR_ALREADY_INITIALIZED;
+	mfError err;
 
 	// Init stream library
-	mfsInitStream();
+	err = mfsInitStream();
+	if (err != MFS_ERROR_OKAY)
+		return err;
 
 	mfInitialized = MFM_TRUE;
 
@@ -21,9 +24,12 @@ void mfTerminate()
 {
 	if (mfInitialized == MFM_FALSE)
 		return;
+	mfError err;
 
 	// Terminate stream library
-	mfsTerminateStream();
+	err = mfsTerminateStream();
+	if (err != MFS_ERROR_OKAY)
+		abort();
 
 	mfInitialized = MFM_FALSE;
 }

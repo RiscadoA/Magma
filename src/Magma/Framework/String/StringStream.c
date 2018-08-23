@@ -116,7 +116,11 @@ mfError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, 
 
 	str->allocator = allocator;
 	if (str->allocator != NULL)
-		++((mfmObject*)str->allocator)->referenceCount;
+	{
+		mfError err = mfmIncObjectRef(((mfmObject*)str->allocator));
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	str->writeHead = 0;
 	str->readHead = 0;
 
@@ -131,7 +135,11 @@ void mfsDestroyStringStream(mfsStream * stream)
 		abort();
 	mfsStringStream* str = (mfsStringStream*)stream;
 	if (str->allocator != NULL)
-		--((mfmObject*)str->allocator)->referenceCount;
+	{
+		mfError err = mfmDecObjectRef((mfmObject*)str->allocator);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 	if (mfmDestroyObject(&str->base.object) != MFM_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(str->allocator, str) != MFM_ERROR_OKAY)

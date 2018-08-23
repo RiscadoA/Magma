@@ -86,7 +86,7 @@ extern "C"
 	///		Returns MFT_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
-	mfError mftAtomic32Add(const volatile mfmI32* atomic, mfmI32 value);
+	mfError mftAtomic32Add(volatile mfmI32* atomic, mfmI32 value);
 
 #ifdef __cplusplus
 }

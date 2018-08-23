@@ -41,12 +41,12 @@ extern "C"
 	/// <summary>
 	///		Initializes the stream library.
 	/// </summary>
-	void mfsInitStream();
+	mfError mfsInitStream();
 
 	/// <summary>
 	///		Terminates the stream library.
 	/// </summary>
-	void mfsTerminateStream();
+	mfError mfsTerminateStream();
 
 	/// <summary>
 	///		Writes raw data into a stream.
