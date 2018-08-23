@@ -18,7 +18,7 @@ mfError mfmDestroyObject(mfmObject* obj)
 	if (obj == NULL)
 		return MFM_ERROR_INVALID_ARGUMENTS;
 	mfmI32 refCount = 0;
-	mfError err = mftAtomic32Load(&obj->m_referenceCount, refCount);
+	mfError err = mftAtomic32Load(&obj->m_referenceCount, &refCount);
 	if (err != MFT_ERROR_OKAY)
 		return err;
 	if (refCount != 0)
