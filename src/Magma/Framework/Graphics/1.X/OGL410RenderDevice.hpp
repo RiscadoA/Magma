@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RenderDevice.hpp"
-#include "../../Input/GLWindow.hpp"
+#include "../../Input/Old/OGLWindow.hpp"
 
 namespace Magma
 {
@@ -61,7 +61,7 @@ namespace Magma
 				virtual void SetFramebuffer(Framebuffer* framebuffer) override;
 				virtual unsigned int GetMaxAnisotropyLimit() override;
 
-				Input::GLWindow* m_window;
+				Input::OGLWindow* m_window;
 
 				Graphics_V1X::IndexBuffer* m_currentIndexBuffer;
 

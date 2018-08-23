@@ -1,4 +1,4 @@
-﻿#include <Magma/Framework/Input/GLWindow.h>
+﻿#include <Magma/Framework/Input/OGLWindow.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <stdio.h>
 #include <stdlib.h>

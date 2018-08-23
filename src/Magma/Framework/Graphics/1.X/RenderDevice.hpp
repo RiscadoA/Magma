@@ -6,7 +6,7 @@
 #include "ShaderData.hpp"
 #include "../Exception.hpp"
 
-#include "../../Input/Window.hpp"
+#include "../../Input/Old/Window.hpp"
 
 namespace Magma
 {

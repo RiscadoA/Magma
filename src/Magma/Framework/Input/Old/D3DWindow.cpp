@@ -1,5 +1,5 @@
 #include "D3DWindow.hpp"
-#include "Exception.hpp"
+#include "../Exception.hpp"
 
 #include <Config.h>
 

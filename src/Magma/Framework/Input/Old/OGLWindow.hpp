@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Window.hpp"
-#include "D3DWindow.h"
-#include "../String/UTF8.hpp"
+#include "../OGLWindow.h"
+#include "../../String/UTF8.hpp"
 
 namespace Magma
 {
@@ -11,9 +11,9 @@ namespace Magma
 		namespace Input
 		{
 			/// <summary>
-			///		Window class implementation for DirectX (uses Windows API)
+			///		Window class implementation for OpenGL (uses GLFW)
 			/// </summary>
-			class D3DWindow : public Window
+			class OGLWindow : public Window
 			{
 			public:
 				/// <summary>
@@ -23,12 +23,12 @@ namespace Magma
 				/// <param name="height">Window height</param>
 				/// <param name="title">Window title</param>
 				/// <param name="mode">Window mode</param>
-				D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, Window::Mode mode = Window::Mode::Windowed);
+				OGLWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, Window::Mode mode = Window::Mode::Windowed);
 
 				/// <summary>
 				///		Closes a window.
 				/// </summary>
-				~D3DWindow();
+				~OGLWindow();
 
 				/// <summary>
 				///		Polls events from this window.
@@ -65,7 +65,7 @@ namespace Magma
 				inline mfiWindow* GetWindow() const { return m_window; }
 
 			private:
-				mfiWindow * m_window;
+				mfiWindow* m_window;
 			};
 		}
 	}

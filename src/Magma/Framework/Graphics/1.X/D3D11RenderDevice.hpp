@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RenderDevice.hpp"
-#include "../../Input/D3DWindow.hpp"
+#include "../../Input/Old/D3DWindow.hpp"
 
 namespace Magma
 {

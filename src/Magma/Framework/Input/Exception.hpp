@@ -16,6 +16,15 @@ namespace Magma
 			public:
 				using std::runtime_error::runtime_error;
 			};
+
+			/// <summary>
+			///		Thrown when there is an error related to window type registering.
+			/// </summary>
+			class RegisterError : public std::runtime_error
+			{
+			public:
+				using std::runtime_error::runtime_error;
+			};
 		}
 	}
 }

@@ -1077,9 +1077,9 @@ public:
 void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	m_window = dynamic_cast<Input::GLWindow*>(window);
+	m_window = dynamic_cast<Input::OGLWindow*>(window);
 	if (m_window == nullptr)
-		throw RenderDeviceError("Failed to init OGL410RenderDevice:\nCouldn't cast from Magma::Framework::Input::Window* to Magma::Framework::Input::GLWindow*");
+		throw RenderDeviceError("Failed to init OGL410RenderDevice:\nCouldn't cast from Magma::Framework::Input::Window* to Magma::Framework::Input::OGLWindow*");
 
 	// Init glew
 	glewExperimental = GL_TRUE;
@@ -1135,7 +1135,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Init(Input::Window * wi
 void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Terminate()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
-	// Oonly terminated when the GLWindow closes
+	// Oonly terminated when the OGLWindow closes
 #else
 	throw RenderDeviceError("Failed to call OGL410RenderDevice function:\nMAGMA_FRAMEWORK_USE_OPENGL must be defined to use this render device");
 #endif
