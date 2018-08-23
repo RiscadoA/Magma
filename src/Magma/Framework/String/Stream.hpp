@@ -10,8 +10,8 @@ namespace Magma
 		namespace String
 		{
 			/// <summary>
-			///		Used as an object handle.
-			///		Destroys the object automatically when there are no more references to it.
+			///		Used as a stream handle.
+			///		Destroys the stream automatically when there are no more references to it.
 			/// </summary>
 			class Stream : public Memory::Object
 			{

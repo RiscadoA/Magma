@@ -44,6 +44,13 @@ namespace Magma
 				Object& operator=(mfmObject& obj);
 				mfmObject* operator->();
 
+				/// <summary>
+				///		Gets a pointer to the currently set object without checking if it is NULL or not.
+				///		USE WITH CAUTION.
+				/// </summary>
+				/// <returns>Currently set pointer</returns>
+				inline mfmObject* GetNoChecks() { return m_obj; }
+
 			private:
 				mfmObject* m_obj;
 			};
