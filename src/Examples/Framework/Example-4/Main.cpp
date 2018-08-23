@@ -1,9 +1,9 @@
 #include <iostream>
 
 #include <Magma/Framework/Files/STDFileSystem.hpp>
-#include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
-#include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
-#include <Magma/Framework/Graphics/OGL410Assembler.hpp>
+#include <Magma/Framework/Graphics/1.X/BytecodeAssembler.hpp>
+#include <Magma/Framework/Graphics/1.X/MetaDataAssembler.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410Assembler.hpp>
 #include <Magma/Framework/Memory/Endianness.hpp>
 #include <Magma/Framework/Entry.h>
 
@@ -29,7 +29,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 		}
 
 		{
@@ -39,7 +39,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
 		}
 
 		{
@@ -67,10 +67,10 @@ int main(int argc, const char** argv)
 			fileSystem->CloseFile(file);
 		}
 
-		Graphics::ShaderData data(binaryObject, binaryObjectSize);
+		Graphics_V1X::ShaderData data(binaryObject, binaryObjectSize);
 
 		std::string compiled;
-		Graphics::OGL410Assembler::Assemble(data, compiled);
+		Graphics_V1X::OGL410Assembler::Assemble(data, compiled);
 
 		std::cout << compiled << std::endl;
 	}
@@ -88,7 +88,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 		}
 
 		{
@@ -98,7 +98,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
 		}
 
 		{
@@ -126,10 +126,10 @@ int main(int argc, const char** argv)
 			fileSystem->CloseFile(file);
 		}
 
-		Graphics::ShaderData data(binaryObject, binaryObjectSize);
+		Graphics_V1X::ShaderData data(binaryObject, binaryObjectSize);
 
 		std::string compiled;
-		Graphics::OGL410Assembler::Assemble(data, compiled);
+		Graphics_V1X::OGL410Assembler::Assemble(data, compiled);
 
 		std::cout << compiled << std::endl;
 	}

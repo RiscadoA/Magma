@@ -1,8 +1,8 @@
 ﻿#include <Magma/Framework/Input/GLWindow.hpp>
-#include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410RenderDevice.hpp>
 
 #include <Magma/Framework/Input/D3DWindow.hpp>
-#include <Magma/Framework/Graphics/D3D11RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/D3D11RenderDevice.hpp>
 
 #include <Magma/Framework/Audio/OALRenderDevice.hpp>
 
@@ -19,7 +19,7 @@ using namespace Magma;
 struct Scene
 {
 	Framework::Input::Window* window;
-	Framework::Graphics::RenderDevice* graphicsDevice;
+	Framework::Graphics_V1X::RenderDevice* Graphics_V1XDevice;
 	Framework::Audio::RenderDevice* audioDevice;
 	Framework::Files::FileSystem* fileSystem;
 	bool running;
@@ -46,15 +46,15 @@ void LoadScene(Scene& scene)
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
 
-	// Create graphics device
+	// Create Graphics_V1X device
 	{
-		Framework::Graphics::RenderDeviceSettings settings;
+		Framework::Graphics_V1X::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.graphicsDevice = new Framework::Graphics::OGL410RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::OGL410RenderDevice();
 #else
-		scene.graphicsDevice = new Framework::Graphics::D3D11RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::D3D11RenderDevice();
 #endif
-		scene.graphicsDevice->Init(scene.window, settings);
+		scene.Graphics_V1XDevice->Init(scene.window, settings);
 	}
 
 	// Create audio device
@@ -96,9 +96,9 @@ void CleanScene(Scene& scene)
 	scene.audioDevice->DestroySource(scene.source);
 	scene.audioDevice->DestroyBuffer(scene.buffer);
 
-	// Destroy graphics and audio devices, window and filesytem
+	// Destroy Graphics_V1X and audio devices, window and filesytem
 	delete scene.audioDevice;
-	delete scene.graphicsDevice;
+	delete scene.Graphics_V1XDevice;
 	delete scene.window;
 	delete scene.fileSystem;
 }
@@ -171,10 +171,10 @@ int main(int argc, const char** argv) try
 		scene.window->PollEvents();
 
 		// Clear screen
-		scene.graphicsDevice->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		scene.Graphics_V1XDevice->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		// Swap screen back and front buffers
-		scene.graphicsDevice->SwapBuffers();
+		scene.Graphics_V1XDevice->SwapBuffers();
 	}
 
 	CleanScene(scene);
@@ -182,9 +182,9 @@ int main(int argc, const char** argv) try
 	mfTerminate();
 	return 0;
 }
-catch (Framework::Graphics::RenderDeviceError& e)
+catch (Framework::Graphics_V1X::RenderDeviceError& e)
 {
-	std::cout << "Graphics render device error caught:" << std::endl;
+	std::cout << "Graphics_V1X render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }

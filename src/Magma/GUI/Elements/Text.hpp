@@ -3,9 +3,9 @@
 #include "../Element.hpp"
 #include "../ElementRenderer.hpp"
 
-#include <Magma/Framework/Graphics/Font.hpp>
-#include <Magma/Framework/Graphics/TextRenderer.hpp>
-#include <Magma/Framework/Graphics/RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/Font.hpp>
+#include <Magma/Framework/Graphics/1.X/TextRenderer.hpp>
+#include <Magma/Framework/Graphics/1.X/RenderDevice.hpp>
 #include <Magma/Resources/Resource.hpp>
 
 namespace Magma
@@ -95,10 +95,10 @@ namespace Magma
 				Resources::ResourceView m_font;
 
 				Resources::ResourceView m_ps;
-				Framework::Graphics::PixelBindingPoint* m_cbBP;
-				Framework::Graphics::PixelBindingPoint* m_ftBP;
-				Framework::Graphics::Pipeline* m_pp;
-				Framework::Graphics::TextRenderer* m_tr;
+				Framework::Graphics_V1X::PixelBindingPoint* m_cbBP;
+				Framework::Graphics_V1X::PixelBindingPoint* m_ftBP;
+				Framework::Graphics_V1X::Pipeline* m_pp;
+				Framework::Graphics_V1X::TextRenderer* m_tr;
 
 			};
 
@@ -115,39 +115,39 @@ namespace Magma
 			class TextRenderer final : public ElementRenderer
 			{
 			public:
-				TextRenderer(Framework::Graphics::RenderDevice* renderDevice, Resources::ResourceView vertexShader);
+				TextRenderer(Framework::Graphics_V1X::RenderDevice* renderDevice, Resources::ResourceView vertexShader);
 				virtual ~TextRenderer() final;
 
 				virtual void Render(Element* element) final;
 
 			private:
-				Framework::Graphics::RenderDevice* m_renderDevice;
+				Framework::Graphics_V1X::RenderDevice* m_renderDevice;
 
-				Framework::Graphics::ConstantBuffer* m_textDataCB;
-				Framework::Graphics::Sampler2D* m_sampler;
+				Framework::Graphics_V1X::ConstantBuffer* m_textDataCB;
+				Framework::Graphics_V1X::Sampler2D* m_sampler;
 
 				Resources::ResourceView m_vs;
-				Framework::Graphics::VertexBindingPoint* m_cbBP;
+				Framework::Graphics_V1X::VertexBindingPoint* m_cbBP;
 				
 
 				struct PipelineData
 				{
-					Framework::Graphics::Pipeline* pp;
-					Framework::Graphics::VertexShader* vs;
-					Framework::Graphics::PixelShader* ps;
+					Framework::Graphics_V1X::Pipeline* pp;
+					Framework::Graphics_V1X::VertexShader* vs;
+					Framework::Graphics_V1X::PixelShader* ps;
 				};
 
 				struct FontData
 				{
-					Framework::Graphics::TextRenderer* renderer;
-					Framework::Graphics::Font* font;
+					Framework::Graphics_V1X::TextRenderer* renderer;
+					Framework::Graphics_V1X::Font* font;
 				};
 
 				std::list<PipelineData> m_pps;
 				std::list<FontData> m_fonts;
 
-				Framework::Graphics::Pipeline* GetPipeline(Text* text);
-				Framework::Graphics::TextRenderer* GetRenderer(Text* text);
+				Framework::Graphics_V1X::Pipeline* GetPipeline(Text* text);
+				Framework::Graphics_V1X::TextRenderer* GetRenderer(Text* text);
 			};
 		}
 	}

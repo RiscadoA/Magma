@@ -12,22 +12,22 @@ struct ElementConstantBuffer
 	glm::vec4 backgroundColor;
 };
 
-Magma::GUI::Renderer::Renderer(Framework::Graphics::RenderDevice* device)
+Magma::GUI::Renderer::Renderer(Framework::Graphics_V1X::RenderDevice* device)
 	: m_device(device)
 {
 	// Create depth stencil state
 	{
-		Framework::Graphics::DepthStencilStateDesc desc;
+		Framework::Graphics_V1X::DepthStencilStateDesc desc;
 		desc.depthEnabled = false;
 		m_depthStencilState = m_device->CreateDepthStencilState(desc);
 	}
 
 	// Create blend state
 	{
-		Framework::Graphics::BlendStateDesc desc;
+		Framework::Graphics_V1X::BlendStateDesc desc;
 		desc.blendEnabled = true;
-		desc.sourceFactor = Framework::Graphics::BlendFactor::SourceAlpha;
-		desc.destinationFactor = Framework::Graphics::BlendFactor::InverseSourceAlpha;
+		desc.sourceFactor = Framework::Graphics_V1X::BlendFactor::SourceAlpha;
+		desc.destinationFactor = Framework::Graphics_V1X::BlendFactor::InverseSourceAlpha;
 		m_blendState = m_device->CreateBlendState(desc);
 	}
 }

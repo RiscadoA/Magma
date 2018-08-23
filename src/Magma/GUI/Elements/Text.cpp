@@ -32,7 +32,7 @@ Magma::GUI::Elements::Text::Text(
 	m_pp(nullptr)
 {
 	// Check if the passed pixel shader is really a pixel shader
-	if (m_ps->GetData<Resources::Shader>()->type != Framework::Graphics::ShaderType::Pixel)
+	if (m_ps->GetData<Resources::Shader>()->type != Framework::Graphics_V1X::ShaderType::Pixel)
 	{
 		std::stringstream ss;
 		ss << "Failed to create Text element:" << std::endl;
@@ -94,7 +94,7 @@ void Magma::GUI::Elements::Text::ResizeToFit()
 }
 
 Magma::GUI::Elements::TextRenderer::TextRenderer(
-	Framework::Graphics::RenderDevice * renderDevice,
+	Framework::Graphics_V1X::RenderDevice * renderDevice,
 	Resources::ResourceView vertexShader) :
 
 	ElementRenderer(std::type_index(typeid(Text))),
@@ -102,7 +102,7 @@ Magma::GUI::Elements::TextRenderer::TextRenderer(
 	m_vs(vertexShader)
 {
 	// Check if the passed vertex shader is really a vertex shader
-	if (m_vs->GetData<Resources::Shader>()->type != Framework::Graphics::ShaderType::Vertex)
+	if (m_vs->GetData<Resources::Shader>()->type != Framework::Graphics_V1X::ShaderType::Vertex)
 	{
 		std::stringstream ss;
 		ss << "Failed to create TextRenderer:" << std::endl;
@@ -111,7 +111,7 @@ Magma::GUI::Elements::TextRenderer::TextRenderer(
 	}
 
 	// Create constant buffer
-	m_textDataCB = m_renderDevice->CreateConstantBuffer(sizeof(TextDataCB), nullptr, Framework::Graphics::BufferUsage::Dynamic);
+	m_textDataCB = m_renderDevice->CreateConstantBuffer(sizeof(TextDataCB), nullptr, Framework::Graphics_V1X::BufferUsage::Dynamic);
 
 	// Get constant buffer binding point
 	m_cbBP = m_vs->GetData<Resources::Shader>()->vertexShader->GetBindingPoint("TEXT_DATA");
@@ -125,13 +125,13 @@ Magma::GUI::Elements::TextRenderer::TextRenderer(
 
 	// Create sampler 2D for the font
 	{
-		Framework::Graphics::Sampler2DDesc desc;
+		Framework::Graphics_V1X::Sampler2DDesc desc;
 		
-		desc.addressU = Framework::Graphics::TextureAdressMode::Repeat;
-		desc.addressV = Framework::Graphics::TextureAdressMode::Repeat;
-		desc.minFilter = Framework::Graphics::TextureFilter::Linear;
-		desc.magFilter = Framework::Graphics::TextureFilter::Linear;
-		desc.mipmapFilter = Framework::Graphics::TextureFilter::Linear;
+		desc.addressU = Framework::Graphics_V1X::TextureAdressMode::Repeat;
+		desc.addressV = Framework::Graphics_V1X::TextureAdressMode::Repeat;
+		desc.minFilter = Framework::Graphics_V1X::TextureFilter::Linear;
+		desc.magFilter = Framework::Graphics_V1X::TextureFilter::Linear;
+		desc.mipmapFilter = Framework::Graphics_V1X::TextureFilter::Linear;
 		desc.border = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		desc.maxAnisotropy = m_renderDevice->GetMaxAnisotropyLimit();
 
@@ -177,7 +177,7 @@ void Magma::GUI::Elements::TextRenderer::Render(Element * element)
 	text->m_tr->RenderU32(reinterpret_cast<const Framework::String::UnicodePoint*>(text->GetText().c_str()), text->m_ftBP, text->GetScale());
 }
 
-Magma::Framework::Graphics::Pipeline * Magma::GUI::Elements::TextRenderer::GetPipeline(Text * text)
+Magma::Framework::Graphics_V1X::Pipeline * Magma::GUI::Elements::TextRenderer::GetPipeline(Text * text)
 {
 	for (auto& pp : m_pps)
 		if (pp.ps == text->m_ps->GetData<Resources::Shader>()->pixelShader &&
@@ -191,7 +191,7 @@ Magma::Framework::Graphics::Pipeline * Magma::GUI::Elements::TextRenderer::GetPi
 	return m_pps.back().pp;
 }
 
-Magma::Framework::Graphics::TextRenderer * Magma::GUI::Elements::TextRenderer::GetRenderer(Text * text)
+Magma::Framework::Graphics_V1X::TextRenderer * Magma::GUI::Elements::TextRenderer::GetRenderer(Text * text)
 {
 	for (auto& font : m_fonts)
 		if (font.font == &text->m_font->GetData<Resources::Font>()->font)
@@ -199,6 +199,6 @@ Magma::Framework::Graphics::TextRenderer * Magma::GUI::Elements::TextRenderer::G
 
 	m_fonts.emplace_back();
 	m_fonts.back().font = &text->m_font->GetData<Resources::Font>()->font;
-	m_fonts.back().renderer = new Framework::Graphics::TextRenderer(m_renderDevice, m_fonts.back().font, m_vs->GetData<Resources::Shader>()->vertexShader);
+	m_fonts.back().renderer = new Framework::Graphics_V1X::TextRenderer(m_renderDevice, m_fonts.back().font, m_vs->GetData<Resources::Shader>()->vertexShader);
 	return m_fonts.back().renderer;
 }

@@ -1,8 +1,8 @@
 ﻿#include <Magma/Framework/Input/GLWindow.hpp>
-#include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410RenderDevice.hpp>
 
 #include <Magma/Framework/Input/D3DWindow.hpp>
-#include <Magma/Framework/Graphics/D3D11RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/D3D11RenderDevice.hpp>
 
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -28,7 +28,7 @@ using namespace Magma;
 struct Scene
 {
 	Framework::Input::Window* window;
-	Framework::Graphics::RenderDevice* graphicsDevice;
+	Framework::Graphics_V1X::RenderDevice* Graphics_V1XDevice;
 	Framework::Audio::RenderDevice* audioDevice;
 	bool running;
 
@@ -57,15 +57,15 @@ void LoadScene(Scene& scene)
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
 
-	// Create graphics render device
+	// Create Graphics_V1X render device
 	{
-		Framework::Graphics::RenderDeviceSettings settings;
+		Framework::Graphics_V1X::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.graphicsDevice = new Framework::Graphics::OGL410RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::OGL410RenderDevice();
 #else
-		scene.graphicsDevice = new Framework::Graphics::D3D11RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::D3D11RenderDevice();
 #endif
-		scene.graphicsDevice->Init(scene.window, settings);
+		scene.Graphics_V1XDevice->Init(scene.window, settings);
 	}
 
 	// Create audio render device
@@ -77,8 +77,8 @@ void LoadScene(Scene& scene)
 
 	// Add resource importers
 	Resources::Manager::AddImporter<Resources::AudioStreamImporter>(scene.audioDevice);
-	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.graphicsDevice);
-	Resources::Manager::AddImporter<Resources::FontImporter>(scene.graphicsDevice);
+	Resources::Manager::AddImporter<Resources::ShaderImporter>(scene.Graphics_V1XDevice);
+	Resources::Manager::AddImporter<Resources::FontImporter>(scene.Graphics_V1XDevice);
 
 	// Load permament resources<
 	Resources::Manager::Load();
@@ -96,9 +96,9 @@ void LoadScene(Scene& scene)
 
 	// Create GUI Renderer
 	{
-		scene.guiRenderer = new GUI::Renderer(scene.graphicsDevice);
-		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-box"));
-		scene.guiRenderer->AddRenderer<GUI::Elements::TextRenderer>(scene.graphicsDevice, Resources::Manager::GetResource("v-text"));
+		scene.guiRenderer = new GUI::Renderer(scene.Graphics_V1XDevice);
+		scene.guiRenderer->AddRenderer<GUI::Elements::BoxRenderer>(scene.Graphics_V1XDevice, Resources::Manager::GetResource("v-box"));
+		scene.guiRenderer->AddRenderer<GUI::Elements::TextRenderer>(scene.Graphics_V1XDevice, Resources::Manager::GetResource("v-text"));
 	}
 
 	// Create GUI Input
@@ -177,9 +177,9 @@ void CleanScene(Scene& scene)
 	delete scene.guiRenderer;
 	delete scene.guiRoot;
 
-	// Destroy audio and graphics devices, window and filesytem
+	// Destroy audio and Graphics_V1X devices, window and filesytem
 	delete scene.audioDevice;
-	delete scene.graphicsDevice;
+	delete scene.Graphics_V1XDevice;
 	delete scene.window;
 
 	// Terminate resources manager
@@ -202,13 +202,13 @@ int main(int argc, const char** argv) try
 		scene.window->PollEvents();
 
 		// Clear screen
-		scene.graphicsDevice->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		scene.Graphics_V1XDevice->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		// Draw GUI
 		scene.guiRenderer->Render(scene.guiRoot);
 
 		// Swap screen back and front buffers
-		scene.graphicsDevice->SwapBuffers();
+		scene.Graphics_V1XDevice->SwapBuffers();
 	}
 
 	CleanScene(scene);
@@ -216,19 +216,19 @@ int main(int argc, const char** argv) try
 	mfTerminate();
 	return 0;
 }
-catch (Framework::Graphics::ShaderError& e)
+catch (Framework::Graphics_V1X::ShaderError& e)
 {
 	std::cout << "Shader error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	abort();
 }
-catch (Framework::Graphics::RenderDeviceError& e)
+catch (Framework::Graphics_V1X::RenderDeviceError& e)
 {
 	std::cout << "Render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	abort();
 }
-catch (Framework::Graphics::TextError& e)
+catch (Framework::Graphics_V1X::TextError& e)
 {
 	std::cout << "Text error caught:" << std::endl;
 	std::cout << e.what() << std::endl;

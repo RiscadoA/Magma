@@ -6,7 +6,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics
+		namespace Graphics_V1X
 		{
 			/// <summary>
 			///		Thrown when there is an error related to shaders
@@ -18,7 +18,7 @@ namespace Magma
 			};
 
 			/// <summary>
-			///		Thrown when a graphics render device encounters an exception
+			///		Thrown when a Graphics_V1X render device encounters an exception
 			/// </summary>
 			class RenderDeviceError : public std::runtime_error
 			{
