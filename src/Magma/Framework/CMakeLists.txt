@@ -53,6 +53,15 @@ else()
 	message(STATUS "Magma-Framework with STD FileSystem disabled")
 endif()
 
+option (MAGMA_FRAMEWORK_USE_WINDOWS_THREADS "Will the framework use the Windows API for multi-threading support?" ON)
+if (MAGMA_FRAMEWORK_USE_WINDOWS_THREADS)
+	set (MAGMA_FRAMEWORK_USE_WINDOWS_THREADS 1)
+	message(STATUS "Magma-Framework with windows threads enabled")
+else()
+	set (MAGMA_FRAMEWORK_USE_WINDOWS_THREADS 0)
+	message(STATUS "Magma-Framework with windows threads disabled")
+endif()
+
 configure_file(Config.h.in Config.h)
 
 # Add files as library
@@ -67,13 +76,19 @@ include_directories(../../)
 
 # Include external libraries
 include_directories(../../../extern/freetype/include/)
-include_directories(../../../extern/glew/include/)
-include_directories(../../../extern/glfw/include/)
 include_directories(../../../extern/glm/)
-include_directories(../../../extern/openal-soft/include/)
 
-# Link external libraries
+# External libraries
 target_link_libraries(Magma-Framework freetype)
-target_link_libraries(Magma-Framework glew_s)
-target_link_libraries(Magma-Framework glfw)
-target_link_libraries(Magma-Framework OpenAL)
+
+if(MAGMA_FRAMEWORK_USE_OPENGL)
+	include_directories(../../../extern/glew/include/)
+	include_directories(../../../extern/glfw/include/)
+	target_link_libraries(Magma-Framework glew_s)
+	target_link_libraries(Magma-Framework glfw)
+endif()
+
+if(MAGMA_FRAMEWORK_USE_OPENAL)
+	include_directories(../../../extern/openal-soft/include/)
+	target_link_libraries(Magma-Framework OpenAL)
+endif()

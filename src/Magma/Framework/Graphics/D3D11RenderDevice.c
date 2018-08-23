@@ -780,8 +780,12 @@ void mfgD3D11DestroyPipeline(void* pp)
 #endif
 
 	mfgD3D11Pipeline* d3dPP = pp;
-	--d3dPP->vertex->base.object.referenceCount;
-	--d3dPP->pixel->base.object.referenceCount;
+	mfError err = mfmDecObjectRef(&d3dPP->vertex->base.object);
+	if (err != MFM_ERROR_OKAY)
+		return err;
+	err = mfmDecObjectRef(&d3dPP->pixel->base.object);
+	if (err != MFM_ERROR_OKAY)
+		return err;
 	if (mfmDestroyObject(&d3dPP->base.object) != MFM_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPP->base.renderDevice)->pool48, d3dPP) != MFM_ERROR_OKAY)
@@ -813,8 +817,15 @@ mfError mfgD3D11CreatePipeline(mfgRenderDevice* rd, mfgPipeline** pp, mfgVertexS
 	// Init pipeline
 	d3dPP->vertex = vs;
 	d3dPP->pixel = ps;
-	++vs->object.referenceCount;
-	++ps->object.referenceCount;
+
+	{
+		mfError err = mfmIncObjectRef(&d3dPP->pixel->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+		err = mfmIncObjectRef(&d3dPP->pixel->base.object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
+	}
 
 	*pp = d3dPP;
 

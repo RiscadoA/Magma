@@ -102,40 +102,60 @@ static mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSi
 	return stream;
 }
 
-void mfsInitStream()
+mfError mfsInitStream()
 {
+	mfError err = MFS_ERROR_OKAY;
+
 	// Initialize mfsInStream stream
 	mfsInStream = mfsCreateFileStream(stdin, mfsInDefaultBuffer, sizeof(mfsInDefaultBuffer));
-	mfsInStream->object.referenceCount++;
+	err = mfmIncObjectRef(&mfsInStream->object);
+	if (err != MFM_ERROR_OKAY)
+		return err;
 	
 	// Initialize mfsOutStream stream
 	mfsOutStream = mfsCreateFileStream(stdout, mfsOutDefaultBuffer, sizeof(mfsOutDefaultBuffer));
-	mfsOutStream->object.referenceCount++;
+	err = mfmIncObjectRef(&mfsOutStream->object);
+	if (err != MFM_ERROR_OKAY)
+		return err;
 
 	// Initialize mfsErrStream stream
 	mfsErrStream = mfsCreateFileStream(stderr, mfsErrDefaultBuffer, sizeof(mfsErrDefaultBuffer));
-	mfsErrStream->object.referenceCount++;
+	err = mfmIncObjectRef(&mfsErrStream->object);
+	if (err != MFM_ERROR_OKAY)
+		return err;
+
+	return err;
 }
 
-void mfsTerminateStream()
+mfError mfsTerminateStream()
 {
+	mfError err = MFS_ERROR_OKAY;
+
 	if (mfsInStream != NULL)
 	{
-		--mfsInStream->object.referenceCount;
+		err = mfmDecObjectRef(&mfsInStream->object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
 		mfsInStream->object.destructorFunc(mfsInStream);
 	}
 
 	if (mfsOutStream != NULL)
 	{
-		--mfsOutStream->object.referenceCount;
+		err = mfmDecObjectRef(&mfsInStream->object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
 		mfsOutStream->object.destructorFunc(mfsOutStream);
 	}
 
 	if (mfsErrStream != NULL)
 	{
-		--mfsErrStream->object.referenceCount;
+		err = mfmDecObjectRef(&mfsInStream->object);
+		if (err != MFM_ERROR_OKAY)
+			return err;
 		mfsErrStream->object.destructorFunc(mfsErrStream);
 	}
+
+	return err;
 }
 
 mfError mfsWrite(mfsStream * stream, const mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize)
