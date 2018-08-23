@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ShaderPreprocessor.hpp"
+#include "ShaderPreprocessor.hpp"
 
 #include <vector>
 #include <string>
@@ -10,7 +10,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics
+		namespace Graphics_V1X
 		{
 			namespace Version_1_X
 			{

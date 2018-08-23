@@ -1,5 +1,5 @@
-﻿#include <Magma/Framework/Graphics/D3D11RenderDevice.h>
-#include <Magma/Framework/Graphics/OGL4RenderDevice.h>
+﻿#include <Magma/Framework/Graphics/2.X/D3D11RenderDevice.h>
+#include <Magma/Framework/Graphics/2.X/OGL4RenderDevice.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <Magma/Framework/String/Stream.h>
 
@@ -9,25 +9,25 @@
 #include <stddef.h>
 
 mfiWindow* window = NULL;
-mfgRenderDevice* renderDevice = NULL;
+mfgV2XRenderDevice* renderDevice = NULL;
 
 mfmBool windowOpen = MFM_TRUE;
 
-mfgVertexShader* vs = NULL;
-mfgPixelShader* ps = NULL;
-mfgPipeline* pp = NULL;
-mfgVertexBuffer* vb = NULL;
-mfgVertexLayout* vl = NULL;
-mfgVertexArray* va = NULL;
-mfgIndexBuffer* ib = NULL;
-mfgConstantBuffer* cb = NULL;
-mfgBindingPoint* cbBP = NULL;
-mfgTexture2D* tex = NULL;
-mfgSampler* sampler = NULL;
-mfgBindingPoint* texBP = NULL;
-mfgRenderTexture* rt = NULL;
-mfgDepthStencilTexture* dst = NULL;
-mfgFramebuffer* fb = NULL;
+mfgV2XVertexShader* vs = NULL;
+mfgV2XPixelShader* ps = NULL;
+mfgV2XPipeline* pp = NULL;
+mfgV2XVertexBuffer* vb = NULL;
+mfgV2XVertexLayout* vl = NULL;
+mfgV2XVertexArray* va = NULL;
+mfgV2XIndexBuffer* ib = NULL;
+mfgV2XConstantBuffer* cb = NULL;
+mfgV2XBindingPoint* cbBP = NULL;
+mfgV2XTexture2D* tex = NULL;
+mfgV2XSampler* sampler = NULL;
+mfgV2XBindingPoint* texBP = NULL;
+mfgV2XRenderTexture* rt = NULL;
+mfgV2XDepthStencilTexture* dst = NULL;
+mfgV2XFramebuffer* fb = NULL;
 
 struct Vertex
 {
@@ -65,13 +65,13 @@ int main(int argc, const char** argv)
 
 	// Create render device
 	{
-		mfgRenderDeviceDesc desc;
+		mfgV2XRenderDeviceDesc desc;
 		desc.vsyncEnabled = MFM_TRUE;
 #ifdef USE_GL
-		if (mfgCreateOGL4RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
+		if (mfgV2XCreateOGL4RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
 			abort();
 #else
-		if(mfgCreateD3D11RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
+		if(mfgV2XCreateD3D11RenderDevice(&renderDevice, window, &desc, NULL) != MFG_ERROR_OKAY)
 			abort();
 #endif
 	}
@@ -158,10 +158,10 @@ int main(int argc, const char** argv)
 		};
 
 		// Create shader
-		if (mfgCreateVertexShader(renderDevice, &vs, bytecode, sizeof(bytecode), metaData) != MFG_ERROR_OKAY)
+		if (mfgV2XCreateVertexShader(renderDevice, &vs, bytecode, sizeof(bytecode), metaData) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
-			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 			mfsPrintFormatUTF8(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
@@ -230,10 +230,10 @@ int main(int argc, const char** argv)
 		};
 
 		// Create shader
-		if (mfgCreatePixelShader(renderDevice, &ps, bytecode, sizeof(bytecode), metaData) != MFG_ERROR_OKAY)
+		if (mfgV2XCreatePixelShader(renderDevice, &ps, bytecode, sizeof(bytecode), metaData) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
-			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 			mfsPrintFormatUTF8(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
@@ -241,10 +241,10 @@ int main(int argc, const char** argv)
 	}
 
 	// Create pipeline
-	if (mfgCreatePipeline(renderDevice, &pp, vs, ps) != MFG_ERROR_OKAY)
+	if (mfgV2XCreatePipeline(renderDevice, &pp, vs, ps) != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
@@ -282,10 +282,10 @@ int main(int argc, const char** argv)
 		vertexes[3].u = 1.0f;
 		vertexes[3].v = 0.0f;
 
-		if (mfgCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
+		if (mfgV2XCreateVertexBuffer(renderDevice, &vb, sizeof(vertexes), vertexes, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
-			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 			mfsPrintFormatUTF8(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
@@ -294,10 +294,10 @@ int main(int argc, const char** argv)
 
 	// Create vertex layout
 	{
-		mfgVertexElement elements[2];
+		mfgV2XVertexElement elements[2];
 		
-		mfgDefaultVertexElement(&elements[0]);
-		mfgDefaultVertexElement(&elements[1]);
+		mfgV2XDefaultVertexElement(&elements[0]);
+		mfgV2XDefaultVertexElement(&elements[1]);
 
 		elements[0].bufferIndex = 0;
 		strcpy(elements[0].name, u8"position");
@@ -314,10 +314,10 @@ int main(int argc, const char** argv)
 		elements[1].type = MFG_FLOAT;
 
 		// Create layout
-		if (mfgCreateVertexLayout(renderDevice, &vl, 2, elements, vs) != MFG_ERROR_OKAY)
+		if (mfgV2XCreateVertexLayout(renderDevice, &vl, 2, elements, vs) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
-			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 			mfsPrintFormatUTF8(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
@@ -325,10 +325,10 @@ int main(int argc, const char** argv)
 	}
 
 	// Create vertex array
-	if (mfgCreateVertexArray(renderDevice, &va, 1, &vb, vl) != MFG_ERROR_OKAY)
+	if (mfgV2XCreateVertexArray(renderDevice, &va, 1, &vb, vl) != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
@@ -342,10 +342,10 @@ int main(int argc, const char** argv)
 			0, 3, 2,
 		};
 
-		if (mfgCreateIndexBuffer(renderDevice, &ib, sizeof(indices), indices, MFG_USHORT, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
+		if (mfgV2XCreateIndexBuffer(renderDevice, &ib, sizeof(indices), indices, MFG_USHORT, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
-			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 			mfsPrintFormatUTF8(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
@@ -353,20 +353,20 @@ int main(int argc, const char** argv)
 	}
 
 	// Create constant buffer
-	if (mfgCreateConstantBuffer(renderDevice, &cb, sizeof(float[4]), NULL, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
+	if (mfgV2XCreateConstantBuffer(renderDevice, &cb, sizeof(float[4]), NULL, MFG_USAGE_DYNAMIC) != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
 
 	// Get binding point
-	if (mfgGetVertexShaderBindingPoint(renderDevice, &cbBP, vs, u8"transform") != MFG_ERROR_OKAY)
+	if (mfgV2XGetVertexShaderBindingPoint(renderDevice, &cbBP, vs, u8"transform") != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
@@ -380,10 +380,10 @@ int main(int argc, const char** argv)
 			0.0f, 0.0f, 1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 		
-		if (mfgCreateTexture2D(renderDevice, &tex, 2, 2, MFG_RGBA32FLOAT, data, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
+		if (mfgV2XCreateTexture2D(renderDevice, &tex, 2, 2, MFG_RGBA32FLOAT, data, MFG_USAGE_STATIC) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
-			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 			mfsPrintFormatUTF8(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
@@ -392,16 +392,16 @@ int main(int argc, const char** argv)
 
 	// Create sampler
 	{
-		mfgSamplerDesc desc;
-		mfgDefaultSamplerDesc(&desc);
+		mfgV2XSamplerDesc desc;
+		mfgV2XDefaultSamplerDesc(&desc);
 
 		desc.minFilter = MFG_LINEAR;
 		desc.magFilter = MFG_LINEAR;
 
-		if (mfgCreateSampler(renderDevice, &sampler, &desc) != MFG_ERROR_OKAY)
+		if (mfgV2XCreateSampler(renderDevice, &sampler, &desc) != MFG_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
-			mfgGetErrorString(renderDevice, err, sizeof(err));
+			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 			mfsPrintFormatUTF8(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
@@ -409,40 +409,40 @@ int main(int argc, const char** argv)
 	}
 
 	// Get binding point
-	if (mfgGetPixelShaderBindingPoint(renderDevice, &texBP, ps, u8"texture") != MFG_ERROR_OKAY)
+	if (mfgV2XGetPixelShaderBindingPoint(renderDevice, &texBP, ps, u8"texture") != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
 
 	// Create render texture
-	if (mfgCreateRenderTexture(renderDevice, &rt, 800, 600, MFG_RGBA8UNORM) != MFG_ERROR_OKAY)
+	if (mfgV2XCreateRenderTexture(renderDevice, &rt, 800, 600, MFG_RGBA8UNORM) != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
 
 	// Create depth stencil texture
-	if (mfgCreateDepthStencilTexture(renderDevice, &dst, 800, 600, MFG_DEPTH24STENCIL8) != MFG_ERROR_OKAY)
+	if (mfgV2XCreateDepthStencilTexture(renderDevice, &dst, 800, 600, MFG_DEPTH24STENCIL8) != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
 	
 	// Create framebuffer
-	if (mfgCreateFramebuffer(renderDevice, &fb, 1, &rt, dst) != MFG_ERROR_OKAY)
+	if (mfgV2XCreateFramebuffer(renderDevice, &fb, 1, &rt, dst) != MFG_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit err[512];
-		mfgGetErrorString(renderDevice, err, sizeof(err));
+		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 		mfsPrintFormatUTF8(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
@@ -454,20 +454,20 @@ int main(int argc, const char** argv)
 	{
 		window->pollEvents(window);
 
-		if (mfgSetFramebuffer(renderDevice, fb) != MFG_ERROR_OKAY)
+		if (mfgV2XSetFramebuffer(renderDevice, fb) != MFG_ERROR_OKAY)
 			abort();
 		
 		x += 0.0001f;
 
 		// Clear
 
-		if (mfgClearColor(renderDevice, 1.0f, 0.0f, 1.0f, 1.0f) != MFG_ERROR_OKAY)
+		if (mfgV2XClearColor(renderDevice, 1.0f, 0.0f, 1.0f, 1.0f) != MFG_ERROR_OKAY)
 			abort();
 
-		if (mfgSetFramebuffer(renderDevice, NULL) != MFG_ERROR_OKAY)
+		if (mfgV2XSetFramebuffer(renderDevice, NULL) != MFG_ERROR_OKAY)
 			abort();
 
-		if (mfgClearColor(renderDevice, 0.0f, 0.0f, 0.2f, 1.0f) != MFG_ERROR_OKAY)
+		if (mfgV2XClearColor(renderDevice, 0.0f, 0.0f, 0.2f, 1.0f) != MFG_ERROR_OKAY)
 			abort();
 
 		// Render rectangle
@@ -476,10 +476,10 @@ int main(int argc, const char** argv)
 			{
 				float* cbData;
 
-				if (mfgMapConstantBuffer(renderDevice, cb, &cbData) != MFG_ERROR_OKAY)
+				if (mfgV2XMapConstantBuffer(renderDevice, cb, &cbData) != MFG_ERROR_OKAY)
 				{
 					mfsUTF8CodeUnit err[512];
-					mfgGetErrorString(renderDevice, err, sizeof(err));
+					mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 					mfsPrintFormatUTF8(mfsErrStream, err);
 					mfsFlush(mfsErrStream);
 					abort();
@@ -490,10 +490,10 @@ int main(int argc, const char** argv)
 				cbData[2] = 0.0f;
 				cbData[3] = 1.0f;
 	
-				if (mfgUnmapConstantBuffer(renderDevice, cb) != MFG_ERROR_OKAY)
+				if (mfgV2XUnmapConstantBuffer(renderDevice, cb) != MFG_ERROR_OKAY)
 				{
 					mfsUTF8CodeUnit err[512];
-					mfgGetErrorString(renderDevice, err, sizeof(err));
+					mfgV2XGetErrorString(renderDevice, err, sizeof(err));
 					mfsPrintFormatUTF8(mfsErrStream, err);
 					mfsFlush(mfsErrStream);
 					abort();
@@ -501,51 +501,51 @@ int main(int argc, const char** argv)
 			}
 
 			// Draw vertex array
-			if (mfgSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
+			if (mfgV2XSetPipeline(renderDevice, pp) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
+			if (mfgV2XBindConstantBuffer(renderDevice, cbBP, cb) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgBindRenderTexture(renderDevice, texBP, rt) != MFG_ERROR_OKAY)
+			if (mfgV2XBindRenderTexture(renderDevice, texBP, rt) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
+			if (mfgV2XBindSampler(renderDevice, texBP, sampler) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
+			if (mfgV2XSetVertexArray(renderDevice, va) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgSetIndexBuffer(renderDevice, ib) != MFG_ERROR_OKAY)
+			if (mfgV2XSetIndexBuffer(renderDevice, ib) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
+			if (mfgV2XDrawTrianglesIndexed(renderDevice, 0, 6) != MFG_ERROR_OKAY)
 				abort();
-			if (mfgBindRenderTexture(renderDevice, texBP, NULL) != MFG_ERROR_OKAY)
+			if (mfgV2XBindRenderTexture(renderDevice, texBP, NULL) != MFG_ERROR_OKAY)
 				abort();
 		}
 
-		if (mfgSwapBuffers(renderDevice) != MFG_ERROR_OKAY)
+		if (mfgV2XSwapBuffers(renderDevice) != MFG_ERROR_OKAY)
 			abort();
 	}
 
-	mfgDestroyFramebuffer(fb);
-	mfgDestroyDepthStencilTexture(dst);
-	mfgDestroyRenderTexture(rt);
+	mfgV2XDestroyFramebuffer(fb);
+	mfgV2XDestroyDepthStencilTexture(dst);
+	mfgV2XDestroyRenderTexture(rt);
 
-	mfgDestroySampler(sampler);
-	mfgDestroyTexture2D(tex);
+	mfgV2XDestroySampler(sampler);
+	mfgV2XDestroyTexture2D(tex);
 
-	mfgDestroyConstantBuffer(cb);
+	mfgV2XDestroyConstantBuffer(cb);
 
-	mfgDestroyIndexBuffer(ib);
-	mfgDestroyVertexArray(va);
-	mfgDestroyVertexLayout(vl);
-	mfgDestroyVertexBuffer(vb);
+	mfgV2XDestroyIndexBuffer(ib);
+	mfgV2XDestroyVertexArray(va);
+	mfgV2XDestroyVertexLayout(vl);
+	mfgV2XDestroyVertexBuffer(vb);
 
-	mfgDestroyPipeline(pp);
-	mfgDestroyPixelShader(ps);
-	mfgDestroyVertexShader(vs);
+	mfgV2XDestroyPipeline(pp);
+	mfgV2XDestroyPixelShader(ps);
+	mfgV2XDestroyVertexShader(vs);
 
 #ifdef USE_GL
-	mfgDestroyOGL4RenderDevice(renderDevice);
+	mfgV2XDestroyOGL4RenderDevice(renderDevice);
 	mfiDestroyGLWindow(window);
 #else
-	mfgDestroyD3D11RenderDevice(renderDevice);
+	mfgV2XDestroyD3D11RenderDevice(renderDevice);
 	mfiDestroyD3DWindow(window);
 #endif
 

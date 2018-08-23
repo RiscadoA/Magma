@@ -6,10 +6,10 @@
 const int MinorVersion = 2;
 
 using namespace Magma::Framework;
-using namespace Magma::Framework::Graphics;
-using namespace Magma::Framework::Graphics::Version_1_X;
+using namespace Magma::Framework::Graphics_V1X;
+using namespace Magma::Framework::Graphics_V1X::Version_1_X;
 
-std::vector<ShaderFunction> Magma::Framework::Graphics::Version_1_X::ShaderFunctions =
+std::vector<ShaderFunction> Magma::Framework::Graphics_V1X::Version_1_X::ShaderFunctions =
 {
 	// 1.0
 
@@ -1043,7 +1043,7 @@ ShaderVariableType Check(ShaderSTNode* node, ShaderCompilerData& data)
 	return ShaderVariableType::Invalid;
 }
 
-void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
+void Magma::Framework::Graphics_V1X::Version_1_X::ShaderAnnotator::Run(ShaderSTNode * tree, ShaderCompilerData & data)
 {
 	if (data.minorVersion > MinorVersion)
 	{
@@ -1057,7 +1057,7 @@ void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Run(ShaderSTNode 
 	Check(tree, data);
 }
 
-void Magma::Framework::Graphics::Version_1_X::ShaderAnnotator::Print(ShaderSTNode * node, size_t indentation)
+void Magma::Framework::Graphics_V1X::Version_1_X::ShaderAnnotator::Print(ShaderSTNode * node, size_t indentation)
 {
 	ShaderParser::Print(node, indentation);
 }

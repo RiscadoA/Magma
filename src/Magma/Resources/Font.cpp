@@ -4,7 +4,7 @@
 
 Magma::Resources::Font::Font(
 	Resource * rsc,
-	Framework::Graphics::RenderDevice * device,
+	Framework::Graphics_V1X::RenderDevice * device,
 	const unsigned char * data,
 	size_t size,
 	size_t charWidth,
@@ -19,7 +19,7 @@ Magma::Resources::Font::Font(
 
 }
 
-Magma::Resources::FontImporter::FontImporter(Manager* manager, Framework::Graphics::RenderDevice* device)
+Magma::Resources::FontImporter::FontImporter(Manager* manager, Framework::Graphics_V1X::RenderDevice* device)
 	: Importer("font", manager), m_pool(sizeof(Font), 256), m_device(device)
 {
 	

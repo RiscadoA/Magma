@@ -1,11 +1,11 @@
 #include <iostream>
 
 #include <Magma/Framework/Files/STDFileSystem.hpp>
-#include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
-#include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
-#include <Magma/Framework/Graphics/D3D11Assembler.hpp>
-#include <Magma/Framework/Graphics/OGL410Assembler.hpp>
-#include <Magma/Framework/Graphics/ShaderCompiler.hpp>
+#include <Magma/Framework/Graphics/1.X/BytecodeAssembler.hpp>
+#include <Magma/Framework/Graphics/1.X/MetaDataAssembler.hpp>
+#include <Magma/Framework/Graphics/1.X/D3D11Assembler.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410Assembler.hpp>
+#include <Magma/Framework/Graphics/1.X/ShaderCompiler.hpp>
 #include <Magma/Framework/Memory/Endianness.hpp>
 #include <Magma/Framework/Entry.h>
 
@@ -38,7 +38,7 @@ int main(int argc, const char** argv)
 				fileSystem->Read(file, code, size);
 				fileSystem->CloseFile(file);
 				code[size] = '\0';
-				Graphics::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+				Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			}
 
 			// Write bytecode
@@ -56,8 +56,8 @@ int main(int argc, const char** argv)
 			}
 
 			// Assemble shader 
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 			// Write binary MSL shader object
 			{
@@ -74,12 +74,12 @@ int main(int argc, const char** argv)
 				fileSystem->CloseFile(file);
 			}
 
-			Graphics::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
+			Graphics_V1X::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
 
 			// Write HLSL shader
 			{
 				std::string compiled;
-				Graphics::D3D11Assembler::Assemble(data, compiled);
+				Graphics_V1X::D3D11Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/vertex.hlsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());
@@ -89,7 +89,7 @@ int main(int argc, const char** argv)
 			// Write GLSL shader
 			{
 				std::string compiled;
-				Graphics::OGL410Assembler::Assemble(data, compiled);
+				Graphics_V1X::OGL410Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/vertex.glsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());
@@ -115,7 +115,7 @@ int main(int argc, const char** argv)
 				fileSystem->Read(file, code, size);
 				fileSystem->CloseFile(file);
 				code[size] = '\0';
-				Graphics::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+				Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			}
 
 			// Write bytecode
@@ -133,8 +133,8 @@ int main(int argc, const char** argv)
 			}
 
 			// Assemble shader 
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 			// Write binary MSL shader object
 			{
@@ -151,12 +151,12 @@ int main(int argc, const char** argv)
 				fileSystem->CloseFile(file);
 			}
 
-			Graphics::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
+			Graphics_V1X::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
 
 			// Write HLSL shader
 			{
 				std::string compiled;
-				Graphics::D3D11Assembler::Assemble(data, compiled);
+				Graphics_V1X::D3D11Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/pixel.hlsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());
@@ -166,7 +166,7 @@ int main(int argc, const char** argv)
 			// Write GLSL shader
 			{
 				std::string compiled;
-				Graphics::OGL410Assembler::Assemble(data, compiled);
+				Graphics_V1X::OGL410Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/pixel.glsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());

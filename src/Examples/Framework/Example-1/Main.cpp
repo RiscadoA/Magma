@@ -1,10 +1,10 @@
 ﻿#include <Magma/Framework/Input/GLWindow.hpp>
-#include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
-#include <Magma/Framework/Graphics/OGL410Assembler.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410Assembler.hpp>
 
 #include <Magma/Framework/Input/D3DWindow.hpp>
-#include <Magma/Framework/Graphics/D3D11RenderDevice.hpp>
-#include <Magma/Framework/Graphics/D3D11Assembler.hpp>
+#include <Magma/Framework/Graphics/1.X/D3D11RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/D3D11Assembler.hpp>
 
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -12,9 +12,9 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Magma/Framework/Graphics/ShaderData.hpp>
-#include <Magma/Framework/Graphics/BytecodeAssembler.hpp>
-#include <Magma/Framework/Graphics/MetaDataAssembler.hpp>
+#include <Magma/Framework/Graphics/1.X/ShaderData.hpp>
+#include <Magma/Framework/Graphics/1.X/BytecodeAssembler.hpp>
+#include <Magma/Framework/Graphics/1.X/MetaDataAssembler.hpp>
 
 //#define USE_GL
 
@@ -29,22 +29,22 @@ struct Vertex
 struct Scene
 {
 	Input::Window* window;
-	Graphics::RenderDevice* device;
+	Graphics_V1X::RenderDevice* device;
 	Files::FileSystem* fileSystem;
 	bool running;
 
-	Graphics::VertexShader* vertexShader;
-	Graphics::PixelShader* pixelShader;
-	Graphics::Pipeline* pipeline;
+	Graphics_V1X::VertexShader* vertexShader;
+	Graphics_V1X::PixelShader* pixelShader;
+	Graphics_V1X::Pipeline* pipeline;
 
-	Graphics::VertexArray* vertexArray;
-	Graphics::VertexBuffer* vertexBuffer;
-	Graphics::VertexBuffer* vertexBuffer2;
-	Graphics::VertexLayout* vertexLayout;
-	Graphics::IndexBuffer* indexBuffer;
+	Graphics_V1X::VertexArray* vertexArray;
+	Graphics_V1X::VertexBuffer* vertexBuffer;
+	Graphics_V1X::VertexBuffer* vertexBuffer2;
+	Graphics_V1X::VertexLayout* vertexLayout;
+	Graphics_V1X::IndexBuffer* indexBuffer;
 
-	Graphics::RasterState* rasterState;
-	Graphics::DepthStencilState* depthStencilState;
+	Graphics_V1X::RasterState* rasterState;
+	Graphics_V1X::DepthStencilState* depthStencilState;
 };
 
 void LoadScene(Scene& scene)
@@ -69,11 +69,11 @@ void LoadScene(Scene& scene)
 	// Create context
 	{
 		
-		Graphics::RenderDeviceSettings settings;
+		Graphics_V1X::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.device = new Framework::Graphics::OGL410RenderDevice();
+		scene.device = new Framework::Graphics_V1X::OGL410RenderDevice();
 #else
-		scene.device = new Framework::Graphics::D3D11RenderDevice();
+		scene.device = new Framework::Graphics_V1X::D3D11RenderDevice();
 #endif
 		scene.device->Init(scene.window, settings);
 	}
@@ -91,7 +91,7 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
 
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
 		}
 
 		char bytecode[2048];
@@ -105,16 +105,16 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
 
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 		}
 
-		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+		Graphics_V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
 		try
 		{
 			scene.vertexShader = scene.device->CreateVertexShader(shaderData);
 		}
-		catch (Graphics::RenderDeviceError& err)
+		catch (Graphics_V1X::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -135,7 +135,7 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
 
-			metaDataSize = Graphics::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
 		}
 
 		char bytecode[2048];
@@ -149,16 +149,16 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
 
-			bytecodeSize = Graphics::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 		}
 
-		Graphics::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+		Graphics_V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
 		try
 		{
 			scene.pixelShader = scene.device->CreatePixelShader(shaderData);
 		}
-		catch (Graphics::RenderDeviceError& err)
+		catch (Graphics_V1X::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -173,7 +173,7 @@ void LoadScene(Scene& scene)
 
 	// Load vertex buffer
 	{
-		scene.vertexBuffer = scene.device->CreateVertexBuffer(48, nullptr, Graphics::BufferUsage::Dynamic);
+		scene.vertexBuffer = scene.device->CreateVertexBuffer(48, nullptr, Graphics_V1X::BufferUsage::Dynamic);
 	}
 
 	// Load vertex buffer 2
@@ -191,28 +191,28 @@ void LoadScene(Scene& scene)
 
 	// Create vertex layout
 	{
-		Graphics::VertexElement elements[2];
+		Graphics_V1X::VertexElement elements[2];
 
 		elements[0].bufferIndex = 0;
 		elements[0].name = "position";
 		elements[0].offset = offsetof(Vertex, x);
 		elements[0].size = 3;
 		elements[0].stride = sizeof(Vertex);
-		elements[0].type = Graphics::VertexElementType::Float;
+		elements[0].type = Graphics_V1X::VertexElementType::Float;
 
 		elements[1].bufferIndex = 1;
 		elements[1].name = "color";
 		elements[1].offset = 0;
 		elements[1].size = 4;
 		elements[1].stride = sizeof(glm::vec4);
-		elements[1].type = Graphics::VertexElementType::Float;
+		elements[1].type = Graphics_V1X::VertexElementType::Float;
 
 		scene.vertexLayout = scene.device->CreateVertexLayout(2, elements, scene.vertexShader);
 	}
 
 	// Create vertex array
 	{
-		Graphics::VertexBuffer* buffers[] =
+		Graphics_V1X::VertexBuffer* buffers[] =
 		{
 			scene.vertexBuffer,
 			scene.vertexBuffer2,
@@ -228,21 +228,21 @@ void LoadScene(Scene& scene)
 			2, 3, 1,
 		};
 
-		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics::IndexType::UInt, sizeof(data), data);
+		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics_V1X::IndexType::UInt, sizeof(data), data);
 	}
 
 	// Create raster state
 	{
-		Graphics::RasterStateDesc desc;
+		Graphics_V1X::RasterStateDesc desc;
 
-		desc.rasterMode = Graphics::RasterMode::Wireframe;
+		desc.rasterMode = Graphics_V1X::RasterMode::Wireframe;
 
 		scene.rasterState = scene.device->CreateRasterState(desc);
 	}
 
 	// Create depth stencil state
 	{
-		Graphics::DepthStencilStateDesc desc;
+		Graphics_V1X::DepthStencilStateDesc desc;
 		
 		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
 	}
@@ -320,13 +320,13 @@ int main(int argc, const char** argv) try
 
 	mfTerminate();
 }
-catch (Graphics::ShaderError& e)
+catch (Graphics_V1X::ShaderError& e)
 {
 	std::cout << "Shader error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }
-catch (Graphics::RenderDeviceError& e)
+catch (Graphics_V1X::RenderDeviceError& e)
 {
 	std::cout << "Render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;

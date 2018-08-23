@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Memory/Type.h"
+#include "../../Memory/Type.h"
 
 #ifdef __cplusplus
 extern "C"

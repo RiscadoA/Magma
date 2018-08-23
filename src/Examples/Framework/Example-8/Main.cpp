@@ -1,10 +1,10 @@
 ﻿#include <Magma/Framework/Input/GLWindow.hpp>
-#include <Magma/Framework/Graphics/OGL410RenderDevice.hpp>
-#include <Magma/Framework/Graphics/OGL410Assembler.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/OGL410Assembler.hpp>
 
 #include <Magma/Framework/Input/D3DWindow.hpp>
-#include <Magma/Framework/Graphics/D3D11RenderDevice.hpp>
-#include <Magma/Framework/Graphics/D3D11Assembler.hpp>
+#include <Magma/Framework/Graphics/1.X/D3D11RenderDevice.hpp>
+#include <Magma/Framework/Graphics/1.X/D3D11Assembler.hpp>
 
 #include <Magma/Framework/Files/STDFileSystem.hpp>
 #include <Magma/Framework/String/Conversion.hpp>
@@ -12,11 +12,11 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Magma/Framework/Graphics/ShaderData.hpp>
-#include <Magma/Framework/Graphics/ShaderCompiler.hpp>
+#include <Magma/Framework/Graphics/1.X/ShaderData.hpp>
+#include <Magma/Framework/Graphics/1.X/ShaderCompiler.hpp>
 
-#include <Magma/Framework/Graphics/Font.hpp>
-#include <Magma/Framework/Graphics/TextRenderer.hpp>
+#include <Magma/Framework/Graphics/1.X/Font.hpp>
+#include <Magma/Framework/Graphics/1.X/TextRenderer.hpp>
 
 #define USE_GL
 
@@ -32,26 +32,26 @@ struct Vertex
 struct Scene
 {
 	Input::Window* window;
-	Graphics::RenderDevice* device;
+	Graphics_V1X::RenderDevice* device;
 	Files::FileSystem* fileSystem;
 	bool running;
 
-	Graphics::VertexShader* vertexShader;
-	Graphics::PixelShader* pixelShader;
-	Graphics::Pipeline* pipeline;
+	Graphics_V1X::VertexShader* vertexShader;
+	Graphics_V1X::PixelShader* pixelShader;
+	Graphics_V1X::Pipeline* pipeline;
 
-	Graphics::Sampler2D* sampler;
-	Graphics::PixelBindingPoint* textureBP;
+	Graphics_V1X::Sampler2D* sampler;
+	Graphics_V1X::PixelBindingPoint* textureBP;
 
-	Graphics::ConstantBuffer* transformBuffer;
-	Graphics::VertexBindingPoint* transformBP;
+	Graphics_V1X::ConstantBuffer* transformBuffer;
+	Graphics_V1X::VertexBindingPoint* transformBP;
 
-	Graphics::RasterState* rasterState;
-	Graphics::DepthStencilState* depthStencilState;
-	Graphics::BlendState* blendState;
+	Graphics_V1X::RasterState* rasterState;
+	Graphics_V1X::DepthStencilState* depthStencilState;
+	Graphics_V1X::BlendState* blendState;
 
-	Graphics::Font* font;
-	Graphics::TextRenderer* textRenderer;
+	Graphics_V1X::Font* font;
+	Graphics_V1X::TextRenderer* textRenderer;
 };
 
 struct Transform
@@ -84,11 +84,11 @@ void LoadScene(Scene& scene)
 
 	// Create context
 	{
-		Graphics::RenderDeviceSettings settings;
+		Graphics_V1X::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.device = new Framework::Graphics::OGL410RenderDevice();
+		scene.device = new Framework::Graphics_V1X::OGL410RenderDevice();
 #else
-		scene.device = new Framework::Graphics::D3D11RenderDevice();
+		scene.device = new Framework::Graphics_V1X::D3D11RenderDevice();
 #endif
 		scene.device->Init(scene.window, settings);
 	}
@@ -105,17 +105,17 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-			objectSize = Graphics::ShaderCompiler::Run(code, object, sizeof(object));
+			objectSize = Graphics_V1X::ShaderCompiler::Run(code, object, sizeof(object));
 			delete[] code;
 		}
 
-		Graphics::ShaderData shaderData(object, objectSize);
+		Graphics_V1X::ShaderData shaderData(object, objectSize);
 
 		try
 		{
 			scene.vertexShader = scene.device->CreateVertexShader(shaderData);
 		}
-		catch (Graphics::RenderDeviceError& err)
+		catch (Graphics_V1X::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -135,17 +135,17 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-			objectSize = Graphics::ShaderCompiler::Run(code, object, sizeof(object));
+			objectSize = Graphics_V1X::ShaderCompiler::Run(code, object, sizeof(object));
 			delete[] code;
 		}
 
-		Graphics::ShaderData shaderData(object, objectSize);
+		Graphics_V1X::ShaderData shaderData(object, objectSize);
 
 		try
 		{
 			scene.pixelShader = scene.device->CreatePixelShader(shaderData);
 		}
-		catch (Graphics::RenderDeviceError& err)
+		catch (Graphics_V1X::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -166,13 +166,13 @@ void LoadScene(Scene& scene)
 
 	// Create sampler
 	{
-		Graphics::Sampler2DDesc desc;
+		Graphics_V1X::Sampler2DDesc desc;
 
-		desc.addressU = Graphics::TextureAdressMode::Repeat;
-		desc.addressV = Graphics::TextureAdressMode::Repeat;
-		desc.minFilter = Graphics::TextureFilter::Linear;
-		desc.magFilter = Graphics::TextureFilter::Linear;
-		desc.mipmapFilter = Graphics::TextureFilter::Linear;
+		desc.addressU = Graphics_V1X::TextureAdressMode::Repeat;
+		desc.addressV = Graphics_V1X::TextureAdressMode::Repeat;
+		desc.minFilter = Graphics_V1X::TextureFilter::Linear;
+		desc.magFilter = Graphics_V1X::TextureFilter::Linear;
+		desc.mipmapFilter = Graphics_V1X::TextureFilter::Linear;
 		desc.border = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		desc.maxAnisotropy = scene.device->GetMaxAnisotropyLimit();
 
@@ -187,9 +187,9 @@ void LoadScene(Scene& scene)
 
 	// Create raster state
 	{
-		Graphics::RasterStateDesc desc;
+		Graphics_V1X::RasterStateDesc desc;
 
-		desc.rasterMode = Graphics::RasterMode::Fill;
+		desc.rasterMode = Graphics_V1X::RasterMode::Fill;
 		desc.cullEnabled = false;
 
 		scene.rasterState = scene.device->CreateRasterState(desc);
@@ -197,16 +197,16 @@ void LoadScene(Scene& scene)
 
 	// Create depth stencil state
 	{
-		Graphics::DepthStencilStateDesc desc;
+		Graphics_V1X::DepthStencilStateDesc desc;
 		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
 	}
 
 	// Create blend state
 	{
-		Graphics::BlendStateDesc desc;
+		Graphics_V1X::BlendStateDesc desc;
 		desc.blendEnabled = true;
-		desc.sourceFactor =	Graphics::BlendFactor::SourceAlpha;
-		desc.destinationFactor = Graphics::BlendFactor::InverseSourceAlpha;
+		desc.sourceFactor =	Graphics_V1X::BlendFactor::SourceAlpha;
+		desc.destinationFactor = Graphics_V1X::BlendFactor::InverseSourceAlpha;
 		scene.blendState = scene.device->CreateBlendState(desc);
 	}
 
@@ -217,13 +217,13 @@ void LoadScene(Scene& scene)
 		auto data = new unsigned char[size];
 		scene.fileSystem->Read(file, data, size);
 		scene.fileSystem->CloseFile(file);
-		scene.font = new Graphics::Font(scene.device, data, size, 0, 48, 1024, 1024);
+		scene.font = new Graphics_V1X::Font(scene.device, data, size, 0, 48, 1024, 1024);
 		delete[] data;
 	}
 
 	// Create text renderer
 	{
-		scene.textRenderer = new Graphics::TextRenderer(scene.device, scene.font, scene.vertexShader);
+		scene.textRenderer = new Graphics_V1X::TextRenderer(scene.device, scene.font, scene.vertexShader);
 	}
 }
 
@@ -307,19 +307,19 @@ int main(int argc, const char** argv) try
 	mfTerminate();
 	return 0;
 }
-catch (Graphics::ShaderError& e)
+catch (Graphics_V1X::ShaderError& e)
 {
 	std::cout << "Shader error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }
-catch (Graphics::RenderDeviceError& e)
+catch (Graphics_V1X::RenderDeviceError& e)
 {
 	std::cout << "Render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }
-catch (Graphics::TextError& e)
+catch (Graphics_V1X::TextError& e)
 {
 	std::cout << "Text error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
