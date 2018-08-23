@@ -12,6 +12,7 @@ extern "C"
 #define MFT_ERROR_INTERNAL				0x0402
 #define MFT_ERROR_TIMEOUT				0x0403
 #define MFT_ERROR_STILL_RUNNING			0x0404
+#define MFT_ERROR_MUTEX_LOCKED			0x0405
 
 	typedef mfmU32 mfError;
 

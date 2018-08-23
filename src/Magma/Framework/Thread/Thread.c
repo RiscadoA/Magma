@@ -33,6 +33,15 @@ static unsigned int __stdcall mftThreadFunc(void* args)
 	return 0;
 }
 
+static void mftDestroyThreadNoErrors(void* thread)
+{
+	if (thread == NULL)
+		abort();
+	mfError err = mftDestroyThread((mftThread*)thread);
+	if (err != MFT_ERROR_OKAY)
+		abort();
+}
+
 mfError mftCreateThread(mftThread ** thread, void(*function)(void*), void* args, void* allocator)
 {
 	if (thread == NULL || function == NULL)
@@ -40,6 +49,11 @@ mfError mftCreateThread(mftThread ** thread, void(*function)(void*), void* args,
 	mfError err = mfmAllocate(allocator, thread, sizeof(mftThread));
 	if (err != MFM_ERROR_OKAY)
 		return err;
+	err = mfmInitObject(&(*thread)->object);
+	if (err != MFM_ERROR_OKAY)
+		return err;
+
+	(*thread)->object.destructorFunc = &mftDestroyThreadNoErrors;
 	(*thread)->allocator = allocator;
 	(*thread)->args = args;
 	(*thread)->function = function;
@@ -71,7 +85,11 @@ mfError mftDestroyThread(mftThread * thread)
 	if (CloseHandle(thread->handle) == FALSE)
 		return MFT_ERROR_INTERNAL;
 
-	// Deallocate thread
+	// Destroy and deallocate thread
+	err = mfmDestroyObject(&thread->object);
+	if (err != MFM_ERROR_OKAY)
+		return err;
+
 	err = mfmDeallocate(thread->allocator, thread);
 	if (err != MFM_ERROR_OKAY)
 		return err;
