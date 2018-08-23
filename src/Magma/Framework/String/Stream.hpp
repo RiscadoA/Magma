@@ -76,6 +76,20 @@ namespace Magma
 
 			void InitStreams();
 			void TerminateStreams();
+
+			enum class FileMode : mfmU32
+			{
+				Read = MFS_FILE_READ,
+				Write = MFS_FILE_WRITE,
+			};
+
+			/// <summary>
+			///		Opens a new file stream.
+			/// </summary>
+			/// <param name="path">File path</param>
+			/// <param name="mode">File open mode</param>
+			/// <returns>Stream handle</returns>
+			Stream OpenFile(const mfsUTF8CodeUnit* path, FileMode mode);
 		}
 	}
 }

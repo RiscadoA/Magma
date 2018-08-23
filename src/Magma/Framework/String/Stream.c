@@ -200,6 +200,7 @@ mfsError mfsOpenFile(mfsStream ** stream, mfmU32 mode, const mfsUTF8CodeUnit * p
 		return MFS_ERROR_INTERNAL;
 
 	*stream = mfsCreateFileStream(file, NULL, 0);
+	(*stream)->object.destructorFunc = &mfsCloseFile;
 
 	return MFS_ERROR_OKAY;
 }

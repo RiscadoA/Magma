@@ -277,5 +277,81 @@ void Magma::Framework::String::Stream::PutString(const mfsUTF8CodeUnit * str)
 
 mfmU64 Magma::Framework::String::Stream::Read(void * data, mfmU64 size)
 {
-	return mfmU64();
+	mfmU64 readSize = 0;
+	mfsError err = mfsRead(reinterpret_cast<mfsStream*>(&this->Get()), static_cast<mfmU8*>(data), size, &readSize);
+	if (err == MFS_ERROR_OKAY || err == MFS_ERROR_FAILED_TO_READ_ALL)
+		return readSize;
+
+	switch (err)
+	{
+		case MFS_ERROR_INVALID_ARGUMENTS:
+			throw StreamError("Failed to read from stream, invalid arguments");
+			break;
+		case MFS_ERROR_INVALID_UTF8:
+			throw StreamError("Failed to read from stream, invalid UTF-8");
+			break;
+		case MFS_ERROR_INVALID_UTF16:
+			throw StreamError("Failed to read from stream, invalid UTF-16");
+			break;
+		case MFS_ERROR_INVALID_UNICODE:
+			throw StreamError("Failed to read from stream, invalid unicode");
+			break;
+		case MFS_ERROR_CHARACTER_TOO_BIG:
+			throw StreamError("Failed to read from stream, character too big");
+			break;
+		case MFS_ERROR_EOF:
+			throw StreamError("Failed to read from stream, EOF reached");
+			break;
+		case MFS_ERROR_INTERNAL:
+			throw StreamError("Failed to read from stream, internal stream error");
+			break;
+		case MFS_ERROR_FAILED_TO_WRITE_ALL:
+			throw StreamError("Failed to read from stream, failed to write all error");
+			break;
+		default:
+			throw StreamError("Failed to read from stream, unknown error");
+			break;
+	}
+}
+
+Magma::Framework::String::Stream Magma::Framework::String::OpenFile(const mfsUTF8CodeUnit * path, FileMode mode)
+{
+	mfsStream* stream;
+	mfsError err = mfsOpenFile(&stream, static_cast<mfmU32>(mode), path);
+	if (err != MFS_ERROR_OKAY)
+	{
+		// Handle error
+		switch (err)
+		{
+			case MFS_ERROR_INVALID_ARGUMENTS:
+				throw StreamError("Failed to open file stream, invalid arguments");
+				break;
+			case MFS_ERROR_INVALID_UTF8:
+				throw StreamError("Failed to open file stream, invalid UTF-8");
+				break;
+			case MFS_ERROR_INVALID_UTF16:
+				throw StreamError("Failed to open file stream, invalid UTF-16");
+				break;
+			case MFS_ERROR_INVALID_UNICODE:
+				throw StreamError("Failed to open file stream, invalid unicode");
+				break;
+			case MFS_ERROR_CHARACTER_TOO_BIG:
+				throw StreamError("Failed to open file stream, character too big");
+				break;
+			case MFS_ERROR_EOF:
+				throw StreamError("Failed to open file stream, EOF reached");
+				break;
+			case MFS_ERROR_INTERNAL:
+				throw StreamError("Failed to open file stream, internal error");
+				break;
+			case MFS_ERROR_FAILED_TO_WRITE_ALL:
+				throw StreamError("Failed to open file stream, failed to write all error");
+				break;
+			default:
+				throw StreamError("Failed to open file stream, unknown error");
+				break;
+		}
+	}
+
+	return stream;
 }

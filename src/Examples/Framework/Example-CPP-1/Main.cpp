@@ -13,11 +13,14 @@ int main(int argc, const char** argv)
 	mfsUTF8CodeUnit str[256];
 	String::InStream.ReadUntil(str, sizeof(str), u8"\n");
 
-	String::OutStream.PutString(str);
-	String::OutStream.Flush();
+	String::Stream file = String::OpenFile(u8"test.txt", String::FileMode::Write);
+
+	file.PutString(str);
+	file.Flush();
+
+	file.Release();
 
 	Magma::Framework::Terminate();
 
-	while (true);
 	return 0;
 }
