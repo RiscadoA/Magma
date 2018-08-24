@@ -175,7 +175,7 @@ extern "C"
 		mfmU64 stride;
 
 		/// <summary>
-		///		First element in the buffer offset.
+		///		Offset of the first element in the buffer.
 		/// </summary>
 		mfmU64 offset;
 
@@ -204,7 +204,7 @@ extern "C"
 		///		Vertex element component count.
 		///		Valid values: 1; 2; 3; 4;
 		/// </summary>
-		mfgEnum size;
+		mfmU64 size;
 	} mfgV2XVertexElement;
 
 	void mfgV2XDefaultVertexElement(mfgV2XVertexElement* element);
@@ -357,6 +357,9 @@ extern "C"
 		/// </summary>
 		mfgEnum depthCompare;
 
+		/// <summary>
+		///		Stencil ref value.
+		/// </summary>
 		mfmU32 stencilRef;
 
 		/// <summary>
@@ -366,7 +369,15 @@ extern "C"
 		///			MFG_TRUE;
 		/// </summary>
 		mfmBool stencilEnabled;
+
+		/// <summary>
+		///		Stencil read mask.
+		/// </summary>
 		mfmU8 stencilReadMask;
+
+		/// <summary>
+		///		Stencil write mask.
+		/// </summary>
 		mfmU8 stencilWriteMask;
 
 		/// <summary>

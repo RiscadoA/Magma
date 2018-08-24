@@ -78,8 +78,8 @@ void mfgV2XDefaultVertexElement(mfgV2XVertexElement * element)
 	element->stride = 0;
 	element->offset = 0;
 	element->bufferIndex = 0;
-	element->type = 0;
-	element->size = 0;
+	element->type = MFG_FLOAT;
+	element->size = 1;
 }
 
 void mfgV2XDefaultSamplerDesc(mfgV2XSamplerDesc * desc)

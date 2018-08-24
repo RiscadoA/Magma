@@ -96,6 +96,7 @@ namespace Magma
 				/// </summary>
 				enum class TextureFilter : mfgEnum
 				{
+					None	= MFG_NONE,
 					Nearest	= MFG_NEAREST,
 					Linear	= MFG_LINEAR,
 				};
@@ -173,6 +174,450 @@ namespace Magma
 					InvSrcAlpha		= MFG_INV_SRC_ALPHA,
 					DstAlpha		= MFG_DST_ALPHA,
 					InvDstAlpha		= MFG_INV_DST_ALPHA,
+				};
+
+				/// <summary>
+				///		Blend operations.
+				/// </summary>
+				enum class BlendOperation : mfgEnum
+				{
+					Add			= MFG_ADD,
+					Subtract	= MFG_SUBTRACT,
+					RevSubtract = MFG_REV_SUBTRACT,
+					Min			= MFG_MIN,
+					Max			= MFG_MAX,
+				};
+
+				/// <summary>
+				///		Render device description.
+				/// </summary>
+				struct RenderDeviceDesc
+				{
+					/// <summary>
+					///		Enable vertical synchronization on this render device?
+					/// </summary>
+					bool vsyncEnabled = false;
+				};
+
+				/// <summary>
+				///		Vertex element description.
+				/// </summary>
+				struct VertexElement
+				{
+					/// <summary>
+					///		Vertex element name (16 bytes max).
+					/// </summary>
+					mfsUTF8CodeUnit name[16] = { '\0' };
+
+					/// <summary>
+					///		Stride between each element in memory.
+					/// </summary>
+					mfmU64 stride = 0;
+
+					/// <summary>
+					///		Offset of the first element in the buffer.
+					/// </summary>
+					mfmU64 offset = 0;
+
+					/// <summary>
+					///		Vertex buffer index.
+					/// </summary>
+					mfmU64 bufferIndex = 0;
+
+					/// <summary>
+					///		Vertex element component count.
+					///		Valid values: 1; 2; 3; 4;
+					/// </summary>
+					mfmU64 size = 1;
+
+					/// <summary>
+					///		Vertex element component type.
+					///		Valid values:
+					///			Byte;
+					///			Short;
+					///			Int;
+					///			UByte;
+					///			UShort;
+					///			UInt;
+					///			NByte;
+					///			NShort;
+					///			NUByte;
+					///			NUShort;
+					///			Float;
+					/// </summary>
+					Type type = Type::Float;
+				};
+
+				/// <summary>
+				///		Sampler object description.
+				/// </summary>
+				struct SamplerDesc
+				{
+					/// <summary>
+					///		Border color (RGBA).
+					/// </summary>
+					mfmF32 borderColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+					/// <summary>
+					///		Max anisotropy for filtering.
+					///		Set to 1 to anisotropic filtering.
+					///		Valid values: 1 - RenderDevice.GetMaxAnisotropy().
+					/// </summary>
+					mfmU32 maxAnisotropy = 1;
+
+					/// <summary>
+					///		Minifying filter.
+					///		Valid values:
+					///			Nearest;
+					///			Linear;
+					/// </summary>
+					TextureFilter minFilter = TextureFilter::Nearest;
+
+					/// <summary>
+					///		Magnifying filter.
+					///		Valid values:
+					///			Nearest;
+					///			Linear;
+					/// </summary>
+					TextureFilter magFilter = TextureFilter::Nearest;
+
+					/// <summary>
+					///		Mipmap filter (set to MFG_NONE to disable mipmaps).
+					///		Valid values:
+					///			None;
+					///			Nearest;
+					///			Linear;
+					/// </summary>
+					TextureFilter mipmapFilter = TextureFilter::None;
+
+					/// <summary>
+					///		Texture adress mode on coordinate U.
+					///		Valid values:
+					///			Repeat;
+					///			Mirror;
+					///			Clamp;
+					///			Border;
+					/// </summary>
+					AddressMode addressU = AddressMode::Clamp;
+
+					/// <summary>
+					///		Texture adress mode on coordinate V.
+					///		Valid values:
+					///			Repeat;
+					///			Mirror;
+					///			Clamp;
+					///			Border;
+					/// </summary>
+					AddressMode addressV = AddressMode::Clamp;
+
+					/// <summary>
+					///		Texture adress mode on coordinate W.
+					///		Valid values:
+					///			Repeat;
+					///			Mirror;
+					///			Clamp;
+					///			Border;
+					/// </summary>
+					AddressMode addressW = AddressMode::Clamp;
+				};
+
+				/// <summary>
+				///		Rasterizer state description.
+				/// </summary>
+				struct RasterStateDesc
+				{
+					/// <summary>
+					///		Is culling enabled?
+					/// </summary>
+					bool cullEnabled = false;
+
+					/// <summary>
+					///		Front face winding.
+					///		Valid values:
+					///			CW;
+					///			CCW;
+					/// </summary>
+					Winding frontFace = Winding::CCW;
+
+					/// <summary>
+					///		The face which gets culled.
+					///		Valid values:
+					///			Front;
+					///			Back;
+					///			FrontAndBack;
+					/// </summary>
+					Face cullFace = Face::Back;
+
+					/// <summary>
+					///		Rasterizer mode.
+					///		Valid values:
+					///			MFG_FILL;
+					///			MFG_WIREFRAME;
+					/// </summary>
+					RasterMode rasterMode = RasterMode::Fill;
+				};
+
+				struct DepthStencilStateDesc
+				{
+					/// <summary>
+					///		Performs depth checks?
+					/// </summary>
+					bool depthEnabled = false;
+
+					/// <summary>
+					///		Write depth?
+					/// </summary>
+					bool depthWriteEnabled = false;
+
+					/// <summary>
+					///		Depth 'near' value.
+					/// </summary>
+					mfmF32 depthNear = 0.0f;
+
+					/// <summary>
+					///		Depth 'far' value.
+					/// </summary>
+					mfmF32 depthFar = 1.0f;
+
+					/// <summary>
+					///		Depth comparison function.
+					///		Valid values:
+					///			Never;
+					///			Less;
+					///			LEqual;
+					///			Greater;
+					///			GEqual;
+					///			Equal;
+					///			NEqual;
+					///			Always;
+					/// </summary>
+					Compare depthCompare = Compare::Less;
+
+					/// <summary>
+					///		Stencil ref value.
+					/// </summary>
+					mfmU32 stencilRef = 0;
+
+					/// <summary>
+					///		Is stencil enabled?
+					/// </summary>
+					bool stencilEnabled = false;
+
+					/// <summary>
+					///		Stencil read mask.
+					/// </summary>
+					mfmU8 stencilReadMask = 0xFF;
+
+					/// <summary>
+					///		Stencil write mask.
+					/// </summary>
+					mfmU8 stencilWriteMask = 0xFF;
+
+					/// <summary>
+					///		Front face stencil comparison function.
+					///		Valid values:
+					///			Never;
+					///			Less;
+					///			LEqual;
+					///			Greater;
+					///			GEqual;
+					///			Equal;
+					///			NEqual;
+					///			Always;
+					/// </summary>
+					Compare frontFaceStencilCompare = Compare::Always;
+
+					/// <summary>
+					///		Front face steincil fail action.
+					///		Valid values:
+					///			Keep;
+					///			Zero;
+					///			Replace;
+					///			Increment;
+					///			IncrementWrap;
+					///			Decrement;
+					///			DecrementWrap;
+					///			Invert;
+					/// </summary>
+					StencilAction frontFaceStencilFail = StencilAction::Keep;
+
+					/// <summary>
+					///		Front face steincil pass action.
+					///		Valid values:
+					///			Keep;
+					///			Zero;
+					///			Replace;
+					///			Increment;
+					///			IncrementWrap;
+					///			Decrement;
+					///			DecrementWrap;
+					///			Invert;
+					/// </summary>
+					StencilAction frontFaceStencilPass = StencilAction::Keep;
+
+					/// <summary>
+					///		Front face stencil depth fail action.
+					///		Valid values:
+					///			Keep;
+					///			Zero;
+					///			Replace;
+					///			Increment;
+					///			IncrementWrap;
+					///			Decrement;
+					///			DecrementWrap;
+					///			Invert;
+					/// </summary>
+					StencilAction frontFaceDepthFail = StencilAction::Keep;
+
+					/// <summary>
+					///		Back face stencil comparison function.
+					///		Valid values:
+					///			Never;
+					///			Less;
+					///			LEqual;
+					///			Greater;
+					///			GEqual;
+					///			Equal;
+					///			NEqual;
+					///			Always;
+					/// </summary>
+					Compare backFaceStencilCompare = Compare::Always;
+
+					/// <summary>
+					///		Back face steincil fail action.
+					///		Valid values:
+					///			Keep;
+					///			Zero;
+					///			Replace;
+					///			Increment;
+					///			IncrementWrap;
+					///			Decrement;
+					///			DecrementWrap;
+					///			Invert;
+					/// </summary>
+					StencilAction backFaceStencilFail = StencilAction::Keep;
+
+					/// <summary>
+					///		Back face steincil pass action.
+					///		Valid values:
+					///			Keep;
+					///			Zero;
+					///			Replace;
+					///			Increment;
+					///			IncrementWrap;
+					///			Decrement;
+					///			DecrementWrap;
+					///			Invert;
+					/// </summary>
+					StencilAction backFaceStencilPass = StencilAction::Keep;
+
+					/// <summary>
+					///		Back face stencil depth fail action.
+					///		Valid values:
+					///			Keep;
+					///			Zero;
+					///			Replace;
+					///			Increment;
+					///			IncrementWrap;
+					///			Decrement;
+					///			DecrementWrap;
+					///			Invert;
+					/// </summary>
+					StencilAction backFaceDepthFail = StencilAction::Keep;
+				};
+
+				struct BlendStateDesc
+				{
+					/// <summary>
+					///		Is blending enabled?
+					/// </summary>
+					bool blendEnabled = false;
+
+					/// <summary>
+					///		Source color factor.
+					///		Valid values:
+					///			Zero;
+					///			One;
+					///			SrcColor;
+					///			InvSrcColor;
+					///			DstColor;
+					///			InvDstColor;
+					///			SrcAlpha;
+					///			InvSrcAlpha;
+					///			DstAlpha;
+					///			InvDstAlpha;
+					/// </summary>
+					BlendFactor sourceFactor = BlendFactor::One;
+
+					/// <summary>
+					///		Destination color factor.
+					///		Valid values:
+					///			Zero;
+					///			One;
+					///			SrcColor;
+					///			InvSrcColor;
+					///			DstColor;
+					///			InvDstColor;
+					///			SrcAlpha;
+					///			InvSrcAlpha;
+					///			DstAlpha;
+					///			InvDstAlpha;
+					/// </summary>
+					BlendFactor destinationFactor = BlendFactor::Zero;
+
+					/// <summary>
+					///		Color blend operation.
+					///		Valid values:
+					///			Add;
+					///			Subtract;
+					///			RevSubtract;
+					///			Min;
+					///			Max;
+					/// </summary>
+					BlendOperation blendOperation = BlendOperation::Add;
+
+					/// <summary>
+					///		Source alpha factor.
+					///		Valid values:
+					///			Zero;
+					///			One;
+					///			SrcColor;
+					///			InvSrcColor;
+					///			DstColor;
+					///			InvDstColor;
+					///			SrcAlpha;
+					///			InvSrcAlpha;
+					///			DstAlpha;
+					///			InvDstAlpha;
+					/// </summary>
+					BlendFactor sourceAlphaFactor = BlendFactor::One;
+
+					/// <summary>
+					///		Destination alpha factor.
+					///		Valid values:
+					///			Zero;
+					///			One;
+					///			SrcColor;
+					///			InvSrcColor;
+					///			DstColor;
+					///			InvDstColor;
+					///			SrcAlpha;
+					///			InvSrcAlpha;
+					///			DstAlpha;
+					///			InvDstAlpha;
+					/// </summary>
+					BlendFactor destinationAlphaFactor = BlendFactor::Zero;
+
+					/// <summary>
+					///		Color alpha operation.
+					///		Valid values:
+					///			Add;
+					///			Subtract;
+					///			RevSubtract;
+					///			Min;
+					///			Max;
+					/// </summary>
+					BlendOperation blendAlphaOperation = BlendOperation::Add;
 				};
 
 				/// <summary>
