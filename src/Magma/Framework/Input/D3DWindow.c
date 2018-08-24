@@ -333,12 +333,17 @@ LRESULT CALLBACK WindowProc(
 
 	switch (message)
 	{
-		case WM_DESTROY:
+		case WM_CLOSE:
 		{
 			if (currentWindow->base.onClose != NULL)
 				currentWindow->base.onClose(currentWindow);
 			return 0;
 		} break;
+		case WM_QUIT:
+		{
+			PostQuitMessage(0);
+			break;
+		}
 		case WM_MOUSEMOVE:
 		{
 			if (!tracking)

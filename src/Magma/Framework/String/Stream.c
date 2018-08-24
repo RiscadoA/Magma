@@ -141,7 +141,7 @@ mfError mfsTerminateStream()
 
 	if (mfsOutStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsInStream->object);
+		err = mfmDecObjectRef(&mfsOutStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		mfsOutStream->object.destructorFunc(mfsOutStream);
@@ -149,7 +149,7 @@ mfError mfsTerminateStream()
 
 	if (mfsErrStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsInStream->object);
+		err = mfmDecObjectRef(&mfsErrStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		mfsErrStream->object.destructorFunc(mfsErrStream);
