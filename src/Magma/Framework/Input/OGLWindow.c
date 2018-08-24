@@ -1,4 +1,4 @@
-#include "GLWindow.h"
+#include "OGLWindow.h"
 #include "Config.h"
 #include "../String/Stream.h"
 
@@ -17,13 +17,13 @@ typedef struct
 	// Properties
 	mfmU32 width;
 	mfmU32 height;
-	mfiWindowMode mode;
+	mfiEnum mode;
 
 	// GLFW window handle
 	GLFWwindow* glfwWindow;
-} mfiGLWindow;
+} mfiOGLWindow;
 
-static mfiGLWindow* currentWindow = NULL;
+static mfiOGLWindow* currentWindow = NULL;
 
 mfiKeyCode mfiGLFWToMFIKey(int key)
 {
@@ -120,25 +120,25 @@ void mfiGLWindowWaitForEvents(void* window)
 
 mfmU32 mfiGetGLWindowWidth(void* window)
 {
-	mfiGLWindow* glWindow = (mfiGLWindow*)window;
-	return glWindow->width;
+	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
+	return OGLWindow->width;
 }
 
 mfmU32 mfiGetGLWindowHeight(void* window)
 {
-	mfiGLWindow* glWindow = (mfiGLWindow*)window;
-	return glWindow->height;
+	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
+	return OGLWindow->height;
 }
 
-mfiWindowMode mfiGetGLWindowMode(void* window)
+mfiEnum mfiGetGLWindowMode(void* window)
 {
-	mfiGLWindow* glWindow = (mfiGLWindow*)window;
-	return glWindow->mode;
+	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
+	return OGLWindow->mode;
 }
 
 void mfiGLFWErrorCallback(int err, const char* errMsg)
 {
-	if (mfsPrintFormatUTF8(mfsErrStream, u8"mfiGLWindow GLFW error caught : \n%s\n", errMsg) != MFS_ERROR_OKAY)
+	if (mfsPrintFormatUTF8(mfsErrStream, u8"mfiGLWindow GLFW error caught : \n%s\n", errMsg) != MF_ERROR_OKAY)
 		abort();
 }
 
@@ -223,14 +223,14 @@ void mfiGLFWCursorEnterCallback(GLFWwindow* window, int enter)
 
 #endif
 
-mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
+mfError mfiCreateOGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiEnum mode, const mfsUTF8CodeUnit * title)
 {
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	if (currentWindow != NULL)
 		return MFI_ERROR_ALREADY_INITIALIZED;
 
-	mfiGLWindow* glWindow = NULL;
-	if (mfmAllocate(NULL, &glWindow, sizeof(mfiGLWindow)) != MFM_ERROR_OKAY)
+	mfiOGLWindow* OGLWindow = NULL;
+	if (mfmAllocate(NULL, &OGLWindow, sizeof(mfiOGLWindow)) != MF_ERROR_OKAY)
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Init GLFW
@@ -238,44 +238,44 @@ mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiW
 	if (glfwInit() != GLFW_TRUE)
 	{
 		// Failed to init
-		mfmDeallocate(NULL, glWindow);
+		mfmDeallocate(NULL, OGLWindow);
 		return MFI_ERROR_INTERNAL;
 	}
 
 	// Set properties
-	glWindow->base.type = MFI_OGLWINDOW;
+	OGLWindow->base.type = MFI_OGLWINDOW_TYPE_NAME;
 
-	glWindow->width = width;
-	glWindow->height = height;
-	glWindow->mode = mode;
+	OGLWindow->width = width;
+	OGLWindow->height = height;
+	OGLWindow->mode = mode;
 
 	// Set destructor
 	{
-		mfError err = mfmInitObject(&glWindow->base.object);
-		if (err != MFM_ERROR_OKAY)
+		mfError err = mfmInitObject(&OGLWindow->base.object);
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
-	glWindow->base.object.destructorFunc = &mfiDestroyGLWindow;
+	OGLWindow->base.object.destructorFunc = &mfiDestroyGLWindow;
 
 	// Set functions
-	glWindow->base.pollEvents = &mfiGLWindowPollEvents;
-	glWindow->base.waitForEvents = &mfiGLWindowWaitForEvents;
+	OGLWindow->base.pollEvents = &mfiGLWindowPollEvents;
+	OGLWindow->base.waitForEvents = &mfiGLWindowWaitForEvents;
 
 	// Set getters
-	glWindow->base.getWidth = &mfiGetGLWindowWidth;
-	glWindow->base.getHeight = &mfiGetGLWindowHeight;
-	glWindow->base.getMode = &mfiGetGLWindowMode;
+	OGLWindow->base.getWidth = &mfiGetGLWindowWidth;
+	OGLWindow->base.getHeight = &mfiGetGLWindowHeight;
+	OGLWindow->base.getMode = &mfiGetGLWindowMode;
 
 	// Set callbacks to NULL
-	glWindow->base.onClose = NULL;
-	glWindow->base.onMouseEnter = NULL;
-	glWindow->base.onMouseLeave = NULL;
-	glWindow->base.onMouseMove = NULL;
-	glWindow->base.onMouseScroll = NULL;
-	glWindow->base.onKeyUp = NULL;
-	glWindow->base.onKeyDown = NULL;
-	glWindow->base.onMouseUp = NULL;
-	glWindow->base.onMouseDown = NULL;
+	OGLWindow->base.onClose = NULL;
+	OGLWindow->base.onMouseEnter = NULL;
+	OGLWindow->base.onMouseLeave = NULL;
+	OGLWindow->base.onMouseMove = NULL;
+	OGLWindow->base.onMouseScroll = NULL;
+	OGLWindow->base.onKeyUp = NULL;
+	OGLWindow->base.onKeyDown = NULL;
+	OGLWindow->base.onMouseUp = NULL;
+	OGLWindow->base.onMouseDown = NULL;
 
 	// Set GLFW window hints for the window creation
 	glfwWindowHint(GLFW_RESIZABLE, 0);
@@ -284,40 +284,40 @@ mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiW
 
 	// Create GLFW window
 	if (mode == MFI_WINDOWED)
-		glWindow->glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL);
+		OGLWindow->glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL);
 	else if (mode == MFI_FULLSCREEN)
-		glWindow->glfwWindow = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);
+		OGLWindow->glfwWindow = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);
 	else
 	{
-		if (mfmDeallocate(NULL, glWindow) != MFM_ERROR_OKAY)
+		if (mfmDeallocate(NULL, OGLWindow) != MF_ERROR_OKAY)
 			abort();
 		return MFI_ERROR_INVALID_ARGUMENTS;
 	}
 
 	// Check if the window creation succeded
-	if (glWindow->glfwWindow == NULL)
+	if (OGLWindow->glfwWindow == NULL)
 	{
-		if (mfmDeallocate(NULL, glWindow) != MFM_ERROR_OKAY)
+		if (mfmDeallocate(NULL, OGLWindow) != MF_ERROR_OKAY)
 			abort();
 		return MFI_ERROR_INTERNAL;
 	}
 
 	// Make window current
-	glfwMakeContextCurrent(glWindow->glfwWindow);
+	glfwMakeContextCurrent(OGLWindow->glfwWindow);
 
 	// Set window callbacks
-	glfwSetKeyCallback(glWindow->glfwWindow, mfiGLFWKeyCallback);
-	glfwSetCursorPosCallback(glWindow->glfwWindow, mfiGLFWMousePositionCallback);
-	glfwSetWindowCloseCallback(glWindow->glfwWindow, mfiGLFWWindowCloseCallback);
-	glfwSetScrollCallback(glWindow->glfwWindow, mfiGLFWMouseScroll);
-	glfwSetCursorEnterCallback(glWindow->glfwWindow, mfiGLFWCursorEnterCallback);
-	glfwSetMouseButtonCallback(glWindow->glfwWindow, mfiGLFWMouseButtonCallback);
+	glfwSetKeyCallback(OGLWindow->glfwWindow, mfiGLFWKeyCallback);
+	glfwSetCursorPosCallback(OGLWindow->glfwWindow, mfiGLFWMousePositionCallback);
+	glfwSetWindowCloseCallback(OGLWindow->glfwWindow, mfiGLFWWindowCloseCallback);
+	glfwSetScrollCallback(OGLWindow->glfwWindow, mfiGLFWMouseScroll);
+	glfwSetCursorEnterCallback(OGLWindow->glfwWindow, mfiGLFWCursorEnterCallback);
+	glfwSetMouseButtonCallback(OGLWindow->glfwWindow, mfiGLFWMouseButtonCallback);
 
 	// Set out window pointer
-	*window = glWindow;
-	currentWindow = glWindow;
+	*window = OGLWindow;
+	currentWindow = OGLWindow;
 
-	return MFI_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 #else
 	return MFI_ERROR_NOT_SUPPORTED;
 #endif
@@ -327,11 +327,11 @@ void mfiDestroyGLWindow(void * window)
 {
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	// Destroy window
-	mfiGLWindow* glWindow = (mfiGLWindow*)window;
-	glfwDestroyWindow(glWindow->glfwWindow);
-	if (mfmDestroyObject(&glWindow->base.object) != MFM_ERROR_OKAY)
+	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
+	glfwDestroyWindow(OGLWindow->glfwWindow);
+	if (mfmDestroyObject(&OGLWindow->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(NULL, glWindow) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(NULL, OGLWindow) != MF_ERROR_OKAY)
 		abort();
 	currentWindow = NULL;
 
@@ -343,8 +343,8 @@ void mfiDestroyGLWindow(void * window)
 void * mfiGetGLWindowGLFWHandle(void * window)
 {
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
-	mfiGLWindow* glWindow = (mfiGLWindow*)window;
-	return glWindow->glfwWindow;
+	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
+	return OGLWindow->glfwWindow;
 #else
 	return NULL;
 #endif

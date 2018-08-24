@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Magma/Framework/Input/Window.hpp>
+#include <Magma/Framework/Input/Old/Window.hpp>
 
 #include "Root.hpp"
 

@@ -20,7 +20,7 @@ static void mftDestroyMutexNoErrors(void* mutex)
 	if (mutex == NULL)
 		abort();
 	mfError err = mftDestroyMutex((mftMutex*)mutex);
-	if (err != MFT_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		abort();
 }
 
@@ -29,10 +29,10 @@ mfError mftCreateMutex(mftMutex ** mutex, void * allocator)
 	if (mutex == NULL)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 	mfError err = mfmAllocate(allocator, mutex, sizeof(mftMutex));
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 	err = mfmInitObject(&(*mutex)->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 
 	(*mutex)->object.destructorFunc = &mftDestroyMutexNoErrors;
@@ -43,7 +43,7 @@ mfError mftCreateMutex(mftMutex ** mutex, void * allocator)
 		mfmDeallocate(allocator, *mutex);
 		return MFT_ERROR_INTERNAL;
 	}
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftDestroyMutex(mftMutex * mutex)
@@ -58,13 +58,13 @@ mfError mftDestroyMutex(mftMutex * mutex)
 	
 	// Destroy and deallocate mutex
 	err = mfmDestroyObject(&mutex->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 
 	err = mfmDeallocate(mutex->allocator, mutex);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftLockMutex(mftMutex * mutex, mfmU32 timeOut)
@@ -81,7 +81,7 @@ mfError mftLockMutex(mftMutex * mutex, mfmU32 timeOut)
 	switch (ret)
 	{
 		case WAIT_OBJECT_0:
-			return MFT_ERROR_OKAY;
+			return MF_ERROR_OKAY;
 		case WAIT_TIMEOUT:
 			return MFT_ERROR_TIMEOUT;
 		default:
@@ -99,7 +99,7 @@ mfError mftTryLockMutex(mftMutex * mutex)
 	switch (ret)
 	{
 		case WAIT_OBJECT_0:
-			return MFT_ERROR_OKAY;
+			return MF_ERROR_OKAY;
 		case WAIT_TIMEOUT:
 			return MFT_ERROR_MUTEX_LOCKED;
 		default:
@@ -114,7 +114,7 @@ mfError mftUnlockMutex(mftMutex * mutex)
 
 	if (ReleaseMutex(mutex->handle) == FALSE)
 		return MFT_ERROR_INTERNAL;
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 #else

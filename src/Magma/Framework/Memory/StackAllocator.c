@@ -20,7 +20,7 @@ mfError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size
 	
 	// Allocate memory for the stack allocator
 	mfmU8 * memory = NULL;
-	if (mfmAllocate(NULL, &memory, sizeof(mfmStackAllocator) + size) != MFM_ERROR_OKAY)
+	if (mfmAllocate(NULL, &memory, sizeof(mfmStackAllocator) + size) != MF_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
 	// Get data pointers
@@ -38,7 +38,7 @@ mfError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size
 	(*stackAllocator)->base.object.destructorFunc = &mfmDestroyStackAllocator;
 
 	// Successfully created a stack allocator
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfmCreateStackAllocatorOnMemory(mfmStackAllocator ** stackAllocator, mfmU64 size, void * memory, mfmU64 memorySize)
@@ -62,13 +62,13 @@ mfError mfmCreateStackAllocatorOnMemory(mfmStackAllocator ** stackAllocator, mfm
 	(*stackAllocator)->base.object.destructorFunc = &mfmDestroyStackAllocator;
 
 	// Successfully created a stack allocator
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfmDestroyStackAllocator(void * stackAllocator)
 {
 	if (((mfmStackAllocator*)stackAllocator)->onMemory == MFM_FALSE)
-		if (mfmDeallocate(NULL, stackAllocator) != MFM_ERROR_OKAY)
+		if (mfmDeallocate(NULL, stackAllocator) != MF_ERROR_OKAY)
 			abort();
 }
 
@@ -81,7 +81,7 @@ mfError mfmStackAllocate(mfmStackAllocator * allocator, void ** memory, mfmU64 s
 	// Get stack head and move it
 	*memory = allocator->stackHead;
 	allocator->stackHead += size;
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfmStackSetHead(mfmStackAllocator * allocator, void * head)
@@ -92,5 +92,5 @@ mfError mfmStackSetHead(mfmStackAllocator * allocator, void * head)
 
 	// Set stack head
 	allocator->stackHead = head;
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }

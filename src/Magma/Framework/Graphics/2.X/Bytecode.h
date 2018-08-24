@@ -347,7 +347,7 @@ typedef struct
 /// <param name="outData">Out shader meta data</param>
 /// <param name="allocator">Allocator to use</param>
 /// <returns>
-///		Returns MFG_ERROR_OKAY if there were no errors.
+///		Returns MF_ERROR_OKAY if there were no errors.
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
 ///		Returns MFG_ALLOCATION_FAILED if there was an allocation error.
 ///		Returns MFG_ERROR_INVALID_DATA if the binary meta data is invalid (if it has no marker, or if the data is too small, etc).
@@ -367,7 +367,7 @@ void mfgUnloadMetaData(void* metaData);
 /// <param name="name">Variable name</param>
 /// <param name="inputVar">Pointer to input var pointer</param>
 /// <returns>
-///		Returns MFG_ERROR_OKAY if there were no errors.
+///		Returns MF_ERROR_OKAY if there were no errors.
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
 ///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
 /// </returns>
@@ -380,7 +380,7 @@ mfError mfgGetMetaDataInput(const mfgMetaData* metaData, const mfsUTF8CodeUnit* 
 /// <param name="name">Variable name</param>
 /// <param name="inputVar">Pointer to output var pointer</param>
 /// <returns>
-///		Returns MFG_ERROR_OKAY if there were no errors.
+///		Returns MF_ERROR_OKAY if there were no errors.
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
 ///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
 /// </returns>
@@ -393,7 +393,7 @@ mfError mfgGetMetaDataOutput(const mfgMetaData* metaData, const mfsUTF8CodeUnit*
 /// <param name="name">Variable name</param>
 /// <param name="inputVar">Pointer to output var pointer</param>
 /// <returns>
-///		Returns MFG_ERROR_OKAY if there were no errors.
+///		Returns MF_ERROR_OKAY if there were no errors.
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
 ///		Returns MFG_ERROR_NOT_FOUND if there isn't a variable with the name sent.
 /// </returns>

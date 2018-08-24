@@ -22,7 +22,7 @@ extern "C"
 	/// <param name="args">Thread arguments</param>
 	/// <param name="allocator">Allocator where the thread will be allocated</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftCreateThread(mftThread** thread, void (*function)(void*), void* args, void* allocator);
@@ -32,7 +32,7 @@ extern "C"
 	/// </summary>
 	/// <param name="thread">Thread handle</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFT_ERROR_STILL_RUNNING if the thread is still running.
 	///		Otherwise returns an error code.
 	/// </returns>
@@ -44,7 +44,7 @@ extern "C"
 	/// <param name="thread">Thread handle</param>
 	/// <param name="timeOut">Wait timeout in milliseconds (set to 0 to be infinite)</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFT_ERROR_TIMEOUT if the time specified in <paramref name="timeOut">timeOut</paramref> has already passed and the thread still hasn't finished.
 	///		Otherwise returns an error code.
 	/// </returns>

@@ -2,7 +2,7 @@
 
 #include "RenderDevice.h"
 
-#include "../../Input/GLWindow.h"
+#include "../../Input/OGLWindow.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -17,7 +17,7 @@ extern "C"
 	/// <param name="desc">Render device description</param>
 	/// <param name="allocator">Allocator to use on allocations</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice** renderDevice, mfiWindow* window, const mfgV2XRenderDeviceDesc* desc, void* allocator);

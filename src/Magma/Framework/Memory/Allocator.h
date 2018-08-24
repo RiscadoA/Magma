@@ -29,7 +29,7 @@ extern "C"
 	/// <param name="memory">Pointer to allocated memory pointer</param>
 	/// <param name="size">Memory allocation size in bytes</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_UNSUPPORTED_FUNCTION if the allocator doesn't support this function.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if memory is NULL or size is 0.
 	///		Returns other errors specific to the allocator type.
@@ -42,7 +42,7 @@ extern "C"
 	/// <param name="allocator">Magma framework memory allocator (set to NULL to use the default allocator)</param>
 	/// <param name="memory">Pointer to memory</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_UNSUPPORTED_FUNCTION if the allocator doesn't support this function.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if memory is NULL.
 	///		Returns other errors specific to the allocator type.

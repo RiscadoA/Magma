@@ -8,7 +8,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfError err = MFM_ERROR_OKAY;
+	mfError err = MF_ERROR_OKAY;
 	mfmPoolAllocator* pool48;
 
 	// Create pool48
@@ -18,7 +18,7 @@ int main(int argc, const char** argv)
 		desc.slotCount = 1;
 		desc.slotSize = sizeof(mfmU32);
 		err = mfmCreatePoolAllocator(&pool48, &desc);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			abort();
 	}
 
@@ -32,7 +32,7 @@ int main(int argc, const char** argv)
 	{
 		mfmU8* value;
 		err = mfmPoolAllocate(pool48, (void**)&value, sizeof(mfmU32));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			abort();
 
 		printf("Allocated on pool, stats:\n");
@@ -42,7 +42,7 @@ int main(int argc, const char** argv)
 		printf("Current chunk count: %d\n", mfmPoolGetChunkCount(pool48));
 
 		err = mfmPoolDeallocate(pool48, value);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			abort();
 
 		printf("Deallocated on pool, stats:\n");
@@ -55,7 +55,7 @@ int main(int argc, const char** argv)
 	{
 		mfmU8* value;
 		err = mfmPoolAllocate(pool48, (void**)&value, sizeof(mfmU32));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			abort();
 	}
 
@@ -68,7 +68,7 @@ int main(int argc, const char** argv)
 	{
 		mfmU8* value;
 		err = mfmPoolAllocate(pool48, (void**)&value, sizeof(mfmU32));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			abort();
 	}
 

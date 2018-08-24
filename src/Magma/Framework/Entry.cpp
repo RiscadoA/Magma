@@ -1,5 +1,9 @@
 #include "Entry.hpp"
 #include "String/Stream.hpp"
+#include "Input/Window.hpp"
+#include "Input/OGLWindow.h"
+#include "Input/D3DWindow.h"
+#include "Config.h"
 
 void Magma::Framework::Init(int argc, const char ** argv)
 {

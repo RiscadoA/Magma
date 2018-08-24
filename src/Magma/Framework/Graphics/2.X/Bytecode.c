@@ -41,7 +41,7 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 			sizeof(mfgMetaDataInputVariable) * inputVarCount +
 			sizeof(mfgMetaDataOutputVariable) * outputVarCount);
 
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 	// If it has binding points, check their size
@@ -96,7 +96,7 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 			sizeof(mfgMetaDataOutputVariable) * outputVarCount +
 			bpAllocSize);
 
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
@@ -104,7 +104,7 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 	(*outData) = (mfgMetaData*)memory;
 	{
 		mfError err = mfmInitObject(&(*outData)->object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}	
 	(*outData)->object.destructorFunc = &mfgUnloadMetaData;
@@ -255,16 +255,16 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 		}
 	}
 
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgUnloadMetaData(void * metaData)
 {
 	mfError err = mfmDestroyObject(&((mfgMetaData*)metaData)->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		abort();
 	err = mfmDeallocate(((mfgMetaData*)metaData)->allocator, metaData);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		abort();
 }
 
@@ -292,7 +292,7 @@ mfError mfgGetMetaDataInput(const mfgMetaData * metaData, const mfsUTF8CodeUnit 
 		if (found == MFM_TRUE)
 		{
 			*inputVar = var;
-			return MFG_ERROR_OKAY;
+			return MF_ERROR_OKAY;
 		}
 		else
 			var = var->next;
@@ -325,7 +325,7 @@ mfError mfgGetMetaDataOutput(const mfgMetaData * metaData, const mfsUTF8CodeUnit
 		if (found == MFM_TRUE)
 		{
 			*outputVar = var;
-			return MFG_ERROR_OKAY;
+			return MF_ERROR_OKAY;
 		}
 		else
 			var = var->next;
@@ -358,7 +358,7 @@ mfError mfgGetMetaDataBindingPoint(const mfgMetaData * metaData, const mfsUTF8Co
 		if (found == MFM_TRUE)
 		{
 			*bindingPoint = bp;
-			return MFG_ERROR_OKAY;
+			return MF_ERROR_OKAY;
 		}
 		else
 			bp = bp->next;

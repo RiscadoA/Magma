@@ -1,7 +1,7 @@
-﻿#include <Magma/Framework/Input/GLWindow.hpp>
+﻿#include <Magma/Framework/Input/Old/OGLWindow.hpp>
 #include <Magma/Framework/Graphics/1.X/OGL410RenderDevice.hpp>
 
-#include <Magma/Framework/Input/D3DWindow.hpp>
+#include <Magma/Framework/Input/Old/D3DWindow.hpp>
 #include <Magma/Framework/Graphics/1.X/D3D11RenderDevice.hpp>
 
 #include <Magma/Framework/Audio/OALRenderDevice.hpp>
@@ -11,6 +11,9 @@
 #include <iostream>
 
 #include <Magma/Framework/Audio/WAVLoader.hpp>
+
+
+#include <Magma/Framework/Entry.hpp>
 
 #define USE_GL
 
@@ -38,7 +41,7 @@ void LoadScene(Scene& scene)
 	// Create window
 	{
 #ifdef USE_GL
-		scene.window = new Framework::Input::GLWindow(800, 600, u8"Example-9", Framework::Input::Window::Mode::Windowed);
+		scene.window = new Framework::Input::OGLWindow(800, 600, u8"Example-9", Framework::Input::Window::Mode::Windowed);
 #else
 		scene.window = new Framework::Input::D3DWindow(800, 600, u8"Example-9", Framework::Input::Window::Mode::Windowed);
 #endif

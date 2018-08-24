@@ -21,7 +21,7 @@ mfError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPoolA
 
 	// Allocate memory for the pool allocator and its first chunk
 	mfmU8 * memory = NULL;
-	if (mfmAllocate(NULL, &memory, sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + desc->slotCount * sizeof(mfmBool) + desc->slotSize * desc->slotCount) != MFM_ERROR_OKAY)
+	if (mfmAllocate(NULL, &memory, sizeof(mfmPoolAllocator) + sizeof(mfmPoolAllocatorChunk) + desc->slotCount * sizeof(mfmBool) + desc->slotSize * desc->slotCount) != MF_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
 	// Get data pointers
@@ -49,7 +49,7 @@ mfError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPoolA
 	memset((*poolAllocator)->firstChunk->slotStatesPtr, MFM_FALSE, desc->slotCount * sizeof(mfmBool));
 
 	// Successfully created a pool allocator
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator ** poolAllocator, const mfmPoolAllocatorDesc * desc, void * memPtr, mfmU64 memSize)
@@ -92,7 +92,7 @@ mfError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator ** poolAllocator, const 
 	memset((*poolAllocator)->firstChunk->slotStatesPtr, MFM_FALSE, desc->slotCount * sizeof(mfmBool));
 
 	// Successfully created a pool allocator
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfmDestroyPoolAllocator(void * poolAllocator)
@@ -102,14 +102,14 @@ void mfmDestroyPoolAllocator(void * poolAllocator)
 	while (chunk != NULL)
 	{
 		mfmPoolAllocatorChunk* next = (mfmPoolAllocatorChunk*)chunk->next;
-		if (mfmDeallocate(NULL, chunk) != MFM_ERROR_OKAY)
+		if (mfmDeallocate(NULL, chunk) != MF_ERROR_OKAY)
 			abort();
 		chunk = next;
 	}
 
 	// Free the pool allocator and its main chunk
 	if (((mfmPoolAllocator*)poolAllocator)->onMemory == MFM_FALSE)
-		if (mfmDeallocate(NULL, poolAllocator) != MFM_ERROR_OKAY)
+		if (mfmDeallocate(NULL, poolAllocator) != MF_ERROR_OKAY)
 			abort();
 }
 
@@ -117,7 +117,7 @@ mfError mfmExpandPoolAllocator(mfmPoolAllocator* poolAllocator, mfmPoolAllocator
 {
 	// Allocate memory for the chunk
 	mfmU8 * memory = NULL;
-	if (mfmAllocate(NULL, &memory, sizeof(mfmPoolAllocatorChunk) + poolAllocator->desc.slotCount * sizeof(mfmBool) + poolAllocator->desc.slotSize * poolAllocator->desc.slotCount) != MFM_ERROR_OKAY)
+	if (mfmAllocate(NULL, &memory, sizeof(mfmPoolAllocatorChunk) + poolAllocator->desc.slotCount * sizeof(mfmBool) + poolAllocator->desc.slotSize * poolAllocator->desc.slotCount) != MF_ERROR_OKAY)
 		return MFM_ERROR_ALLOCATION_FAILED;
 
 	// Get data pointers
@@ -141,7 +141,7 @@ mfError mfmExpandPoolAllocator(mfmPoolAllocator* poolAllocator, mfmPoolAllocator
 	// Set out chunk
 	if (newChunk != NULL)
 		*newChunk = chunk;
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfmPoolChunkAllocate(mfmPoolAllocator * allocator, mfmPoolAllocatorChunk * chunk, void ** memory, mfmU64 size)
@@ -158,7 +158,7 @@ mfError mfmPoolChunkAllocate(mfmPoolAllocator * allocator, mfmPoolAllocatorChunk
 			chunk->slotStatesPtr[i] = MFM_TRUE;
 			*memory = chunk->slotDataPtr + allocator->desc.slotSize * i;
 			--allocator->currentFreeSlotCount;
-			return MFM_ERROR_OKAY;
+			return MF_ERROR_OKAY;
 		}
 
 	// No free slots
@@ -177,7 +177,7 @@ mfError mfmPoolChunkDeallocate(void * memory, mfmPoolAllocator * allocator, mfmP
 	// Free slot
 	++allocator->currentFreeSlotCount;
 	chunk->slotStatesPtr[slotIndex] = MFM_FALSE;
-	return MFM_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfmPoolAllocate(mfmPoolAllocator * allocator, void ** memory, mfmU64 size)
@@ -191,8 +191,8 @@ mfError mfmPoolAllocate(mfmPoolAllocator * allocator, void ** memory, mfmU64 siz
 	while (ck != NULL)
 	{
 		mfError err = mfmPoolChunkAllocate(allocator, ck, memory, size);
-		if (err == MFM_ERROR_OKAY)
-			return MFM_ERROR_OKAY;
+		if (err == MF_ERROR_OKAY)
+			return MF_ERROR_OKAY;
 		else if (err != MFM_ERROR_ALLOCATOR_OVERFLOW)
 			return err;
 		ck = (mfmPoolAllocatorChunk*)ck->next;
@@ -203,7 +203,7 @@ mfError mfmPoolAllocate(mfmPoolAllocator * allocator, void ** memory, mfmU64 siz
 	if (allocator->desc.expandable)
 	{
 		mfError err = mfmExpandPoolAllocator(allocator, &ck);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		else
 			return mfmPoolChunkAllocate(allocator, ck, memory, size);
@@ -219,8 +219,8 @@ mfError mfmPoolDeallocate(mfmPoolAllocator * allocator, void * memory)
 	while (ck != NULL)
 	{
 		mfError err = mfmPoolChunkDeallocate(memory, allocator, ck);
-		if (err == MFM_ERROR_OKAY)
-			return MFM_ERROR_OKAY;
+		if (err == MF_ERROR_OKAY)
+			return MF_ERROR_OKAY;
 		else if (err != MFM_ERROR_OUT_OF_BOUNDS)
 			return err;
 		ck = (mfmPoolAllocatorChunk*)ck->next;

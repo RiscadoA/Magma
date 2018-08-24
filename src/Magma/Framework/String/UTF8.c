@@ -56,7 +56,7 @@ mfError mfsGetUTF8CharSize(const mfsUTF8CodeUnit * chr, mfmU64 * size)
 		*size = 4;
 	else
 		return MFS_ERROR_INVALID_UTF8;
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfsGetSizeAsUTF8(mfsUnicodePoint up, mfmU64 * size)
@@ -74,7 +74,7 @@ mfError mfsGetSizeAsUTF8(mfsUnicodePoint up, mfmU64 * size)
 		*size = 4;
 	else
 		return MFS_ERROR_INVALID_UNICODE;
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfsGetUTF8Char(const mfsUTF8CodeUnit * chr, mfsUnicodePoint * up)
@@ -84,7 +84,7 @@ mfError mfsGetUTF8Char(const mfsUTF8CodeUnit * chr, mfsUnicodePoint * up)
 
 	mfmU64 sz;
 	mfError err = mfsGetUTF8CharSize(chr, &sz);
-	if (err != MFS_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 
 	*up = 0;
@@ -112,7 +112,7 @@ mfError mfsGetUTF8Char(const mfsUTF8CodeUnit * chr, mfsUnicodePoint * up)
 			return MFS_ERROR_INVALID_UTF8;
 	}
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit * chr, mfmU64 * chrSize, mfmU64 maxChrSize)
@@ -122,7 +122,7 @@ mfError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit * chr, mfmU64 * chrSi
 
 	mfmU64 sz; 
 	mfError err = mfsGetSizeAsUTF8(up, &sz);
-	if (err != MFS_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 	if (sz > maxChrSize)
 		return MFS_ERROR_CHARACTER_TOO_BIG;
@@ -154,5 +154,5 @@ mfError mfsSetUTF8Char(mfsUnicodePoint up, mfsUTF8CodeUnit * chr, mfmU64 * chrSi
 	if (chrSize != NULL)
 		*chrSize = sz;
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }

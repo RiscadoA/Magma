@@ -774,7 +774,7 @@ extern "C"
 	/// <param name="bytecodeSize">Shader bytecode size</param>
 	/// <param name="metaData">Shader meta data</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** vertexShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
@@ -794,7 +794,7 @@ extern "C"
 	/// <param name="bytecodeSize">Shader bytecode size</param>
 	/// <param name="metaData">Shader meta data</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** pixelShader, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
@@ -813,7 +813,7 @@ extern "C"
 	/// <param name="vs">Vertex shader handle</param>
 	/// <param name="ps">Pixel shader handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreatePipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline** pipeline, mfgV2XVertexShader* vs, mfgV2XPixelShader* ps);
@@ -830,7 +830,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="pipeline">Pipeline handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pipeline);
@@ -843,7 +843,7 @@ extern "C"
 	/// <param name="vertexShader">Vertex shader handle</param>
 	/// <param name="name">Binding point name</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XGetVertexShaderBindingPoint(mfgV2XRenderDevice* rd, mfgV2XBindingPoint** bp, mfgV2XVertexShader* vertexShader, const mfsUTF8CodeUnit* name);
@@ -856,7 +856,7 @@ extern "C"
 	/// <param name="pixelShader">Pixel shader handle</param>
 	/// <param name="name">Binding point name</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XGetPixelShaderBindingPoint(mfgV2XRenderDevice* rd, mfgV2XBindingPoint** bp, mfgV2XPixelShader* pixelShader, const mfsUTF8CodeUnit* name);
@@ -868,7 +868,7 @@ extern "C"
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="cb">Constant buffer handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XBindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XConstantBuffer* cb);
@@ -882,7 +882,7 @@ extern "C"
 	/// <param name="offset">Starting memory offset in the buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
 	/// <param name="size">Memory size in the buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XBindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XConstantBuffer* cb, mfmU64 offset, mfmU64 size);
@@ -894,7 +894,7 @@ extern "C"
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="tex">Texture handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XBindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XTexture1D* tex);
@@ -906,7 +906,7 @@ extern "C"
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="tex">Texture handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XBindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XTexture2D* tex);
@@ -918,7 +918,7 @@ extern "C"
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="tex">Texture handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XBindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XTexture3D* tex);
@@ -930,7 +930,7 @@ extern "C"
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="tex">Texture handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XBindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XRenderTexture* tex);
@@ -942,7 +942,7 @@ extern "C"
 	/// <param name="bp">Binding point handle</param>
 	/// <param name="sampler">Sampler handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XBindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XSampler* sampler);
@@ -956,7 +956,7 @@ extern "C"
 	/// <param name="data">Constant buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
 	/// <param name="usage">Constant buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer** cb, mfmU64 size, const void* data, mfgEnum usage);
@@ -974,7 +974,7 @@ extern "C"
 	/// <param name="cb">Constant buffer handle</param>
 	/// <param name="memory">Pointer to memory pointer</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XMapConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer* cb, void** memory);
@@ -985,7 +985,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="cb">Constant buffer handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XUnmapConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer* cb);
@@ -999,7 +999,7 @@ extern "C"
 	/// <param name="data">Vertex buffer initial data (set to NULL to create empty buffer, only works if the usage isn't set to MFG_STATIC)</param>
 	/// <param name="usage">Vertex buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer** vb, mfmU64 size, const void* data, mfgEnum usage);
@@ -1017,7 +1017,7 @@ extern "C"
 	/// <param name="vb">Vertex buffer handle</param>
 	/// <param name="memory">Pointer to memory pointer</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XMapVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer* vb, void** memory);
@@ -1028,7 +1028,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="vb">Vertex buffer handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XUnmapVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer* vb);
@@ -1042,7 +1042,7 @@ extern "C"
 	/// <param name="elements">Vertex elements array pointer</param>
 	/// <param name="vs">Vertex shader handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateVertexLayout(mfgV2XRenderDevice* rd, mfgV2XVertexLayout** vl, mfmU64 elementCount, const mfgV2XVertexElement* elements, mfgV2XVertexShader* vs);
@@ -1062,7 +1062,7 @@ extern "C"
 	/// <param name="vbs">Vertex buffers array pointer</param>
 	/// <param name="vl">Vertex layout handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va, mfmU64 vbCount, mfgV2XVertexBuffer** vbs, mfgV2XVertexLayout* vl);
@@ -1079,7 +1079,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="va">Vertex array handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSetVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray* va);
@@ -1094,7 +1094,7 @@ extern "C"
 	/// <param name="format">Index data format (valid: MFG_USHORT; MFG_UINT)</param>
 	/// <param name="usage">Index buffer usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer** ib, mfmU64 size, const void* data, mfgEnum format, mfgEnum usage);
@@ -1112,7 +1112,7 @@ extern "C"
 	/// <param name="ib">Index buffer handle</param>
 	/// <param name="memory">Pointer to memory pointer</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XMapIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib, void** memory);
@@ -1123,7 +1123,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="ib">Index buffer handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XUnmapIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib);
@@ -1134,7 +1134,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="ib">Index buffer handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSetIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib);
@@ -1149,7 +1149,7 @@ extern "C"
 	/// <param name="data">Texture initial data (set to NULL to create empty texture, only works if the usage isn't set to MFG_STATIC)</param>
 	/// <param name="usage">Texture usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D** tex, mfmU64 width, mfgEnum format, const void* data, mfgEnum usage);
@@ -1169,7 +1169,7 @@ extern "C"
 	/// <param name="width">Update data width</param>
 	/// <param name="data">Update data</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XUpdateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data);
@@ -1180,7 +1180,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="tex">Texture handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XGenerateTexture1DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture1D* tex);
@@ -1196,7 +1196,7 @@ extern "C"
 	/// <param name="data">Texture initial data (set to NULL to create empty texture, only works if the usage isn't set to MFG_STATIC)</param>
 	/// <param name="usage">Texture usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D** tex, mfmU64 width, mfmU64 height, mfgEnum format, const void* data, mfgEnum usage);
@@ -1218,7 +1218,7 @@ extern "C"
 	/// <param name="height">Update data height</param>
 	/// <param name="data">Update data</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XUpdateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data);
@@ -1229,7 +1229,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="tex">Texture handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XGenerateTexture2DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture2D* tex);
@@ -1246,7 +1246,7 @@ extern "C"
 	/// <param name="data">Texture initial data (set to NULL to create empty texture, only works if the usage isn't set to MFG_STATIC)</param>
 	/// <param name="usage">Texture usage mode (valid: MFG_DEFAULT; MFG_DYNAMIC; MFG_STATIC)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateTexture3D(mfgV2XRenderDevice* rd, mfgV2XTexture3D** tex, mfmU64 width, mfmU64 height, mfmU64 depth, mfgEnum format, const void* data, mfgEnum usage);
@@ -1270,7 +1270,7 @@ extern "C"
 	/// <param name="depth">Update data depth</param>
 	/// <param name="data">Update data</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XUpdateTexture3D(mfgV2XRenderDevice * rd, mfgV2XTexture3D * tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void * data);
@@ -1281,7 +1281,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="tex">Texture handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XGenerateTexture3DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture3D* tex);
@@ -1293,7 +1293,7 @@ extern "C"
 	/// <param name="sampler">Pointer to sampler handle</param>
 	/// <param name="desc">Sampler description</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateSampler(mfgV2XRenderDevice* rd, mfgV2XSampler** sampler, const mfgV2XSamplerDesc* desc);
@@ -1311,7 +1311,7 @@ extern "C"
 	/// <param name="state">Pointer to raster state handle</param>
 	/// <param name="desc">State description</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState** state, const mfgV2XRasterStateDesc* desc);
@@ -1328,7 +1328,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="state">Raster state handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state);
@@ -1340,7 +1340,7 @@ extern "C"
 	/// <param name="state">Pointer to depth stencil state handle</param>
 	/// <param name="desc">State description</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilState** state, const mfgV2XDepthStencilStateDesc* desc);
@@ -1357,7 +1357,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="state">Depth stencil state handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilState* state);
@@ -1369,7 +1369,7 @@ extern "C"
 	/// <param name="state">Pointer to blend state handle</param>
 	/// <param name="desc">State description</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState** state, const mfgV2XBlendStateDesc* desc);
@@ -1386,7 +1386,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="state">Blend state handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state);
@@ -1400,7 +1400,7 @@ extern "C"
 	/// <param name="height">Texture height</param>
 	/// <param name="format">Texture data format</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateRenderTexture(mfgV2XRenderDevice* rd, mfgV2XRenderTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
@@ -1420,7 +1420,7 @@ extern "C"
 	/// <param name="height">Texture height</param>
 	/// <param name="format">Texture data format</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateDepthStencilTexture(mfgV2XRenderDevice* rd, mfgV2XDepthStencilTexture** tex, mfmU64 width, mfmU64 height, mfgEnum format);
@@ -1440,7 +1440,7 @@ extern "C"
 	/// <param name="texture">Texture attachments array</param>
 	/// <param name="depthStencilTexture">Depth stencil texture (optional, can be set to NULL)</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XCreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb, mfmU64 textureCount, mfgV2XRenderTexture** textures, mfgV2XDepthStencilTexture* depthStencilTexture);
@@ -1457,7 +1457,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="fb">Framebuffer handle</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSetFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer* fb);
@@ -1471,7 +1471,7 @@ extern "C"
 	/// <param name="b">Color blue component</param>
 	/// <param name="a">Color alpha component</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XClearColor(mfgV2XRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
@@ -1482,7 +1482,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="depth">Depth value</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XClearDepth(mfgV2XRenderDevice* rd, mfmF32 depth);
@@ -1493,7 +1493,7 @@ extern "C"
 	/// <param name="rd">Render device</param>
 	/// <param name="stencil">Stencil value</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XClearStencil(mfgV2XRenderDevice* rd, mfmI32 stencil);
@@ -1505,7 +1505,7 @@ extern "C"
 	/// <param name="offset">First vertex offset</param>
 	/// <param name="count">Vertex count</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XDrawTriangles(mfgV2XRenderDevice* rd, mfmU64 offset, mfmU64 count);
@@ -1517,7 +1517,7 @@ extern "C"
 	/// <param name="offset">First index offset</param>
 	/// <param name="count">Index count</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XDrawTrianglesIndexed(mfgV2XRenderDevice* rd, mfmU64 offset, mfmU64 count);
@@ -1527,7 +1527,7 @@ extern "C"
 	/// </summary>
 	/// <param name="rd">Render device</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XSwapBuffers(mfgV2XRenderDevice* rd);
@@ -1539,7 +1539,7 @@ extern "C"
 	/// <param name="id">Property identifier</param>
 	/// <param name="value">Output property value</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XGetPropertyI(mfgV2XRenderDevice* rd, mfgEnum id, mfmI32* value);
@@ -1551,7 +1551,7 @@ extern "C"
 	/// <param name="id">Property identifier</param>
 	/// <param name="value">Output property value</param>
 	/// <returns>
-	///		MFG_ERROR_OKAY if there were no errors.
+	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfgV2XGetPropertyF(mfgV2XRenderDevice* rd, mfgEnum id, mfmF32* value);

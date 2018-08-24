@@ -1,4 +1,4 @@
-﻿#include <Magma/Framework/Input/GLWindow.h>
+﻿#include <Magma/Framework/Input/OGLWindow.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +16,8 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfError err = mfiCreateGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-2");
-	if (err != MFI_ERROR_OKAY)
+	mfError err = mfiCreateOGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-2");
+	if (err != MF_ERROR_OKAY)
 		abort();
 
 	window->onClose = &OnClose;

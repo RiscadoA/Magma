@@ -18,7 +18,7 @@ extern "C"
 	/// <param name="buffer">Buffer where the data will be written to</param>
 	/// <param name="size">Buffer size</param>
 	/// <param name="allocator">The allocator the stream is going to use</param>
-	/// <returns>The error code (MFS_ERROR_OKAY if there no errors).</returns>
+	/// <returns>The error code (MF_ERROR_OKAY if there no errors).</returns>
 	mfError mfsCreateStringStream(mfsStream** stream, mfmU8* buffer, mfmU64 size, void* allocator);
 
 	/// <summary>
@@ -31,7 +31,7 @@ extern "C"
 	///		Clears all data in a string stream.
 	/// </summary>
 	/// <param name="stream">Stream handle</param>
-	/// <returns>The error code (MFS_ERROR_OKAY if there no errors).</returns>
+	/// <returns>The error code (MF_ERROR_OKAY if there no errors).</returns>
 	mfError mfsClearStringStream(mfsStream* stream);
 
 #ifdef __cplusplus

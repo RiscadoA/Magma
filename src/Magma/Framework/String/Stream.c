@@ -26,7 +26,7 @@ static mfError mfsFileWrite(void* stream, const mfmU8* data, mfmU64 dataSize, mf
 	if (outSize != NULL)
 		*outSize = size;
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfsFileRead(void* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize)
@@ -37,7 +37,7 @@ static mfError mfsFileRead(void* stream, mfmU8* data, mfmU64 dataSize, mfmU64* o
 	if (outSize != NULL)
 		*outSize = size;
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfsFileFlush(void* stream)
@@ -46,7 +46,7 @@ static mfError mfsFileFlush(void* stream)
 	int ret = fflush(fileStream->file);
 	if (ret == EOF)
 		return MFS_ERROR_EOF;
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfsFileSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
@@ -66,26 +66,26 @@ static mfError mfsFileSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
 			return MFS_ERROR_INTERNAL;
 	}
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 static void mfsDestroyFileStream(void* stream)
 {
-	if (mfmDestroyObject(stream) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(stream) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(NULL, stream) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(NULL, stream) != MF_ERROR_OKAY)
 		abort();
 }
 
 static mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSize)
 {
 	mfsFileStream* stream = NULL;
-	if (mfmAllocate(NULL, &stream, sizeof(mfsFileStream)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(NULL, &stream, sizeof(mfsFileStream)) != MF_ERROR_OKAY)
 		abort();
 
 	{
 		mfError err = mfmInitObject(&stream->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	stream->base.object.destructorFunc = &mfsDestroyFileStream;
@@ -104,24 +104,24 @@ static mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSi
 
 mfError mfsInitStream()
 {
-	mfError err = MFS_ERROR_OKAY;
+	mfError err = MF_ERROR_OKAY;
 
 	// Initialize mfsInStream stream
 	mfsInStream = mfsCreateFileStream(stdin, mfsInDefaultBuffer, sizeof(mfsInDefaultBuffer));
 	err = mfmIncObjectRef(&mfsInStream->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 	
 	// Initialize mfsOutStream stream
 	mfsOutStream = mfsCreateFileStream(stdout, mfsOutDefaultBuffer, sizeof(mfsOutDefaultBuffer));
 	err = mfmIncObjectRef(&mfsOutStream->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 
 	// Initialize mfsErrStream stream
 	mfsErrStream = mfsCreateFileStream(stderr, mfsErrDefaultBuffer, sizeof(mfsErrDefaultBuffer));
 	err = mfmIncObjectRef(&mfsErrStream->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 
 	return err;
@@ -129,28 +129,28 @@ mfError mfsInitStream()
 
 mfError mfsTerminateStream()
 {
-	mfError err = MFS_ERROR_OKAY;
+	mfError err = MF_ERROR_OKAY;
 
 	if (mfsInStream != NULL)
 	{
 		err = mfmDecObjectRef(&mfsInStream->object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		mfsInStream->object.destructorFunc(mfsInStream);
 	}
 
 	if (mfsOutStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsInStream->object);
-		if (err != MFM_ERROR_OKAY)
+		err = mfmDecObjectRef(&mfsOutStream->object);
+		if (err != MF_ERROR_OKAY)
 			return err;
 		mfsOutStream->object.destructorFunc(mfsOutStream);
 	}
 
 	if (mfsErrStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsInStream->object);
-		if (err != MFM_ERROR_OKAY)
+		err = mfmDecObjectRef(&mfsErrStream->object);
+		if (err != MF_ERROR_OKAY)
 			return err;
 		mfsErrStream->object.destructorFunc(mfsErrStream);
 	}
@@ -163,7 +163,7 @@ mfError mfsWrite(mfsStream * stream, const mfmU8 * data, mfmU64 dataSize, mfmU64
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	if (dataSize == 0)
-		return MFS_ERROR_OKAY;
+		return MF_ERROR_OKAY;
 	return stream->write(stream, data, dataSize, outSize);
 }
 
@@ -172,7 +172,7 @@ mfError mfsRead(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outS
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	if (dataSize == 0)
-		return MFS_ERROR_OKAY;
+		return MF_ERROR_OKAY;
 	return stream->read(stream, data, dataSize, outSize);
 }
 
@@ -196,13 +196,13 @@ mfError mfsSetBuffer(mfsStream * stream, mfmU8 * buffer, mfmU64 bufferSize)
 				return MFS_ERROR_INVALID_ARGUMENTS;
 
 			mfError err = stream->flush(stream);
-			if (err != MFS_ERROR_OKAY)
+			if (err != MF_ERROR_OKAY)
 				return err;
 		}
 
 		stream->buffer = buffer;
 		stream->bufferSize = bufferSize;
-		return MFS_ERROR_OKAY;
+		return MF_ERROR_OKAY;
 	}
 	else
 		return stream->setBuffer(stream, buffer, bufferSize);
@@ -228,7 +228,7 @@ mfError mfsOpenFile(mfsStream ** stream, mfmU32 mode, const mfsUTF8CodeUnit * pa
 	*stream = mfsCreateFileStream(file, NULL, 0);
 	(*stream)->object.destructorFunc = &mfsCloseFile;
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfsCloseFile(mfsStream * stream)
@@ -247,21 +247,21 @@ mfError mfsGetByte(mfsStream * stream, mfmU8 * byte)
 		mfmU8 temp;
 		mfmU64 readSize = 0;
 		mfError err = stream->read(stream, &temp, sizeof(mfmU8), &readSize);
-		if (err != MFS_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		if (readSize != sizeof(mfmU8))
 			return MFS_ERROR_FAILED_TO_READ_ALL;
-		return MFS_ERROR_OKAY;
+		return MF_ERROR_OKAY;
 	}
 	else
 	{
 		mfmU64 readSize = 0;
 		mfError err = stream->read(stream, byte, sizeof(mfmU8), &readSize);
-		if (err != MFS_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		if (readSize != sizeof(mfmU8))
 			return MFS_ERROR_FAILED_TO_READ_ALL;
-		return MFS_ERROR_OKAY;
+		return MF_ERROR_OKAY;
 	}
 }
 
@@ -272,11 +272,11 @@ mfError mfsPutByte(mfsStream * stream, mfmU8 byte)
 
 	mfmU64 writeSize = 0;
 	mfError err = stream->write(stream, &byte, sizeof(mfmU8), &writeSize);
-	if (err != MFS_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 	if (writeSize != sizeof(mfmU8))
 		return MFS_ERROR_FAILED_TO_WRITE_ALL;
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfsPutString(mfsStream * stream, const mfsUTF8CodeUnit * str)
@@ -284,12 +284,12 @@ mfError mfsPutString(mfsStream * stream, const mfsUTF8CodeUnit * str)
 	while (*str != '\0')
 	{
 		mfError err = mfsPutByte(stream, *str);
-		if (err != MFS_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		++str;
 	}
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, ...)
@@ -306,7 +306,7 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 		{
 			mfError err = mfsPutByte(stream, *format);
 			escape = MFM_FALSE;
-			if (err != MFS_ERROR_OKAY)
+			if (err != MF_ERROR_OKAY)
 			{
 				va_end(args);
 				return err;
@@ -328,7 +328,7 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 						for (int i = 0; i < ret; ++i)
 						{
 							mfError err = mfsPutByte(stream, tempBuf[i]);
-							if (err != MFS_ERROR_OKAY)
+							if (err != MF_ERROR_OKAY)
 							{
 								va_end(args);
 								return err;
@@ -344,7 +344,7 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 						for (int i = 0; i < ret; ++i)
 						{
 							mfError err = mfsPutByte(stream, tempBuf[i]);
-							if (err != MFS_ERROR_OKAY)
+							if (err != MF_ERROR_OKAY)
 							{
 								va_end(args);
 								return err;
@@ -360,7 +360,7 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 						for (int i = 0; i < ret; ++i)
 						{
 							mfError err = mfsPutByte(stream, tempBuf[i]);
-							if (err != MFS_ERROR_OKAY)
+							if (err != MF_ERROR_OKAY)
 							{
 								va_end(args);
 								return err;
@@ -376,7 +376,7 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 						for (int i = 0; i < ret; ++i)
 						{
 							mfError err = mfsPutByte(stream, tempBuf[i]);
-							if (err != MFS_ERROR_OKAY)
+							if (err != MF_ERROR_OKAY)
 							{
 								va_end(args);
 								return err;
@@ -386,7 +386,7 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 				else if (*format == 's')
 				{
 					mfError err = mfsPutString(stream, va_arg(args, const mfsUTF8CodeUnit*));
-					if (err != MFS_ERROR_OKAY)
+					if (err != MF_ERROR_OKAY)
 					{
 						va_end(args);
 						return err;
@@ -402,7 +402,7 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 			{
 				mfError err = mfsPutByte(stream, *format);
 				escape = MFM_FALSE;
-				if (err != MFS_ERROR_OKAY)
+				if (err != MF_ERROR_OKAY)
 				{
 					va_end(args);
 					return err;
@@ -415,5 +415,5 @@ mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, .
 	
 	va_end(args);
 
-	return MFS_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }

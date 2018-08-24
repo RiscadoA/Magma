@@ -45,7 +45,7 @@ extern "C"
 	/// <param name="poolAllocator">Pointer to allocator pointer</param>
 	/// <param name="desc">Pointer to pool allocator description</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the pool.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the pool description or allocator pointers are NULL.
 	/// </returns>
@@ -59,7 +59,7 @@ extern "C"
 	/// <param name="memory">Pointer to memory adress where the pool allocator will be created</param>
 	/// <param name="memorySize">Size of the reserved memory</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the pool description or allocator pointers are NULL or if the pool is marked as expandable or if the pool doesn't fit on the memory passed.
 	/// </returns>
 	mfError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator** poolAllocator, const mfmPoolAllocatorDesc* desc, void* memory, mfmU64 memorySize);
@@ -77,7 +77,7 @@ extern "C"
 	/// <param name="memory">Pointer to allocated memory pointer</param>
 	/// <param name="size">Memory allocation size in bytes</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if the pool has no free slots.
 	///		Returns MFM_ERROR_ALLOCATION_TOO_BIG if the allocation size is bigger than the pool slot's size.
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the pool failed to expand.
@@ -90,7 +90,7 @@ extern "C"
 	/// <param name="allocator">Magma framework memory pool allocator</param>
 	/// <param name="memory">Pointer to the allocated memory</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_OUT_OF_BOUNDS if the memory is out of the pool bounds.
 	/// </returns>
 	mfError mfmPoolDeallocate(mfmPoolAllocator* allocator, void* memory);

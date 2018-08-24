@@ -28,7 +28,7 @@ extern "C"
 	/// <param name="linearAllocator">Pointer to allocator pointer</param>
 	/// <param name="size">Linear buffer size in bytes</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the stack.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the allocator pointer is null or the size is invalid.
 	/// </returns>
@@ -42,7 +42,7 @@ extern "C"
 	/// <param name="size">Linear buffer size in bytes</param>
 	///	<param name="memory">Pointer to memory adress where the linear allocator will be created</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATION_FAILED if the function couldn't allocate memory for the stack.
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if the allocator pointer is null or the size is invalid.
 	/// </returns>
@@ -61,7 +61,7 @@ extern "C"
 	/// <param name="memory">Pointer to allocated memory pointer</param>
 	/// <param name="size">Memory allocation size in bytes</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if the linear buffer overflows.
 	/// </returns>
 	mfError mfmLinearAllocate(mfmLinearAllocator* linearAllocator, void** memory, mfmU64 size);

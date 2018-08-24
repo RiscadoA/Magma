@@ -4,7 +4,7 @@ Magma::Framework::Memory::StackAllocator Magma::Framework::Memory::CreateStackAl
 {
 	mfmStackAllocator* alloc;
 	mfError err = mfmCreateStackAllocator(&alloc, size);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		throw AllocatorError(ErrorToString(err));
 	return alloc;
 }
@@ -13,7 +13,7 @@ Magma::Framework::Memory::StackAllocator Magma::Framework::Memory::CreateStackAl
 {
 	mfmStackAllocator* alloc;
 	mfError err = mfmCreateStackAllocatorOnMemory(&alloc, size, memory, memorySize);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		throw AllocatorError(ErrorToString(err));
 	return alloc;
 }

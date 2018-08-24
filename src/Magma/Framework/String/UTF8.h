@@ -26,7 +26,7 @@ extern "C"
 	/// <param name="chr">Pointer to UTF-8 character</param>
 	/// <param name="size">Pointer to character size</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="chr">chr</paramref> or <paramref name="size">size</paramref> are NULL.
 	///		Returns MFS_ERROR_INVALID_UTF8 if the character at <paramref name="chr">chr</paramref> is invalid.
 	/// </returns>
@@ -38,7 +38,7 @@ extern "C"
 	/// <param name="up">Character unicode point value</param>
 	/// <param name="size">Pointer to character size</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="size">size</paramref> is NULL.
 	///		Returns MFS_ERROR_INVALID_UNICODE if the unicode point value is invalid.
 	/// </returns>
@@ -50,7 +50,7 @@ extern "C"
 	/// <param name="chr">Pointer to UTF-8 character</param>
 	/// <param name="up">Pointer to character unicode point value</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="chr">chr</paramref> or <paramref name="up">up</paramref> are NULL.
 	///		Returns MFS_ERROR_INVALID_UTF8 if the UTF-8 character at <paramref name="chr">chr</paramref> is invalid UTF-8.
 	/// </returns>
@@ -64,7 +64,7 @@ extern "C"
 	/// <param name="chrSize">Pointer to the character size (set to NULL to ignore)</param>
 	/// <param name="maxChrSize">The maximum size of the character in bytes</param>
 	/// <returns>
-	///		Returns MFM_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFS_ERROR_INVALID_ARGUMENTS if <paramref name="chr">chr</paramref> is NULL.
 	///		Returns MFS_ERROR_INVALID_UNICODE if the character unicode point value is invalid.
 	///		Returns MFS_ERROR_CHARACTER_TOO_BIG if the character size as UTF-8 is bigger than <paramref name="maxChrSize">maxChrSize</paramref>.
