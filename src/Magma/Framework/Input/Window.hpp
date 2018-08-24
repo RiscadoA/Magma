@@ -10,7 +10,7 @@ namespace Magma
 	{
 		namespace Input
 		{
-			enum class WindowMode : mfiWindowMode
+			enum class WindowMode : mfiEnum
 			{
 				Windowed = MFI_WINDOWED,
 				Fullscreen = MFI_FULLSCREEN,
@@ -55,15 +55,6 @@ namespace Magma
 				/// <returns>Window mode</returns>
 				WindowMode GetMode();
 			};
-
-			typedef mfError (*WindowCreatorFunction)(mfiWindow** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit* title);
-
-			/// <summary>
-			///		Registers a new window creator.
-			/// </summary>
-			/// <param name="type">Window type name (with a maximum size of 16 bytes)</param>
-			/// <param name="func">Window creator function</param>
-			void RegisterWindowCreator(mfsUTF8CodeUnit type[16], WindowCreatorFunction func);
 
 			/// <summary>
 			///		Creates a new window.

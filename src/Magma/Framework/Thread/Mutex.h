@@ -20,7 +20,7 @@ extern "C"
 	/// <param name="mutex">Out mutex handle</param>
 	/// <param name="allocator">Allocator where the mutex lock will be allocated</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftCreateMutex(mftMutex** mutex, void* allocator);
@@ -30,7 +30,7 @@ extern "C"
 	/// </summary>
 	/// <param name="mutex">Mutex handle</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFT_ERROR_STILL_RUNNING if the mutex is still locked.
 	///		Otherwise returns an error code.
 	/// </returns>
@@ -42,7 +42,7 @@ extern "C"
 	/// <param name="mutex">Mutex handle</param>
 	/// <param name="timeOut">Wait timeout in milliseconds (set to 0 to be infinite)</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFT_ERROR_TIMEOUT if the time specified in <paramref name="timeOut">timeOut</paramref> has already passed and the mutex still hasn't been unlocked.
 	///		Otherwise returns an error code.
 	/// </returns>
@@ -53,7 +53,7 @@ extern "C"
 	/// </summary>
 	/// <param name="mutex">Mutex handle</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors and the mutex was successfully locked.
+	///		Returns MF_ERROR_OKAY if there were no errors and the mutex was successfully locked.
 	///		Returns MFT_ERROR_MUTEX_LOCKED if the mutex is locked.
 	///		Otherwise returns an error code.
 	/// </returns>
@@ -64,7 +64,7 @@ extern "C"
 	/// </summary>
 	/// <param name="mutex">Mutex handle</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftUnlockMutex(mftMutex* mutex);

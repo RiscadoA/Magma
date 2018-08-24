@@ -8,7 +8,7 @@ Magma::Framework::Memory::LinearAllocator::LinearAllocator(mfmU64 size)
 	auto err = ::mfmCreateLinearAllocator(&m_linear, size);
 	switch (err)
 	{
-		case MFM_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFM_ERROR_ALLOCATION_FAILED:
 		{
@@ -46,7 +46,7 @@ void * Magma::Framework::Memory::LinearAllocator::Allocate(mfmU64 size)
 	auto err = ::mfmLinearAllocate(m_linear, &memory, size);
 	switch (err)
 	{
-		case MFM_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFM_ERROR_ALLOCATOR_OVERFLOW:
 		{

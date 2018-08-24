@@ -18,6 +18,9 @@
 #include <Magma/Framework/Graphics/1.X/Font.hpp>
 #include <Magma/Framework/Graphics/1.X/TextRenderer.hpp>
 
+
+#include <Magma/Framework/Entry.hpp>
+
 #define USE_GL
 
 using namespace Magma;

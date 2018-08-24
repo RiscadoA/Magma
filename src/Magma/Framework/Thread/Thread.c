@@ -25,10 +25,10 @@ struct mftThread
 static unsigned int __stdcall mftThreadFunc(void* args)
 {
 	mftThread* thread = (mftThread*)args;
-	if (mftAtomic8Store(&thread->running, MFM_TRUE) != MFT_ERROR_OKAY)
+	if (mftAtomic8Store(&thread->running, MFM_TRUE) != MF_ERROR_OKAY)
 		return 1;
 	thread->function(args);
-	if (mftAtomic8Store(&thread->running, MFM_FALSE) != MFT_ERROR_OKAY)
+	if (mftAtomic8Store(&thread->running, MFM_FALSE) != MF_ERROR_OKAY)
 		return 2;
 	return 0;
 }
@@ -38,7 +38,7 @@ static void mftDestroyThreadNoErrors(void* thread)
 	if (thread == NULL)
 		abort();
 	mfError err = mftDestroyThread((mftThread*)thread);
-	if (err != MFT_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		abort();
 }
 
@@ -47,10 +47,10 @@ mfError mftCreateThread(mftThread ** thread, void(*function)(void*), void* args,
 	if (thread == NULL || function == NULL)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 	mfError err = mfmAllocate(allocator, thread, sizeof(mftThread));
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 	err = mfmInitObject(&(*thread)->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 
 	(*thread)->object.destructorFunc = &mftDestroyThreadNoErrors;
@@ -64,7 +64,7 @@ mfError mftCreateThread(mftThread ** thread, void(*function)(void*), void* args,
 		mfmDeallocate(allocator, *thread);
 		return MFT_ERROR_INTERNAL;
 	}
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftDestroyThread(mftThread * thread)
@@ -76,7 +76,7 @@ mfError mftDestroyThread(mftThread * thread)
 	// Check if the thread is running
 	mfmBool running = MFM_FALSE;
 	err = mftAtomic8Load(&thread->running, &running);
-	if (err != MFT_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 	if (running != MFM_FALSE)
 		return MFT_ERROR_STILL_RUNNING;
@@ -87,13 +87,13 @@ mfError mftDestroyThread(mftThread * thread)
 
 	// Destroy and deallocate thread
 	err = mfmDestroyObject(&thread->object);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
 
 	err = mfmDeallocate(thread->allocator, thread);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		return err;
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftWaitForThread(mftThread * thread, mfmU32 timeOut)
@@ -109,7 +109,7 @@ mfError mftWaitForThread(mftThread * thread, mfmU32 timeOut)
 	else if (ret == WAIT_FAILED)
 		return MFT_ERROR_INTERNAL;
 	else
-		return MFT_ERROR_OKAY;
+		return MF_ERROR_OKAY;
 }
 
 #else

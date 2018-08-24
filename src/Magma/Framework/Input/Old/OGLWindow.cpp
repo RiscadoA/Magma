@@ -64,8 +64,8 @@ static void mfiWindowMouseLeaveCallback(void* window)
 Magma::Framework::Input::OGLWindow::OGLWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, Mode mode)
 {
 	m_window = nullptr;
-	auto err = mfiCreateGLWindow(&m_window, width, height, (mfiWindowMode)mode, title);
-	if (err != MFI_ERROR_OKAY)
+	auto err = mfiCreateOGLWindow(&m_window, width, height, (mfiEnum)mode, title);
+	if (err != MF_ERROR_OKAY)
 	{
 		std::stringstream ss;
 		ss << "Failed to open OGLWindow:" << std::endl;

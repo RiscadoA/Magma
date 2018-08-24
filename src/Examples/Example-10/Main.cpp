@@ -15,6 +15,8 @@
 
 #include <Magma/Framework/Audio/OALRenderDevice.hpp>
 
+#include <Magma/Framework/Entry.hpp>
+
 #define USE_GL
 
 using namespace Magma;

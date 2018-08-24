@@ -13,7 +13,7 @@ mfError mfmAllocate(void * allocator, void ** memory, mfmU64 size)
 		if (*memory == NULL)
 			return MFM_ERROR_ALLOCATION_FAILED;
 		else
-			return MFM_ERROR_OKAY;
+			return MF_ERROR_OKAY;
 	}
 	else
 	{
@@ -30,7 +30,7 @@ mfError mfmDeallocate(void * allocator, void * memory)
 	if (allocator == NULL)
 	{
 		free(memory);
-		return MFM_ERROR_OKAY;
+		return MF_ERROR_OKAY;
 	}
 	else
 	{

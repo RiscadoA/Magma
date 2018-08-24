@@ -21,11 +21,11 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	if (mftCreateMutex(&mutex, NULL) != MFT_ERROR_OKAY)
+	if (mftCreateMutex(&mutex, NULL) != MF_ERROR_OKAY)
 		abort();
 
 	mftThread* thread;
-	if (mftCreateThread(&thread, &ThreadFunction, NULL, NULL) != MFT_ERROR_OKAY)
+	if (mftCreateThread(&thread, &ThreadFunction, NULL, NULL) != MF_ERROR_OKAY)
 		abort();
 
 	for (mfmU16 i = 0; i < 10000; ++i)
@@ -35,13 +35,13 @@ int main(int argc, const char** argv)
 		mftUnlockMutex(mutex);
 	}
 
-	if (mftWaitForThread(thread, 0) != MFT_ERROR_OKAY)
+	if (mftWaitForThread(thread, 0) != MF_ERROR_OKAY)
 		abort();
 
-	if (mftDestroyThread(thread) != MFT_ERROR_OKAY)
+	if (mftDestroyThread(thread) != MF_ERROR_OKAY)
 		abort();
 
-	if (mftDestroyMutex(mutex) != MFT_ERROR_OKAY)
+	if (mftDestroyMutex(mutex) != MF_ERROR_OKAY)
 		abort();
 
 	Magma::Framework::Terminate();

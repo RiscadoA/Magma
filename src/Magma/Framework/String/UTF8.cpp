@@ -15,7 +15,7 @@ mfmU64 Magma::Framework::String::GetU8CharSize(const UTF8CodeUnit * src)
 	auto err = mfsGetUTF8CharSize(src, &size);
 	switch (err)
 	{
-		case MFS_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFS_ERROR_INVALID_ARGUMENTS:
 		{
@@ -51,7 +51,7 @@ mfmU64 Magma::Framework::String::GetU8CharSize(UnicodePoint up)
 	auto err = mfsGetSizeAsUTF8(up, &size);
 	switch (err)
 	{
-		case MFS_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFS_ERROR_INVALID_UNICODE:
 		{
@@ -79,7 +79,7 @@ UnicodePoint Magma::Framework::String::GetU8Char(const UTF8CodeUnit * src)
 	auto err = mfsGetUTF8Char(src, &up);
 	switch (err)
 	{
-		case MFS_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFS_ERROR_INVALID_ARGUMENTS:
 		{
@@ -114,7 +114,7 @@ mfmU64 Magma::Framework::String::SetU8Char(UTF8CodeUnit * dst, UnicodePoint up, 
 	auto err = mfsSetUTF8Char(up, dst, &size, maxSize);
 	switch (err)
 	{
-		case MFS_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFS_ERROR_INVALID_ARGUMENTS:
 		{

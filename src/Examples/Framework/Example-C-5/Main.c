@@ -11,7 +11,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfError err = MFG_ERROR_OKAY;
+	mfError err = MF_ERROR_OKAY;
 	mfgMetaData* metaData = NULL;
 
 	// Load meta data
@@ -69,7 +69,7 @@ int main(int argc, const char** argv)
 		
 		// Load
 		err = mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL);
-		if (err != MFG_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			abort();
 	}
 
@@ -89,11 +89,11 @@ int main(int argc, const char** argv)
 	};
 
 	err = mfgV2XD3D11Assemble(bytecode, sizeof(bytecode), metaData, mfsOutStream);
-	if (err != MFG_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		abort();
 
 	err = mfgV2XOGL4Assemble(bytecode, sizeof(bytecode), metaData, mfsOutStream);
-	if (err != MFG_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		abort();
 
 	// Unload meta data

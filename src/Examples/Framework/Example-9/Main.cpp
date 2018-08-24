@@ -12,6 +12,9 @@
 
 #include <Magma/Framework/Audio/WAVLoader.hpp>
 
+
+#include <Magma/Framework/Entry.hpp>
+
 #define USE_GL
 
 using namespace Magma;

@@ -16,6 +16,8 @@
 #include <Magma/Framework/Graphics/1.X/BytecodeAssembler.hpp>
 #include <Magma/Framework/Graphics/1.X/MetaDataAssembler.hpp>
 
+#include <Magma/Framework/Entry.hpp>
+
 using namespace Magma;
 using namespace Magma::Framework;
 

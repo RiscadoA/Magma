@@ -64,8 +64,8 @@ static void mfiWindowMouseLeaveCallback(void* window)
 Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, Window::Mode mode)
 {
 	m_window = nullptr;
-	auto err = mfiCreateD3DWindow(&m_window, width, height, (mfiWindowMode)mode, title);
-	if (err != MFI_ERROR_OKAY)
+	auto err = mfiCreateD3DWindow(&m_window, width, height, (mfiEnum)mode, title);
+	if (err != MF_ERROR_OKAY)
 	{
 		std::stringstream ss;
 		ss << "Failed to open D3DWindow:" << std::endl;

@@ -12,7 +12,7 @@ mfError mftAtomic8Load(const mfmI8 * atomic, mfmI8 * out)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 #endif
 	*out = *atomic;
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftAtomic8Store(mfmI8 * atomic, mfmI8 value)
@@ -22,7 +22,7 @@ mfError mftAtomic8Store(mfmI8 * atomic, mfmI8 value)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 #endif
 	InterlockedExchange8(atomic, value);
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftAtomic16Load(const mfmI16 * atomic, mfmI16 * out)
@@ -32,7 +32,7 @@ mfError mftAtomic16Load(const mfmI16 * atomic, mfmI16 * out)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 #endif
 	*out = *atomic;
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftAtomic16Store(mfmI16 * atomic, mfmI16 value)
@@ -42,7 +42,7 @@ mfError mftAtomic16Store(mfmI16 * atomic, mfmI16 value)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 #endif
 	InterlockedExchange16(atomic, value);
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftAtomic32Load(const volatile mfmI32 * atomic, mfmI32 * out)
@@ -52,7 +52,7 @@ mfError mftAtomic32Load(const volatile mfmI32 * atomic, mfmI32 * out)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 #endif
 	*out = *atomic;
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftAtomic32Store(volatile mfmI32 * atomic, mfmI32 value)
@@ -62,7 +62,7 @@ mfError mftAtomic32Store(volatile mfmI32 * atomic, mfmI32 value)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 #endif
 	InterlockedExchange(atomic, value);
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mftAtomic32Add(const volatile mfmI32 * atomic, mfmI32 value)
@@ -72,7 +72,7 @@ mfError mftAtomic32Add(const volatile mfmI32 * atomic, mfmI32 value)
 		return MFT_ERROR_INVALID_ARGUMENTS;
 #endif
 	InterlockedAdd(atomic, value);
-	return MFT_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 #else

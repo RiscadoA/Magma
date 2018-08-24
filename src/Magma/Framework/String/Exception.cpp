@@ -4,7 +4,7 @@ const mfsUTF8CodeUnit * Magma::Framework::String::ErrorToString(mfError err)
 {
 	switch (err)
 	{
-		case MFS_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			return u8"No error";
 		case MFS_ERROR_INVALID_ARGUMENTS:
 			return u8"Invalid arguments";

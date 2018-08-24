@@ -14,14 +14,6 @@ void Magma::Framework::Init(int argc, const char ** argv)
 		throw CoreError(u8"Failed to init Magma Framework:\nmfInit returned an error code", err);
 
 	String::InitStreams();
-
-#ifdef MAGMA_FRAMEWORK_USE_OPENGL
-	Input::RegisterWindowCreator(u8"ogl", &mfiCreateGLWindow);
-#endif
-
-#ifdef MAGMA_FRAMEWORK_USE_DIRECTX
-	Input::RegisterWindowCreator(u8"d3d", &mfiCreateD3DWindow);
-#endif
 }
 
 void Magma::Framework::Terminate()

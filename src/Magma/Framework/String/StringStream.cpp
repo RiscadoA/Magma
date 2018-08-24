@@ -4,7 +4,7 @@
 void Magma::Framework::String::StringStream::Clear()
 {
 	mfError err = mfsClearStringStream(reinterpret_cast<mfsStream*>(&this->Get()));
-	if (err == MFS_ERROR_OKAY)
+	if (err == MF_ERROR_OKAY)
 		return;
 	throw StreamError(ErrorToString(err));
 }
@@ -13,7 +13,7 @@ Magma::Framework::String::StringStream Magma::Framework::String::CreateStringStr
 {
 	mfsStream* stream;
 	mfError err = mfsCreateStringStream(&stream, static_cast<mfmU8*>(buffer), size, allocator.GetNoChecks());
-	if (err != MFS_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		throw StreamError(ErrorToString(err));
 	return stream;
 }

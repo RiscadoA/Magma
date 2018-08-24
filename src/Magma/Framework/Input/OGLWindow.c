@@ -17,7 +17,7 @@ typedef struct
 	// Properties
 	mfmU32 width;
 	mfmU32 height;
-	mfiWindowMode mode;
+	mfiEnum mode;
 
 	// GLFW window handle
 	GLFWwindow* glfwWindow;
@@ -130,7 +130,7 @@ mfmU32 mfiGetGLWindowHeight(void* window)
 	return OGLWindow->height;
 }
 
-mfiWindowMode mfiGetGLWindowMode(void* window)
+mfiEnum mfiGetGLWindowMode(void* window)
 {
 	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
 	return OGLWindow->mode;
@@ -138,7 +138,7 @@ mfiWindowMode mfiGetGLWindowMode(void* window)
 
 void mfiGLFWErrorCallback(int err, const char* errMsg)
 {
-	if (mfsPrintFormatUTF8(mfsErrStream, u8"mfiGLWindow GLFW error caught : \n%s\n", errMsg) != MFS_ERROR_OKAY)
+	if (mfsPrintFormatUTF8(mfsErrStream, u8"mfiGLWindow GLFW error caught : \n%s\n", errMsg) != MF_ERROR_OKAY)
 		abort();
 }
 
@@ -223,14 +223,14 @@ void mfiGLFWCursorEnterCallback(GLFWwindow* window, int enter)
 
 #endif
 
-mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
+mfError mfiCreateOGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiEnum mode, const mfsUTF8CodeUnit * title)
 {
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	if (currentWindow != NULL)
 		return MFI_ERROR_ALREADY_INITIALIZED;
 
 	mfiOGLWindow* OGLWindow = NULL;
-	if (mfmAllocate(NULL, &OGLWindow, sizeof(mfiOGLWindow)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(NULL, &OGLWindow, sizeof(mfiOGLWindow)) != MF_ERROR_OKAY)
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Init GLFW
@@ -243,7 +243,7 @@ mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiW
 	}
 
 	// Set properties
-	OGLWindow->base.type = MFI_OGLWINDOW;
+	OGLWindow->base.type = MFI_OGLWINDOW_TYPE_NAME;
 
 	OGLWindow->width = width;
 	OGLWindow->height = height;
@@ -252,7 +252,7 @@ mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiW
 	// Set destructor
 	{
 		mfError err = mfmInitObject(&OGLWindow->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	OGLWindow->base.object.destructorFunc = &mfiDestroyGLWindow;
@@ -289,7 +289,7 @@ mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiW
 		OGLWindow->glfwWindow = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);
 	else
 	{
-		if (mfmDeallocate(NULL, OGLWindow) != MFM_ERROR_OKAY)
+		if (mfmDeallocate(NULL, OGLWindow) != MF_ERROR_OKAY)
 			abort();
 		return MFI_ERROR_INVALID_ARGUMENTS;
 	}
@@ -297,7 +297,7 @@ mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiW
 	// Check if the window creation succeded
 	if (OGLWindow->glfwWindow == NULL)
 	{
-		if (mfmDeallocate(NULL, OGLWindow) != MFM_ERROR_OKAY)
+		if (mfmDeallocate(NULL, OGLWindow) != MF_ERROR_OKAY)
 			abort();
 		return MFI_ERROR_INTERNAL;
 	}
@@ -317,7 +317,7 @@ mfError mfiCreateGLWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiW
 	*window = OGLWindow;
 	currentWindow = OGLWindow;
 
-	return MFI_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 #else
 	return MFI_ERROR_NOT_SUPPORTED;
 #endif
@@ -329,9 +329,9 @@ void mfiDestroyGLWindow(void * window)
 	// Destroy window
 	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
 	glfwDestroyWindow(OGLWindow->glfwWindow);
-	if (mfmDestroyObject(&OGLWindow->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&OGLWindow->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(NULL, OGLWindow) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(NULL, OGLWindow) != MF_ERROR_OKAY)
 		abort();
 	currentWindow = NULL;
 

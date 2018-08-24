@@ -16,7 +16,7 @@ typedef struct
 	// Properties
 	mfmU32 width;
 	mfmU32 height;
-	mfiWindowMode mode;
+	mfiEnum mode;
 
 	// GLFW window handle
 	HWND hwnd;
@@ -143,7 +143,7 @@ mfmU32 mfiGetD3DWindowHeight(void* window)
 	return d3dWindow->height;
 }
 
-mfiWindowMode mfiGetD3DWindowMode(void* window)
+mfiEnum mfiGetD3DWindowMode(void* window)
 {
 	mfiD3DWindow* d3dWindow = (mfiD3DWindow*)window;
 	return d3dWindow->mode;
@@ -151,18 +151,18 @@ mfiWindowMode mfiGetD3DWindowMode(void* window)
 
 #endif
 
-mfError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiWindowMode mode, const mfsUTF8CodeUnit * title)
+mfError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfiEnum mode, const mfsUTF8CodeUnit * title)
 {
 #ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 	if (currentWindow != NULL)
 		return MFI_ERROR_ALREADY_INITIALIZED;
 
 	mfiD3DWindow* d3dWindow = NULL;
-	if (mfmAllocate(NULL, &d3dWindow, sizeof(mfiD3DWindow)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(NULL, &d3dWindow, sizeof(mfiD3DWindow)) != MF_ERROR_OKAY)
 		return MFI_ERROR_ALLOCATION_FAILED;
 
 	// Set properties
-	d3dWindow->base.type = MFI_D3DWINDOW;
+	d3dWindow->base.type = MFI_D3DWINDOW_TYPE_NAME;
 
 	d3dWindow->width = width;
 	d3dWindow->height = height;
@@ -171,7 +171,7 @@ mfError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	// Set destructor
 	{
 		mfError err = mfmInitObject(&d3dWindow->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	d3dWindow->base.object.destructorFunc = &mfiDestroyD3DWindow;
@@ -276,7 +276,7 @@ mfError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 
 		default:
 		{
-			if (mfmDeallocate(NULL, d3dWindow) != MFM_ERROR_OKAY)
+			if (mfmDeallocate(NULL, d3dWindow) != MF_ERROR_OKAY)
 				abort();
 			return MFI_ERROR_INVALID_ARGUMENTS;
 		}
@@ -286,7 +286,7 @@ mfError mfiCreateD3DWindow(mfiWindow ** window, mfmU32 width, mfmU32 height, mfi
 	currentWindow = d3dWindow;
 	*window = d3dWindow;
 
-	return MFI_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 #else
 	return MFI_ERROR_NOT_SUPPORTED;
 #endif
@@ -298,9 +298,9 @@ void mfiDestroyD3DWindow(void * window)
 	// Destroy window
 	mfiD3DWindow* d3dWindow = (mfiD3DWindow*)window;
 	DestroyWindow(d3dWindow->hwnd);
-	if (mfmDestroyObject(&d3dWindow->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&d3dWindow->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(NULL, d3dWindow) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(NULL, d3dWindow) != MF_ERROR_OKAY)
 		abort();
 	currentWindow = NULL;
 #endif

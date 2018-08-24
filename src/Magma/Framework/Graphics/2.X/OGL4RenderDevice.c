@@ -273,9 +273,9 @@ void mfgOGL4DestroyVertexShader(void* vs)
 #endif
 	mfgOGL4Shader* oglVS = vs;
 	glDeleteProgram(oglVS->program);
-	if (mfmDestroyObject(&oglVS->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglVS->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVS->base.renderDevice)->pool512, oglVS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVS->base.renderDevice)->pool512, oglVS) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -294,13 +294,13 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 
 	// Allocate vertex shader
 	mfgOGL4Shader* oglVS = NULL;
-	if (mfmAllocate(oglRD->pool512, &oglVS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool512, &oglVS, sizeof(mfgOGL4Shader)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex shader on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglVS->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglVS->base.object.destructorFunc = &mfgOGL4DestroyVertexShader;
@@ -309,12 +309,12 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 	// Create string stream
 	mfsStream* ss;
 	GLchar buffer[4096];
-	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), oglRD->stack) != MFS_ERROR_OKAY)
+	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), oglRD->stack) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for mfgOGL4Assemble");
 	mfError err = mfgV2XOGL4Assemble(bytecode, bytecodeSize, metaData, ss);
-	if (err != MFG_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgOGL4Assemble failed");
-	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+	if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 	{
 		mfsDestroyStringStream(ss);
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -359,20 +359,20 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 				
-				if (mfsPutString(ss, u8"buf_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"buf_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
 				}
-				if (mfsWrite(ss, bp->name, sizeof(bp->name), NULL) != MFS_ERROR_OKAY)
+				if (mfsWrite(ss, bp->name, sizeof(bp->name), NULL) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -388,20 +388,20 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 
-				if (mfsPutString(ss, u8"tex1d_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"tex1d_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}	
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -416,20 +416,20 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 
-				if (mfsPutString(ss, u8"tex2d_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"tex2d_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -444,20 +444,20 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 
-				if (mfsPutString(ss, u8"tex3d_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"tex3d_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -476,7 +476,7 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 	*vs = oglVS;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4GetVertexShaderBindingPoint(mfgV2XRenderDevice* rd, mfgV2XBindingPoint** bp, mfgV2XVertexShader* vs, const mfsUTF8CodeUnit* name)
@@ -492,7 +492,7 @@ mfError mfgOGL4GetVertexShaderBindingPoint(mfgV2XRenderDevice* rd, mfgV2XBinding
 			if (strcmp(name, oglVS->bps[i].bp->name) == 0)
 			{
 				*bp = &oglVS->bps[i];
-				return MFG_ERROR_OKAY;
+				return MF_ERROR_OKAY;
 			}
 		}
 
@@ -506,9 +506,9 @@ void mfgOGL4DestroyPixelShader(void* ps)
 #endif
 	mfgOGL4Shader* oglPS = ps;
 	glDeleteProgram(oglPS->program);
-	if (mfmDestroyObject(&oglPS->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglPS->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPS->base.renderDevice)->pool512, oglPS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPS->base.renderDevice)->pool512, oglPS) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -528,13 +528,13 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 	
 	// Allocate pixel shader
 	mfgOGL4Shader* oglPS = NULL;
-	if (mfmAllocate(oglRD->pool512, &oglPS, sizeof(mfgOGL4Shader)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool512, &oglPS, sizeof(mfgOGL4Shader)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pixel shader on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglPS->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglPS->base.object.destructorFunc = &mfgOGL4DestroyPixelShader;
@@ -543,12 +543,12 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 	// Create string stream
 	mfsStream* ss;
 	GLchar buffer[4096];
-	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), oglRD->stack) != MFS_ERROR_OKAY)
+	if (mfsCreateStringStream(&ss, buffer, sizeof(buffer), oglRD->stack) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for mfgOGL4Assemble");
 	mfError err = mfgV2XOGL4Assemble(bytecode, bytecodeSize, metaData, ss);
-	if (err != MFG_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfgOGL4Assemble failed");
-	if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+	if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 	{
 		mfsDestroyStringStream(ss);
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -593,20 +593,20 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 
-				if (mfsPutString(ss, u8"buf_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"buf_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
 				}
-				if (mfsWrite(ss, bp->name, sizeof(bp->name), NULL) != MFS_ERROR_OKAY)
+				if (mfsWrite(ss, bp->name, sizeof(bp->name), NULL) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -622,20 +622,20 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 
-				if (mfsPutString(ss, u8"tex1d_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"tex1d_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -650,20 +650,20 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 
-				if (mfsPutString(ss, u8"tex2d_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"tex2d_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -678,20 +678,20 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 			{
 				GLchar buf[256];
 
-				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MFS_ERROR_OKAY)
+				if (mfsCreateStringStream(&ss, buf, sizeof(buf), oglRD->stack) != MF_ERROR_OKAY)
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"Failed to create string stream for binding point name");
 
-				if (mfsPutString(ss, u8"tex3d_") != MFS_ERROR_OKAY)
+				if (mfsPutString(ss, u8"tex3d_") != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MFS_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
 				}
-				if (mfsPutByte(ss, '\0') != MFS_ERROR_OKAY)
+				if (mfsPutByte(ss, '\0') != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutByte returned error");
@@ -710,7 +710,7 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 	*ps = oglPS;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4GetPixelShaderBindingPoint(mfgV2XRenderDevice* rd, mfgV2XBindingPoint** bp, mfgV2XPixelShader* ps, const mfsUTF8CodeUnit* name)
@@ -726,7 +726,7 @@ mfError mfgOGL4GetPixelShaderBindingPoint(mfgV2XRenderDevice* rd, mfgV2XBindingP
 			if (strcmp(name, oglPS->bps[i].bp->name) == 0)
 			{
 				*bp = &oglPS->bps[i];
-				return MFG_ERROR_OKAY;
+				return MF_ERROR_OKAY;
 			}
 		}
 
@@ -747,7 +747,7 @@ mfError mfgOGL4BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 		glBindBufferBase(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XConstantBuffer* cb, mfmU64 offset, mfmU64 size)
@@ -761,7 +761,7 @@ mfError mfgOGL4BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoin
 	glBindBufferRange(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb, offset * 16, size * 16);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XTexture1D* tex)
@@ -780,7 +780,7 @@ mfError mfgOGL4BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfg
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XTexture2D* tex)
@@ -799,7 +799,7 @@ mfError mfgOGL4BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfg
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XTexture3D* tex)
@@ -818,7 +818,7 @@ mfError mfgOGL4BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfg
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XRenderTexture* tex)
@@ -837,7 +837,7 @@ mfError mfgOGL4BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp,
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2XSampler* sampler)
@@ -854,7 +854,7 @@ mfError mfgOGL4BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2
 		glBindSampler(oglBP->location, oglS->sampler);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyPipeline(void* pp)
@@ -864,9 +864,9 @@ void mfgOGL4DestroyPipeline(void* pp)
 #endif
 	mfgOGL4Pipeline* oglPP = pp;
 	glDeleteProgramPipelines(1, &oglPP->pipeline);
-	if (mfmDestroyObject(&oglPP->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglPP->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool48, oglPP) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool48, oglPP) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -885,13 +885,13 @@ mfError mfgOGL4CreatePipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline** pp, mfgV2
 
 	// Allocate pipeline
 	mfgOGL4Pipeline* oglPP = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglPP, sizeof(mfgOGL4Pipeline)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglPP, sizeof(mfgOGL4Pipeline)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate pipeline on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglPP->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglPP->base.object.destructorFunc = &mfgOGL4DestroyPipeline;
@@ -905,7 +905,7 @@ mfError mfgOGL4CreatePipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline** pp, mfgV2
 	*pp = oglPP;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pp)
@@ -924,7 +924,7 @@ mfError mfgOGL4SetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pp)
 		glBindProgramPipeline(oglPP->pipeline);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyConstantBuffer(void* buffer)
@@ -934,9 +934,9 @@ void mfgOGL4DestroyConstantBuffer(void* buffer)
 #endif
 	mfgOGL4ConstantBuffer* oglCB = buffer;
 	glDeleteBuffers(1, &oglCB->cb);
-	if (mfmDestroyObject(&oglCB->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglCB->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglCB->base.renderDevice)->pool48, oglCB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglCB->base.renderDevice)->pool48, oglCB) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -955,13 +955,13 @@ mfError mfgOGL4CreateConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer
 
 	// Allocate constant buffer
 	mfgOGL4ConstantBuffer* oglCB = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglCB, sizeof(mfgOGL4ConstantBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglCB, sizeof(mfgOGL4ConstantBuffer)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate constant buffer on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglCB->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglCB->base.object.destructorFunc = &mfgOGL4DestroyConstantBuffer;
@@ -985,7 +985,7 @@ mfError mfgOGL4CreateConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer
 	*cb = oglCB;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4MapConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer* cb, void** memory)
@@ -1003,7 +1003,7 @@ mfError mfgOGL4MapConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer* c
 	*memory = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4UnmapConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer* cb)
@@ -1021,7 +1021,7 @@ mfError mfgOGL4UnmapConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer*
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 
@@ -1032,9 +1032,9 @@ void mfgOGL4DestroyVertexBuffer(void* buffer)
 #endif
 	mfgOGL4VertexBuffer* oglVB = buffer;
 	glDeleteBuffers(1, &oglVB->vb);
-	if (mfmDestroyObject(&oglVB->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglVB->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVB->base.renderDevice)->pool48, oglVB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVB->base.renderDevice)->pool48, oglVB) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1055,13 +1055,13 @@ mfError mfgOGL4CreateVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer** v
 
 	// Allocate vertex buffer
 	mfgOGL4VertexBuffer* oglVB = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglVB, sizeof(mfgOGL4VertexBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglVB, sizeof(mfgOGL4VertexBuffer)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex buffer on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglVB->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglVB->base.object.destructorFunc = &mfgOGL4DestroyVertexBuffer;
@@ -1085,7 +1085,7 @@ mfError mfgOGL4CreateVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer** v
 	*vb = oglVB;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 
@@ -1106,7 +1106,7 @@ mfError mfgOGL4MapVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer* vb, v
 	*memory = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4UnmapVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer* vb)
@@ -1126,7 +1126,7 @@ mfError mfgOGL4UnmapVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer* vb)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyIndexBuffer(void* buffer)
@@ -1136,9 +1136,9 @@ void mfgOGL4DestroyIndexBuffer(void* buffer)
 #endif
 	mfgOGL4IndexBuffer* oglIB = buffer;
 	glDeleteBuffers(1, &oglIB->ib);
-	if (mfmDestroyObject(&oglIB->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglIB->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglIB->base.renderDevice)->pool48, oglIB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglIB->base.renderDevice)->pool48, oglIB) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1159,13 +1159,13 @@ mfError mfgOGL4CreateIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer** ib,
 
 	// Allocate index buffer
 	mfgOGL4IndexBuffer* oglIB = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglIB, sizeof(mfgOGL4IndexBuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglIB, sizeof(mfgOGL4IndexBuffer)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate index buffer on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglIB->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglIB->base.object.destructorFunc = &mfgOGL4DestroyIndexBuffer;
@@ -1196,7 +1196,7 @@ mfError mfgOGL4CreateIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer** ib,
 	*ib = oglIB;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 
@@ -1217,7 +1217,7 @@ mfError mfgOGL4MapIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib, voi
 	*memory = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4UnmapIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
@@ -1237,7 +1237,7 @@ mfError mfgOGL4UnmapIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
 	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SetIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
@@ -1260,7 +1260,7 @@ mfError mfgOGL4SetIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
 	oglRD->currentIndexBuffer = oglIB;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyVertexLayout(void* vl)
@@ -1269,9 +1269,9 @@ void mfgOGL4DestroyVertexLayout(void* vl)
 	if (vl == NULL) abort();
 #endif
 	mfgOGL4VertexLayout* oglVL = vl;
-	if (mfmDestroyObject(&oglVL->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglVL->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVL->base.renderDevice)->pool512, oglVL) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVL->base.renderDevice)->pool512, oglVL) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1290,13 +1290,13 @@ mfError mfgOGL4CreateVertexLayout(mfgV2XRenderDevice* rd, mfgV2XVertexLayout** v
 
 	// Allocate vertex layout
 	mfgOGL4VertexLayout* oglVL = NULL;
-	if (mfmAllocate(oglRD->pool512, &oglVL, sizeof(mfgOGL4VertexLayout)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool512, &oglVL, sizeof(mfgOGL4VertexLayout)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex layout on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglVL->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglVL->base.object.destructorFunc = &mfgOGL4DestroyVertexLayout;
@@ -1365,7 +1365,7 @@ mfError mfgOGL4CreateVertexLayout(mfgV2XRenderDevice* rd, mfgV2XVertexLayout** v
 	*vl = oglVL;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyVertexArray(void* va)
@@ -1375,9 +1375,9 @@ void mfgOGL4DestroyVertexArray(void* va)
 #endif
 	mfgOGL4VertexArray* oglVA = va;
 	glDeleteVertexArrays(1, &oglVA->va);
-	if (mfmDestroyObject(&oglVA->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglVA->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool48, oglVA) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool48, oglVA) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1396,7 +1396,7 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 
 	// Allocate vertex array
 	mfgOGL4VertexArray* oglVA = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglVA, sizeof(mfgOGL4VertexArray)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglVA, sizeof(mfgOGL4VertexArray)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
 	mfgOGL4VertexLayout* oglVL = vl;
 
@@ -1404,7 +1404,7 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 	oglVA->base.object.destructorFunc = &mfgOGL4DestroyVertexArray;
 	{
 		mfError err = mfmInitObject(&oglVA->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglVA->base.renderDevice = rd;
@@ -1434,7 +1434,7 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 	*va = oglVA;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SetVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray* va)
@@ -1450,7 +1450,7 @@ mfError mfgOGL4SetVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray* va)
 	glBindVertexArray(oglVA->va);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 
@@ -1461,9 +1461,9 @@ void mfgOGL4DestroyTexture1D(void* tex)
 #endif
 	mfgOGL4Texture1D* oglTex = tex;
 	glDeleteTextures(1, &oglTex->tex);
-	if (mfmDestroyObject(&oglTex->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1482,13 +1482,13 @@ mfError mfgOGL4CreateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D** tex, mf
 
 	// Allocate texture
 	mfgOGL4Texture1D* oglTex = NULL;
-	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture1D)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture1D)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 1D on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglTex->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglTex->base.object.destructorFunc = &mfgOGL4DestroyTexture1D;
@@ -1555,7 +1555,7 @@ mfError mfgOGL4CreateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D** tex, mf
 	*tex = oglTex;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4UpdateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D* tex, mfmU64 dstX, mfmU64 width, const void* data)
@@ -1574,7 +1574,7 @@ mfError mfgOGL4UpdateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D* tex, mfm
 	glTexSubImage1D(GL_TEXTURE_1D, 0, dstX, width, oglTex->format, oglTex->type, data);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4GenerateTexture1DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture1D* tex)
@@ -1591,7 +1591,7 @@ mfError mfgOGL4GenerateTexture1DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture1D*
 	glGenerateMipmap(GL_TEXTURE_1D);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyTexture2D(void* tex)
@@ -1601,9 +1601,9 @@ void mfgOGL4DestroyTexture2D(void* tex)
 #endif
 	mfgOGL4Texture2D* oglTex = tex;
 	glDeleteTextures(1, &oglTex->tex);
-	if (mfmDestroyObject(&oglTex->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1622,13 +1622,13 @@ mfError mfgOGL4CreateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D** tex, mf
 
 	// Allocate texture
 	mfgOGL4Texture2D* oglTex = NULL;
-	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture2D)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture2D)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 2D on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglTex->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglTex->base.object.destructorFunc = &mfgOGL4DestroyTexture2D;
@@ -1697,7 +1697,7 @@ mfError mfgOGL4CreateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D** tex, mf
 	*tex = oglTex;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4UpdateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 width, mfmU64 height, const void* data)
@@ -1716,7 +1716,7 @@ mfError mfgOGL4UpdateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D* tex, mfm
 	glTexSubImage2D(GL_TEXTURE_2D, 0, dstX, dstY, width, height, oglTex->format, oglTex->type, data);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4GenerateTexture2DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture2D* tex)
@@ -1733,7 +1733,7 @@ mfError mfgOGL4GenerateTexture2DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture2D*
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyTexture3D(void* tex)
@@ -1743,9 +1743,9 @@ void mfgOGL4DestroyTexture3D(void* tex)
 #endif
 	mfgOGL4Texture3D* oglTex = tex;
 	glDeleteTextures(1, &oglTex->tex);
-	if (mfmDestroyObject(&oglTex->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1764,13 +1764,13 @@ mfError mfgOGL4CreateTexture3D(mfgV2XRenderDevice* rd, mfgV2XTexture3D** tex, mf
 
 	// Allocate texture
 	mfgOGL4Texture3D* oglTex = NULL;
-	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture3D)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4Texture3D)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate texture 3D on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglTex->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglTex->base.object.destructorFunc = &mfgOGL4DestroyTexture3D;
@@ -1841,7 +1841,7 @@ mfError mfgOGL4CreateTexture3D(mfgV2XRenderDevice* rd, mfgV2XTexture3D** tex, mf
 	oglTex->depth = depth;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4UpdateTexture3D(mfgV2XRenderDevice* rd, mfgV2XTexture3D* tex, mfmU64 dstX, mfmU64 dstY, mfmU64 dstZ, mfmU64 width, mfmU64 height, mfmU64 depth, const void* data)
@@ -1860,7 +1860,7 @@ mfError mfgOGL4UpdateTexture3D(mfgV2XRenderDevice* rd, mfgV2XTexture3D* tex, mfm
 	glTexSubImage3D(GL_TEXTURE_3D, 0, dstX, dstY, dstZ, width, height, depth, oglTex->format, oglTex->type, data);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4GenerateTexture3DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture3D* tex)
@@ -1877,7 +1877,7 @@ mfError mfgOGL4GenerateTexture3DMipmaps(mfgV2XRenderDevice* rd, mfgV2XTexture3D*
 	glGenerateMipmap(GL_TEXTURE_3D);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroySampler(void* sampler)
@@ -1887,9 +1887,9 @@ void mfgOGL4DestroySampler(void* sampler)
 #endif
 	mfgOGL4Sampler* oglS = sampler;
 	glDeleteSamplers(1, &oglS->sampler);
-	if (mfmDestroyObject(&oglS->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglS->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglS->base.renderDevice)->pool48, oglS) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglS->base.renderDevice)->pool48, oglS) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1908,13 +1908,13 @@ mfError mfgOGL4CreateSampler(mfgV2XRenderDevice* rd, mfgV2XSampler** sampler, co
 
 	// Allocate sampler
 	mfgOGL4Sampler* oglS = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglS, sizeof(mfgOGL4Sampler)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglS, sizeof(mfgOGL4Sampler)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate sampler on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglS->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglS->base.object.destructorFunc = &mfgOGL4DestroySampler;
@@ -2006,7 +2006,7 @@ mfError mfgOGL4CreateSampler(mfgV2XRenderDevice* rd, mfgV2XSampler** sampler, co
 	*sampler = oglS;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyRenderTexture(void* tex)
@@ -2016,9 +2016,9 @@ void mfgOGL4DestroyRenderTexture(void* tex)
 #endif
 	mfgOGL4RenderTexture* oglTex = tex;
 	glDeleteTextures(1, &oglTex->tex);
-	if (mfmDestroyObject(&oglTex->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2037,13 +2037,13 @@ mfError mfgOGL4CreateRenderTexture(mfgV2XRenderDevice* rd, mfgV2XRenderTexture**
 
 	// Allocate texture
 	mfgOGL4RenderTexture* oglTex = NULL;
-	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4RenderTexture)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4RenderTexture)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate render texture on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglTex->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglTex->base.object.destructorFunc = &mfgOGL4DestroyRenderTexture;
@@ -2101,7 +2101,7 @@ mfError mfgOGL4CreateRenderTexture(mfgV2XRenderDevice* rd, mfgV2XRenderTexture**
 	*tex = oglTex;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyDepthStencilTexture(void* tex)
@@ -2111,9 +2111,9 @@ void mfgOGL4DestroyDepthStencilTexture(void* tex)
 #endif
 	mfgOGL4DepthStencilTexture* oglTex = tex;
 	glDeleteRenderbuffers(1, &oglTex->rbo);
-	if (mfmDestroyObject(&oglTex->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2132,13 +2132,13 @@ mfError mfgOGL4CreateDepthStencilTexture(mfgV2XRenderDevice* rd, mfgV2XDepthSten
 
 	// Allocate texture
 	mfgOGL4DepthStencilTexture* oglTex = NULL;
-	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4DepthStencilTexture)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglTex, sizeof(mfgOGL4DepthStencilTexture)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil texture on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglTex->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglTex->base.object.destructorFunc = &mfgOGL4DestroyDepthStencilTexture;
@@ -2161,7 +2161,7 @@ mfError mfgOGL4CreateDepthStencilTexture(mfgV2XRenderDevice* rd, mfgV2XDepthSten
 	*tex = oglTex;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyFramebuffer(void* fb)
@@ -2171,9 +2171,9 @@ void mfgOGL4DestroyFramebuffer(void* fb)
 #endif
 	mfgOGL4Framebuffer* oglFB = fb;
 	glDeleteFramebuffers(1, &oglFB->fbo);
-	if (mfmDestroyObject(&oglFB->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglFB->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool48, oglFB) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool48, oglFB) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2192,13 +2192,13 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 
 	// Allocate texture
 	mfgOGL4Framebuffer* oglFB = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglFB, sizeof(mfgOGL4Framebuffer)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool48, &oglFB, sizeof(mfgOGL4Framebuffer)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate framebuffer on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglFB->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglFB->base.object.destructorFunc = &mfgOGL4DestroyFramebuffer;
@@ -2212,7 +2212,7 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 	glBindFramebuffer(GL_FRAMEBUFFER, oglFB->fbo);
 
 	GLenum* drawBuffers;
-	if (mfmAllocate(oglRD->stack, &drawBuffers, textureCount * sizeof(GLenum)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->stack, &drawBuffers, textureCount * sizeof(GLenum)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate draw buffers on stack");
 
 	for (mfmU64 i = 0; i < textureCount; ++i)
@@ -2226,7 +2226,7 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 	}
 
 	glDrawBuffers(textureCount, drawBuffers);
-	if (mfmDeallocate(oglRD->stack, drawBuffers) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(oglRD->stack, drawBuffers) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to deallocate draw buffers on stack");
 
 	if (depthStencilTexture != NULL)
@@ -2247,7 +2247,7 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 	*fb = oglFB;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SetFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer* fb)
@@ -2265,7 +2265,7 @@ mfError mfgOGL4SetFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer* fb)
 		glBindFramebuffer(GL_FRAMEBUFFER, oglFB->fbo);
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4ClearColor(mfgV2XRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a)
@@ -2276,7 +2276,7 @@ mfError mfgOGL4ClearColor(mfgV2XRenderDevice* rd, mfmF32 r, mfmF32 g, mfmF32 b, 
 	glClearColor(r, g, b, a);
 	glClear(GL_COLOR_BUFFER_BIT);
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4ClearDepth(mfgV2XRenderDevice* rd, mfmF32 depth)
@@ -2287,7 +2287,7 @@ mfError mfgOGL4ClearDepth(mfgV2XRenderDevice* rd, mfmF32 depth)
 	glClearDepth(depth);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4ClearStencil(mfgV2XRenderDevice* rd, mfmI32 stencil)
@@ -2298,7 +2298,7 @@ mfError mfgOGL4ClearStencil(mfgV2XRenderDevice* rd, mfmI32 stencil)
 	glClearStencil(stencil);
 	glClear(GL_STENCIL_BUFFER_BIT);
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SwapBuffers(mfgV2XRenderDevice* rd)
@@ -2308,7 +2308,7 @@ mfError mfgOGL4SwapBuffers(mfgV2XRenderDevice* rd)
 #endif
 	glfwSwapBuffers((GLFWwindow*)mfiGetGLWindowGLFWHandle(((mfgOGL4RenderDevice*)rd)->window));
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyRasterState(void* state)
@@ -2317,9 +2317,9 @@ void mfgOGL4DestroyRasterState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4RasterState* oglState = state;
-	if (mfmDestroyObject(&oglState->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglState->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2338,13 +2338,13 @@ mfError mfgOGL4CreateRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState** sta
 
 	// Allocate state
 	mfgOGL4RasterState* oglState = NULL;
-	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4RasterState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4RasterState)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglState->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglState->base.object.destructorFunc = &mfgOGL4DestroyRasterState;
@@ -2381,7 +2381,7 @@ mfError mfgOGL4CreateRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState** sta
 	}
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
@@ -2404,7 +2404,7 @@ mfError mfgOGL4SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
 
 	MFG_CHECK_GL_ERROR();
 
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyDepthStencilState(void* state)
@@ -2413,9 +2413,9 @@ void mfgOGL4DestroyDepthStencilState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4DepthStencilState* oglState = state;
-	if (mfmDestroyObject(&oglState->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglState->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool256, oglState) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool256, oglState) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2434,13 +2434,13 @@ mfError mfgOGL4CreateDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStenci
 
 	// Allocate state
 	mfgOGL4DepthStencilState* oglState = NULL;
-	if (mfmAllocate(oglRD->pool256, &oglState, sizeof(mfgOGL4DepthStencilState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool256, &oglState, sizeof(mfgOGL4DepthStencilState)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate depth stencil state on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglState->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglState->base.object.destructorFunc = &mfgOGL4DestroyDepthStencilState;
@@ -2577,7 +2577,7 @@ mfError mfgOGL4CreateDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStenci
 	*state = oglState;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilState* state)
@@ -2614,7 +2614,7 @@ mfError mfgOGL4SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilSt
 
 	MFG_CHECK_GL_ERROR();
 
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgOGL4DestroyBlendState(void* state)
@@ -2623,9 +2623,9 @@ void mfgOGL4DestroyBlendState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4BlendState* oglState = state;
-	if (mfmDestroyObject(&oglState->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&oglState->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2644,13 +2644,13 @@ mfError mfgOGL4CreateBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState** state
 
 	// Allocate state
 	mfgOGL4BlendState* oglState = NULL;
-	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4BlendState)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglState, sizeof(mfgOGL4BlendState)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate raster state on pool");
 
 	// Init object
 	{
 		mfError err = mfmInitObject(&oglState->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	oglState->base.object.destructorFunc = &mfgOGL4DestroyRasterState;
@@ -2748,7 +2748,7 @@ mfError mfgOGL4CreateBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState** state
 	*state = oglState;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
@@ -2776,7 +2776,7 @@ mfError mfgOGL4SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
 
 	MFG_CHECK_GL_ERROR();
 
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfmBool mfgOGL4GetErrorString(mfgV2XRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize)
@@ -2813,7 +2813,7 @@ mfError mfgOGL4DrawTriangles(mfgV2XRenderDevice* rd, mfmU64 offset, mfmU64 count
 #endif
 	glDrawArrays(GL_TRIANGLES, offset, count);
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4DrawTrianglesIndexed(mfgV2XRenderDevice* rd, mfmU64 offset, mfmU64 count)
@@ -2826,7 +2826,7 @@ mfError mfgOGL4DrawTrianglesIndexed(mfgV2XRenderDevice* rd, mfmU64 offset, mfmU6
 #endif
 	glDrawElements(GL_TRIANGLES, count, ((mfgOGL4RenderDevice*)rd)->currentIndexBuffer->indexType, (char*)NULL + offset);
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4GetPropertyI(mfgV2XRenderDevice* rd, mfgEnum id, mfmI32* value)
@@ -2847,7 +2847,7 @@ mfError mfgOGL4GetPropertyI(mfgV2XRenderDevice* rd, mfgEnum id, mfmI32* value)
 	*value = out;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgOGL4GetPropertyF(mfgV2XRenderDevice* rd, mfgEnum id, mfmF32* value)
@@ -2868,18 +2868,18 @@ mfError mfgOGL4GetPropertyF(mfgV2XRenderDevice* rd, mfgEnum id, mfmF32* value)
 	*value = out;
 
 	MFG_CHECK_GL_ERROR();
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWindow* window, const mfgV2XRenderDeviceDesc * desc, void * allocator)
 {
 	// Check if params are valid
-	if (renderDevice == NULL || window == NULL || desc == NULL || window->type != MFI_OGLWINDOW)
+	if (renderDevice == NULL || window == NULL || desc == NULL || strcmp(window->type, MFI_OGLWINDOW_TYPE_NAME) != 0)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 	
 	// Allocate render device
 	mfgOGL4RenderDevice* rd;
-	if (mfmAllocate(allocator, &rd, sizeof(mfgOGL4RenderDevice)) != MFM_ERROR_OKAY)
+	if (mfmAllocate(allocator, &rd, sizeof(mfgOGL4RenderDevice)) != MF_ERROR_OKAY)
 		return MFG_ERROR_ALLOCATION_FAILED;
 
 	// Create 32 bytes pool
@@ -2889,7 +2889,7 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		desc.slotCount = MFG_POOL_48_ELEMENT_COUNT;
 		desc.slotSize = 32;
 		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool48, &desc, rd->pool48Memory, sizeof(rd->pool48Memory));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
@@ -2900,7 +2900,7 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		desc.slotCount = MFG_POOL_64_ELEMENT_COUNT;
 		desc.slotSize = 64;
 		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool64, &desc, rd->pool64Memory, sizeof(rd->pool64Memory));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
@@ -2911,7 +2911,7 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		desc.slotCount = MFG_POOL_256_ELEMENT_COUNT;
 		desc.slotSize = 256;
 		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool256, &desc, rd->pool256Memory, sizeof(rd->pool256Memory));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
@@ -2922,21 +2922,21 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		desc.slotCount = MFG_POOL_512_ELEMENT_COUNT;
 		desc.slotSize = 512;
 		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool512, &desc, rd->pool512Memory, sizeof(rd->pool512Memory));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
 	// Create stack
 	{
 		mfError err = mfmCreateStackAllocatorOnMemory(&rd->stack, 2048, rd->stackMemory, sizeof(rd->stackMemory));
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;
 	}
 
 	// Initialize some properties
 	{
 		mfError err = mfmInitObject(&rd->base.object);
-		if (err != MFM_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	rd->base.object.destructorFunc = &mfgV2XDestroyOGL4RenderDevice;
@@ -3059,10 +3059,10 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		mfgV2XRasterStateDesc desc;
 		mfgV2XDefaultRasterStateDesc(&desc);
 		mfError err = mfgV2XCreateRasterState(rd, &rd->defaultRasterState, &desc);
-		if (err != MFG_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		err = mfgV2XSetRasterState(rd, rd->defaultRasterState);
-		if (err != MFG_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 
@@ -3071,10 +3071,10 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		mfgV2XDepthStencilStateDesc desc;
 		mfgV2XDefaultDepthStencilStateDesc(&desc);
 		mfError err = mfgV2XCreateDepthStencilState(rd, &rd->defaultDepthStencilState, &desc);
-		if (err != MFG_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		err = mfgV2XSetDepthStencilState(rd, rd->defaultDepthStencilState);
-		if (err != MFG_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 
@@ -3083,16 +3083,16 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		mfgV2XBlendStateDesc desc;
 		mfgV2XDefaultBlendStateDesc(&desc);
 		mfError err = mfgV2XCreateBlendState(rd, &rd->defaultBlendState, &desc);
-		if (err != MFG_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 		err = mfgV2XSetBlendState(rd, rd->defaultBlendState);
-		if (err != MFG_ERROR_OKAY)
+		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 
 	// Successfully inited render device
 	*renderDevice = rd;
-	return MFG_ERROR_OKAY;
+	return MF_ERROR_OKAY;
 }
 
 void mfgV2XDestroyOGL4RenderDevice(void * renderDevice)
@@ -3115,9 +3115,9 @@ void mfgV2XDestroyOGL4RenderDevice(void * renderDevice)
 	mfmDestroyPoolAllocator(rd->pool48);
 
 	// Deallocate render device
-	if (mfmDestroyObject(&rd->base.object) != MFM_ERROR_OKAY)
+	if (mfmDestroyObject(&rd->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(rd->allocator, rd) != MFM_ERROR_OKAY)
+	if (mfmDeallocate(rd->allocator, rd) != MF_ERROR_OKAY)
 		abort();
 }
 

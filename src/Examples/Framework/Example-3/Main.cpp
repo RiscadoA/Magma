@@ -16,6 +16,9 @@
 #include <Magma/Framework/Graphics/1.X/BytecodeAssembler.hpp>
 #include <Magma/Framework/Graphics/1.X/MetaDataAssembler.hpp>
 
+
+#include <Magma/Framework/Entry.hpp>
+
 #define USE_GL
 
 using namespace Magma;

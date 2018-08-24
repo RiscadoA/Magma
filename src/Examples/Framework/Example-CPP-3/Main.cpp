@@ -7,7 +7,7 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	auto win = Input::CreateWindow(u8"d3d", 800, 600, Input::WindowMode::Windowed, u8"D3D Window");
+	auto win = Input::CreateWindow(u8"d3d", 800, 600, Input::WindowMode::Windowed, u8"Window");
 
 	while (true)
 	{

@@ -17,7 +17,7 @@ extern "C"
 	/// <param name="atomic">Pointer to 8 bit atomic variable</param>
 	/// <param name="out">Output value</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftAtomic8Load(const volatile mfmI8* atomic, mfmI8* out);
@@ -28,7 +28,7 @@ extern "C"
 	/// <param name="atomic">Pointer to 8 bit atomic variable</param>
 	/// <param name="value">New value</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftAtomic8Store(volatile mfmI8* atomic, mfmI8 value);
@@ -39,7 +39,7 @@ extern "C"
 	/// <param name="atomic">Pointer to 16 bit atomic variable</param>
 	/// <param name="out">Output value</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftAtomic16Load(const volatile mfmI16* atomic, mfmI16* out);
@@ -50,7 +50,7 @@ extern "C"
 	/// <param name="atomic">Pointer to 16 bit atomic variable</param>
 	/// <param name="value">New value</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftAtomic16Store(volatile mfmI16* atomic, mfmI16 value);
@@ -61,7 +61,7 @@ extern "C"
 	/// <param name="atomic">Pointer to 32 bit atomic variable</param>
 	/// <param name="out">Output value</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftAtomic32Load(const volatile mfmI32* atomic, mfmI32* out);
@@ -72,7 +72,7 @@ extern "C"
 	/// <param name="atomic">Pointer to 32 bit atomic variable</param>
 	/// <param name="value">New value</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftAtomic32Store(volatile mfmI32* atomic, mfmI32 value);
@@ -83,7 +83,7 @@ extern "C"
 	/// <param name="atomic">Pointer to 32 bit atomic variable</param>
 	/// <param name="value">Value to add to atomic variable</param>
 	/// <returns>
-	///		Returns MFT_ERROR_OKAY if there were no errors.
+	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
 	mfError mftAtomic32Add(volatile mfmI32* atomic, mfmI32 value);
