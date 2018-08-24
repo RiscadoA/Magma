@@ -95,10 +95,10 @@ namespace Magma
 				Resources::ResourceView m_font;
 
 				Resources::ResourceView m_ps;
-				Framework::Graphics_V1X::PixelBindingPoint* m_cbBP;
-				Framework::Graphics_V1X::PixelBindingPoint* m_ftBP;
-				Framework::Graphics_V1X::Pipeline* m_pp;
-				Framework::Graphics_V1X::TextRenderer* m_tr;
+				Framework::Graphics::V1X::PixelBindingPoint* m_cbBP;
+				Framework::Graphics::V1X::PixelBindingPoint* m_ftBP;
+				Framework::Graphics::V1X::Pipeline* m_pp;
+				Framework::Graphics::V1X::TextRenderer* m_tr;
 
 			};
 
@@ -115,39 +115,39 @@ namespace Magma
 			class TextRenderer final : public ElementRenderer
 			{
 			public:
-				TextRenderer(Framework::Graphics_V1X::RenderDevice* renderDevice, Resources::ResourceView vertexShader);
+				TextRenderer(Framework::Graphics::V1X::RenderDevice* renderDevice, Resources::ResourceView vertexShader);
 				virtual ~TextRenderer() final;
 
 				virtual void Render(Element* element) final;
 
 			private:
-				Framework::Graphics_V1X::RenderDevice* m_renderDevice;
+				Framework::Graphics::V1X::RenderDevice* m_renderDevice;
 
-				Framework::Graphics_V1X::ConstantBuffer* m_textDataCB;
-				Framework::Graphics_V1X::Sampler2D* m_sampler;
+				Framework::Graphics::V1X::ConstantBuffer* m_textDataCB;
+				Framework::Graphics::V1X::Sampler2D* m_sampler;
 
 				Resources::ResourceView m_vs;
-				Framework::Graphics_V1X::VertexBindingPoint* m_cbBP;
+				Framework::Graphics::V1X::VertexBindingPoint* m_cbBP;
 				
 
 				struct PipelineData
 				{
-					Framework::Graphics_V1X::Pipeline* pp;
-					Framework::Graphics_V1X::VertexShader* vs;
-					Framework::Graphics_V1X::PixelShader* ps;
+					Framework::Graphics::V1X::Pipeline* pp;
+					Framework::Graphics::V1X::VertexShader* vs;
+					Framework::Graphics::V1X::PixelShader* ps;
 				};
 
 				struct FontData
 				{
-					Framework::Graphics_V1X::TextRenderer* renderer;
-					Framework::Graphics_V1X::Font* font;
+					Framework::Graphics::V1X::TextRenderer* renderer;
+					Framework::Graphics::V1X::Font* font;
 				};
 
 				std::list<PipelineData> m_pps;
 				std::list<FontData> m_fonts;
 
-				Framework::Graphics_V1X::Pipeline* GetPipeline(Text* text);
-				Framework::Graphics_V1X::TextRenderer* GetRenderer(Text* text);
+				Framework::Graphics::V1X::Pipeline* GetPipeline(Text* text);
+				Framework::Graphics::V1X::TextRenderer* GetRenderer(Text* text);
 			};
 		}
 	}

@@ -34,8 +34,9 @@
 const int MinorVersion = 2;
 
 using namespace Magma::Framework;
-using namespace Magma::Framework::Graphics_V1X;
-using namespace Magma::Framework::Graphics_V1X::Version_1_X;
+using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::V1X;
+using namespace Magma::Framework::Graphics::V1X::Version_1_X;
 
 const std::vector<std::tuple<std::string, ShaderTokenType, ShaderVariableType, ShaderOperatorType, ShaderPunctuationType>> ShaderTokens =
 {
@@ -110,7 +111,7 @@ const std::vector<std::tuple<std::string, ShaderTokenType, ShaderVariableType, S
 	std::make_tuple(R"(\b([a-zA-Z]\w*)\b)",ShaderTokenType::Identifier, ShaderVariableType::Invalid, ShaderOperatorType::Invalid, ShaderPunctuationType::Invalid),
 };
 
-void Magma::Framework::Graphics_V1X::Version_1_X::ShaderLexer::Run(const std::vector<ShaderLine>& in, std::vector<ShaderToken>& out, ShaderCompilerData& data)
+void Magma::Framework::Graphics::V1X::Version_1_X::ShaderLexer::Run(const std::vector<ShaderLine>& in, std::vector<ShaderToken>& out, ShaderCompilerData& data)
 {
 	if (data.minorVersion > MinorVersion)
 	{

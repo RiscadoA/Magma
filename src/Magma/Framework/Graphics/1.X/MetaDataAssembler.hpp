@@ -6,7 +6,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics_V1X
+		namespace Graphics::V1X
 		{
 			/// <summary>
 			///		Shader meta data assembler
@@ -24,7 +24,7 @@ namespace Magma
 				/// <param name="out">Binary meta data</param>
 				/// <param name="maxSize">Max meta data size</param>
 				/// <returns>Binary meta data size in bytes</returns>
-				/// <exception cref="Magma::Framework::Graphics_V1X::ShaderError">Thrown if there is an error in the assembly</exception>
+				/// <exception cref="Magma::Framework::Graphics::ShaderError">Thrown if there is an error in the assembly</exception>
 				static size_t Assemble(const std::string& code, char* out, size_t maxSize);
 			};
 		}

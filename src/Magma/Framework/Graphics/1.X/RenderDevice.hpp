@@ -12,7 +12,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics_V1X
+		namespace Graphics::V1X
 		{
 			/// <summary>
 			///		Encapsulates a 2D texture
@@ -1217,7 +1217,7 @@ namespace Magma
 			};
 
 			/// <summary>
-			///		Abstract class that encapsulates the low level API specific Graphics_V1X rendering calls
+			///		Abstract class that encapsulates the low level API specific Graphics::V1X rendering calls
 			/// </summary>
 			class RenderDevice
 			{

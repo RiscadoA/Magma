@@ -49,7 +49,7 @@ mfError mfInit(int argc, const char** argv)
 #endif
 
 #ifdef MAGMA_FRAMEWORK_USE_DIRECTX
-	err = mfiRegisterWindowCreator(MFG_D3D11RENDERDEVICE_TYPE_NAME, &mfgV2XCreateD3D11RenderDevice);
+	err = mfgV2XRegisterRenderDeviceCreator(MFG_D3D11RENDERDEVICE_TYPE_NAME, &mfgV2XCreateD3D11RenderDevice);
 	if (err != MF_ERROR_OKAY)
 		return err;
 #endif

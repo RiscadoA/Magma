@@ -6,7 +6,7 @@ struct Vertex
 	float u, v;
 };
 
-Magma::Framework::Graphics_V1X::TextRenderer::TextRenderer(RenderDevice* device, const Font * font, VertexShader * vertexShader)
+Magma::Framework::Graphics::V1X::TextRenderer::TextRenderer(RenderDevice* device, const Font * font, VertexShader * vertexShader)
 {
 	m_device = device;
 
@@ -36,14 +36,14 @@ Magma::Framework::Graphics_V1X::TextRenderer::TextRenderer(RenderDevice* device,
 	m_vertexArray = m_device->CreateVertexArray(1, &m_vertexBuffer, m_vertexLayout);
 }
 
-Magma::Framework::Graphics_V1X::TextRenderer::~TextRenderer()
+Magma::Framework::Graphics::V1X::TextRenderer::~TextRenderer()
 {
 	m_device->DestroyVertexArray(m_vertexArray);
 	m_device->DestroyVertexBuffer(m_vertexBuffer);
 	m_device->DestroyVertexLayout(m_vertexLayout);
 }
 
-void Magma::Framework::Graphics_V1X::TextRenderer::RenderU32(const String::UnicodePoint * str, PixelBindingPoint * textureBP, float scale)
+void Magma::Framework::Graphics::V1X::TextRenderer::RenderU32(const String::UnicodePoint * str, PixelBindingPoint * textureBP, float scale)
 {
 	float x = 0.0f;
 	float y = 0.0f;

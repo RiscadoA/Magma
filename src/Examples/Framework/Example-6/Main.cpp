@@ -33,51 +33,51 @@ struct Vertex
 struct Scene
 {
 	Input::Window* window;
-	Graphics_V1X::RenderDevice* device;
+	Graphics::V1X::RenderDevice* device;
 	Files::FileSystem* fileSystem;
 	bool running;
 
-	Graphics_V1X::VertexShader* vertexShader;
-	Graphics_V1X::PixelShader* pixelShader;
-	Graphics_V1X::Pipeline* pipeline;
+	Graphics::V1X::VertexShader* vertexShader;
+	Graphics::V1X::PixelShader* pixelShader;
+	Graphics::V1X::Pipeline* pipeline;
 
-	Graphics_V1X::VertexShader* screenVertexShader;
-	Graphics_V1X::PixelShader* screenDifPixelShader;
-	Graphics_V1X::Pipeline* screenDifPipeline;
-	Graphics_V1X::PixelShader* screenUVsPixelShader;
-	Graphics_V1X::Pipeline* screenUVsPipeline;
+	Graphics::V1X::VertexShader* screenVertexShader;
+	Graphics::V1X::PixelShader* screenDifPixelShader;
+	Graphics::V1X::Pipeline* screenDifPipeline;
+	Graphics::V1X::PixelShader* screenUVsPixelShader;
+	Graphics::V1X::Pipeline* screenUVsPipeline;
 
-	Graphics_V1X::VertexArray* screenVertexArray;
-	Graphics_V1X::VertexBuffer* screenVertexBuffer;
-	Graphics_V1X::VertexLayout* screenVertexLayout;
+	Graphics::V1X::VertexArray* screenVertexArray;
+	Graphics::V1X::VertexBuffer* screenVertexBuffer;
+	Graphics::V1X::VertexLayout* screenVertexLayout;
 
-	Graphics_V1X::VertexArray* vertexArray;
-	Graphics_V1X::VertexBuffer* vertexBuffer;
-	Graphics_V1X::VertexLayout* vertexLayout;
-	Graphics_V1X::IndexBuffer* indexBuffer;
+	Graphics::V1X::VertexArray* vertexArray;
+	Graphics::V1X::VertexBuffer* vertexBuffer;
+	Graphics::V1X::VertexLayout* vertexLayout;
+	Graphics::V1X::IndexBuffer* indexBuffer;
 
-	Graphics_V1X::Texture2D* texture;
-	Graphics_V1X::Sampler2D* sampler;
-	Graphics_V1X::PixelBindingPoint* textureBP;
+	Graphics::V1X::Texture2D* texture;
+	Graphics::V1X::Sampler2D* sampler;
+	Graphics::V1X::PixelBindingPoint* textureBP;
 
-	Graphics_V1X::ConstantBuffer* transformBuffer;
-	Graphics_V1X::VertexBindingPoint* transformBP;
+	Graphics::V1X::ConstantBuffer* transformBuffer;
+	Graphics::V1X::VertexBindingPoint* transformBP;
 
-	Graphics_V1X::RasterState* rasterState;
-	Graphics_V1X::DepthStencilState* depthStencilState;
-	Graphics_V1X::BlendState* blendState;
+	Graphics::V1X::RasterState* rasterState;
+	Graphics::V1X::DepthStencilState* depthStencilState;
+	Graphics::V1X::BlendState* blendState;
 
-	Graphics_V1X::PixelBindingPoint* diffuseBP;
-	Graphics_V1X::PixelBindingPoint* uvsBP;
+	Graphics::V1X::PixelBindingPoint* diffuseBP;
+	Graphics::V1X::PixelBindingPoint* uvsBP;
 
-	Graphics_V1X::Texture2D* diffuseAttachment;
-	Graphics_V1X::Texture2D* uvsAttachment;
-	Graphics_V1X::DepthStencilBuffer* depthStencilBuffer;
-	Graphics_V1X::Sampler2D* framebufferSampler;
-	Graphics_V1X::Framebuffer* framebuffer;
+	Graphics::V1X::Texture2D* diffuseAttachment;
+	Graphics::V1X::Texture2D* uvsAttachment;
+	Graphics::V1X::DepthStencilBuffer* depthStencilBuffer;
+	Graphics::V1X::Sampler2D* framebufferSampler;
+	Graphics::V1X::Framebuffer* framebuffer;
 
-	Graphics_V1X::ConstantBuffer* screenConstantBuffer;
-	Graphics_V1X::VertexBindingPoint* screenConstantBufferBP;
+	Graphics::V1X::ConstantBuffer* screenConstantBuffer;
+	Graphics::V1X::VertexBindingPoint* screenConstantBufferBP;
 };
 
 struct Transform
@@ -110,11 +110,11 @@ void LoadScene(Scene& scene)
 
 	// Create context
 	{
-		Graphics_V1X::RenderDeviceSettings settings;
+		Graphics::V1X::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.device = new Framework::Graphics_V1X::OGL410RenderDevice();
+		scene.device = new Framework::Graphics::V1X::OGL410RenderDevice();
 #else
-		scene.device = new Framework::Graphics_V1X::D3D11RenderDevice();
+		scene.device = new Framework::Graphics::V1X::D3D11RenderDevice();
 #endif
 		scene.device->Init(scene.window, settings);
 	}
@@ -131,17 +131,17 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-			objectSize = Graphics_V1X::ShaderCompiler::Run(code, object, sizeof(object));
+			objectSize = Graphics::V1X::ShaderCompiler::Run(code, object, sizeof(object));
 			delete[] code;
 		}
 
-		Graphics_V1X::ShaderData shaderData(object, objectSize);
+		Graphics::V1X::ShaderData shaderData(object, objectSize);
 
 		try
 		{
 			scene.vertexShader = scene.device->CreateVertexShader(shaderData);
 		}
-		catch (Graphics_V1X::RenderDeviceError& err)
+		catch (Graphics::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -161,25 +161,25 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-			Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+			Graphics::V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
 
 		char metaData[2048];
 		size_t metaDataSize;
-		metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+		metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-		bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+		bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
-		Graphics_V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+		Graphics::V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
 		try
 		{
 			scene.pixelShader = scene.device->CreatePixelShader(shaderData);
 		}
-		catch (Graphics_V1X::RenderDeviceError& err)
+		catch (Graphics::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -204,25 +204,25 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-			Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+			Graphics::V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
 
 		char metaData[2048];
 		size_t metaDataSize;
-		metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+		metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-		bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+		bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
-		Graphics_V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+		Graphics::V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
 		try
 		{
 			scene.screenVertexShader = scene.device->CreateVertexShader(shaderData);
 		}
-		catch (Graphics_V1X::RenderDeviceError& err)
+		catch (Graphics::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -242,25 +242,25 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-			Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+			Graphics::V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
 
 		char metaData[2048];
 		size_t metaDataSize;
-		metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+		metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-		bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+		bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
-		Graphics_V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+		Graphics::V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
 		try
 		{
 			scene.screenDifPixelShader = scene.device->CreatePixelShader(shaderData);
 		}
-		catch (Graphics_V1X::RenderDeviceError& err)
+		catch (Graphics::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -285,25 +285,25 @@ void LoadScene(Scene& scene)
 			scene.fileSystem->Read(file, code, size);
 			scene.fileSystem->CloseFile(file);
 			code[size] = '\0';
-			Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+			Graphics::V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			delete[] code;
 		}
 
 		char metaData[2048];
 		size_t metaDataSize;
-		metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+		metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 		char bytecode[2048];
 		size_t bytecodeSize;
-		bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+		bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
 
-		Graphics_V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
+		Graphics::V1X::ShaderData shaderData(bytecode, bytecodeSize, metaData, metaDataSize);
 
 		try
 		{
 			scene.screenUVsPixelShader = scene.device->CreatePixelShader(shaderData);
 		}
-		catch (Graphics_V1X::RenderDeviceError& err)
+		catch (Graphics::RenderDeviceError& err)
 		{
 			std::cout << err.what() << std::endl;
 			getchar();
@@ -325,33 +325,33 @@ void LoadScene(Scene& scene)
 		data[2].x = +0.5f; data[2].y = -0.5f; data[2].z = 0.0f; data[2].u = 1.0f; data[2].v = 0.0f;
 		data[3].x = +0.5f; data[3].y = +0.5f; data[3].z = 0.0f; data[3].u = 1.0f; data[3].v = 1.0f;
 
-		scene.vertexBuffer = scene.device->CreateVertexBuffer(sizeof(data), data, Graphics_V1X::BufferUsage::Static);
+		scene.vertexBuffer = scene.device->CreateVertexBuffer(sizeof(data), data, Graphics::V1X::BufferUsage::Static);
 	}
 
 	// Create vertex layout
 	{
-		Graphics_V1X::VertexElement elements[2];
+		Graphics::V1X::VertexElement elements[2];
 
 		elements[0].bufferIndex = 0;
 		elements[0].name = "POSITION";
 		elements[0].offset = offsetof(Vertex, x);
 		elements[0].size = 3;
 		elements[0].stride = sizeof(Vertex);
-		elements[0].type = Graphics_V1X::VertexElementType::Float;
+		elements[0].type = Graphics::V1X::VertexElementType::Float;
 
 		elements[1].bufferIndex = 0;
 		elements[1].name = "UVS";
 		elements[1].offset = offsetof(Vertex, u);
 		elements[1].size = 2;
 		elements[1].stride = sizeof(Vertex);
-		elements[1].type = Graphics_V1X::VertexElementType::Float;
+		elements[1].type = Graphics::V1X::VertexElementType::Float;
 
 		scene.vertexLayout = scene.device->CreateVertexLayout(2, elements, scene.vertexShader);
 	}
 
 	// Create vertex array
 	{
-		Graphics_V1X::VertexBuffer* buffers[] =
+		Graphics::V1X::VertexBuffer* buffers[] =
 		{
 			scene.vertexBuffer,
 		};
@@ -370,33 +370,33 @@ void LoadScene(Scene& scene)
 		data[4].x = -1.0f; data[4].y = +0.0f; data[4].z = 0.0f; data[4].u = 0.0f; data[4].v = 1.0f;
 		data[5].x = +0.0f; data[5].y = +0.0f; data[5].z = 0.0f; data[5].u = 1.0f; data[5].v = 1.0f;
 
-		scene.screenVertexBuffer = scene.device->CreateVertexBuffer(sizeof(data), data, Graphics_V1X::BufferUsage::Static);
+		scene.screenVertexBuffer = scene.device->CreateVertexBuffer(sizeof(data), data, Graphics::V1X::BufferUsage::Static);
 	}
 
 	// Create screen vertex layout
 	{
-		Graphics_V1X::VertexElement elements[2];
+		Graphics::V1X::VertexElement elements[2];
 
 		elements[0].bufferIndex = 0;
 		elements[0].name = "POSITION";
 		elements[0].offset = offsetof(Vertex, x);
 		elements[0].size = 3;
 		elements[0].stride = sizeof(Vertex);
-		elements[0].type = Graphics_V1X::VertexElementType::Float;
+		elements[0].type = Graphics::V1X::VertexElementType::Float;
 
 		elements[1].bufferIndex = 0;
 		elements[1].name = "UVS";
 		elements[1].offset = offsetof(Vertex, u);
 		elements[1].size = 2;
 		elements[1].stride = sizeof(Vertex);
-		elements[1].type = Graphics_V1X::VertexElementType::Float;
+		elements[1].type = Graphics::V1X::VertexElementType::Float;
 
 		scene.screenVertexLayout = scene.device->CreateVertexLayout(2, elements, scene.screenVertexShader);
 	}
 
 	// Create screen vertex array
 	{
-		Graphics_V1X::VertexBuffer* buffers[] =
+		Graphics::V1X::VertexBuffer* buffers[] =
 		{
 			scene.screenVertexBuffer,
 		};
@@ -411,7 +411,7 @@ void LoadScene(Scene& scene)
 			2, 3, 1,
 		};
 
-		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics_V1X::IndexType::UInt, sizeof(data), data);
+		scene.indexBuffer = scene.device->CreateIndexBuffer(Graphics::V1X::IndexType::UInt, sizeof(data), data);
 	}
 
 	// Create texture
@@ -422,20 +422,20 @@ void LoadScene(Scene& scene)
 			0.0f, 0.0f, 1.0f, 1.0f,		1.0f, 1.0f, 1.0f, 1.0f,
 		};
 
-		scene.texture = scene.device->CreateTexture2D(2, 2, Graphics_V1X::TextureFormat::RGBA32Float, data);
+		scene.texture = scene.device->CreateTexture2D(2, 2, Graphics::V1X::TextureFormat::RGBA32Float, data);
 		scene.texture->GenerateMipmaps();
 		scene.textureBP = scene.pixelShader->GetBindingPoint("TEXTURE");
 	}
 
 	// Create sampler
 	{
-		Graphics_V1X::Sampler2DDesc desc;
+		Graphics::V1X::Sampler2DDesc desc;
 
-		desc.addressU = Graphics_V1X::TextureAdressMode::Clamp;
-		desc.addressV = Graphics_V1X::TextureAdressMode::Clamp;
-		desc.minFilter = Graphics_V1X::TextureFilter::Linear;
-		desc.magFilter = Graphics_V1X::TextureFilter::Linear;
-		desc.mipmapFilter = Graphics_V1X::TextureFilter::Linear;
+		desc.addressU = Graphics::V1X::TextureAdressMode::Clamp;
+		desc.addressV = Graphics::V1X::TextureAdressMode::Clamp;
+		desc.minFilter = Graphics::V1X::TextureFilter::Linear;
+		desc.magFilter = Graphics::V1X::TextureFilter::Linear;
+		desc.mipmapFilter = Graphics::V1X::TextureFilter::Linear;
 		desc.border = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		scene.sampler = scene.device->CreateSampler2D(desc);
@@ -449,59 +449,59 @@ void LoadScene(Scene& scene)
 
 	// Create raster state
 	{
-		Graphics_V1X::RasterStateDesc desc;
+		Graphics::V1X::RasterStateDesc desc;
 
-		desc.rasterMode = Graphics_V1X::RasterMode::Fill;
+		desc.rasterMode = Graphics::V1X::RasterMode::Fill;
 		desc.cullEnabled = false;
 		scene.rasterState = scene.device->CreateRasterState(desc);
 	}
 
 	// Create depth stencil state
 	{
-		Graphics_V1X::DepthStencilStateDesc desc;
+		Graphics::V1X::DepthStencilStateDesc desc;
 		desc.depthEnabled = true;
 		scene.depthStencilState = scene.device->CreateDepthStencilState(desc);
 	}
 
 	// Create blend state
 	{
-		Graphics_V1X::BlendStateDesc desc;
+		Graphics::V1X::BlendStateDesc desc;
 		desc.blendEnabled = false;
-		desc.sourceFactor = Graphics_V1X::BlendFactor::SourceAlpha;
-		desc.destinationFactor = Graphics_V1X::BlendFactor::InverseSourceAlpha;
+		desc.sourceFactor = Graphics::V1X::BlendFactor::SourceAlpha;
+		desc.destinationFactor = Graphics::V1X::BlendFactor::InverseSourceAlpha;
 		scene.blendState = scene.device->CreateBlendState(desc);
 	}
 
 	// Create diffuse attachment
 	{
-		scene.diffuseAttachment = scene.device->CreateTexture2D(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics_V1X::TextureFormat::RGBA8UNorm, nullptr, Graphics_V1X::BufferUsage::Default, true);
+		scene.diffuseAttachment = scene.device->CreateTexture2D(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics::V1X::TextureFormat::RGBA8UNorm, nullptr, Graphics::V1X::BufferUsage::Default, true);
 		scene.diffuseBP = scene.screenDifPixelShader->GetBindingPoint("DIFFUSE");
 	}
 
 	// Create UVs attachment
 	{
-		scene.uvsAttachment = scene.device->CreateTexture2D(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics_V1X::TextureFormat::RGBA8UNorm, nullptr, Graphics_V1X::BufferUsage::Default, true);
+		scene.uvsAttachment = scene.device->CreateTexture2D(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics::V1X::TextureFormat::RGBA8UNorm, nullptr, Graphics::V1X::BufferUsage::Default, true);
 		scene.uvsBP = scene.screenUVsPixelShader->GetBindingPoint("UVS");
 	}
 
 	// Create depth and stencil attachment
 	{
-		scene.depthStencilBuffer = scene.device->CreateDepthStencilBuffer(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics_V1X::DepthStencilFormat::Depth32Stencil8);
+		scene.depthStencilBuffer = scene.device->CreateDepthStencilBuffer(scene.window->GetWidth() / 2, scene.window->GetHeight() / 2, Graphics::V1X::DepthStencilFormat::Depth32Stencil8);
 	}
 
 	// Create framebuffer sampler
 	{
-		Graphics_V1X::Sampler2DDesc desc;
-		desc.addressU = Graphics_V1X::TextureAdressMode::Clamp;
-		desc.addressV = Graphics_V1X::TextureAdressMode::Clamp;
-		desc.minFilter = Graphics_V1X::TextureFilter::Linear;
-		desc.magFilter = Graphics_V1X::TextureFilter::Linear;
+		Graphics::V1X::Sampler2DDesc desc;
+		desc.addressU = Graphics::V1X::TextureAdressMode::Clamp;
+		desc.addressV = Graphics::V1X::TextureAdressMode::Clamp;
+		desc.minFilter = Graphics::V1X::TextureFilter::Linear;
+		desc.magFilter = Graphics::V1X::TextureFilter::Linear;
 		scene.framebufferSampler = scene.device->CreateSampler2D(desc);
 	}
 
 	// Create framebuffer
 	{
-		Graphics_V1X::Texture2D* tex[2];
+		Graphics::V1X::Texture2D* tex[2];
 		tex[0] = scene.diffuseAttachment;
 		tex[1] = scene.uvsAttachment;
 		scene.framebuffer = scene.device->CreateFramebuffer(2, tex, scene.depthStencilBuffer);
@@ -657,13 +657,13 @@ int main(int argc, const char** argv) try
 	mfTerminate();
 	return 0;
 }
-catch (Graphics_V1X::ShaderError& e)
+catch (Graphics::ShaderError& e)
 {
 	std::cout << "Shader error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }
-catch (Graphics_V1X::RenderDeviceError& e)
+catch (Graphics::RenderDeviceError& e)
 {
 	std::cout << "Render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;

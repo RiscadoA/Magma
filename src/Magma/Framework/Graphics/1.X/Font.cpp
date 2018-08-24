@@ -12,7 +12,7 @@ struct Vertex
 	float u, v;
 };
 
-Magma::Framework::Graphics_V1X::Font::Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth, size_t atlasHeight, size_t maxAtlasCount)
+Magma::Framework::Graphics::V1X::Font::Font(RenderDevice* device, const unsigned char* data, size_t size, size_t charWidth, size_t charHeight, size_t atlasWidth, size_t atlasHeight, size_t maxAtlasCount)
 	: m_device(device), m_height(charHeight)
 {
 	if (maxAtlasCount < 1)
@@ -127,14 +127,14 @@ Magma::Framework::Graphics_V1X::Font::Font(RenderDevice* device, const unsigned 
 	}
 }
 
-Magma::Framework::Graphics_V1X::Font::~Font()
+Magma::Framework::Graphics::V1X::Font::~Font()
 {
 	for (auto& t : m_atlas)
 		m_device->DestroyTexture2D(t);
 	m_atlas.clear();
 }
 
-void Magma::Framework::Graphics_V1X::Font::Set(Magma::Framework::Graphics_V1X::Character character)
+void Magma::Framework::Graphics::V1X::Font::Set(Magma::Framework::Graphics::V1X::Character character)
 {
 	for (auto& c : m_chars)
 		if (c.codePoint == character.codePoint)
@@ -145,7 +145,7 @@ void Magma::Framework::Graphics_V1X::Font::Set(Magma::Framework::Graphics_V1X::C
 	m_chars.push_back(character);
 }
 
-Magma::Framework::Graphics_V1X::Character Magma::Framework::Graphics_V1X::Font::Get(Magma::Framework::String::UnicodePoint codePoint) const
+Magma::Framework::Graphics::V1X::Character Magma::Framework::Graphics::V1X::Font::Get(Magma::Framework::String::UnicodePoint codePoint) const
 {
 	for (const auto& c : m_chars)
 		if (c.codePoint == codePoint)
@@ -156,7 +156,7 @@ Magma::Framework::Graphics_V1X::Character Magma::Framework::Graphics_V1X::Font::
 	throw TextError(ss.str());
 }
 
-Magma::Framework::Graphics_V1X::Texture2D * Magma::Framework::Graphics_V1X::Font::GetAtlas(size_t index) const
+Magma::Framework::Graphics::V1X::Texture2D * Magma::Framework::Graphics::V1X::Font::GetAtlas(size_t index) const
 {
 	return m_atlas.at(index);
 }

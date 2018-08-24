@@ -22,7 +22,7 @@ using namespace Magma;
 struct Scene
 {
 	Framework::Input::Window* window;
-	Framework::Graphics_V1X::RenderDevice* Graphics_V1XDevice;
+	Framework::Graphics::V1X::RenderDevice* Graphics_V1XDevice;
 	Framework::Audio::RenderDevice* audioDevice;
 	Framework::Files::FileSystem* fileSystem;
 	bool running;
@@ -49,13 +49,13 @@ void LoadScene(Scene& scene)
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
 
-	// Create Graphics_V1X device
+	// Create Graphics::V1X device
 	{
-		Framework::Graphics_V1X::RenderDeviceSettings settings;
+		Framework::Graphics::V1X::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::OGL410RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics::V1X::OGL410RenderDevice();
 #else
-		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::D3D11RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics::V1X::D3D11RenderDevice();
 #endif
 		scene.Graphics_V1XDevice->Init(scene.window, settings);
 	}
@@ -99,7 +99,7 @@ void CleanScene(Scene& scene)
 	scene.audioDevice->DestroySource(scene.source);
 	scene.audioDevice->DestroyBuffer(scene.buffer);
 
-	// Destroy Graphics_V1X and audio devices, window and filesytem
+	// Destroy Graphics::V1X and audio devices, window and filesytem
 	delete scene.audioDevice;
 	delete scene.Graphics_V1XDevice;
 	delete scene.window;
@@ -185,9 +185,9 @@ int main(int argc, const char** argv) try
 	mfTerminate();
 	return 0;
 }
-catch (Framework::Graphics_V1X::RenderDeviceError& e)
+catch (Framework::Graphics::RenderDeviceError& e)
 {
-	std::cout << "Graphics_V1X render device error caught:" << std::endl;
+	std::cout << "Graphics::V1X render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }

@@ -15,7 +15,7 @@ std::string ToLower(const std::string& str)
 	return ret;
 }
 
-size_t Magma::Framework::Graphics_V1X::MetaDataAssembler::Assemble(const std::string & code, char * out, size_t maxSize)
+size_t Magma::Framework::Graphics::V1X::MetaDataAssembler::Assemble(const std::string & code, char * out, size_t maxSize)
 {
 	struct Object
 	{
