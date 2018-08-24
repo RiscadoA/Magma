@@ -4,6 +4,8 @@
 
 #include "../../Input/D3DWindow.h"
 
+#define MFG_D3D11RENDERDEVICE_TYPE_NAME u8"d3d11"
+
 #ifdef __cplusplus
 extern "C"
 {

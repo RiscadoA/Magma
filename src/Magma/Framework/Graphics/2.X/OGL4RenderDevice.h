@@ -4,6 +4,8 @@
 
 #include "../../Input/OGLWindow.h"
 
+#define MFG_OGL4RENDERDEVICE_TYPE_NAME u8"ogl4"
+
 #ifdef __cplusplus
 extern "C"
 {

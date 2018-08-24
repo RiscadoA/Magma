@@ -117,6 +117,7 @@ extern "C"
 	/// <summary>
 	///		Destroys a window.
 	/// </summary>
+	/// <param name="window">Window handle</param>
 	void mfiDestroyWindow(void* window);
 
 #ifdef __cplusplus

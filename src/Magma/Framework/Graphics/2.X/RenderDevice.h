@@ -11,6 +11,10 @@ extern "C"
 #include "../../Memory/Object.h"
 #include "../../String/UTF8.h"
 
+#include "../../Input/Window.h"
+
+#define MFG_MAX_RENDER_DEVICE_CREATOR_REGISTER_ENTRIES 16
+
 #define MFG_NONE			0x00
 
 #define MFG_USAGE_DEFAULT	0x01
@@ -1566,6 +1570,54 @@ extern "C"
 	///		True if there was an error, otherwise false.
 	/// </returns>
 	mfmBool mfgV2XGetErrorString(mfgV2XRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize);
+
+	typedef mfError(*mfgV2XRenderDeviceCreatorFunction)(mfgV2XRenderDevice** renderDevice, mfiWindow* window, const mfgV2XRenderDeviceDesc* desc, void* allocator);
+
+	/// <summary>
+	///		Inits the render devices library.
+	/// </summary>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns an error code.
+	/// </returns>
+	mfError mfgV2XInitRenderDevices();
+
+	/// <summary>
+	///		Terminates the render devices library.
+	/// </summary>
+	void mfgV2XTerminateRenderDevices();
+
+	/// <summary>
+	///		Registers a new render device creator.
+	/// </summary>
+	/// <param name="type">Render device type name (with a maximum size of 16 bytes)</param>
+	/// <param name="func">Render device creator function</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFG_ERROR_NO_REGISTER_ENTRIES if there are no more creator slots in the register.
+	/// </returns>
+	mfError mfgV2XRegisterRenderDeviceCreator(const mfsUTF8CodeUnit* type, mfgV2XRenderDeviceCreatorFunction func);
+
+	/// <summary>
+	///		Creates a new window.
+	/// </summary>
+	/// <param name="type">Render device type name</param>
+	/// <param name="renderDevice">Out render device handle</param>
+	/// <param name="window">Render device window</param>
+	/// <param name="desc">Render device description</param>
+	/// <param name="allocator">Render device allocator</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFG_ERROR_TYPE_NOT_REGISTERED if there isn't a creator with the type registered.
+	///		Otherwise returns a render device creation error code.
+	/// </returns>
+	mfError mfgV2XCreateRenderDevice(const mfsUTF8CodeUnit* type, mfgV2XRenderDevice** renderDevice, mfiWindow* window, const mfgV2XRenderDeviceDesc* desc, void* allocator);
+
+	/// <summary>
+	///		Destroys a render device.
+	/// </summary>
+	/// <param name="renderDevice">Render device handle</param>
+	void mfgV2XDestroyRenderDevice(void* renderDevice);
 
 #ifdef __cplusplus
 }

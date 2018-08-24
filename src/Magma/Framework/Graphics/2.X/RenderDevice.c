@@ -1,6 +1,72 @@
 #include "RenderDevice.h"
 #include <string.h>
 
+struct
+{
+	mfmBool active;
+	mfgV2XRenderDeviceCreatorFunction func;
+	mfsUTF8CodeUnit type[16];
+} mfgRenderDeviceCreatorRegisterEntries[MFG_MAX_RENDER_DEVICE_CREATOR_REGISTER_ENTRIES];
+
+mfError mfgV2XInitRenderDevices()
+{
+	// Init all entries
+
+	for (mfmU64 i = 0; i < MFG_MAX_RENDER_DEVICE_CREATOR_REGISTER_ENTRIES; ++i)
+	{
+		mfgRenderDeviceCreatorRegisterEntries[i].active = MFM_FALSE;
+		mfgRenderDeviceCreatorRegisterEntries[i].func = NULL;
+	}
+
+	return MF_ERROR_OKAY;
+}
+
+void mfgV2XTerminateRenderDevices()
+{
+	// Reset all entries
+
+	for (mfmU64 i = 0; i < MFG_MAX_RENDER_DEVICE_CREATOR_REGISTER_ENTRIES; ++i)
+	{
+		mfgRenderDeviceCreatorRegisterEntries[i].active = MFM_FALSE;
+		mfgRenderDeviceCreatorRegisterEntries[i].func = NULL;
+	}
+}
+
+mfError mfgV2XRegisterRenderDeviceCreator(const mfsUTF8CodeUnit * type, mfgV2XRenderDeviceCreatorFunction func)
+{
+	for (mfmU64 i = 0; i < MFG_MAX_RENDER_DEVICE_CREATOR_REGISTER_ENTRIES; ++i)
+		if (mfgRenderDeviceCreatorRegisterEntries[i].active == MFM_FALSE)
+		{
+			mfgRenderDeviceCreatorRegisterEntries[i].active = MFM_TRUE;
+			mfgRenderDeviceCreatorRegisterEntries[i].func = func;
+
+			for (mfmU32 j = 0; j < 16; ++j)
+			{
+				mfgRenderDeviceCreatorRegisterEntries[i].type[j] = type[j];
+				if (type[j] == '\0')
+					break;
+			}
+
+			return MF_ERROR_OKAY;
+		}
+
+	return MFG_ERROR_NO_REGISTER_ENTRIES;
+}
+
+mfError mfgV2XCreateRenderDevice(const mfsUTF8CodeUnit * type, mfgV2XRenderDevice ** renderDevice, mfiWindow * window, const mfgV2XRenderDeviceDesc * desc, void * allocator)
+{
+	for (mfmU64 i = 0; i < MFG_MAX_RENDER_DEVICE_CREATOR_REGISTER_ENTRIES; ++i)
+		if (mfgRenderDeviceCreatorRegisterEntries[i].active == MFM_TRUE &&
+			strcmp(type, mfgRenderDeviceCreatorRegisterEntries[i].type) == 0)
+			return mfgRenderDeviceCreatorRegisterEntries[i].func(renderDevice, window, desc, allocator);
+	return MFG_ERROR_TYPE_NOT_REGISTERED;
+}
+
+void mfgV2XDestroyRenderDevice(void * renderDevice)
+{
+	((mfmObject*)renderDevice)->destructorFunc(renderDevice);
+}
+
 void mfgV2XDefaultRenderDeviceDesc(mfgV2XRenderDeviceDesc * desc)
 {
 	desc->vsyncEnabled = MFM_FALSE;
