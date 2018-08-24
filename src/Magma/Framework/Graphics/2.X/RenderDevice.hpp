@@ -621,6 +621,111 @@ namespace Magma
 				};
 
 				/// <summary>
+				///		Used as a vertex shader handle.
+				///		Destroys the vertex shader automatically when there are no more references to it.
+				/// </summary>
+				class VertexShader : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline VertexShader(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a pixel shader handle.
+				///		Destroys the pixel shader automatically when there are no more references to it.
+				/// </summary>
+				class PixelShader : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline PixelShader(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a pipeline handle.
+				///		Destroys the pipeline automatically when there are no more references to it.
+				/// </summary>
+				class Pipeline : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline Pipeline(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a constant buffer handle.
+				///		Destroys the constant buffer automatically when there are no more references to it.
+				/// </summary>
+				class ConstantBuffer : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline ConstantBuffer(const Memory::Object& object) : Memory::Object(object) {}
+
+					/// <summary>
+					/// 
+					/// </summary>
+					void Bind(void* bindingPoint);
+
+					void* Map();
+
+					void Unmap();
+				};
+
+				/// <summary>
+				///		Used as a texture 1D handle.
+				///		Destroys the texture 1D automatically when there are no more references to it.
+				/// </summary>
+				class Texture1D : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline Texture1D(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a texture 2D handle.
+				///		Destroys the texture 2D automatically when there are no more references to it.
+				/// </summary>
+				class Texture2D : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline Texture2D(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a texture 3D handle.
+				///		Destroys the texture 3D automatically when there are no more references to it.
+				/// </summary>
+				class Texture3D : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline Texture3D(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a sampler handle.
+				///		Destroys the sampler automatically when there are no more references to it.
+				/// </summary>
+				class Sampler : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline Sampler(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
 				///		Used as a render device handle.
 				///		Destroys the render device automatically when there are no more references to it.
 				/// </summary>
