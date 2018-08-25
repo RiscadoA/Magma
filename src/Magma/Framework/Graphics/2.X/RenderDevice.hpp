@@ -630,6 +630,8 @@ namespace Magma
 					using Object::Object;
 					using Object::operator=;
 					inline VertexShader(const Memory::Object& object) : Memory::Object(object) {}
+
+					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
 
 				/// <summary>
@@ -642,6 +644,8 @@ namespace Magma
 					using Object::Object;
 					using Object::operator=;
 					inline PixelShader(const Memory::Object& object) : Memory::Object(object) {}
+
+					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
 
 				/// <summary>
@@ -667,11 +671,6 @@ namespace Magma
 					using Object::operator=;
 					inline ConstantBuffer(const Memory::Object& object) : Memory::Object(object) {}
 
-					/// <summary>
-					/// 
-					/// </summary>
-					void Bind(void* bindingPoint);
-
 					void* Map();
 
 					void Unmap();
@@ -687,6 +686,8 @@ namespace Magma
 					using Object::Object;
 					using Object::operator=;
 					inline Texture1D(const Memory::Object& object) : Memory::Object(object) {}
+
+					void Update(mfmU32 dstX, mfmU32 width, const void* data);
 				};
 
 				/// <summary>
@@ -699,6 +700,8 @@ namespace Magma
 					using Object::Object;
 					using Object::operator=;
 					inline Texture2D(const Memory::Object& object) : Memory::Object(object) {}
+
+					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void* data);
 				};
 
 				/// <summary>
@@ -711,6 +714,8 @@ namespace Magma
 					using Object::Object;
 					using Object::operator=;
 					inline Texture3D(const Memory::Object& object) : Memory::Object(object) {}
+
+					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void* data);
 				};
 
 				/// <summary>
@@ -724,6 +729,52 @@ namespace Magma
 					using Object::operator=;
 					inline Sampler(const Memory::Object& object) : Memory::Object(object) {}
 				};
+
+				/// <summary>
+				///		Used as a vertex buffer handle.
+				///		Destroys the vertex buffer automatically when there are no more references to it.
+				/// </summary>
+				class VertexBuffer : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline VertexBuffer(const Memory::Object& object) : Memory::Object(object) {}
+
+					void* Map();
+
+					void Unmap();
+				};
+
+				class VertexLayout : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline VertexLayout(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				class VertexArray : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline VertexArray(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				class IndexBuffer : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					inline IndexBuffer(const Memory::Object& object) : Memory::Object(object) {}
+
+					void* Map();
+
+					void Unmap();
+				};
+
+
 
 				/// <summary>
 				///		Used as a render device handle.
