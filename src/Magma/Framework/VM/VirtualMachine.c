@@ -105,41 +105,48 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 	
 	switch (vm->code[vm->ip])
 	{
-		case MFV_BYTECODE_POP:
+		// Stack operations
 		{
-			mfmU8 size = vm->code[vm->ip + 1];
-			vm->ip += 2;
-			if (vm->stackHead < size)
-				return MFV_ERROR_STACK_UNDERFLOW;
-			vm->stackHead -= size;
-			break;
-		}
+			case MFV_BYTECODE_POP:
+			{
+				mfmU8 size = vm->code[vm->ip + 1];
+				vm->ip += 2;
+				if (vm->stackHead < size)
+					return MFV_ERROR_STACK_UNDERFLOW;
+				vm->stackHead -= size;
+				break;
+			}
 
-		case MFV_BYTECODE_PUSH8:
-		{
-			err = mfvVirtualMachinePush8(vm, vm->code + vm->ip + 1);
-			vm->ip += 2;
-			if (err != MF_ERROR_OKAY)
-				return err;
-			break;
-		}
+			case MFV_BYTECODE_PUSH8:
+			{
+				err = mfvVirtualMachinePush8(vm, vm->code + vm->ip + 1);
+				vm->ip += 2;
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
 
-		case MFV_BYTECODE_PUSH16:
-		{
-			err = mfvVirtualMachinePush16(vm, vm->code + vm->ip + 1);
-			vm->ip += 3;
-			if (err != MF_ERROR_OKAY)
-				return err;
-			break;
-		}
+			case MFV_BYTECODE_PUSH16:
+			{
+				mfmU16 value;
+				mfmFromBigEndian2(vm->code + vm->ip + 1, &value);
+				err = mfvVirtualMachinePush16(vm, &value);
+				vm->ip += 3;
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
 
-		case MFV_BYTECODE_PUSH32:
-		{
-			err = mfvVirtualMachinePush32(vm, vm->code + vm->ip + 1);
-			vm->ip += 5;
-			if (err != MF_ERROR_OKAY)
-				return err;
-			break;
+			case MFV_BYTECODE_PUSH32:
+			{
+				mfmU32 value;
+				mfmFromBigEndian4(vm->code + vm->ip + 1, &value);
+				err = mfvVirtualMachinePush32(vm, &value);
+				vm->ip += 5;
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
 		}
 
 		// 8 bit operations
@@ -325,6 +332,189 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 			}
 		}
 
+		// 16 bit operations
+		{
+			case MFV_BYTECODE_ADDS16:
+			{
+				vm->ip += 1;
+
+				mfmI16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI16 val = val1 + val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_SUBS16:
+			{
+				vm->ip += 1;
+
+				mfmI16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI16 val = val1 - val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MULS16:
+			{
+				vm->ip += 1;
+
+				mfmI16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI16 val = val1 * val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_DIVS16:
+			{
+				vm->ip += 1;
+
+				mfmI16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI16 val = val1 / val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MODS16:
+			{
+				vm->ip += 1;
+
+				mfmI16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI16 val = val1 % val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_ADDU16:
+			{
+				vm->ip += 1;
+
+				mfmU16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU16 val = val1 + val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_SUBU16:
+			{
+				vm->ip += 1;
+
+				mfmU16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU16 val = val1 - val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MULU16:
+			{
+				vm->ip += 1;
+
+				mfmU16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU16 val = val1 * val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_DIVU16:
+			{
+				vm->ip += 1;
+
+				mfmU16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU16 val = val1 / val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MODU16:
+			{
+				vm->ip += 1;
+
+				mfmU16 val1, val2;
+				err = mfvVirtualMachinePop16(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop16(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU16 val = val1 % val2;
+				err = mfvVirtualMachinePush16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+		}
+
 		case MFV_BYTECODE_END:
 		{
 			vm->ip = 0;
@@ -459,7 +649,7 @@ mfError mfvVirtualMachinePush16(mfvVirtualMachine * vm, const void * value)
 {
 	if (vm->stackHead + 2 >= vm->desc.stackSize)
 		return MFV_ERROR_STACK_OVERFLOW;
-	mfmFromBigEndian2(value, vm->stack + vm->stackHead);
+	memcpy(vm->stack + vm->stackHead, value, 2);
 	vm->stackHead += 2;
 	return MF_ERROR_OKAY;
 }
@@ -468,7 +658,7 @@ mfError mfvVirtualMachinePush32(mfvVirtualMachine * vm, const void * value)
 {
 	if (vm->stackHead + 4 >= vm->desc.stackSize)
 		return MFV_ERROR_STACK_OVERFLOW;
-	mfmFromBigEndian4(value, vm->stack + vm->stackHead);
+	memcpy(vm->stack + vm->stackHead, value, 4);
 	vm->stackHead += 4;
 	return MF_ERROR_OKAY;
 }
