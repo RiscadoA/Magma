@@ -19,6 +19,9 @@ struct mfvVirtualMachine
 	mfmU8* stack;
 	mfvInstructionPointer* callStack;
 	mfvVirtualMachineFunction* functionTable;
+	mfmU8* registers8;
+	mfmU16* registers16;
+	mfmU32* registers32;
 };
 
 mfError mfvCreateVirtualMachine(mfvVirtualMachine ** vm, const mfvVirtualMachineDesc * desc, void * allocator)
@@ -28,7 +31,8 @@ mfError mfvCreateVirtualMachine(mfvVirtualMachine ** vm, const mfvVirtualMachine
 							  sizeof(mfvVirtualMachine) +
 							  desc->stackSize +
 							  desc->callStackSize * sizeof(mfvInstructionPointer) +
-							  desc->functionTableSize * sizeof(mfvVirtualMachineFunction));
+							  desc->functionTableSize * sizeof(mfvVirtualMachineFunction) +
+							  desc->registerCount * sizeof(mfmU32));
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -52,6 +56,14 @@ mfError mfvCreateVirtualMachine(mfvVirtualMachine ** vm, const mfvVirtualMachine
 	(*vm)->stack = memory + sizeof(mfvVirtualMachine);
 	(*vm)->callStack = memory + sizeof(mfvVirtualMachine) + desc->stackSize;
 	(*vm)->functionTable = memory + sizeof(mfvVirtualMachine) + desc->stackSize + desc->callStackSize * sizeof(mfvInstructionPointer);
+	(*vm)->registers32 =
+		memory +
+		sizeof(mfvVirtualMachine) +
+		desc->stackSize +
+		desc->callStackSize * sizeof(mfvInstructionPointer) +
+		desc->functionTableSize * sizeof(mfvVirtualMachineFunction);
+	(*vm)->registers16 = (*vm)->registers32;
+	(*vm)->registers8 = (*vm)->registers32;
 
 	for (mfmU64 i = 0; i < desc->functionTableSize; ++i)
 		(*vm)->functionTable[i] = NULL;
@@ -115,6 +127,19 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 				if (vm->stackHead < size)
 					return MFV_ERROR_STACK_UNDERFLOW;
 				vm->stackHead -= size;
+				break;
+			}
+
+			case MFV_BYTECODE_PUSH_COPY:
+			{
+				mfmU8 count = vm->code[vm->ip + 1];
+				vm->ip += 2;
+				if (vm->stackHead < count)
+					return MFV_ERROR_STACK_UNDERFLOW;
+				if (vm->stackHead + count > vm->desc.stackSize)
+					return MFV_ERROR_STACK_OVERFLOW;
+				memcpy(vm->stack + vm->stackHead, vm->stack + vm->stackHead - count, count);
+				vm->stackHead += count;
 				break;
 			}
 
@@ -839,139 +864,229 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 			}
 		}
 
-		case MFV_BYTECODE_END:
+		// Flow control
 		{
-			vm->ip = 0;
-			if (state != NULL)
-				*state = MFV_STATE_FINISHED;
-			break;
-		}
+			case MFV_BYTECODE_END:
+			{
+				vm->ip = 0;
+				if (state != NULL)
+					*state = MFV_STATE_FINISHED;
+				break;
+			}
 
-		case MFV_BYTECODE_YIELD:
-		{
-			vm->ip += 1;
-			if (state != NULL)
-				*state = MFV_STATE_UNFINISHED;
-			break;
-		}
-
-		case MFV_BYTECODE_CALL:
-		{
-			mfvInstructionPointer ip = 0;
-			err = mfvVirtualMachinePop32(vm, &ip);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			vm->ip += 1;
-			if (vm->callStackHead >= vm->desc.callStackSize)
-				return MFV_ERROR_CALL_STACK_OVERFLOW;
-			vm->callStack[vm->callStackHead] = vm->ip;
-			++vm->callStackHead;
-			vm->ip = ip;
-			break;
-		}
-
-		case MFV_BYTECODE_RETURN:
-		{
-			vm->ip += 1;
-			if (vm->callStackHead == 0)
-				return MFV_ERROR_CALL_STACK_UNDERFLOW;
-			--vm->callStackHead;
-			vm->ip = vm->callStack[vm->callStackHead];
-			break;
-		}
-
-		case MFV_BYTECODE_JUMP:
-		{
-			mfvInstructionPointer ip = 0;
-			err = mfvVirtualMachinePop32(vm, &ip);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			vm->ip = ip;
-			break;
-		}
-
-		case MFV_BYTECODE_JUMP_I8_NOT_ZERO:
-		{
-			mfvInstructionPointer ip = 0;
-			err = mfvVirtualMachinePop32(vm, &ip);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			mfmU8 val = 0;
-			err = mfvVirtualMachinePop8(vm, &val);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			if (val == 0)
+			case MFV_BYTECODE_YIELD:
+			{
 				vm->ip += 1;
-			else
-				vm->ip = ip;
-			break;
-		}
+				if (state != NULL)
+					*state = MFV_STATE_UNFINISHED;
+				break;
+			}
 
-		case MFV_BYTECODE_JUMP_I16_NOT_ZERO:
-		{
-			mfvInstructionPointer ip = 0;
-			err = mfvVirtualMachinePop32(vm, &ip);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			mfmU16 val = 0;
-			err = mfvVirtualMachinePop16(vm, &val);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			if (val == 0)
+			case MFV_BYTECODE_CALL:
+			{
+				mfvInstructionPointer ip = 0;
+				err = mfvVirtualMachinePop32(vm, &ip);
+				if (err != MF_ERROR_OKAY)
+					return err;
 				vm->ip += 1;
-			else
+				if (vm->callStackHead >= vm->desc.callStackSize)
+					return MFV_ERROR_CALL_STACK_OVERFLOW;
+				vm->callStack[vm->callStackHead] = vm->ip;
+				++vm->callStackHead;
 				vm->ip = ip;
-			break;
-		}
+				break;
+			}
 
-		case MFV_BYTECODE_JUMP_I32_NOT_ZERO:
-		{
-			mfvInstructionPointer ip = 0;
-			err = mfvVirtualMachinePop32(vm, &ip);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			mfmU32 val = 0;
-			err = mfvVirtualMachinePop32(vm, &val);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			if (val == 0)
+			case MFV_BYTECODE_RETURN:
+			{
 				vm->ip += 1;
-			else
-				vm->ip = ip;
-			break;
-		}
+				if (vm->callStackHead == 0)
+					return MFV_ERROR_CALL_STACK_UNDERFLOW;
+				--vm->callStackHead;
+				vm->ip = vm->callStack[vm->callStackHead];
+				break;
+			}
 
-		case MFV_BYTECODE_JUMP_F32_NOT_ZERO:
-		{
-			mfvInstructionPointer ip = 0;
-			err = mfvVirtualMachinePop32(vm, &ip);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			mfmF32 val = 0;
-			err = mfvVirtualMachinePop32(vm, &val);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			if (val == 0.0f)
+			case MFV_BYTECODE_JUMP:
+			{
+				mfvInstructionPointer ip = 0;
+				err = mfvVirtualMachinePop32(vm, &ip);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				vm->ip = ip;
+				break;
+			}
+
+			case MFV_BYTECODE_JUMP_I8_NOT_ZERO:
+			{
+				mfvInstructionPointer ip = 0;
+				err = mfvVirtualMachinePop32(vm, &ip);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU8 val = 0;
+				err = mfvVirtualMachinePop8(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (val == 0)
+					vm->ip += 1;
+				else
+					vm->ip = ip;
+				break;
+			}
+
+			case MFV_BYTECODE_JUMP_I16_NOT_ZERO:
+			{
+				mfvInstructionPointer ip = 0;
+				err = mfvVirtualMachinePop32(vm, &ip);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU16 val = 0;
+				err = mfvVirtualMachinePop16(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (val == 0)
+					vm->ip += 1;
+				else
+					vm->ip = ip;
+				break;
+			}
+
+			case MFV_BYTECODE_JUMP_I32_NOT_ZERO:
+			{
+				mfvInstructionPointer ip = 0;
+				err = mfvVirtualMachinePop32(vm, &ip);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU32 val = 0;
+				err = mfvVirtualMachinePop32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (val == 0)
+					vm->ip += 1;
+				else
+					vm->ip = ip;
+				break;
+			}
+
+			case MFV_BYTECODE_JUMP_F32_NOT_ZERO:
+			{
+				mfvInstructionPointer ip = 0;
+				err = mfvVirtualMachinePop32(vm, &ip);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 val = 0;
+				err = mfvVirtualMachinePop32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (val == 0.0f)
+					vm->ip += 1;
+				else
+					vm->ip = ip;
+				break;
+			}
+
+			case MFV_BYTECODE_CALL_BUILTIN:
+			{
 				vm->ip += 1;
-			else
-				vm->ip = ip;
-			break;
+
+				mfmU16 id;
+				err = mfvVirtualMachinePop16(vm, &id);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.functionTableSize || vm->functionTable[id] == NULL)
+					return MFV_ERROR_FUNCTION_NOT_DEFINED;
+				err = vm->functionTable[id](vm);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
 		}
 
-		case MFV_BYTECODE_CALL_BUILTIN:
+		// Register operations
 		{
-			vm->ip += 1;
+			case MFV_BYTECODE_STORE8:
+			{
+				mfmU32 id;
+				mfmFromBigEndian4(vm->code + vm->ip + 1, &id);
+				vm->ip += 5;
+				mfmU8 value;
+				err = mfvVirtualMachinePop8(vm, &value);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount * 4)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				vm->registers8[id] = value;
+				break;
+			}
 
-			mfmU16 id;
-			err = mfvVirtualMachinePop16(vm, &id);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			if (id >= vm->desc.functionTableSize || vm->functionTable[id] == NULL)
-				return MFV_ERROR_FUNCTION_NOT_DEFINED;
-			err = vm->functionTable[id](vm);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			break;
+			case MFV_BYTECODE_STORE16:
+			{
+				mfmU32 id;
+				mfmFromBigEndian4(vm->code + vm->ip + 1, &id);
+				vm->ip += 5;
+				mfmU16 value;
+				err = mfvVirtualMachinePop16(vm, &value);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount * 2)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				vm->registers16[id] = value;
+				break;
+			}
+
+			case MFV_BYTECODE_STORE32:
+			{
+				mfmU32 id;
+				mfmFromBigEndian4(vm->code + vm->ip + 1, &id);
+				vm->ip += 5;
+				mfmU8 value;
+				err = mfvVirtualMachinePop32(vm, &value);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				vm->registers32[id] = value;
+				break;
+			}
+
+			case MFV_BYTECODE_LOAD8:
+			{
+				mfmU32 id;
+				mfmFromBigEndian4(vm->code + vm->ip + 1, &id);
+				vm->ip += 5;
+				if (id >= vm->desc.registerCount * 4)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				err = mfvVirtualMachinePush8(vm, &vm->registers8[id]);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_LOAD16:
+			{
+				mfmU32 id;
+				mfmFromBigEndian4(vm->code + vm->ip + 1, &id);
+				vm->ip += 5;
+				if (id >= vm->desc.registerCount * 2)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				err = mfvVirtualMachinePush16(vm, &vm->registers16[id]);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_LOAD32:
+			{
+				mfmU32 id;
+				mfmFromBigEndian4(vm->code + vm->ip + 1, &id);
+				vm->ip += 5;
+				if (id >= vm->desc.registerCount)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				err = mfvVirtualMachinePush32(vm, &vm->registers32[id]);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
 		}
 
 		default:

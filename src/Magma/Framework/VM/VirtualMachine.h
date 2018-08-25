@@ -29,6 +29,7 @@ extern "C"
 	{
 		mfmU64 stackSize;
 		mfmU64 callStackSize;
+		mfmU32 registerCount;
 		mfmU16 functionTableSize;
 	} mfvVirtualMachineDesc;
 

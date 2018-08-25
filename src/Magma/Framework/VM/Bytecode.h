@@ -9,7 +9,7 @@ extern "C"
 		MVM Bytecode version 1.0.
 		
 		Notes:
-			- MVM Bytecode is stack based (it has no registers).
+			- MVM Bytecode is stack based.
 			- All literals are stored in big endianness.
 			- Each virtual machine may have different memory and call stack sizes.
 
@@ -21,6 +21,20 @@ extern "C"
 #define MFV_BYTECODE_PUSH8				0x02	// Pushs a 1 byte value into the stage (push value = param 1 (1 byte))
 #define MFV_BYTECODE_PUSH16				0x03	// Pushs a 2 byte value into the stage (push value = param 1 (2 byte))
 #define MFV_BYTECODE_PUSH32				0x04	// Pushs a 4 byte value into the stage (push value = param 1 (4 byte))
+
+	// Register operations
+#define	MFV_BYTECODE_STORE8				0xA0	// Pops a 1 byte value from the stack and stores it in a register (register index = param 1 (4 bytes)/4, offset = index%4)
+#define	MFV_BYTECODE_STORE16			0xA1	// Pops a 2 byte value from the stack and stores it in a register (register index = param 1 (4 bytes)/2, offset = index%2)
+#define	MFV_BYTECODE_STORE32			0xA2	// Pops a 4 byte value from the stack and stores it in a register (register index = param 1 (4 bytes))
+#define	MFV_BYTECODE_LOAD8				0xA3	// Loads a 1 byte value from a register and pushes it into the stack (register index = param 1 (4 bytes)/4, offset = index%4)
+#define	MFV_BYTECODE_LOAD16				0xA4	// Loads a 2 byte value from a register and pushes it into the stack (register index = param 1 (4 bytes)/2, offset = index%2)
+#define	MFV_BYTECODE_LOAD32				0xA5	// Loads a 4 byte value from a register and pushes it into the stack (register index = param 1 (4 bytes))
+#define	MFV_BYTECODE_STORES8			0xA6	// Pos a 1 byte value from the stack and stores it in a register (register index on stack (4 bytes), offset = index%4)
+#define	MFV_BYTECODE_STORES16			0xA7	// Pops a 2 byte value from the stack and stores it in a register (register index on stack (4 bytes)/2, offset = index%2)
+#define	MFV_BYTECODE_STORES32			0xA8	// Pops a 4 byte value from the stack and stores it in a register (register index on stack (4 bytes))
+#define	MFV_BYTECODE_LOADS8				0xA9	// Loads a 1 byte value from a register and pushes it into the stack (register index on stack (4 bytes), offset = index%4)
+#define	MFV_BYTECODE_LOADS16			0xAA	// Loads a 2 byte value from a register and pushes it into the stack (register index on stack (4 bytes)/2, offset = index%2)
+#define	MFV_BYTECODE_LOADS32			0xAB	// Loads a 4 byte value from a register and pushes it into the stack (register index on stack (4 bytes))
 
 	// 1 byte signed integer operations
 #define MFV_BYTECODE_ADDS8				0x10	// Pushes the top byte added to the next byte (1 byte signed integers)
