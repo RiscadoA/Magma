@@ -82,6 +82,7 @@ extern "C"
 #define MFV_BYTECODE_JUMP_I16_NOT_ZERO	0x96	// Jumps to an address (address on the top 4 bytes on the stack) if the next 2 bytes aren't zero.
 #define MFV_BYTECODE_JUMP_I32_NOT_ZERO	0x97	// Jumps to an address (address on the top 4 bytes on the stack) if the next 4 bytes aren't zero.
 #define MFV_BYTECODE_JUMP_F32_NOT_ZERO	0x98	// Jumps to an address (address on the top 4 bytes on the stack) if the next 4 byte floating point isn't zero.
+#define MFV_BYTECODE_CALL_BUILTIN		0x99	// Calls a built-in function (function ID on the top 2 bytes on the stack). 
 
 #ifdef __cplusplus
 }
