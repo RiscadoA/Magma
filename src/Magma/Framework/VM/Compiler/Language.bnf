@@ -1,3 +1,5 @@
+;	Magma Virtual Machine Language	 (MVL)\1qwsxwd23w
+;
 ;	Example:
 ;
 ;	void entry()
@@ -26,6 +28,8 @@
 
 <compound-statement> ::= "{" { <statement> } "}"
 
-<throw-statement> ::= "throw" ( "warning" | "error" ) ";"
+<throw-statement> ::= "throw" ( "warning" | "error" ) "(" <string-literal> ")" ";"
+
+<expression> ::= ; TO DO
 
 <type> ::= ( "void" | "I8" | "I16" | "I32" | "U8" | "U16" | "U32" | "F32" | <id> )
