@@ -45,20 +45,36 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 	mfError err = MF_ERROR_OKAY;
 	mfvV1XToken tok;
 
+#define SINGLE_CHAR_TOK(chr, tokInfo) else if (*state->it == chr) { tok.info = &tokInfo; err = mfvV1XPutToken(state, &tok); if (err != MF_ERROR_OKAY) return err; ++state->it; return MF_ERROR_OKAY; }
+
 	if (*state->it == '\0')
 	{
 		state->finished = MFM_TRUE;
 		return MF_ERROR_OKAY;
 	}
-	else if (*state->it == ';')
-	{
-		tok.info = &MFV_V1X_TINFO_SEMICOLON;
-		err = mfvV1XPutToken(state, &tok);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		++state->it;
-		return MF_ERROR_OKAY;
-	}
+
+	// Operators
+	SINGLE_CHAR_TOK('+', MFV_V1X_TINFO_ADD)
+	SINGLE_CHAR_TOK('-', MFV_V1X_TINFO_SUBTRACT)
+	SINGLE_CHAR_TOK('*', MFV_V1X_TINFO_MULTIPLY)
+	SINGLE_CHAR_TOK('/', MFV_V1X_TINFO_DIVIDE)
+	SINGLE_CHAR_TOK('>', MFV_V1X_TINFO_GREATER)
+	SINGLE_CHAR_TOK('<', MFV_V1X_TINFO_LESS)
+	SINGLE_CHAR_TOK('!', MFV_V1X_TINFO_NOT)
+	SINGLE_CHAR_TOK('=', MFV_V1X_TINFO_ASSIGN)
+	SINGLE_CHAR_TOK('.', MFV_V1X_TINFO_MEMBER)
+
+
+	// Punctuation
+	SINGLE_CHAR_TOK('{', MFV_V1X_TINFO_OPEN_BRACES)
+	SINGLE_CHAR_TOK('}', MFV_V1X_TINFO_CLOSE_BRACES)
+	SINGLE_CHAR_TOK('[', MFV_V1X_TINFO_OPEN_BRACKETS)
+	SINGLE_CHAR_TOK(']', MFV_V1X_TINFO_CLOSE_BRACKETS)
+	SINGLE_CHAR_TOK('(', MFV_V1X_TINFO_OPEN_PARENTHESIS)
+	SINGLE_CHAR_TOK(')', MFV_V1X_TINFO_CLOSE_PARENTHESIS)
+	SINGLE_CHAR_TOK(';', MFV_V1X_TINFO_SEMICOLON)
+	SINGLE_CHAR_TOK(':', MFV_V1X_TINFO_COLON)
+	SINGLE_CHAR_TOK(',', MFV_V1X_TINFO_COMMA)
 	else
 	{
 		mfsStringStream ss;
@@ -67,6 +83,8 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_UNKNOWN_TOKEN;
 	}
+
+#undef SINGLE_CHAR_TOK
 }
 
 mfError mfvV1XRunMVLLexer(const mfsUTF8CodeUnit * source, mfvV1XToken * tokens, mfmU64 maxTokenCount, mfvV1XLexerState * state)
