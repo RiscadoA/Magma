@@ -17,8 +17,10 @@ extern "C"
 	
 	// Stack operations
 #define MFV_BYTECODE_POP				0x00	// Pops N bytes from stack (N = param 1 (1 byte))
-#define MFV_BYTECODE_PUSH				0x01	// Pushs N bytes into the stack (N = param 1 (1 byte)) (push value = param 2 (N bytes))
-#define MFV_BYTECODE_PUSH_COPY			0x02	// Makes a copy of the previous N bytes in the stack and pushes them again (N = param 1 (1 byte))
+#define MFV_BYTECODE_PUSH_COPY			0x01	// Makes a copy of the previous N bytes in the stack and pushes them again (N = param 1 (1 byte))
+#define MFV_BYTECODE_PUSH8				0x02	// Pushs a 1 byte value into the stage (push value = param 1 (1 byte))
+#define MFV_BYTECODE_PUSH16				0x03	// Pushs a 2 byte value into the stage (push value = param 1 (2 byte))
+#define MFV_BYTECODE_PUSH32				0x04	// Pushs a 4 byte value into the stage (push value = param 1 (4 byte))
 
 	// 1 byte signed integer operations
 #define MFV_BYTECODE_ADDS8				0x10	// Pushes the top byte added to the next byte (1 byte signed integers)
