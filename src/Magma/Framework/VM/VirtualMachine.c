@@ -890,6 +890,74 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 			break;
 		}
 
+		case MFV_BYTECODE_JUMP_I8_NOT_ZERO:
+		{
+			mfvInstructionPointer ip = 0;
+			err = mfvVirtualMachinePop32(vm, &ip);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmU8 val = 0;
+			err = mfvVirtualMachinePop8(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			if (val == 0)
+				vm->ip += 1;
+			else
+				vm->ip = ip;
+			break;
+		}
+
+		case MFV_BYTECODE_JUMP_I16_NOT_ZERO:
+		{
+			mfvInstructionPointer ip = 0;
+			err = mfvVirtualMachinePop32(vm, &ip);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmU16 val = 0;
+			err = mfvVirtualMachinePop16(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			if (val == 0)
+				vm->ip += 1;
+			else
+				vm->ip = ip;
+			break;
+		}
+
+		case MFV_BYTECODE_JUMP_I32_NOT_ZERO:
+		{
+			mfvInstructionPointer ip = 0;
+			err = mfvVirtualMachinePop32(vm, &ip);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmU32 val = 0;
+			err = mfvVirtualMachinePop32(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			if (val == 0)
+				vm->ip += 1;
+			else
+				vm->ip = ip;
+			break;
+		}
+
+		case MFV_BYTECODE_JUMP_F32_NOT_ZERO:
+		{
+			mfvInstructionPointer ip = 0;
+			err = mfvVirtualMachinePop32(vm, &ip);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmF32 val = 0;
+			err = mfvVirtualMachinePop32(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			if (val == 0.0f)
+				vm->ip += 1;
+			else
+				vm->ip = ip;
+			break;
+		}
+
 		case MFV_BYTECODE_CALL_BUILTIN:
 		{
 			vm->ip += 1;

@@ -80,9 +80,9 @@ extern "C"
 #define MFV_BYTECODE_CALL				0x92	// Calls a function (address on the top 4 bytes on the stack).
 #define MFV_BYTECODE_RETURN				0x93	// Returns from a function.
 #define MFV_BYTECODE_JUMP				0x94	// Jumps to an address (address on the top 4 bytes on the stack).
-#define MFV_BYTECODE_JUMP_I8_NOT_ZERO	0x95	// Jumps to an address (address on the top 4 bytes on the stack) if the next byte isn't zero.
-#define MFV_BYTECODE_JUMP_I16_NOT_ZERO	0x96	// Jumps to an address (address on the top 4 bytes on the stack) if the next 2 bytes aren't zero.
-#define MFV_BYTECODE_JUMP_I32_NOT_ZERO	0x97	// Jumps to an address (address on the top 4 bytes on the stack) if the next 4 bytes aren't zero.
+#define MFV_BYTECODE_JUMP_I8_NOT_ZERO	0x95	// Jumps to an address (address on the top 4 bytes on the stack) if the next byte isn't zero (integer).
+#define MFV_BYTECODE_JUMP_I16_NOT_ZERO	0x96	// Jumps to an address (address on the top 4 bytes on the stack) if the next 2 bytes aren't zero (integer).
+#define MFV_BYTECODE_JUMP_I32_NOT_ZERO	0x97	// Jumps to an address (address on the top 4 bytes on the stack) if the next 4 bytes aren't zero (integer).
 #define MFV_BYTECODE_JUMP_F32_NOT_ZERO	0x98	// Jumps to an address (address on the top 4 bytes on the stack) if the next 4 byte floating point isn't zero.
 #define MFV_BYTECODE_CALL_BUILTIN		0x99	// Calls a built-in function (function ID on the top 2 bytes on the stack). 
 
