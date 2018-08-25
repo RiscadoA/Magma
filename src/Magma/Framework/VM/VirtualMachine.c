@@ -160,6 +160,78 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 			break;
 		}
 
+		case MFV_BYTECODE_SUBS8:
+		{
+			vm->ip += 1;
+
+			mfmI8 val1, val2;
+			err = mfvVirtualMachinePop8(vm, &val1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfvVirtualMachinePop8(vm, &val2);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmI8 val = val1 - val2;
+			err = mfvVirtualMachinePush8(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			break;
+		}
+
+		case MFV_BYTECODE_MULS8:
+		{
+			vm->ip += 1;
+
+			mfmI8 val1, val2;
+			err = mfvVirtualMachinePop8(vm, &val1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfvVirtualMachinePop8(vm, &val2);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmI8 val = val1 * val2;
+			err = mfvVirtualMachinePush8(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			break;
+		}
+
+		case MFV_BYTECODE_DIVS8:
+		{
+			vm->ip += 1;
+
+			mfmI8 val1, val2;
+			err = mfvVirtualMachinePop8(vm, &val1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfvVirtualMachinePop8(vm, &val2);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmI8 val = val1 / val2;
+			err = mfvVirtualMachinePush8(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			break;
+		}
+
+		case MFV_BYTECODE_MODS8:
+		{
+			vm->ip += 1;
+
+			mfmI8 val1, val2;
+			err = mfvVirtualMachinePop8(vm, &val1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfvVirtualMachinePop8(vm, &val2);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfmI8 val = val1 % val2;
+			err = mfvVirtualMachinePush8(vm, &val);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			break;
+		}
+
 		case MFV_BYTECODE_END:
 		{
 			vm->ip = 0;
