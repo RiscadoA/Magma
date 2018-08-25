@@ -35,19 +35,20 @@ int main(int argc, const char** argv)
 
 	mfmU8 code[] =
 	{
-		/* 0d00 */ MFV_BYTECODE_PUSH8, 0x0A,
-		/* 0d02 */ MFV_BYTECODE_STORE8, 0x00, 0x00, 0x00, 0x00,
-		/* 0d07 */ MFV_BYTECODE_PUSH8, 0x01,
-		/* 0d09 */ MFV_BYTECODE_LOAD8, 0x00, 0x00, 0x00, 0x00,
-		/* 0d14 */ MFV_BYTECODE_SUBU8,
-		/* 0d15 */ MFV_BYTECODE_PUSH_COPY, 0x01,
-		/* 0d17 */ MFV_BYTECODE_STORE8, 0x00, 0x00, 0x00, 0x00,
-		/* 0d22 */ MFV_BYTECODE_PUSH_COPY, 0x01,
-		/* 0d24 */ MFV_BYTECODE_PUSH16, 0x00, 0x01,
-		/* 0d27 */ MFV_BYTECODE_CALL_BUILTIN,
-		/* 0d28 */ MFV_BYTECODE_PUSH32, 0, 0, 0, 7,
-		/* 0d33 */ MFV_BYTECODE_JUMP_I8_NOT_ZERO,
-		/* 0d34 */ MFV_BYTECODE_END,
+		MFV_BYTECODE_PUSH8, '\0',
+		MFV_BYTECODE_PUSH8, '!',
+		MFV_BYTECODE_PUSH8, 'd',
+		MFV_BYTECODE_PUSH8, 'l',
+		MFV_BYTECODE_PUSH8, 'r',
+		MFV_BYTECODE_PUSH8, 'o',
+		MFV_BYTECODE_PUSH8, 'w',
+		MFV_BYTECODE_PUSH8, ' ',
+		MFV_BYTECODE_PUSH8, 'o',
+		MFV_BYTECODE_PUSH8, 'l',
+		MFV_BYTECODE_PUSH8, 'l',
+		MFV_BYTECODE_PUSH8, 'e',
+		MFV_BYTECODE_PUSH8, 'H',
+		MFV_BYTECODE_THROW_ERROR,
 	};
 	
 	if (mfvSetVirtualMachineFunction(vm, 0x0001, &PrintU8) != MF_ERROR_OKAY)
@@ -55,7 +56,12 @@ int main(int argc, const char** argv)
 	if (mfvSetVirtualMachineCode(vm, 0, code) != MF_ERROR_OKAY)
 		abort();
 	if (mfvRunVirtualMachine(vm, NULL, NULL, NULL) != MF_ERROR_OKAY)
+	{
+		const mfsUTF8CodeUnit* msg = NULL;
+		mfvVirtualMachineGetError(vm, &msg);
+		mfsPutString(mfsOutStream, msg);
 		abort();
+	}
 
 	mfvDestroyVirtualMachine(vm);
 

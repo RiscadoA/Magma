@@ -4,6 +4,7 @@
 #include "../Memory/Object.h"
 #include "Bytecode.h"
 #include "Error.h"
+#include "../String/UTF8.h"
 
 /*
 	Variable data typedefs.
@@ -31,6 +32,8 @@ extern "C"
 		mfmU64 callStackSize;
 		mfmU32 registerCount;
 		mfmU16 functionTableSize;
+		mfsUTF8CodeUnit warningString[256];
+		mfsUTF8CodeUnit errorString[256];
 	} mfvVirtualMachineDesc;
 
 	mfError mfvCreateVirtualMachine(mfvVirtualMachine** vm, const mfvVirtualMachineDesc* desc, void* allocator);
@@ -58,6 +61,10 @@ extern "C"
 	mfError mfvVirtualMachinePop16(mfvVirtualMachine* vm, void* value);
 
 	mfError mfvVirtualMachinePop32(mfvVirtualMachine* vm, void* value);
+
+	mfError mfvVirtualMachineGetWarning(mfvVirtualMachine* vm, const mfsUTF8CodeUnit** msg);
+
+	mfError mfvVirtualMachineGetError(mfvVirtualMachine* vm, const mfsUTF8CodeUnit** msg);
 
 #ifdef __cplusplus
 }

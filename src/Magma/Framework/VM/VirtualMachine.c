@@ -22,6 +22,8 @@ struct mfvVirtualMachine
 	mfmU8* registers8;
 	mfmU16* registers16;
 	mfmU32* registers32;
+	mfsUTF8CodeUnit warningMessage[256];
+	mfsUTF8CodeUnit errorMessage[256];
 };
 
 mfError mfvCreateVirtualMachine(mfvVirtualMachine ** vm, const mfvVirtualMachineDesc * desc, void * allocator)
@@ -64,6 +66,8 @@ mfError mfvCreateVirtualMachine(mfvVirtualMachine ** vm, const mfvVirtualMachine
 		desc->functionTableSize * sizeof(mfvVirtualMachineFunction);
 	(*vm)->registers16 = (*vm)->registers32;
 	(*vm)->registers8 = (*vm)->registers32;
+	(*vm)->warningMessage[0] = '\0';
+	(*vm)->errorMessage[0] = '\0';
 
 	for (mfmU64 i = 0; i < desc->functionTableSize; ++i)
 		(*vm)->functionTable[i] = NULL;
@@ -1185,6 +1189,39 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 			}
 		}
 
+		// Special instructions
+		{
+			case MFV_BYTECODE_THROW_WARNING:
+			{
+				vm->ip += 1;
+				for (mfmU64 i = 0; i < 254; ++i)
+				{
+					err = mfvVirtualMachinePop8(vm, &vm->warningMessage[i]);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					if (vm->warningMessage[i] == '\0')
+						break;
+				}
+				vm->warningMessage[255] = '\0';
+				break;
+			}
+
+			case MFV_BYTECODE_THROW_ERROR:
+			{
+				vm->ip = 0;
+				for (mfmU64 i = 0; i < 254; ++i)
+				{
+					err = mfvVirtualMachinePop8(vm, &vm->errorMessage[i]);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					if (vm->errorMessage[i] == '\0')
+						break;
+				}
+				vm->errorMessage[255] = '\0';
+				return MFV_ERROR_ERROR_THROWN;
+			}
+		}
+
 		default:
 			return MFV_ERROR_INVALID_INSTRUCTION;
 	}
@@ -1333,5 +1370,27 @@ mfError mfvVirtualMachinePop32(mfvVirtualMachine * vm, void * value)
 		return MFV_ERROR_STACK_UNDERFLOW;
 	memcpy(value, vm->stack + vm->stackHead - 4, 4);
 	vm->stackHead -= 4;
+	return MF_ERROR_OKAY;
+}
+
+mfError mfvVirtualMachineGetWarning(mfvVirtualMachine * vm, const mfsUTF8CodeUnit ** msg)
+{
+	if (vm == NULL || msg == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+	if (vm->warningMessage[0] = '\0')
+		*msg = u8"[No warning message]";
+	else
+		*msg = &vm->warningMessage[0];
+	return MF_ERROR_OKAY;
+}
+
+mfError mfvVirtualMachineGetError(mfvVirtualMachine * vm, const mfsUTF8CodeUnit ** msg)
+{
+	if (vm == NULL || msg == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+	if (vm->errorMessage[0] == '\0')
+		*msg = u8"[No error message]";
+	else
+		*msg = &vm->errorMessage[0];
 	return MF_ERROR_OKAY;
 }
