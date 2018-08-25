@@ -5,6 +5,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 struct mfvVirtualMachine
 {
@@ -546,7 +547,7 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 				err = mfvVirtualMachinePop32(vm, &val2);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				mfmI16 val = val1 - val2;
+				mfmI32 val = val1 - val2;
 				err = mfvVirtualMachinePush32(vm, &val);
 				if (err != MF_ERROR_OKAY)
 					return err;
@@ -692,6 +693,146 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 					return err;
 				mfmU32 val = val1 % val2;
 				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+		}
+
+
+		// 32 bit floating point operations
+		{
+			case MFV_BYTECODE_ADDF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 val = val1 + val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_SUBF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 val = val1 - val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MULF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 val = val1 * val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_DIVF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 val = val1 / val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MODF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 val = fmodf(val1, val2);
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_FLOORF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val;
+				err = mfvVirtualMachinePop32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 ret = floorf(val);
+				err = mfvVirtualMachinePush32(vm, &ret);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_CEILF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val;
+				err = mfvVirtualMachinePop32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 ret = ceilf(val);
+				err = mfvVirtualMachinePush32(vm, &ret);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_FRACTF32:
+			{
+				vm->ip += 1;
+
+				mfmF32 val;
+				err = mfvVirtualMachinePop32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmF32 temp;
+				mfmF32 ret = modff(val, &temp);
+				err = mfvVirtualMachinePush32(vm, &ret);
 				if (err != MF_ERROR_OKAY)
 					return err;
 				break;
