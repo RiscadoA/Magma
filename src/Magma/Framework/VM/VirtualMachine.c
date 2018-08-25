@@ -515,6 +515,189 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 			}
 		}
 
+		// 32 bit operations
+		{
+			case MFV_BYTECODE_ADDS32:
+			{
+				vm->ip += 1;
+
+				mfmI32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI32 val = val1 + val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_SUBS32:
+			{
+				vm->ip += 1;
+
+				mfmI32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI16 val = val1 - val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MULS32:
+			{
+				vm->ip += 1;
+
+				mfmI32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI32 val = val1 * val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_DIVS32:
+			{
+				vm->ip += 1;
+
+				mfmI32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI32 val = val1 / val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MODS32:
+			{
+				vm->ip += 1;
+
+				mfmI32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmI32 val = val1 % val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_ADDU32:
+			{
+				vm->ip += 1;
+
+				mfmU32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU32 val = val1 + val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_SUBU32:
+			{
+				vm->ip += 1;
+
+				mfmU32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU32 val = val1 - val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MULU32:
+			{
+				vm->ip += 1;
+
+				mfmU32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU32 val = val1 * val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_DIVU32:
+			{
+				vm->ip += 1;
+
+				mfmU32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU32 val = val1 / val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_MODU32:
+			{
+				vm->ip += 1;
+
+				mfmU32 val1, val2;
+				err = mfvVirtualMachinePop32(vm, &val1);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfvVirtualMachinePop32(vm, &val2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU32 val = val1 % val2;
+				err = mfvVirtualMachinePush32(vm, &val);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+		}
+
 		case MFV_BYTECODE_END:
 		{
 			vm->ip = 0;
