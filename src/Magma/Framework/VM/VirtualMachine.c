@@ -847,6 +847,49 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 			break;
 		}
 
+		case MFV_BYTECODE_YIELD:
+		{
+			vm->ip += 1;
+			if (state != NULL)
+				*state = MFV_STATE_UNFINISHED;
+			break;
+		}
+
+		case MFV_BYTECODE_CALL:
+		{
+			mfvInstructionPointer ip = 0;
+			err = mfvVirtualMachinePop32(vm, &ip);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			vm->ip += 1;
+			if (vm->callStackHead >= vm->desc.callStackSize)
+				return MFV_ERROR_CALL_STACK_OVERFLOW;
+			vm->callStack[vm->callStackHead] = vm->ip;
+			++vm->callStackHead;
+			vm->ip = ip;
+			break;
+		}
+
+		case MFV_BYTECODE_RETURN:
+		{
+			vm->ip += 1;
+			if (vm->callStackHead == 0)
+				return MFV_ERROR_CALL_STACK_UNDERFLOW;
+			--vm->callStackHead;
+			vm->ip = vm->callStack[vm->callStackHead];
+			break;
+		}
+
+		case MFV_BYTECODE_JUMP:
+		{
+			mfvInstructionPointer ip = 0;
+			err = mfvVirtualMachinePop32(vm, &ip);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			vm->ip = ip;
+			break;
+		}
+
 		case MFV_BYTECODE_CALL_BUILTIN:
 		{
 			vm->ip += 1;

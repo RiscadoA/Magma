@@ -22,7 +22,7 @@ extern "C"
 	typedef struct mfvVirtualMachine mfvVirtualMachine;
 
 	typedef mfError(*mfvVirtualMachineFunction)(mfvVirtualMachine *);
-	typedef mfmU64 mfvInstructionPointer;
+	typedef mfmU32 mfvInstructionPointer;
 	typedef mfmU32 mfvVirtualMachineState;
 
 	typedef struct
