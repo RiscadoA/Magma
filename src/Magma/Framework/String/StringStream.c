@@ -4,14 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct
-{
-	mfsStream base;
-	void* allocator;
-	mfmU64 writeHead;
-	mfmU64 readHead;
-} mfsStringStream;
-
 mfError mfsStringStreamRead(void* stream, mfmU8* data, mfmU64 size, mfmU64* readSize)
 {
 	if (stream == NULL || data == NULL)
@@ -143,6 +135,40 @@ void mfsDestroyStringStream(mfsStream * stream)
 	if (mfmDestroyObject(&str->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(str->allocator, str) != MF_ERROR_OKAY)
+		abort();
+}
+
+mfError mfsCreateLocalStringStream(mfsStringStream * stream, mfmU8 * buffer, mfmU64 size)
+{
+	{
+		mfError err = mfmInitObject(&stream->base.object);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	stream->base.object.destructorFunc = &mfsDestroyLocalStringStream;
+
+	stream->base.buffer = buffer;
+	stream->base.bufferSize = size;
+	memset(buffer, 0, size);
+
+	stream->base.read = &mfsStringStreamRead;
+	stream->base.write = &mfsStringStreamWrite;
+	stream->base.flush = &mfsStringStreamFlush;
+	stream->base.setBuffer = &mfsStringStreamSetBuffer;
+
+	stream->allocator = NULL;
+	stream->writeHead = 0;
+	stream->readHead = 0;
+
+	return MF_ERROR_OKAY;
+}
+
+void mfsDestroyLocalStringStream(mfsStringStream * stream)
+{
+	if (stream == NULL)
+		abort();
+	if (mfmDestroyObject(&stream->base.object) != MF_ERROR_OKAY)
 		abort();
 }
 
