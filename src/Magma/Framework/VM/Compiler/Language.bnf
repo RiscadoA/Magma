@@ -1,0 +1,31 @@
+;	Example:
+;
+;	void entry()
+;	{
+;		Magma.Print("test\n");
+;		end;
+;	} 
+
+
+<program> ::= { <function> }
+<function> ::= <type> <id> "(" [ <type> <id> { "," <type> <id> } ] ")" "{" <compound-statement> "}"
+
+<block-item> ::= <statement>
+
+<statement> ::= <expression-statement>
+			  | <jump-statement>
+			  | <compound-statement>
+			  | <throw-statement>
+			  | ";"
+
+<expression-statement> ::= <expression> ";"
+
+<jump-statement> ::= "end" ";"
+				   | "return" [ <expression> ] ";"
+				   | "yield" ";"
+
+<compound-statement> ::= "{" { <statement> } "}"
+
+<throw-statement> ::= "throw" ( "warning" | "error" ) ";"
+
+<type> ::= ( "void" | "I8" | "I16" | "I32" | "U8" | "U16" | "U32" | "F32" | <id> )
