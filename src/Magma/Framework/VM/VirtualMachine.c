@@ -1087,6 +1087,102 @@ mfError mfvStepVirtualMachine(mfvVirtualMachine * vm, mfvVirtualMachineState* st
 					return err;
 				break;
 			}
+
+			case MFV_BYTECODE_STORES8:
+			{
+				vm->ip += 1;
+				mfmU32 id;
+				err = mfvVirtualMachinePop32(vm, &id);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU8 value;
+				err = mfvVirtualMachinePop8(vm, &value);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount * 4)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				vm->registers8[id] = value;
+				break;
+			}
+
+			case MFV_BYTECODE_STORES16:
+			{
+				vm->ip += 1;
+				mfmU32 id;
+				err = mfvVirtualMachinePop32(vm, &id);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU16 value;
+				err = mfvVirtualMachinePop16(vm, &value);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount * 2)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				vm->registers16[id] = value;
+				break;
+			}
+
+			case MFV_BYTECODE_STORES32:
+			{
+				vm->ip += 1;
+				mfmU32 id;
+				err = mfvVirtualMachinePop32(vm, &id);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfmU32 value;
+				err = mfvVirtualMachinePop32(vm, &value);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				vm->registers32[id] = value;
+				break;
+			}
+
+			case MFV_BYTECODE_LOADS8:
+			{
+				vm->ip += 1;
+				mfmU32 id;
+				err = mfvVirtualMachinePop32(vm, &id);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount * 4)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				err = mfvVirtualMachinePush8(vm, &vm->registers8[id]);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_LOADS16:
+			{
+				vm->ip += 1;
+				mfmU32 id;
+				err = mfvVirtualMachinePop32(vm, &id);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount * 2)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				err = mfvVirtualMachinePush16(vm, &vm->registers16[id]);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
+
+			case MFV_BYTECODE_LOADS32:
+			{
+				vm->ip += 1;
+				mfmU32 id;
+				err = mfvVirtualMachinePop32(vm, &id);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (id >= vm->desc.registerCount)
+					return MFV_ERROR_REGISTER_OUT_OF_BOUNDS;
+				err = mfvVirtualMachinePush32(vm, &vm->registers32[id]);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				break;
+			}
 		}
 
 		default:
