@@ -4,16 +4,16 @@
 
 #include <stdlib.h>
 
-mfError PrintS8(mfvVirtualMachine* vm)
+mfError PrintU8(mfvVirtualMachine* vm)
 {
 	mfError err = MF_ERROR_OKAY;
-	mfmI8 val;
+	mfmU8 val;
 
 	err = mfvVirtualMachinePop8(vm, &val);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	err = mfsPrintFormatUTF8(mfsOutStream, u8"(PrintS8): %d\n", val);
+	err = mfsPrintFormatUTF8(mfsOutStream, u8"(PrintU8): %d\n", val);
 	return err;
 }
 
@@ -34,16 +34,16 @@ int main(int argc, const char** argv)
 
 	mfmU8 code[] =
 	{
-		MFV_BYTECODE_PUSH8, 7,
-		MFV_BYTECODE_PUSH8, 5,
-		MFV_BYTECODE_ADDS8,
+		MFV_BYTECODE_PUSH8, 55U,
+		MFV_BYTECODE_PUSH8, 200U,
+		MFV_BYTECODE_SUBU8,
 		MFV_BYTECODE_PUSH16, 0x00, 0x01,
 		MFV_BYTECODE_CALL_BUILTIN,
 		MFV_BYTECODE_END,
 	};
 
 	
-	if (mfvSetVirtualMachineFunction(vm, 0x0001, &PrintS8) != MF_ERROR_OKAY)
+	if (mfvSetVirtualMachineFunction(vm, 0x0001, &PrintU8) != MF_ERROR_OKAY)
 		abort();
 	if (mfvSetVirtualMachineCode(vm, 0, code) != MF_ERROR_OKAY)
 		abort();
