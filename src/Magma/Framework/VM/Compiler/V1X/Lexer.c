@@ -66,6 +66,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 	mfError err = MF_ERROR_OKAY;
 
 	mfvV1XToken tok;
+	tok.info = NULL;
 	tok.attribute[0] = '\0';
 
 	mfmU64 attrIt = 0;

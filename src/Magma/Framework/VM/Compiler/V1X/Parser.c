@@ -1,6 +1,8 @@
 #include "Parser.h"
 #include "../../../String/StringStream.h"
 
+#include <string.h>
+
 typedef struct
 {
 	mfvV1XLexerState* state;
@@ -68,7 +70,7 @@ static mfError mfvExpectTokenType(mfvV1XParserInternalState* state, const mfvV1X
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvExpectTokenType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", state->it->info->type, info->name);
+		mfsPrintFormatUTF8(&ss, u8"[mfvExpectTokenType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_UNEXPECTED_EOF;
 	}
@@ -89,12 +91,41 @@ static mfError mfvExpectTokenType(mfvV1XParserInternalState* state, const mfvV1X
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfvExpectType(mfvV1XParserInternalState* state, const mfvV1XToken** out)
+{
+	if (state == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+	if (state->it > state->lastToken)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfvExpectType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected type");
+		mfsDestroyLocalStringStream(&ss);
+		return MFV_ERROR_UNEXPECTED_EOF;
+	}
+
+	if (state->it->info->isType == MFM_FALSE)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfvExpectType : MFV_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected type", state->it->info->name);
+		mfsDestroyLocalStringStream(&ss);
+		return MFV_ERROR_UNEXPECTED_TOKEN;
+	}
+
+	if (out != NULL)
+		*out = state->it;
+	++state->it;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfvPeekToken(mfvV1XParserInternalState* state, const mfvV1XToken** out)
 {
 	if (state == NULL || out == NULL)
 		return MFV_ERROR_INVALID_ARGUMENTS;
 	if (state->it > state->lastToken)
-		*out == NULL;
+		*out = NULL;
 	else
 		*out = state->it;
 	return MF_ERROR_OKAY;
@@ -119,6 +150,52 @@ static mfError mfvParseFunction(mfvV1XParserInternalState* state, mfvV1XNode** o
 	err = mfvV1XGetNode(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
+	(*outNode)->info = &MFV_V1X_TINFO_FUNCTION;
+
+	// Get function type
+	{
+		mfvV1XToken* tok;
+		err = mfvExpectType(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfvV1XNode* node;
+		err = mfvV1XGetNode(state, &node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		node->info = tok->info;
+		strcpy(node->attribute, tok->attribute);
+		err = mfvAddToNode(*outNode, node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	
+	// Set function name
+	{
+		mfvV1XToken* tok;
+		err = mfvExpectTokenType(state, &MFV_V1X_TINFO_IDENTIFIER, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfvV1XNode* node;
+		err = mfvV1XGetNode(state, &node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		node->info = tok->info;
+		strcpy(node->attribute, tok->attribute);
+		err = mfvAddToNode(*outNode, node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	// Get params
+	{
+		err = mfvExpectTokenType(state, &MFV_V1X_TINFO_OPEN_PARENTHESIS, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		err = mfvExpectTokenType(state, &MFV_V1X_TINFO_CLOSE_PARENTHESIS, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
 
 	return MF_ERROR_OKAY;
 }
@@ -137,7 +214,7 @@ static mfError mfvParseProgram(mfvV1XParserInternalState* state)
 	root->info = NULL; // Root has no type
 
 	// Parse program
-	mfvV1XNode* node;
+	mfvV1XNode* node = NULL;
 	for (;;)
 	{
 		err = mfvPeekToken(state, &node);
@@ -146,7 +223,7 @@ static mfError mfvParseProgram(mfvV1XParserInternalState* state)
 		if (node == NULL)
 			break;
 
-		// Check if function
+		// Check if it is a function
 		if (node->info->isType == MFM_TRUE)
 		{
 			err = mfvParseFunction(state, &node);
@@ -171,7 +248,7 @@ mfError mfvV1XRunMVLParser(const mfvV1XToken * tokens, mfvV1XNode * nodeArray, m
 	mfvV1XParserInternalState internalState;
 	internalState.state = state;
 	internalState.it = tokens;
-	internalState.lastToken = tokens + lexerState->tokenCount;
+	internalState.lastToken = tokens + lexerState->tokenCount - 1;
 	internalState.nodes = nodeArray;
 	internalState.maxNodeCount = maxNodeCount;
 	internalState.state = state;
@@ -214,7 +291,7 @@ mfError mfvV1XPrintNode(mfsStream * stream, mfvV1XNode * node, mfmU64 indentatio
 	{
 		if (node->attribute[0] == '\0')
 		{
-			err = mfsPrintFormatUTF8(stream, u8"- '%s'\n", node->attribute);
+			err = mfsPrintFormatUTF8(stream, u8"- '%s'\n", node->info->name);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
