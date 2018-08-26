@@ -9,7 +9,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	const mfsUTF8CodeUnit* src = u8";><<>=<!!..}}{}()][[];::::,,";
+	const mfsUTF8CodeUnit* src = u8"93.92+***--+!492";
 
 	mfvV1XToken tokens[2048];
 	mfvV1XLexerState state;
@@ -20,7 +20,12 @@ int main(int argc, const char** argv)
 	}
 
 	for (mfmU64 i = 0; i < state.tokenCount; ++i)
-		mfsPrintFormatUTF8(mfsOutStream, u8"'%s'\n", tokens[i].info->name);
+	{
+		if (tokens[i].attribute[0] != '\0')
+			mfsPrintFormatUTF8(mfsOutStream, u8"'%s' \"%s\"\n", tokens[i].info->name, tokens[i].attribute);
+		else
+			mfsPrintFormatUTF8(mfsOutStream, u8"'%s'\n", tokens[i].info->name);
+	}
 
 	mfTerminate();
 
