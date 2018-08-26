@@ -156,7 +156,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 	SINGLE_CHAR_TOK(',', MFV_V1X_TINFO_COMMA)
 
 	// Float literal
-	if (mfvV1XIsNumeric(*state->it) == MFM_TRUE && *state->it != '0')
+	if (mfvV1XIsNumeric(*state->it) == MFM_TRUE)
 	{
 		mfmBool foundDot = MFM_FALSE;
 		attrIt = 0;
@@ -204,7 +204,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 	}
 
 	// Integer literal
-	if (mfvV1XIsNumeric(*state->it) == MFM_TRUE && *state->it != '0')
+	if (mfvV1XIsNumeric(*state->it) == MFM_TRUE)
 	{
 		attrIt = 0;
 		while (1)
