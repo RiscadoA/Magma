@@ -106,8 +106,26 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 	}
 
 	// Keywords
+	KEYWORD_TOK(u8"void", MFV_V1X_TINFO_VOID)
+	KEYWORD_TOK(u8"i8", MFV_V1X_TINFO_I8)
+	KEYWORD_TOK(u8"i16", MFV_V1X_TINFO_I16)
+	KEYWORD_TOK(u8"i32", MFV_V1X_TINFO_I32)
+	KEYWORD_TOK(u8"u8", MFV_V1X_TINFO_U8)
+	KEYWORD_TOK(u8"u16", MFV_V1X_TINFO_U16)
+	KEYWORD_TOK(u8"u32", MFV_V1X_TINFO_U32)
+	KEYWORD_TOK(u8"f32", MFV_V1X_TINFO_F32)
+	KEYWORD_TOK(u8"bool", MFV_V1X_TINFO_BOOL)
 	KEYWORD_TOK(u8"if", MFV_V1X_TINFO_IF)
 	KEYWORD_TOK(u8"else", MFV_V1X_TINFO_ELSE)
+	KEYWORD_TOK(u8"while", MFV_V1X_TINFO_WHILE)
+	KEYWORD_TOK(u8"for", MFV_V1X_TINFO_FOR)
+	KEYWORD_TOK(u8"return", MFV_V1X_TINFO_RETURN)
+	KEYWORD_TOK(u8"end", MFV_V1X_TINFO_END)
+	KEYWORD_TOK(u8"throw", MFV_V1X_TINFO_THROW)
+	KEYWORD_TOK(u8"true", MFV_V1X_TINFO_TRUE)
+	KEYWORD_TOK(u8"false", MFV_V1X_TINFO_FALSE)
+	KEYWORD_TOK(u8"warning", MFV_V1X_TINFO_WARNING)
+	KEYWORD_TOK(u8"error", MFV_V1X_TINFO_ERROR)
 
 	// Operators
 	SINGLE_CHAR_TOK('+', MFV_V1X_TINFO_ADD)
@@ -255,6 +273,48 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
 					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Identifier token is too big:\n\"(%s)\"", state->it);
+					mfsDestroyLocalStringStream(&ss);
+					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
+				}
+			}
+		}
+
+		tok.attribute[0] = '\0';
+	}
+
+	// String literal
+	if (*state->it == '"')
+	{
+		attrIt = 1;
+		while (1)
+		{
+			tok.attribute[attrIt - 1] = state->it[attrIt];
+			++attrIt;
+			if (state->it[attrIt] == '"')
+			{
+				tok.attribute[attrIt - 1] = '\0';
+				tok.info = &MFV_V1X_TINFO_STRING_LITERAL;
+				err = mfvV1XPutToken(state, &tok);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				state->it += attrIt + 1;
+				return MF_ERROR_OKAY;
+			}
+			else if (state->it[attrIt] == '\n')
+				break;
+			else if (state->it[attrIt] == '\\')
+			{
+				++attrIt;
+				tok.attribute[attrIt] = state->it[attrIt];
+				++attrIt;
+			}
+			else
+			{
+				if (attrIt >= MFV_TOKEN_ATTRIBUTE_SIZE - 1)
+				{
+					mfsStringStream ss;
+					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] String literal token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
 				}

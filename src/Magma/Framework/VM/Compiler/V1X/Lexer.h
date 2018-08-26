@@ -38,19 +38,21 @@ extern "C"
 #define MFV_V1X_TOKEN_VOID										0x0000
 static const mfvV1XTokenInfo MFV_V1X_TINFO_VOID					= { MFV_V1X_TOKEN_VOID, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"void" };
 #define MFV_V1X_TOKEN_I8										0x0001
-static const mfvV1XTokenInfo MFV_V1X_TINFO_I8					= { MFV_V1X_TOKEN_I8, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"I8" };
+static const mfvV1XTokenInfo MFV_V1X_TINFO_I8					= { MFV_V1X_TOKEN_I8, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"i8" };
 #define MFV_V1X_TOKEN_I16										0x0002
-static const mfvV1XTokenInfo MFV_V1X_TINFO_I16					= { MFV_V1X_TOKEN_I16, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"I16" };
+static const mfvV1XTokenInfo MFV_V1X_TINFO_I16					= { MFV_V1X_TOKEN_I16, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"i16" };
 #define MFV_V1X_TOKEN_I32										0x0003
-static const mfvV1XTokenInfo MFV_V1X_TINFO_I32					= { MFV_V1X_TOKEN_I32, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"I32" };
+static const mfvV1XTokenInfo MFV_V1X_TINFO_I32					= { MFV_V1X_TOKEN_I32, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"i32" };
 #define MFV_V1X_TOKEN_U8										0x0004
-static const mfvV1XTokenInfo MFV_V1X_TINFO_U8					= { MFV_V1X_TOKEN_U8, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"U8" };
+static const mfvV1XTokenInfo MFV_V1X_TINFO_U8					= { MFV_V1X_TOKEN_U8, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"u8" };
 #define MFV_V1X_TOKEN_U16										0x0005
-static const mfvV1XTokenInfo MFV_V1X_TINFO_U16					= { MFV_V1X_TOKEN_U16, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"U16" };
+static const mfvV1XTokenInfo MFV_V1X_TINFO_U16					= { MFV_V1X_TOKEN_U16, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"u16" };
 #define MFV_V1X_TOKEN_U32										0x0006
-static const mfvV1XTokenInfo MFV_V1X_TINFO_U32					= { MFV_V1X_TOKEN_U32, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"U32" };
+static const mfvV1XTokenInfo MFV_V1X_TINFO_U32					= { MFV_V1X_TOKEN_U32, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"u32" };
 #define MFV_V1X_TOKEN_F32										0x0007
-static const mfvV1XTokenInfo MFV_V1X_TINFO_F32					= { MFV_V1X_TOKEN_F32, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"F32" };
+static const mfvV1XTokenInfo MFV_V1X_TINFO_F32					= { MFV_V1X_TOKEN_F32, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"f32" };
+#define MFV_V1X_TOKEN_BOOL										0x0008
+static const mfvV1XTokenInfo MFV_V1X_TINFO_BOOL					= { MFV_V1X_TOKEN_BOOL, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"bool" };
 
 #define MFV_V1X_TOKEN_INT_LITERAL								0x0010
 static const mfvV1XTokenInfo MFV_V1X_TINFO_INT_LITERAL			= { MFV_V1X_TOKEN_INT_LITERAL, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"int-literal" };
@@ -72,6 +74,16 @@ static const mfvV1XTokenInfo MFV_V1X_TINFO_RETURN				= { MFV_V1X_TOKEN_RETURN, M
 static const mfvV1XTokenInfo MFV_V1X_TINFO_END					= { MFV_V1X_TOKEN_END, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"end" };
 #define MFV_V1X_TOKEN_THROW										0x0019
 static const mfvV1XTokenInfo MFV_V1X_TINFO_THROW				= { MFV_V1X_TOKEN_THROW, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"throw" };
+#define MFV_V1X_TOKEN_TRUE										0x001A
+static const mfvV1XTokenInfo MFV_V1X_TINFO_TRUE					= { MFV_V1X_TOKEN_TRUE, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"true" };
+#define MFV_V1X_TOKEN_FALSE										0x001B
+static const mfvV1XTokenInfo MFV_V1X_TINFO_FALSE				= { MFV_V1X_TOKEN_FALSE, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"false" };
+#define MFV_V1X_TOKEN_STRING_LITERAL							0x001C
+static const mfvV1XTokenInfo MFV_V1X_TINFO_STRING_LITERAL		= { MFV_V1X_TOKEN_STRING_LITERAL, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"string-literal" };
+#define MFV_V1X_TOKEN_WARNING									0x001D
+static const mfvV1XTokenInfo MFV_V1X_TINFO_WARNING				= { MFV_V1X_TOKEN_WARNING, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"warning" };
+#define MFV_V1X_TOKEN_ERROR										0x001E
+static const mfvV1XTokenInfo MFV_V1X_TINFO_ERROR				= { MFV_V1X_TOKEN_ERROR, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"error" };
 
 #define MFV_V1X_TOKEN_ADD										0x0030
 static const mfvV1XTokenInfo MFV_V1X_TINFO_ADD					= { MFV_V1X_TOKEN_ADD, MFM_FALSE, MFM_TRUE, MFM_FALSE, u8"add" };
