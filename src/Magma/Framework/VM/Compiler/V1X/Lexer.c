@@ -150,7 +150,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Int literal token is too big:\n\"(%s)\"", state->it);
+					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Float literal token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
 				}
@@ -189,6 +189,47 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
 					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Int literal token is too big:\n\"(%s)\"", state->it);
+					mfsDestroyLocalStringStream(&ss);
+					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
+				}
+			}
+		}
+
+		tok.attribute[0] = '\0';
+	}
+
+	// Identifier
+	if (mfvV1XIsAlpha(*state->it) == MFM_TRUE || *state->it == '_')
+	{
+		attrIt = 0;
+		while (1)
+		{
+			tok.attribute[attrIt] = state->it[attrIt];
+			++attrIt;
+			if (mfvV1XIsWhiteSpace(state->it[attrIt]) == MFM_TRUE ||
+				(mfvV1XIsNumeric(state->it[attrIt]) == MFM_FALSE &&
+				 mfvV1XIsAlpha(state->it[attrIt]) == MFM_FALSE &&
+				 *state->it != '_'))
+			{
+				tok.attribute[attrIt] = '\0';
+				tok.info = &MFV_V1X_TINFO_IDENTIFIER;
+				err = mfvV1XPutToken(state, &tok);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				state->it += attrIt;
+				return MF_ERROR_OKAY;
+			}
+			else if (mfvV1XIsAlpha(state->it[attrIt]) == MFM_FALSE &&
+					 mfvV1XIsNumeric(state->it[attrIt]) == MFM_FALSE &&
+					 *state->it != '_')
+				break;
+			else
+			{
+				if (attrIt >= MFV_TOKEN_ATTRIBUTE_SIZE - 1)
+				{
+					mfsStringStream ss;
+					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Identifier token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
 				}
