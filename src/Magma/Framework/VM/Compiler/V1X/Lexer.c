@@ -62,15 +62,39 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 {
 	if (state == NULL)
 		return MFV_ERROR_INVALID_ARGUMENTS;
+
 	mfError err = MF_ERROR_OKAY;
+
 	mfvV1XToken tok;
 	tok.attribute[0] = '\0';
+
+	mfmU64 attrIt = 0;
 
 #define SINGLE_CHAR_TOK(chr, tokInfo) else if (*state->it == chr) { tok.info = &tokInfo; err = mfvV1XPutToken(state, &tok); if (err != MF_ERROR_OKAY) return err; ++state->it; return MF_ERROR_OKAY; }
 
 #define MULTI_CHAR_2_TOK(chr, tokInfo) else if (state->it[0] == chr[0] && state->it[1] == chr[1]) { tok.info = &tokInfo; err = mfvV1XPutToken(state, &tok); if (err != MF_ERROR_OKAY) return err; state->it += 2; return MF_ERROR_OKAY; }
 
-	mfmU64 attrIt = 0;
+#define KEYWORD_TOK(str, tokInfo) if (state->it[0] == str[0]) { \
+		attrIt = 0;\
+		while (1)\
+		{\
+			if (str[attrIt] == '\0')\
+			{\
+				if (mfvV1XIsAlpha(state->it[attrIt]) == MFM_TRUE ||\
+					mfvV1XIsNumeric(state->it[attrIt]) == MFM_TRUE)\
+					break;\
+				tok.info = &tokInfo;\
+				err = mfvV1XPutToken(state, &tok);\
+				if (err != MF_ERROR_OKAY)\
+					return err;\
+				state->it += attrIt;\
+				return MF_ERROR_OKAY;\
+			}\
+			else if (state->it[attrIt] != str[attrIt])\
+				break;\
+			++attrIt;\
+		}\
+	}
 
 	if (mfvV1XIsWhiteSpace(*state->it) == MFM_TRUE)
 	{
@@ -82,7 +106,8 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 	}
 
 	// Keywords
-	MULTI_CHAR_2_TOK("if", MFV_V1X_TINFO_IF)
+	KEYWORD_TOK(u8"if", MFV_V1X_TINFO_IF)
+	KEYWORD_TOK(u8"else", MFV_V1X_TINFO_ELSE)
 
 	// Operators
 	SINGLE_CHAR_TOK('+', MFV_V1X_TINFO_ADD)
@@ -250,6 +275,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 
 #undef SINGLE_CHAR_TOK
 #undef MULTI_CHAR_2_TOK
+#undef KEYWORD_TOK
 }
 
 mfError mfvV1XRunMVLLexer(const mfsUTF8CodeUnit * source, mfvV1XToken * tokens, mfmU64 maxTokenCount, mfvV1XLexerState * state)

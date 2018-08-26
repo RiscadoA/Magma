@@ -9,7 +9,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	const mfsUTF8CodeUnit* src = u8"_test_2_23 = 93;";
+	const mfsUTF8CodeUnit* src = u8"if,else;;elseif = 93;";
 
 	mfvV1XToken tokens[2048];
 	mfvV1XLexerState state;
