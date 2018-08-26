@@ -120,6 +120,33 @@ static mfError mfvExpectType(mfvV1XParserInternalState* state, const mfvV1XToken
 	return MF_ERROR_OKAY;
 }
 
+static mfmBool mfvAcceptTokenType(mfvV1XParserInternalState* state, const mfvV1XTokenInfo* info, const mfvV1XToken** out)
+{
+	if (state == NULL)
+		return MFM_FALSE;
+	if (state->it > state->lastToken)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfvAcceptTokenType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
+		mfsDestroyLocalStringStream(&ss);
+		return MFM_FALSE;
+	}
+
+	if (state->it->info->type != info->type)
+	{
+		if (out != NULL)
+			*out = NULL;
+		return MFM_FALSE;
+	}
+
+	if (out != NULL)
+		*out = state->it;
+	++state->it;
+
+	return MFM_TRUE;
+}
+
 static mfError mfvPeekToken(mfvV1XParserInternalState* state, const mfvV1XToken** out)
 {
 	if (state == NULL || out == NULL)
@@ -138,6 +165,28 @@ static mfError mfvNextToken(mfvV1XParserInternalState* state)
 	if (state->it > state->lastToken)
 		return MFV_ERROR_UNEXPECTED_EOF;
 	++state->it;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfvParseCompoundStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_OPEN_BRACES, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfvV1XGetNode(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	(*outNode)->info = &MFV_V1X_TINFO_COMPOUND_STATEMENT;
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_CLOSE_BRACES, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -192,7 +241,74 @@ static mfError mfvParseFunction(mfvV1XParserInternalState* state, mfvV1XNode** o
 		if (err != MF_ERROR_OKAY)
 			return err;
 
+		mfvV1XNode* params;
+		err = mfvV1XGetNode(state, &params);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		params->info = &MFV_V1X_TINFO_PARAMS_DECL;
+
+		// Get params
+		mfvV1XToken* tok;
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		while (tok->info->type != MFV_V1X_TOKEN_CLOSE_PARENTHESIS)
+		{
+			// Param node
+			mfvV1XNode* paramNode;
+			err = mfvV1XGetNode(state, &paramNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			// Get param type
+			err = mfvExpectType(state, &tok);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			paramNode->info = tok->info;
+
+			// Get param ID
+			err = mfvExpectTokenType(state, &MFV_V1X_TINFO_IDENTIFIER, &tok);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			// Param ID node
+			mfvV1XNode* idNode;
+			err = mfvV1XGetNode(state, &idNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			idNode->info = tok->info;
+			strcpy(idNode->attribute, tok->attribute);
+			err = mfvAddToNode(paramNode, idNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			// Add node to params
+			err = mfvAddToNode(params, paramNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			// Check if next token is comma
+			if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_COMMA, NULL) == MFM_FALSE)
+				break;
+		}
+
 		err = mfvExpectTokenType(state, &MFV_V1X_TINFO_CLOSE_PARENTHESIS, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		err = mfvAddToNode(*outNode, params);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	// Get function body
+	{
+		mfvV1XNode* node;
+		err = mfvParseCompoundStatement(state, &node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvAddToNode(*outNode, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -217,14 +333,16 @@ static mfError mfvParseProgram(mfvV1XParserInternalState* state)
 	mfvV1XNode* node = NULL;
 	for (;;)
 	{
-		err = mfvPeekToken(state, &node);
+		mfvV1XToken* tok;
+
+		err = mfvPeekToken(state, &tok);
 		if (err != MF_ERROR_OKAY)
 			return err;
-		if (node == NULL)
+		if (tok == NULL)
 			break;
 
 		// Check if it is a function
-		if (node->info->isType == MFM_TRUE)
+		if (tok->info->isType == MFM_TRUE)
 		{
 			err = mfvParseFunction(state, &node);
 			if (err != MF_ERROR_OKAY)

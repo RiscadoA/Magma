@@ -11,10 +11,10 @@ int main(int argc, const char** argv)
 		abort();
 
 	const mfsUTF8CodeUnit* src =
-		u8"void entry()\n"
-		//u8"{\n"
+		u8"void entry(i32 x, f32 y, u8 z)\n"
+		u8"{\n"
 		//u8"\ti32 i = 0;\n"
-		//u8"}"
+		u8"}"
 		;
 
 	mfvV1XToken tokens[2048];
