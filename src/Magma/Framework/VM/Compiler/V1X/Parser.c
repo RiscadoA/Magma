@@ -190,10 +190,23 @@ static mfError mfvParseOperatorLast(mfvV1XParserInternalState* state, mfvV1XNode
 		return MF_ERROR_OKAY;
 	}
 
-	// <int-literal> | <float-literal> | <string-literal>
+	// <id>
+	else if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_IDENTIFIER, &tok) == MFM_TRUE)
+	{
+		err = mfvV1XGetNode(state, outNode);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		(*outNode)->info = tok->info;
+		strcpy((*outNode)->attribute, tok->attribute);
+		return MF_ERROR_OKAY;
+	}
+
+	// <int-literal> | <float-literal> | <string-literal> | <true> | <bool>
 	else if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_INT_LITERAL, &tok) == MFM_TRUE ||
 			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_FLOAT_LITERAL, &tok) == MFM_TRUE ||
-			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_STRING_LITERAL, &tok) == MFM_TRUE)
+			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_STRING_LITERAL, &tok) == MFM_TRUE ||
+			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_TRUE, &tok) == MFM_TRUE ||
+			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_FALSE, &tok) == MFM_TRUE)
 	{
 		err = mfvV1XGetNode(state, outNode);
 		if (err != MF_ERROR_OKAY)
@@ -207,6 +220,415 @@ static mfError mfvParseOperatorLast(mfvV1XParserInternalState* state, mfvV1XNode
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfvParseOperator5(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	
+	mfvV1XToken* tok = NULL;
+
+	// <unary-op>
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_ADD, &tok) == MFM_TRUE ||
+		mfvAcceptTokenType(state, &MFV_V1X_TINFO_SUBTRACT, &tok) == MFM_TRUE ||
+		mfvAcceptTokenType(state, &MFV_V1X_TINFO_NOT, &tok) == MFM_TRUE)
+	{
+		// Create operator node
+		mfvV1XNode* op = NULL;
+		err = mfvV1XGetNode(state, &op);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		op->info = tok->info;
+
+		// Next token
+		err = mfvNextToken(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Parse term
+		mfvV1XNode* term;
+		err = mfvParseOperator5(state, &term);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (term == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator5] Failed to parse '%s' unary operator term", tok->info->name);
+			mfsDestroyLocalStringStream(&ss);
+			return MFV_ERROR_FAILED_TO_PARSE;
+		}
+
+		// Add term to operator node
+		err = mfvAddToNode(op, term);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		*outNode = term;
+		return MF_ERROR_OKAY;
+	}
+
+	// <member-op>
+	// Get first term
+	mfvV1XNode* term1 = NULL;
+	err = mfvParseOperatorLast(state, &term1);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (term1 == NULL)
+	{
+		// No first term, no expression
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	// Get terms
+	mfvV1XNode* term2 = NULL;
+	for (;;)
+	{
+		// Check operator token
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (tok == NULL ||
+			tok->info->type != MFV_V1X_TOKEN_MEMBER)
+			break;
+
+		// Create operator node
+		mfvV1XNode* op = NULL;
+		err = mfvV1XGetNode(state, &op);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		op->info = tok->info;
+
+		// Next token
+		err = mfvNextToken(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Parse second term
+		err = mfvParseOperatorLast(state, &term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (term2 == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator5] Failed to parse '%s' operator second term", tok->info->name);
+			mfsDestroyLocalStringStream(&ss);
+			return MFV_ERROR_FAILED_TO_PARSE;
+		}
+
+		// Add terms to operator node
+		err = mfvAddToNode(op, term1);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvAddToNode(op, term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		term1 = op;
+	}
+
+	*outNode = term1;
+	return MF_ERROR_OKAY;
+}
+
+
+static mfError mfvParseOperator4(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	// Get first term
+	mfvV1XNode* term1 = NULL;
+	err = mfvParseOperator5(state, &term1);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (term1 == NULL)
+	{
+		// No first term, no expression
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	// Get terms
+	mfvV1XNode* term2 = NULL;
+	mfvV1XToken* tok = NULL;
+	for (;;)
+	{
+		// Check operator token
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (tok == NULL || (
+			tok->info->type != MFV_V1X_TOKEN_ADD &&
+			tok->info->type != MFV_V1X_TOKEN_SUBTRACT))
+			break;
+
+		// Create operator node
+		mfvV1XNode* op = NULL;
+		err = mfvV1XGetNode(state, &op);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		op->info = tok->info;
+
+		// Next token
+		err = mfvNextToken(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Parse second term
+		err = mfvParseOperator5(state, &term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (term2 == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator4] Failed to parse '%s' operator second term", tok->info->name);
+			mfsDestroyLocalStringStream(&ss);
+			return MFV_ERROR_FAILED_TO_PARSE;
+		}
+
+		// Add terms to operator node
+		err = mfvAddToNode(op, term1);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvAddToNode(op, term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		term1 = op;
+	}
+
+	*outNode = term1;
+	return MF_ERROR_OKAY;
+}
+
+
+static mfError mfvParseOperator3(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	// Get first term
+	mfvV1XNode* term1 = NULL;
+	err = mfvParseOperator4(state, &term1);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (term1 == NULL)
+	{
+		// No first term, no expression
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	// Get terms
+	mfvV1XNode* term2 = NULL;
+	mfvV1XToken* tok = NULL;
+	for (;;)
+	{
+		// Check operator token
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (tok == NULL || (
+			tok->info->type != MFV_V1X_TOKEN_MULTIPLY &&
+			tok->info->type != MFV_V1X_TOKEN_DIVIDE))
+			break;
+
+		// Create operator node
+		mfvV1XNode* op = NULL;
+		err = mfvV1XGetNode(state, &op);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		op->info = tok->info;
+
+		// Next token
+		err = mfvNextToken(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Parse second term
+		err = mfvParseOperator4(state, &term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (term2 == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator3] Failed to parse '%s' operator second term", tok->info->name);
+			mfsDestroyLocalStringStream(&ss);
+			return MFV_ERROR_FAILED_TO_PARSE;
+		}
+
+		// Add terms to operator node
+		err = mfvAddToNode(op, term1);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvAddToNode(op, term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		term1 = op;
+	}
+
+	*outNode = term1;
+	return MF_ERROR_OKAY;
+}
+
+
+static mfError mfvParseOperator2(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	// Get first term
+	mfvV1XNode* term1 = NULL;
+	err = mfvParseOperator3(state, &term1);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (term1 == NULL)
+	{
+		// No first term, no expression
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	// Get terms
+	mfvV1XNode* term2 = NULL;
+	mfvV1XToken* tok = NULL;
+	for (;;)
+	{
+		// Check operator token
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (tok == NULL || (
+			tok->info->type != MFV_V1X_TOKEN_EQUAL &&
+			tok->info->type != MFV_V1X_TOKEN_DIFFERENT &&
+			tok->info->type != MFV_V1X_TOKEN_GREATER &&
+			tok->info->type != MFV_V1X_TOKEN_LESS &&
+			tok->info->type != MFV_V1X_TOKEN_GEQUAL &&
+			tok->info->type != MFV_V1X_TOKEN_LEQUAL))
+			break;
+
+		// Create operator node
+		mfvV1XNode* op = NULL;
+		err = mfvV1XGetNode(state, &op);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		op->info = tok->info;
+
+		// Next token
+		err = mfvNextToken(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Parse second term
+		err = mfvParseOperator3(state, &term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (term2 == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator2] Failed to parse '%s' operator second term", tok->info->name);
+			mfsDestroyLocalStringStream(&ss);
+			return MFV_ERROR_FAILED_TO_PARSE;
+		}
+
+		// Add terms to operator node
+		err = mfvAddToNode(op, term1);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvAddToNode(op, term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		term1 = op;
+	}
+
+	*outNode = term1;
+	return MF_ERROR_OKAY;
+}
+
+
+static mfError mfvParseOperator1(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	// Get first term
+	mfvV1XNode* term1 = NULL;
+	err = mfvParseOperator2(state, &term1);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (term1 == NULL)
+	{
+		// No first term, no expression
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	// Get terms
+	mfvV1XNode* term2 = NULL;
+	mfvV1XToken* tok = NULL;
+	for (;;)
+	{
+		// Check operator token
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (tok == NULL || (
+			tok->info->type != MFV_V1X_TOKEN_AND &&
+			tok->info->type != MFV_V1X_TOKEN_OR))
+			break;
+
+		// Create operator node
+		mfvV1XNode* op = NULL;
+		err = mfvV1XGetNode(state, &op);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		op->info = tok->info;
+
+		// Next token
+		err = mfvNextToken(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Parse second term
+		err = mfvParseOperator2(state, &term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (term2 == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
+			mfsDestroyLocalStringStream(&ss);
+			return MFV_ERROR_FAILED_TO_PARSE;
+		}
+
+		// Add terms to operator node
+		err = mfvAddToNode(op, term1);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvAddToNode(op, term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		term1 = op;
+	}
+
+	*outNode = term1;
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfvParseExpression(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
@@ -216,7 +638,7 @@ static mfError mfvParseExpression(mfvV1XParserInternalState* state, mfvV1XNode**
 
 	// Get first term
 	mfvV1XNode* term1 = NULL;
-	err = mfvParseOperatorLast(state, &term1);
+	err = mfvParseOperator1(state, &term1);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (term1 == NULL)
@@ -252,14 +674,14 @@ static mfError mfvParseExpression(mfvV1XParserInternalState* state, mfvV1XNode**
 			return err;
 
 		// Parse second term
-		err = mfvParseOperatorLast(state, &term2);
+		err = mfvParseOperator1(state, &term2);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		if (term2 == NULL)
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseExpression] Failed to parse assign operator second term");
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
