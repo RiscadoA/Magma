@@ -190,15 +190,86 @@ static mfError mfvParseOperatorLast(mfvV1XParserInternalState* state, mfvV1XNode
 		return MF_ERROR_OKAY;
 	}
 
-	// <id>
+	// <id> | <call>
 	else if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_IDENTIFIER, &tok) == MFM_TRUE)
 	{
-		err = mfvV1XGetNode(state, outNode);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		(*outNode)->info = tok->info;
-		strcpy((*outNode)->attribute, tok->attribute);
-		return MF_ERROR_OKAY;
+		// <call>
+		if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_OPEN_PARENTHESIS, NULL) == MFM_TRUE)
+		{
+			// Create identifier node
+			mfvV1XNode* idNode = NULL;
+			err = mfvV1XGetNode(state, &idNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			idNode->info = tok->info;
+			strcpy(idNode->attribute, tok->attribute);
+
+			// Create call node
+			err = mfvV1XGetNode(state, outNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			(*outNode)->info = &MFV_V1X_TINFO_CALL;
+			err = mfvAddToNode(*outNode, idNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			// Create call params node
+			mfvV1XNode* params = NULL;
+			err = mfvV1XGetNode(state, &params);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			params->info = &MFV_V1X_TINFO_CALL_PARAMS;
+			err = mfvAddToNode(*outNode, params);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			// Add params to call params node
+			mfvV1XNode* param = NULL;
+			if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_CLOSE_PARENTHESIS, NULL) == MFM_FALSE)
+			{
+				mfmU64 i = 0;
+				for (;;)
+				{
+					err = mfvParseExpression(state, &param);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					if (param == NULL)
+					{
+						mfsStringStream ss;
+						mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+						mfsPrintFormatUTF8(&ss, u8"[mfvParseOperatorLast] Failed to parse function call param %d", i);
+						mfsDestroyLocalStringStream(&ss);
+						return MFV_ERROR_FAILED_TO_PARSE;
+					}
+
+					err = mfvAddToNode(params, param);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_COMMA, NULL) == MFM_FALSE)
+						break;
+
+					++i;
+				}
+
+
+				err = mfvExpectTokenType(state, &MFV_V1X_TINFO_CLOSE_PARENTHESIS, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			
+			return MF_ERROR_OKAY;
+		}
+		// <id>
+		else
+		{
+			err = mfvV1XGetNode(state, outNode);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			(*outNode)->info = tok->info;
+			strcpy((*outNode)->attribute, tok->attribute);
+			return MF_ERROR_OKAY;
+		}
 	}
 
 	// <int-literal> | <float-literal> | <string-literal> | <true> | <bool>

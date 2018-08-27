@@ -20,7 +20,7 @@ static mfmBool mfvV1XIsWhiteSpace(mfsUTF8CodeUnit chr)
 
 static mfmBool mfvV1XIsAlpha(mfsUTF8CodeUnit chr)
 {
-	if ((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'A'))
+	if ((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'Z'))
 		return MFM_TRUE;
 	return MFM_FALSE;
 }
