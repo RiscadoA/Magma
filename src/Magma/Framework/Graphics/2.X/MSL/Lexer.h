@@ -3,15 +3,12 @@
 #include "../../Error.h"
 #include "../../../String/UTF8.h"
 
+#include "Internal.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-	typedef mfmU32 mfgV2XEnum;
-
-#define MFG_TOKEN_ATTRIBUTE_SIZE 32
-#define MFG_MAX_ERROR_MESSAGE_SIZE 512
 
 	typedef struct
 	{
@@ -25,12 +22,12 @@ extern "C"
 	typedef struct
 	{
 		mfgV2XTokenInfo* info;
-		mfsUTF8CodeUnit attribute[MFG_TOKEN_ATTRIBUTE_SIZE];
+		mfsUTF8CodeUnit attribute[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 	} mfgV2XToken;
 
 	typedef struct
 	{
-		mfsUTF8CodeUnit errorMsg[MFG_MAX_ERROR_MESSAGE_SIZE];
+		mfsUTF8CodeUnit errorMsg[MFG_V2X_MAX_ERROR_MESSAGE_SIZE];
 		mfmU64 tokenCount;
 	} mfgV2XLexerState;
 

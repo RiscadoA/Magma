@@ -39,7 +39,7 @@ static mfError mfgV2XPutToken(mfgV2XLexerInternalState * state, const mfgV2XToke
 	else if (token == NULL)
 	{
 		mfsStringStream ss;
-		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_MAX_ERROR_MESSAGE_SIZE);
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 		mfsPutString(&ss, u8"[mfgV2XPutToken : MFG_ERROR_INVALID_ARGUMENTS] Token is NULL");
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -47,7 +47,7 @@ static mfError mfgV2XPutToken(mfgV2XLexerInternalState * state, const mfgV2XToke
 	else if (state->state->tokenCount + 1 >= state->maxTokenCount)
 	{
 		mfsStringStream ss;
-		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_MAX_ERROR_MESSAGE_SIZE);
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 		mfsPutString(&ss, u8"[mfgV2XPutToken : MFG_ERROR_TOKENS_OVERFLOW] Tokens array is already full (try increasing its size)");
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_TOKENS_OVERFLOW;
@@ -202,10 +202,10 @@ static mfError mfgV2XReadToken(mfgV2XLexerInternalState* state)
 				break;
 			else
 			{
-				if (attrIt >= MFG_TOKEN_ATTRIBUTE_SIZE - 1)
+				if (attrIt >= MFG_V2X_TOKEN_ATTRIBUTE_SIZE - 1)
 				{
 					mfsStringStream ss;
-					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_MAX_ERROR_MESSAGE_SIZE);
+					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 					mfsPrintFormatUTF8(&ss, u8"[mfgV2XReadToken : MFG_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Float literal token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
@@ -240,10 +240,10 @@ static mfError mfgV2XReadToken(mfgV2XLexerInternalState* state)
 				break;
 			else
 			{
-				if (attrIt >= MFG_TOKEN_ATTRIBUTE_SIZE - 1)
+				if (attrIt >= MFG_V2X_TOKEN_ATTRIBUTE_SIZE - 1)
 				{
 					mfsStringStream ss;
-					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_MAX_ERROR_MESSAGE_SIZE);
+					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 					mfsPrintFormatUTF8(&ss, u8"[mfgV2XReadToken : MFG_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Int literal token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
@@ -281,10 +281,10 @@ static mfError mfgV2XReadToken(mfgV2XLexerInternalState* state)
 				break;
 			else
 			{
-				if (attrIt >= MFG_TOKEN_ATTRIBUTE_SIZE - 1)
+				if (attrIt >= MFG_V2X_TOKEN_ATTRIBUTE_SIZE - 1)
 				{
 					mfsStringStream ss;
-					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_MAX_ERROR_MESSAGE_SIZE);
+					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 					mfsPrintFormatUTF8(&ss, u8"[mfgV2XReadToken : MFG_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Identifier token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
@@ -298,7 +298,7 @@ static mfError mfgV2XReadToken(mfgV2XLexerInternalState* state)
 	// Unknown token
 	{
 		mfsStringStream ss;
-		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_MAX_ERROR_MESSAGE_SIZE);
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 		mfsPrintFormatUTF8(&ss, u8"[mfgV2XReadToken : MFG_ERROR_UNKNOWN_TOKEN] Unknown token found on:\n<<%s>>", state->it);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_UNKNOWN_TOKEN;

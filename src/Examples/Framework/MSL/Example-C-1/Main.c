@@ -1,6 +1,7 @@
 ﻿#include <Magma/Framework/Entry.h>
 #include <Magma/Framework/String/Stream.h>
 #include <Magma/Framework/Graphics/2.X/MSL/Lexer.h>
+#include <Magma/Framework/Graphics/2.X/MSL/Parser.h>
 
 #include <stdlib.h>
 
@@ -29,15 +30,16 @@ int main(int argc, const char** argv)
 			mfsPrintFormatUTF8(mfsOutStream, u8"'%s'\n", tokens[i].info->name);
 	}
 
-	/*mfgV2XNode nodes[2048];
+	mfgV2XNode nodes[2048];
 	mfgV2XParserState parserState;
-	if (mfgV2XRunMVLParser(tokens, nodes, 2048, &lexerState, &parserState) != MF_ERROR_OKAY)
+	mfgV2XCompilerState compilerState;
+	if (mfgV2XRunMVLParser(tokens, nodes, 2048, &lexerState, &parserState, &compilerState) != MF_ERROR_OKAY)
 	{
 		mfsPutString(mfsErrStream, parserState.errorMsg);
 		abort();
 	}
 
-	mfgV2XPrintNode(mfsOutStream, &nodes[0], 0);*/
+	mfgV2XPrintNode(mfsOutStream, &nodes[0], 0);
 
 	mfTerminate();
 
