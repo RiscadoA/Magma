@@ -168,25 +168,61 @@ static mfError mfvNextToken(mfvV1XParserInternalState* state)
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfvParseStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode);
+
 static mfError mfvParseCompoundStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
 		return MFV_ERROR_INVALID_ARGUMENTS;
 
-	mfError err;
-	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_OPEN_BRACES, NULL);
-	if (err != MF_ERROR_OKAY)
-		return err;
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_OPEN_BRACES, NULL) == MFM_FALSE)
+	{
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
 
-	err = mfvV1XGetNode(state, outNode);
+	mfError err = mfvV1XGetNode(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	(*outNode)->info = &MFV_V1X_TINFO_COMPOUND_STATEMENT;
+
+	// Get statements
+	mfvV1XNode* statement = NULL;
+	for (;;)
+	{
+		err = mfvParseStatement(state, &statement);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (statement == NULL)
+			break;
+		err = mfvAddToNode(*outNode, statement);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
 
 	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_CLOSE_BRACES, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfvParseStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	
+	// Check if it is a compound statement
+	err = mfvParseCompoundStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Not a statement
+	*outNode = NULL;
 	return MF_ERROR_OKAY;
 }
 
@@ -308,6 +344,13 @@ static mfError mfvParseFunction(mfvV1XParserInternalState* state, mfvV1XNode** o
 		err = mfvParseCompoundStatement(state, &node);
 		if (err != MF_ERROR_OKAY)
 			return err;
+		if (node == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseFunction] Failed to parse function compound statement");
+			mfsDestroyLocalStringStream(&ss);
+		}
 		err = mfvAddToNode(*outNode, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
