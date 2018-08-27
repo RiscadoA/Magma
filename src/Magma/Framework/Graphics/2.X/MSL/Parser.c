@@ -1075,6 +1075,8 @@ static mfError mfgParseInput(mfgV2XParserInternalState* state)
 	if (err != MF_ERROR_OKAY)
 		return err;
 
+	// Extract input variables
+
 	return MF_ERROR_OKAY;
 }
 
@@ -1089,6 +1091,8 @@ static mfError mfgParseOutput(mfgV2XParserInternalState* state)
 	if (err != MF_ERROR_OKAY)
 		return err;
 
+	// Extract output variables
+	
 	return MF_ERROR_OKAY;
 }
 
@@ -1103,6 +1107,8 @@ static mfError mfgParseConstantBuffer(mfgV2XParserInternalState* state)
 	if (err != MF_ERROR_OKAY)
 		return err;
 
+	// Extract constant buffer variables
+	
 	return MF_ERROR_OKAY;
 }
 
@@ -1116,6 +1122,8 @@ static mfError mfgParseTexture1D(mfgV2XParserInternalState* state)
 	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_TEXTURE_1D, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
+
+	// Extract texture identifier and name
 
 	return MF_ERROR_OKAY;
 }
@@ -1131,6 +1139,8 @@ static mfError mfgParseTexture2D(mfgV2XParserInternalState* state)
 	if (err != MF_ERROR_OKAY)
 		return err;
 
+	// Extract texture identifier and name
+	
 	return MF_ERROR_OKAY;
 }
 
@@ -1145,6 +1155,8 @@ static mfError mfgParseTexture3D(mfgV2XParserInternalState* state)
 	if (err != MF_ERROR_OKAY)
 		return err;
 
+	// Extract texture identifier and name
+	
 	return MF_ERROR_OKAY;
 }
 
