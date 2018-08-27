@@ -26,6 +26,7 @@ extern "C"
 #define MFV_ERROR_UNEXPECTED_TOKEN			0x0611
 #define MFV_ERROR_UNEXPECTED_EOF			0x0612
 #define MFV_ERROR_INACTIVE_NODE				0x0613
+#define MFV_ERROR_FAILED_TO_PARSE			0x0614
 
 #ifdef __cplusplus
 }

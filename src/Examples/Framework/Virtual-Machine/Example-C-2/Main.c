@@ -13,7 +13,7 @@ int main(int argc, const char** argv)
 	const mfsUTF8CodeUnit* src =
 		u8"void entry(i32 x, f32 y, u8 z)\n"
 		u8"{\n"
-		//u8"\ti32 i = 0;\n"
+		u8"\t2.95 = 9;\n"
 		u8"}"
 		;
 

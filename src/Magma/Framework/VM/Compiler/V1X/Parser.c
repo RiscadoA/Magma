@@ -168,6 +168,116 @@ static mfError mfvNextToken(mfvV1XParserInternalState* state)
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfvParseExpression(mfvV1XParserInternalState* state, mfvV1XNode** outNode);
+
+static mfError mfvParseOperatorLast(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	const mfvV1XToken* tok = NULL;
+
+	// ( <exp )
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_OPEN_PARENTHESIS, NULL) == MFM_TRUE)
+	{
+		err = mfvParseExpression(state, outNode);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvExpectTokenType(state, &MFV_V1X_TINFO_CLOSE_PARENTHESIS, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		return MF_ERROR_OKAY;
+	}
+
+	// <int-literal> | <float-literal> | <string-literal>
+	else if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_INT_LITERAL, &tok) == MFM_TRUE ||
+			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_FLOAT_LITERAL, &tok) == MFM_TRUE ||
+			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_STRING_LITERAL, &tok) == MFM_TRUE)
+	{
+		err = mfvV1XGetNode(state, outNode);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		(*outNode)->info = tok->info;
+		strcpy((*outNode)->attribute, tok->attribute);
+		return MF_ERROR_OKAY;
+	}
+
+	*outNode = NULL;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfvParseExpression(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	// Get first term
+	mfvV1XNode* term1 = NULL;
+	err = mfvParseOperatorLast(state, &term1);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (term1 == NULL)
+	{
+		// No first term, no expression
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	// Get terms
+	mfvV1XNode* term2 = NULL;
+	mfvV1XToken* tok = NULL;
+	for (;;)
+	{
+		// Check operator token
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (tok == NULL || (
+			tok->info->type != MFV_V1X_TOKEN_ASSIGN))
+			break;
+
+		// Create operator node
+		mfvV1XNode* op = NULL;
+		err = mfvV1XGetNode(state, &op);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		op->info = tok->info;
+
+		// Next token
+		err = mfvNextToken(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Parse second term
+		err = mfvParseOperatorLast(state, &term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (term2 == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfvParseExpression] Failed to parse assign operator second term");
+			mfsDestroyLocalStringStream(&ss);
+			return MFV_ERROR_FAILED_TO_PARSE;
+		}
+
+		// Add terms to operator node
+		err = mfvAddToNode(op, term1);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfvAddToNode(op, term2);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		term1 = op;
+	}
+
+	*outNode = term1;
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfvParseStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode);
 
 static mfError mfvParseCompoundStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
@@ -207,6 +317,26 @@ static mfError mfvParseCompoundStatement(mfvV1XParserInternalState* state, mfvV1
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfvParseExpressionStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	err = mfvParseExpression(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode == NULL)
+		return MF_ERROR_OKAY;
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfvParseStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
@@ -216,6 +346,13 @@ static mfError mfvParseStatement(mfvV1XParserInternalState* state, mfvV1XNode** 
 	
 	// Check if it is a compound statement
 	err = mfvParseCompoundStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is an expression statement
+	err = mfvParseExpressionStatement(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (*outNode != NULL)
