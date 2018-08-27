@@ -11,9 +11,13 @@ int main(int argc, const char** argv)
 		abort();
 
 	const mfsUTF8CodeUnit* src =
-		u8"void entry(i32 x, f32 y, u8 z)\n"
+		u8"void func(i32 x, i32 y)\n"
 		u8"{\n"
-		u8"\tMagma.Print(\"x: %d\", x);\n"
+		u8"\tMagma.Print(\"%d\", x + y);"
+		u8"}\n"
+		u8"void entry(i32 x, f32 y)\n"
+		u8"{\n"
+		u8"\tfunc(x, y);\n"
 		u8"}"
 		;
 
