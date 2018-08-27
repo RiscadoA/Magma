@@ -629,7 +629,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline VertexShader(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline VertexShader(const Memory::Object& object) : Memory::Object(object) {}
 
 					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
@@ -643,7 +643,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline PixelShader(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline PixelShader(const Memory::Object& object) : Memory::Object(object) {}
 
 					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
@@ -657,7 +657,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline Pipeline(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline Pipeline(const Memory::Object& object) : Memory::Object(object) {}
 				};
 
 				/// <summary>
@@ -669,7 +669,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline ConstantBuffer(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline ConstantBuffer(const Memory::Object& object) : Memory::Object(object) {}
 
 					void* Map();
 
@@ -685,7 +685,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline Texture1D(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline Texture1D(const Memory::Object& object) : Memory::Object(object) {}
 
 					void Update(mfmU32 dstX, mfmU32 width, const void* data);
 				};
@@ -699,7 +699,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline Texture2D(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline Texture2D(const Memory::Object& object) : Memory::Object(object) {}
 
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void* data);
 				};
@@ -713,7 +713,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline Texture3D(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline Texture3D(const Memory::Object& object) : Memory::Object(object) {}
 
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void* data);
 				};
@@ -727,7 +727,7 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline Sampler(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline Sampler(const Memory::Object& object) : Memory::Object(object) {}
 				};
 
 				/// <summary>
@@ -739,42 +739,124 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline VertexBuffer(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline VertexBuffer(const Memory::Object& object) : Memory::Object(object) {}
 
 					void* Map();
 
 					void Unmap();
 				};
 
+				/// <summary>
+				///		Used as a vertex layout handle.
+				///		Destroys the vertex layout automatically when there are no more references to it.
+				/// </summary>
 				class VertexLayout : public Memory::Object
 				{
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline VertexLayout(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline VertexLayout(const Memory::Object& object) : Memory::Object(object) {}
 				};
 
+				/// <summary>
+				///		Used as a vertex array handle.
+				///		Destroys the vertex array automatically when there are no more references to it.
+				/// </summary>
 				class VertexArray : public Memory::Object
 				{
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline VertexArray(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline VertexArray(const Memory::Object& object) : Memory::Object(object) {}
 				};
 
+				/// <summary>
+				///		Used as a index buffer handle.
+				///		Destroys the index buffer automatically when there are no more references to it.
+				/// </summary>
 				class IndexBuffer : public Memory::Object
 				{
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline IndexBuffer(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline IndexBuffer(const Memory::Object& object) : Memory::Object(object) {}
 
 					void* Map();
 
 					void Unmap();
 				};
 
+				/// <summary>
+				///		Used as a rasterizer state handle.
+				///		Destroys the state automatically when there are no more references to it.
+				/// </summary>
+				class RasterState : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					explicit inline RasterState(const Memory::Object& object) : Memory::Object(object) {}
+				};
 
+				/// <summary>
+				///		Used as a depth stencil state handle.
+				///		Destroys the state automatically when there are no more references to it.
+				/// </summary>
+				class DepthStencilState : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					explicit inline DepthStencilState(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a blend state handle.
+				///		Destroys the state automatically when there are no more references to it.
+				/// </summary>
+				class BlendState : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					explicit inline BlendState(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a render texture handle.
+				///		Destroys the texture automatically when there are no more references to it.
+				/// </summary>
+				class RenderTexture : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					explicit inline RenderTexture(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a depth stencil texture handle.
+				///		Destroys the texture automatically when there are no more references to it.
+				/// </summary>
+				class DepthStencilTexture : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					explicit inline DepthStencilTexture(const Memory::Object& object) : Memory::Object(object) {}
+				};
+
+				/// <summary>
+				///		Used as a framebuffer handle.
+				///		Destroys the framebuffer automatically when there are no more references to it.
+				/// </summary>
+				class Framebuffer : public Memory::Object
+				{
+				public:
+					using Object::Object;
+					using Object::operator=;
+					explicit inline Framebuffer(const Memory::Object& object) : Memory::Object(object) {}
+				};
 
 				/// <summary>
 				///		Used as a render device handle.
@@ -785,9 +867,23 @@ namespace Magma
 				public:
 					using Object::Object;
 					using Object::operator=;
-					inline RenderDevice(const Memory::Object& object) : Memory::Object(object) {}
+					explicit inline RenderDevice(const Memory::Object& object) : Memory::Object(object) {}
 
+					// TO DO: ADD FUNCTIONS
+					
+					/// <summary>
+					///		Clears the current framebuffer color textures.
+					/// </summary>
+					/// <param name="r">New red component value</param>
+					/// <param name="g">New green component value</param>
+					/// <param name="b">New blue component value</param>
+					/// <param name="a">New alpha component value</param>
+					void ClearColor(mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
 
+					/// <summary>
+					///		Swaps the front and back buffers.
+					/// </summary>
+					void SwapBuffers();
 				};
 
 				/// <summary>
@@ -798,7 +894,7 @@ namespace Magma
 				/// <param name="desc">Render device description</param>
 				/// <param name="allocator">Render device allocator</param>
 				/// <returns>Render device handle</returns>
-				RenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Input::Window window, const mfgV2XRenderDeviceDesc* desc, Memory::Allocator allocator);
+				RenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Input::Window window, const RenderDeviceDesc* desc, Memory::Allocator allocator);
 			}
 		}
 	}

@@ -16,16 +16,16 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	Input::Window win = Input::CreateWindow(u8"d3d", 800, 600, Input::WindowMode::Windowed, u8"Window");
+	Input::Window win = Input::CreateWindow(NULL, 800, 600, Input::WindowMode::Windowed, u8"Window");
 	win.SetOnCloseCallback(OnWindowClose);
 
 	Graphics::V2X::RenderDevice rd = NULL;
 
 	try
 	{
-		mfgV2XRenderDeviceDesc desc;
-		desc.vsyncEnabled = MFM_TRUE;
-		rd = Graphics::V2X::CreateRenderDevice(u8"d3d11", win, &desc, Memory::StandardAllocator);
+		Graphics::V2X::RenderDeviceDesc desc;
+		desc.vsyncEnabled = true;
+		rd = Graphics::V2X::CreateRenderDevice(NULL, win, &desc, Memory::StandardAllocator);
 	}
 	catch (std::runtime_error& err)
 	{
@@ -36,6 +36,9 @@ int main(int argc, const char** argv)
 	{
 		win.PollEvents();
 		
+		rd.ClearColor(0.0f, 0.2f, 0.4f, 1.0f);
+
+		rd.SwapBuffers();
 	}
 
 	rd.Release();
