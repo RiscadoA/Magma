@@ -5,7 +5,8 @@
 
 typedef struct
 {
-	mfgV2XLexerState* state;
+	mfgV2XParserState* state;
+	mfgV2XCompilerState* compilerState;
 	const mfgV2XToken* it;
 	const mfgV2XToken* lastToken;
 	mfgV2XNode* nodes;
@@ -24,7 +25,7 @@ static mfError mfgV2XGetNode(mfgV2XParserInternalState* state, mfgV2XNode** node
 			state->nodes[i].info = NULL;
 			state->nodes[i].attribute[0] = '\0';
 			state->nodes[i].active = MFM_TRUE;
-			++state->state->tokenCount;
+			++state->state->nodeCount;
 			*node = &state->nodes[i];
 			return MF_ERROR_OKAY;
 		}
@@ -36,7 +37,7 @@ static mfError mfgV2XReleaseNode(mfgV2XParserInternalState* state, mfgV2XNode* n
 	if (state == NULL || node == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 	node->active = MFM_FALSE;
-	--state->state->tokenCount;
+	--state->state->nodeCount;
 	return MF_ERROR_OKAY;
 }
 
@@ -1091,6 +1092,62 @@ static mfError mfgParseOutput(mfgV2XParserInternalState* state)
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgParseConstantBuffer(mfgV2XParserInternalState* state)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_CONSTANT_BUFFER, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgParseTexture1D(mfgV2XParserInternalState* state)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_TEXTURE_1D, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgParseTexture2D(mfgV2XParserInternalState* state)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_TEXTURE_2D, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgParseTexture3D(mfgV2XParserInternalState* state)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_TEXTURE_3D, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgParseProgram(mfgV2XParserInternalState* state)
 {
 	if (state == NULL)
@@ -1154,6 +1211,7 @@ mfError mfgV2XRunMVLParser(const mfgV2XToken * tokens, mfgV2XNode * nodeArray, m
 
 	mfgV2XParserInternalState internalState;
 	internalState.state = state;
+	internalState.compilerState = compilerState;
 	internalState.it = tokens;
 	internalState.lastToken = tokens + lexerState->tokenCount - 1;
 	internalState.nodes = nodeArray;

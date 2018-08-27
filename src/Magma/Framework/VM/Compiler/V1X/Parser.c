@@ -5,7 +5,7 @@
 
 typedef struct
 {
-	mfvV1XLexerState* state;
+	mfvV1XParserState* state;
 	const mfvV1XToken* it;
 	const mfvV1XToken* lastToken;
 	mfvV1XNode* nodes;
@@ -24,7 +24,7 @@ static mfError mfvV1XGetNode(mfvV1XParserInternalState* state, mfvV1XNode** node
 			state->nodes[i].info = NULL;
 			state->nodes[i].attribute[0] = '\0';
 			state->nodes[i].active = MFM_TRUE;
-			++state->state->tokenCount;
+			++state->state->nodeCount;
 			*node = &state->nodes[i];
 			return MF_ERROR_OKAY;
 		}
@@ -36,7 +36,7 @@ static mfError mfvV1XReleaseNode(mfvV1XParserInternalState* state, mfvV1XNode* n
 	if (state == NULL || node == NULL)
 		return MFV_ERROR_INVALID_ARGUMENTS;
 	node->active = MFM_FALSE;
-	--state->state->tokenCount;
+	--state->state->nodeCount;
 	return MF_ERROR_OKAY;
 }
 
