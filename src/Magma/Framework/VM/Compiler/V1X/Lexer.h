@@ -84,6 +84,8 @@ static const mfvV1XTokenInfo MFV_V1X_TINFO_STRING_LITERAL		= { MFV_V1X_TOKEN_STR
 static const mfvV1XTokenInfo MFV_V1X_TINFO_WARNING				= { MFV_V1X_TOKEN_WARNING, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"warning" };
 #define MFV_V1X_TOKEN_ERROR										0x001E
 static const mfvV1XTokenInfo MFV_V1X_TINFO_ERROR				= { MFV_V1X_TOKEN_ERROR, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"error" };
+#define MFV_V1X_TOKEN_YIELD										0x001F
+static const mfvV1XTokenInfo MFV_V1X_TINFO_YIELD				= { MFV_V1X_TOKEN_YIELD, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"yield" };
 
 #define MFV_V1X_TOKEN_ADD										0x0030
 static const mfvV1XTokenInfo MFV_V1X_TINFO_ADD					= { MFV_V1X_TOKEN_ADD, MFM_FALSE, MFM_TRUE, MFM_FALSE, u8"add" };

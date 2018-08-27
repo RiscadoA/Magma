@@ -15,21 +15,33 @@
 <block-item> ::= <statement>
 
 <statement> ::= <expression-statement>
-			  | <jump-statement>
 			  | <compound-statement>
 			  | <throw-statement>
+			  | <return-statement>
+			  | <yield-statement>
+			  | <end-statement>
 			  | ";"
 
 <expression-statement> ::= <expression> ";"
-
-<jump-statement> ::= "end" ";"
-				   | "return" [ <expression> ] ";"
-				   | "yield" ";"
-
 <compound-statement> ::= "{" { <statement> } "}"
-
 <throw-statement> ::= "throw" ( "warning" | "error" ) "(" <string-literal> ")" ";"
+<return-statement> ::= "return" [ <expression> ] ";"
+<yield-statement> ::= "yield" ";"
+<end-statement> ::= "end" ";"
 
-<expression> ::= ; TO DO
+<expression> ::= <assignment-term> { "=" <assignment-term> }
+<assignment-term> ::= <logic-term> { ( "&&" | "||") <logic->term> }
+<logic-term> ::= <condition-term> { ( "==" | "!=" | ">" | "<" | ">=" | "<=" ) <condition->term> }
+<condition-term> ::= <factor> { ( "*" | "/" ) <factor> }
+<factor> ::= { ( "+" | "-" | "!" ) } <member> { "." <member> }
+<member> ::= "(" <expression> ")"
+		   | <id>
+		   | <call>
+		   | <int-literal>
+		   | <float-literal>
+		   | <string-literal>
+		   | <true>
+		   | <false>
+<call> := <id> "(" [ <expression> { "," <expression> } ] ")"
 
-<type> ::= ( "void" | "I8" | "I16" | "I32" | "U8" | "U16" | "U32" | "F32" | <id> )
+<type> ::= ( "void" | "i8" | "i16" | "i32" | "u8" | "u16" | "u32" | "f32" | <id> )

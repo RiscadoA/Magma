@@ -272,7 +272,7 @@ static mfError mfvParseOperatorLast(mfvV1XParserInternalState* state, mfvV1XNode
 		}
 	}
 
-	// <int-literal> | <float-literal> | <string-literal> | <true> | <bool>
+	// <int-literal> | <float-literal> | <string-literal> | <true> | <false>
 	else if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_INT_LITERAL, &tok) == MFM_TRUE ||
 			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_FLOAT_LITERAL, &tok) == MFM_TRUE ||
 			 mfvAcceptTokenType(state, &MFV_V1X_TINFO_STRING_LITERAL, &tok) == MFM_TRUE ||
@@ -773,6 +773,26 @@ static mfError mfvParseExpression(mfvV1XParserInternalState* state, mfvV1XNode**
 
 static mfError mfvParseStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode);
 
+static mfError mfvParseExpressionStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	err = mfvParseExpression(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode == NULL)
+		return MF_ERROR_OKAY;
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfvParseCompoundStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
@@ -810,18 +830,153 @@ static mfError mfvParseCompoundStatement(mfvV1XParserInternalState* state, mfvV1
 	return MF_ERROR_OKAY;
 }
 
-static mfError mfvParseExpressionStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+static mfError mfvParseThrowStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
 		return MFV_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;
 
-	err = mfvParseExpression(state, outNode);
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_THROW, NULL) == MFM_FALSE)
+	{
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	err = mfvV1XGetNode(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
-	if (*outNode == NULL)
+	(*outNode)->info = &MFV_V1X_TINFO_THROW;
+
+	mfvV1XToken* tok = NULL;
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_WARNING, &tok) == MFM_TRUE ||
+		mfvAcceptTokenType(state, &MFV_V1X_TINFO_ERROR, &tok) == MFM_TRUE)
+	{
+		mfvV1XNode* type = NULL;
+		err = mfvV1XGetNode(state, &type);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		type->info = tok->info;
+		err = mfvAddToNode(*outNode, type);
+	}
+	else
+	{
+		mfvV1XToken* tok;
+		err = mfvPeekToken(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfvParseThrowStatement] Failed to parse throw statement, unexpected throw type '%s'", tok->info->name);
+		mfsDestroyLocalStringStream(&ss);
+		return MFV_ERROR_FAILED_TO_PARSE;
+	}
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_OPEN_PARENTHESIS, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	mfvV1XNode* exp = NULL;
+	err = mfvParseExpression(state, &exp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (exp != NULL)
+	{
+		err = mfvAddToNode(*outNode, exp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_CLOSE_PARENTHESIS, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfvParseReturnStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_RETURN, NULL) == MFM_FALSE)
+	{
+		*outNode = NULL;
 		return MF_ERROR_OKAY;
+	}
+
+	err = mfvV1XGetNode(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	(*outNode)->info = &MFV_V1X_TINFO_RETURN;
+
+	mfvV1XNode* exp = NULL;
+	err = mfvParseExpression(state, &exp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (exp != NULL)
+	{
+		err = mfvAddToNode(*outNode, exp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfvParseEndStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_END, NULL) == MFM_FALSE)
+	{
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	err = mfvV1XGetNode(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	(*outNode)->info = &MFV_V1X_TINFO_END;
+
+	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfvParseYieldStatement(mfvV1XParserInternalState* state, mfvV1XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFV_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	if (mfvAcceptTokenType(state, &MFV_V1X_TINFO_YIELD, NULL) == MFM_FALSE)
+	{
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	err = mfvV1XGetNode(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	(*outNode)->info = &MFV_V1X_TINFO_YIELD;
 
 	err = mfvExpectTokenType(state, &MFV_V1X_TINFO_SEMICOLON, NULL);
 	if (err != MF_ERROR_OKAY)
@@ -846,6 +1001,34 @@ static mfError mfvParseStatement(mfvV1XParserInternalState* state, mfvV1XNode** 
 
 	// Check if it is an expression statement
 	err = mfvParseExpressionStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is a throw statement
+	err = mfvParseThrowStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is a return statement
+	err = mfvParseReturnStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is a end statement
+	err = mfvParseEndStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is a yield statement
+	err = mfvParseYieldStatement(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (*outNode != NULL)
