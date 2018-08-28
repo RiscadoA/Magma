@@ -3,6 +3,9 @@
 #include <Magma/Framework/Graphics/2.X/MSL/Lexer.h>
 #include <Magma/Framework/Graphics/2.X/MSL/Parser.h>
 #include <Magma/Framework/Graphics/2.X/MSL/Generator.h>
+#include <Magma/Framework/Graphics/2.X/Bytecode.h>
+#include <Magma/Framework/Graphics/2.X/OGL4Assembler.h>
+#include <Magma/Framework/Graphics/2.X/D3D11Assembler.h>
 
 #include <stdlib.h>
 
@@ -12,12 +15,12 @@ int main(int argc, const char** argv)
 		abort();
 
 	const mfsUTF8CodeUnit* src =
-		u8"Input { float4 position : POSITION; int instanceID : _INSTANCEID; };"
-		u8"Output { float4 position : _POSITION; };"
-		u8"ConstantBuffer buffer : BUFFER { float4x4 transforms[256]; };"
-		u8"Texture1D tex1d : TEXTURE_1D;"
-		u8"Texture2D tex2d : TEXTURE_2D;"
-		u8"Texture3D tex3d : TEXTURE_3D;"
+		u8"Input { float4 position : position; int instanceID : _instanceID; };"
+		u8"Output { float4 position : _position; };"
+		u8"ConstantBuffer buffer : buffer { float4x4 transforms[256]; };"
+		u8"Texture1D tex1d : texture1D;"
+		u8"Texture2D tex2d : texture2D;"
+		u8"Texture3D tex3d : texture3D;"
 
 		u8"void entry()"
 		u8"{"
@@ -56,11 +59,23 @@ int main(int argc, const char** argv)
 	mfmU8 metaData[4096];
 	mfgV2XGeneratorState generatorState;
 	
-	if (mfgV2XRunMVLGenerator(&nodes[0], bytecode, sizeof(bytecode), metaData, sizeof(metaData), &generatorState, &compilerState) != MF_ERROR_OKAY)
+	if (mfgV2XRunMVLGenerator(&nodes[0], bytecode, sizeof(bytecode), metaData, sizeof(metaData), &generatorState, &compilerState, MFG_VERTEX_SHADER) != MF_ERROR_OKAY)
 	{
 		mfsPutString(mfsErrStream, generatorState.errorMsg);
 		abort();
 	}
+
+	mfgMetaData* md;
+	if (mfgLoadMetaData(metaData, generatorState.metaDataSize, &md, NULL) != MF_ERROR_OKAY)
+		abort();
+
+	if(mfgV2XOGL4Assemble(bytecode, generatorState.bytecodeSize, md, mfsOutStream) != MF_ERROR_OKAY)
+		abort();
+
+	if (mfgV2XD3D11Assemble(bytecode, generatorState.bytecodeSize, md, mfsOutStream) != MF_ERROR_OKAY)
+		abort();
+
+	mfgUnloadMetaData(md);
 
 	mfTerminate();
 

@@ -25,6 +25,7 @@ extern "C"
 		mfsUTF8CodeUnit name[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfmU64 arraySize; // 0 if not an array
 		mfgV2XEnum type;
+		mfmU16 index;
 		mfmBool active;
 	} mfgV2XCompilerMSLVariable;
 
@@ -44,6 +45,7 @@ extern "C"
 		mfsUTF8CodeUnit id[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfsUTF8CodeUnit name[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfmBool active;
+		mfmU16 index;
 	} mfgV2XCompilerMSLConstantBuffer;
 
 	typedef struct
@@ -51,6 +53,7 @@ extern "C"
 		mfsUTF8CodeUnit id[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfsUTF8CodeUnit name[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfmBool active;
+		mfmU16 index;
 	} mfgV2XCompilerMSLTexture1D;
 
 	typedef struct
@@ -58,6 +61,7 @@ extern "C"
 		mfsUTF8CodeUnit id[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfsUTF8CodeUnit name[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfmBool active;
+		mfmU16 index;
 	} mfgV2XCompilerMSLTexture2D;
 
 	typedef struct
@@ -65,6 +69,7 @@ extern "C"
 		mfsUTF8CodeUnit id[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfsUTF8CodeUnit name[MFG_V2X_TOKEN_ATTRIBUTE_SIZE];
 		mfmBool active;
+		mfmU16 index;
 	} mfgV2XCompilerMSLTexture3D;
 
 	typedef struct
