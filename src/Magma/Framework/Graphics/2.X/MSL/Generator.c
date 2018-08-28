@@ -108,6 +108,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 	mfError err;
 	mfmU8 u8T = 0;
+	mfmU16 u16T = 0;
 
 	u8T = MFG_BYTECODE_OPSCOPE;
 	err = mfgBytecodePut8(state, &u8T);
@@ -116,21 +117,61 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 	mfmU16 prevIndex = state->nextVarIndex;
 
+	mfgV2XNode* term1 = node->first;
+	mfgV2XNode* term2 = NULL;
+	if (term1 != NULL)
+		term2 = term1->next;
+
 	switch (node->info->type)
 	{
 		case MFG_V2X_TOKEN_ASSIGN:
 		{
-			// TO DO
+			if (term1->info->type == MFG_V2X_TOKEN_REFERENCE)
+			{
+				err = mfgGenerateExpression(state, term2, term1->refIndex, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
 
-			u8T = MFG_BYTECODE_ASSIGN;
-			err = mfgBytecodePut8(state, &u8T);
-			if (err != MF_ERROR_OKAY)
-				return err;
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_ASSIGN;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
 
-			++state->nextVarIndex;
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
 
+				u16T = term1->refIndex;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
 
-			err = mfgGenerateExpression(state, node->first, 0xFFFF, NULL);
+		case MFG_V2X_TOKEN_REFERENCE:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_ASSIGN;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = node->refIndex;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
 			break;
 		}
 
@@ -154,30 +195,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 	return MF_ERROR_OKAY;
 }
 
-static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
-{
-	if (state == NULL || node == NULL)
-		return MFG_ERROR_INVALID_ARGUMENTS;
-
-	mfError err;
-
-	if (node->info->isOperator == MFM_TRUE)
-	{
-		err = mfgGenerateExpression(state, node, 0xFFFF, NULL);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else
-	{
-		mfsStringStream ss;
-		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateStatement] Failed to generate statement, unsupported node type '%s'", node->info->name);
-		mfsDestroyLocalStringStream(&ss);
-		return MFG_ERROR_FAILED_TO_GENERATE_STATEMENT;
-	}
-
-	return MF_ERROR_OKAY;
-}
+static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node);
 
 static mfError mfgGenerateCompoundStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
 {
@@ -193,6 +211,37 @@ static mfError mfgGenerateCompoundStatement(mfgV2XGeneratorInternalState* state,
 		if (err != MF_ERROR_OKAY)
 			return err;
 		statement = statement->next;
+	}
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	if (node->info->isOperator == MFM_TRUE)
+	{
+		err = mfgGenerateExpression(state, node, 0xFFFF, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_COMPOUND_STATEMENT)
+	{
+		err = mfgGenerateCompoundStatement(state, node, 0xFFFF, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateStatement] Failed to generate statement, unsupported node type '%s'", node->info->name);
+		mfsDestroyLocalStringStream(&ss);
+		return MFG_ERROR_FAILED_TO_GENERATE_STATEMENT;
 	}
 
 	return MF_ERROR_OKAY;
@@ -215,7 +264,7 @@ static mfError mfgGenerateFunction(mfgV2XGeneratorInternalState* state, mfgV2XNo
 		return MFG_ERROR_UNSUPPORTED_FEATURE;
 	}
 
-	mfgV2XNode* compoundStatement = node->first->next->next; // Ignore name, not neeeded for now
+	mfgV2XNode* compoundStatement = node->first->next->next->next; // Ignore name, not neeeded for now
 	err = mfgGenerateCompoundStatement(state, compoundStatement);
 	if (err != MF_ERROR_OKAY)
 		return err;
@@ -267,7 +316,7 @@ static mfError mfgGenerateBytecode(mfgV2XGeneratorInternalState* state, const mf
 	{
 		// Generate only main function (for now)
 		if (node->info->type == MFG_V2X_TOKEN_FUNCTION)
-			if (strcmp(node->info->name, u8"main") == 0)
+			if (strcmp(node->first->next->attribute, u8"main") == 0)
 			{
 				err = mfgGenerateFunction(state, node);
 				if (err != MF_ERROR_OKAY)
