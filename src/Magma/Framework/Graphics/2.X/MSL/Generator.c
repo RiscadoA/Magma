@@ -3,6 +3,7 @@
 #include "../../../String/StringStream.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -230,6 +231,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 	mfError err;
 	mfmU8 u8T = 0;
 	mfmU16 u16T = 0;
+	mfmU32 u32T = 0;
 
 	mfgV2XNode* term1 = node->first;
 	mfgV2XNode* term2 = NULL;
@@ -351,6 +353,161 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				}
 			}
 
+			break;
+		}
+
+		case MFG_V2X_TOKEN_ADD:
+		{
+			if (outVar != 0xFFFF)
+			{
+				if (term2 == NULL)
+				{
+					err = mfgGenerateExpression(state, term1, outVar, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+				else
+				{
+					u8T = MFG_BYTECODE_OPSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Get first term value
+					mfmU16 term1Temp = state->nextVarIndex++;
+					err = mfgDeclareType(state, term1->returnType, term1Temp);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Get second term value
+					mfmU16 term2Temp = state->nextVarIndex++;
+					err = mfgDeclareType(state, term2->returnType, term2Temp);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Perform operation
+					u8T = MFG_BYTECODE_ADD;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = term1Temp;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = term2Temp;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = outVar;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u8T = MFG_BYTECODE_CLSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_SUBTRACT:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				mfmU16 term1Temp = 0;
+				mfmU16 term2Temp = 0;
+
+				
+				if (term2 != NULL)
+				{
+					// Get first term value
+					term1Temp = state->nextVarIndex++;
+					err = mfgDeclareType(state, term1->returnType, term1Temp);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Get second term value
+					term2Temp = state->nextVarIndex++;
+					err = mfgDeclareType(state, term2->returnType, term2Temp);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Perform operation
+					u8T = MFG_BYTECODE_SUBTRACT;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = term1Temp;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = term2Temp;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = outVar;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+				else
+				{
+					// Get first term value
+					term1Temp = state->nextVarIndex++;
+					err = mfgDeclareType(state, term1->returnType, term1Temp);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Perform operation
+					u8T = MFG_BYTECODE_NEGATE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = term1Temp;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = outVar;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}			
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
 			break;
 		}
 
@@ -482,6 +639,52 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 				u8T = MFG_BYTECODE_CLSCOPE;
 				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_INT_LITERAL:
+		{
+			if (outVar != 0xFFFF)
+			{
+				// Assign output to literal
+				u8T = MFG_BYTECODE_LITI1;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u32T = atoi(node->attribute);
+				err = mfgBytecodePut32(state, &u32T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_FLOAT_LITERAL:
+		{
+			if (outVar != 0xFFFF)
+			{
+				// Assign output to literal
+				u8T = MFG_BYTECODE_LITF1;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				mfmF32 f32T = atof(node->attribute);
+				err = mfgBytecodePut32(state, &f32T);
 				if (err != MF_ERROR_OKAY)
 					return err;
 			}
@@ -667,6 +870,89 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
 
+			return MF_ERROR_OKAY;
+
+		case MFG_V2X_TOKEN_ADD:
+		case MFG_V2X_TOKEN_SUBTRACT:
+		case MFG_V2X_TOKEN_MULTIPLY:
+		case MFG_V2X_TOKEN_DIVIDE:
+			err = mfgAnnotateExpression(state, term1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			if (term2 != NULL)
+			{
+				err = mfgAnnotateExpression(state, term2);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+
+			node->isConstant = MFM_FALSE;
+			node->isLValue = MFM_FALSE;
+			node->returnType = term1->returnType;
+			return MF_ERROR_OKAY;
+
+		case MFG_V2X_TOKEN_EQUAL:
+		case MFG_V2X_TOKEN_DIFFERENT:
+		case MFG_V2X_TOKEN_GREATER:
+		case MFG_V2X_TOKEN_LESS:
+		case MFG_V2X_TOKEN_GEQUAL:
+		case MFG_V2X_TOKEN_LEQUAL:
+			err = mfgAnnotateExpression(state, term1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			err = mfgAnnotateExpression(state, term2);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			node->isConstant = MFM_FALSE;
+			node->isLValue = MFM_FALSE;
+			node->returnType = MFG_V2X_TOKEN_BOOL;
+			return MF_ERROR_OKAY;
+
+		case MFG_V2X_TOKEN_AND:
+		case MFG_V2X_TOKEN_OR:
+			err = mfgAnnotateExpression(state, term1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			err = mfgAnnotateExpression(state, term2);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			if (term1->returnType != MFG_V2X_TOKEN_BOOL ||
+				term2->returnType != MFG_V2X_TOKEN_BOOL)
+			{
+				mfsStringStream ss;
+				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+				mfsPutString(&ss, u8"[mfgAnnotateExpression] 'and' and 'or' terms must be booleans");
+				mfsDestroyLocalStringStream(&ss);
+				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+			}
+
+			node->isConstant = MFM_FALSE;
+			node->isLValue = MFM_FALSE;
+			node->returnType = MFG_V2X_TOKEN_BOOL;
+			return MF_ERROR_OKAY;
+
+		case MFG_V2X_TOKEN_NOT:
+			err = mfgAnnotateExpression(state, term1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			if (term1->returnType != MFG_V2X_TOKEN_BOOL)
+			{
+				mfsStringStream ss;
+				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+				mfsPutString(&ss, u8"[mfgAnnotateExpression] 'not' term must be a boolean");
+				mfsDestroyLocalStringStream(&ss);
+				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+			}
+
+			node->isConstant = MFM_FALSE;
+			node->isLValue = MFM_FALSE;
+			node->returnType = MFG_V2X_TOKEN_BOOL;
 			return MF_ERROR_OKAY;
 
 		case MFG_V2X_TOKEN_INT_LITERAL:

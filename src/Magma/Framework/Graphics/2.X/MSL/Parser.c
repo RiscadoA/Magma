@@ -325,11 +325,6 @@ static mfError mfgParseOperator6(mfgV2XParserInternalState* state, mfgV2XNode** 
 			return err;
 		op->info = tok->info;
 
-		// Next token
-		err = mfgNextToken(state);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
 		// Parse term
 		mfgV2XNode* term;
 		err = mfgParseOperator6(state, &term);
@@ -348,7 +343,7 @@ static mfError mfgParseOperator6(mfgV2XParserInternalState* state, mfgV2XNode** 
 		err = mfgAddToNode(op, term);
 		if (err != MF_ERROR_OKAY)
 			return err;
-		*outNode = term;
+		*outNode = op;
 		return MF_ERROR_OKAY;
 	}
 
