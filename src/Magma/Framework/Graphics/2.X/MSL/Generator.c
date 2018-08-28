@@ -101,6 +101,127 @@ static mfError mfgMetaDataPutN(mfgV2XGeneratorInternalState* state, const void* 
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgDeclareType(mfgV2XGeneratorInternalState* state, mfgV2XEnum type, mfmU16 index)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	mfmU8 u8T = 0;
+
+	switch (type)
+	{
+		case MFG_V2X_TOKEN_INT1: u8T = MFG_BYTECODE_DECLI1; break;
+		case MFG_V2X_TOKEN_INT2: u8T = MFG_BYTECODE_DECLI2; break;
+		case MFG_V2X_TOKEN_INT3: u8T = MFG_BYTECODE_DECLI3; break;
+		case MFG_V2X_TOKEN_INT4: u8T = MFG_BYTECODE_DECLI4; break;
+		case MFG_V2X_TOKEN_INT22: u8T = MFG_BYTECODE_DECLI22; break;
+		case MFG_V2X_TOKEN_INT33: u8T = MFG_BYTECODE_DECLI33; break;
+		case MFG_V2X_TOKEN_INT44: u8T = MFG_BYTECODE_DECLI44; break;
+
+		case MFG_V2X_TOKEN_FLOAT1: u8T = MFG_BYTECODE_DECLF1; break;
+		case MFG_V2X_TOKEN_FLOAT2: u8T = MFG_BYTECODE_DECLF2; break;
+		case MFG_V2X_TOKEN_FLOAT3: u8T = MFG_BYTECODE_DECLF3; break;
+		case MFG_V2X_TOKEN_FLOAT4: u8T = MFG_BYTECODE_DECLF4; break;
+		case MFG_V2X_TOKEN_FLOAT22: u8T = MFG_BYTECODE_DECLF22; break;
+		case MFG_V2X_TOKEN_FLOAT33: u8T = MFG_BYTECODE_DECLF33; break;
+		case MFG_V2X_TOKEN_FLOAT44: u8T = MFG_BYTECODE_DECLF44; break;
+
+		default:
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgDeclareType] Unsupported variable type");
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_UNSUPPORTED_TYPE;
+		}
+	}
+
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &index);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgGetComponent(mfgV2XGeneratorInternalState* state, mfgV2XEnum type, mfmU16 varID, mfmU16 outID, mfmU8 index)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	mfmU8 u8T = 0;
+
+	switch (type)
+	{
+		case MFG_V2X_TOKEN_INT2: u8T = MFG_BYTECODE_GET2CMP; break;
+		case MFG_V2X_TOKEN_INT3: u8T = MFG_BYTECODE_GET3CMP; break;
+		case MFG_V2X_TOKEN_INT4: u8T = MFG_BYTECODE_GET4CMP; break;
+
+		case MFG_V2X_TOKEN_FLOAT2: u8T = MFG_BYTECODE_GET2CMP; break;
+		case MFG_V2X_TOKEN_FLOAT3: u8T = MFG_BYTECODE_GET3CMP; break;
+		case MFG_V2X_TOKEN_FLOAT4: u8T = MFG_BYTECODE_GET4CMP; break;
+
+		default:
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgGetComponent] Unsupported variable type");
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_UNSUPPORTED_TYPE;
+		}
+	}
+
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &outID);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &varID);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut8(state, &index);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgAccessArray(mfgV2XGeneratorInternalState* state, mfmU16 varID, mfmU16 outID, mfmU16 indexID)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	mfmU8 u8T = MFG_BYTECODE_GETACMP;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &outID);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &varID);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &indexID);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2XNode* node, mfmU16 outVar, mfmU16* prodVar)
 {
 	if (state == NULL || node == NULL)
@@ -109,13 +230,6 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 	mfError err;
 	mfmU8 u8T = 0;
 	mfmU16 u16T = 0;
-
-	u8T = MFG_BYTECODE_OPSCOPE;
-	err = mfgBytecodePut8(state, &u8T);
-	if (err != MF_ERROR_OKAY)
-		return err;
-
-	mfmU16 prevIndex = state->nextVarIndex;
 
 	mfgV2XNode* term1 = node->first;
 	mfgV2XNode* term2 = NULL;
@@ -128,28 +242,115 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 		{
 			if (term1->info->type == MFG_V2X_TOKEN_REFERENCE)
 			{
-				err = mfgGenerateExpression(state, term2, term1->refIndex, NULL);
+				err = mfgGenerateExpression(state, term2, term1->ref.varID, NULL);
 				if (err != MF_ERROR_OKAY)
 					return err;
-			}
 
-			if (outVar != 0xFFFF)
+				if (outVar != 0xFFFF)
+				{
+					u8T = MFG_BYTECODE_ASSIGN;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = outVar;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = term1->ref.varID;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+			}
+			
+			else if (term1->info->type == MFG_V2X_TOKEN_CMP_REFERENCE)
 			{
-				u8T = MFG_BYTECODE_ASSIGN;
-				err = mfgBytecodePut8(state, &u8T);
-				if (err != MF_ERROR_OKAY)
-					return err;
+				if (term1->first == NULL)
+				{
+					u8T = MFG_BYTECODE_OPSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					// Get component reference
+					err = mfgGetComponent(state, term1->ref.type, term1->ref.varID, term1->ref.cmpVarID, term1->ref.cmpIndex);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					// Set component value
+					err = mfgGenerateExpression(state, term2, term1->ref.cmpVarID, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					// Set out value
+					if (outVar != 0xFFFF)
+					{
+						u8T = MFG_BYTECODE_ASSIGN;
+						err = mfgBytecodePut8(state, &u8T);
+						if (err != MF_ERROR_OKAY)
+							return err;
 
-				u16T = outVar;
-				err = mfgBytecodePut16(state, &u16T);
-				if (err != MF_ERROR_OKAY)
-					return err;
+						u16T = outVar;
+						err = mfgBytecodePut16(state, &u16T);
+						if (err != MF_ERROR_OKAY)
+							return err;
 
-				u16T = term1->refIndex;
-				err = mfgBytecodePut16(state, &u16T);
-				if (err != MF_ERROR_OKAY)
-					return err;
+						u16T = term1->ref.cmpVarID;
+						err = mfgBytecodePut16(state, &u16T);
+						if (err != MF_ERROR_OKAY)
+							return err;
+					}
+					u8T = MFG_BYTECODE_CLSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+				else
+				{
+					u8T = MFG_BYTECODE_OPSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					// Get first term value
+					mfmU16 term1Temp;
+					err = mfgDeclareType(state, term1->first->returnType, term1Temp);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgGenerateExpression(state, term1->first, term1Temp, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					// Get component reference
+					err = mfgGetComponent(state, term1->ref.type, term1Temp, term1->ref.cmpVarID, term1->ref.cmpIndex);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					// Set component value
+					err = mfgGenerateExpression(state, term2, term1->ref.cmpVarID, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					// Set out value
+					if (outVar != 0xFFFF)
+					{
+						u8T = MFG_BYTECODE_ASSIGN;
+						err = mfgBytecodePut8(state, &u8T);
+						if (err != MF_ERROR_OKAY)
+							return err;
+
+						u16T = outVar;
+						err = mfgBytecodePut16(state, &u16T);
+						if (err != MF_ERROR_OKAY)
+							return err;
+
+						u16T = term1->ref.cmpVarID;
+						err = mfgBytecodePut16(state, &u16T);
+						if (err != MF_ERROR_OKAY)
+							return err;
+					}
+					u8T = MFG_BYTECODE_CLSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
 			}
+
 			break;
 		}
 
@@ -167,8 +368,120 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				if (err != MF_ERROR_OKAY)
 					return err;
 
-				u16T = node->refIndex;
+				u16T = node->ref.varID;
 				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_CMP_REFERENCE:
+		{
+			if (outVar != 0xFFFF)
+			{
+				if (node->first == NULL)
+				{
+					// Get component reference
+					err = mfgGetComponent(state, node->ref.type, node->ref.varID, node->ref.cmpVarID, node->ref.cmpIndex);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Assign output to component
+					u8T = MFG_BYTECODE_ASSIGN;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = outVar;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = node->ref.cmpVarID;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+				else
+				{
+					// Calculate temp
+					mfmU16 temp;
+					err = mfgDeclareType(state, node->first->returnType, temp);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgGenerateExpression(state, node->first, temp, NULL);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Get component reference
+					err = mfgGetComponent(state, node->ref.type, temp, node->ref.cmpVarID, node->ref.cmpIndex);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					// Assign output to component
+					u8T = MFG_BYTECODE_ASSIGN;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = outVar;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u16T = node->ref.cmpVarID;
+					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+				
+			}
+			break;
+		}
+
+
+		case MFG_V2X_TOKEN_ARRAY_REFERENCE:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get index
+				mfmU16 index = state->nextVarIndex++;
+				err = mfgDeclareType(state, node->first->returnType, index);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, node->first, index, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get array reference
+				err = mfgAccessArray(state, node->ref.varID, node->ref.cmpVarID, index);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Assign output to component
+				u8T = MFG_BYTECODE_ASSIGN;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = node->ref.cmpVarID;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
 				if (err != MF_ERROR_OKAY)
 					return err;
 			}
@@ -184,13 +497,6 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 		}
 	}
-
-	state->nextVarIndex = prevIndex;
-
-	u8T = MFG_BYTECODE_CLSCOPE;
-	err = mfgBytecodePut8(state, &u8T);
-	if (err != MF_ERROR_OKAY)
-		return err;
 
 	return MF_ERROR_OKAY;
 }
@@ -376,10 +682,77 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			return MF_ERROR_OKAY;
 
 		case MFG_V2X_TOKEN_IDENTIFIER:
+		{
 			node->isLValue = MFM_TRUE;
 			node->isConstant = MFM_FALSE;
 			node->returnType = 0;
+
+			for (mfmU32 i = 0; i < MFG_V2X_MAX_TEXTURE_1DS; ++i)
+				if (strcmp(state->compilerState->texture1Ds[i].id, node->attribute) == 0)
+				{
+					node->ref.varID = state->compilerState->texture1Ds[i].index;
+					node->ref.type = MFG_V2X_TOKEN_TEXTURE_1D;
+					node->returnType = MFG_V2X_TOKEN_TEXTURE_1D;
+					node->info = &MFG_V2X_TINFO_REFERENCE;
+					return MF_ERROR_OKAY;
+				}
+
+			for (mfmU32 i = 0; i < MFG_V2X_MAX_TEXTURE_2DS; ++i)
+				if (strcmp(state->compilerState->texture2Ds[i].id, node->attribute) == 0)
+				{
+					node->ref.varID = state->compilerState->texture2Ds[i].index;
+					node->ref.type = MFG_V2X_TOKEN_TEXTURE_2D;
+					node->returnType = MFG_V2X_TOKEN_TEXTURE_2D;
+					node->info = &MFG_V2X_TINFO_REFERENCE;
+					return MF_ERROR_OKAY;
+				}
+
+			for (mfmU32 i = 0; i < MFG_V2X_MAX_TEXTURE_3DS; ++i)
+				if (strcmp(state->compilerState->texture3Ds[i].id, node->attribute) == 0)
+				{
+					node->ref.varID = state->compilerState->texture3Ds[i].index;
+					node->ref.type = MFG_V2X_TOKEN_TEXTURE_3D;
+					node->returnType = MFG_V2X_TOKEN_TEXTURE_3D;
+					node->info = &MFG_V2X_TINFO_REFERENCE;
+					return MF_ERROR_OKAY;
+				}
+
+			// TO DO: GET LOCAL VARIABLES
+
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Couldn't find a variable with the ID '%s'", node->attribute);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+		}
+
+		case MFG_V2X_TOKEN_ARRAY_ACCESS:
+		{
+			err = mfgAnnotateExpression(state, term1);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfgAnnotateExpression(state, term2);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			if (term1->info->type != MFG_V2X_TOKEN_REFERENCE)
+			{
+				mfsStringStream ss;
+				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] First term in a array access operator must be a reference");
+				mfsDestroyLocalStringStream(&ss);
+				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+			}
+
+			node->info = &MFG_V2X_TINFO_ARRAY_REFERENCE;
+			node->ref.varID = term1->ref.varID;
+			node->ref.type = term1->ref.type;
+			node->ref.cmpVarID = state->nextVarIndex++;
+			node->first = term2;
+			node->returnType = node->ref.type;
+
 			return MF_ERROR_OKAY;
+		}
 
 		case MFG_V2X_TOKEN_MEMBER:
 		{
@@ -399,10 +772,12 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				for (mfmU32 i = 0; i < MFG_V2X_MAX_INPUT_VARS; ++i)
 					if (strcmp(term2->attribute, state->compilerState->input.variables[i].id) == 0)
 					{
-						node->refIndex = state->compilerState->input.variables[i].index;
+						node->first = NULL;
+						node->ref.varID = state->compilerState->input.variables[i].index;
+						node->ref.type = state->compilerState->input.variables[i].type;
 						node->isLValue = MFM_TRUE;
 						node->isConstant = MFM_FALSE;
-						node->returnType = state->compilerState->input.variables[i].type;
+						node->returnType = node->ref.type;
 						return MF_ERROR_OKAY;
 					}
 
@@ -413,7 +788,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
 			// Output struct member
-			else if (term1->info->type == MFG_V2X_TOKEN_OUTPUT)
+			if (term1->info->type == MFG_V2X_TOKEN_OUTPUT)
 			{
 				node->info = &MFG_V2X_TINFO_REFERENCE;
 				if (term2->info->type != MFG_V2X_TOKEN_IDENTIFIER)
@@ -428,10 +803,12 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				for (mfmU32 i = 0; i < MFG_V2X_MAX_OUTPUT_VARS; ++i)
 					if (strcmp(term2->attribute, state->compilerState->output.variables[i].id) == 0)
 					{
-						node->refIndex = state->compilerState->output.variables[i].index;
+						node->first = NULL;
+						node->ref.varID = state->compilerState->output.variables[i].index;
+						node->ref.type = state->compilerState->output.variables[i].type;
 						node->isLValue = MFM_TRUE;
 						node->isConstant = MFM_FALSE;
-						node->returnType = state->compilerState->output.variables[i].type;
+						node->returnType = node->ref.type;
 						return MF_ERROR_OKAY;
 					}
 
@@ -441,30 +818,87 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
-			else
+			// Buffer member?
+			if (term1->info->type == MFG_V2X_TOKEN_IDENTIFIER)
+			{
+				for (mfmU32 i = 0; i < MFG_V2X_MAX_CONSTANT_BUFFERS; ++i)
+					if (strcmp(state->compilerState->constantBuffers[i].id, term1->attribute) == 0)
+					{
+						// Search for the corresponding buffer member variable, if any
+						for (mfmU32 j = 0; j < MFG_V2X_MAX_CONSTANT_BUFFER_VARS; ++j)
+							if (strcmp(state->compilerState->constantBuffers[i].variables[j].id, term2->attribute) == 0)
+							{
+								node->info = &MFG_V2X_TINFO_REFERENCE;
+								node->first = NULL;
+								node->ref.varID = state->compilerState->constantBuffers[i].variables[j].index;
+								node->ref.type = state->compilerState->constantBuffers[i].variables[j].type;
+								node->isLValue = MFM_TRUE;
+								node->isConstant = MFM_FALSE;
+								node->returnType = node->ref.type;
+								return MF_ERROR_OKAY;
+							}
+
+						// Couldn't find a matching member variable
+						mfsStringStream ss;
+						mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+						mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] The constant buffer '%s' has no member '%s'", term1->attribute, term2->attribute);
+						mfsDestroyLocalStringStream(&ss);
+						return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+					}
+			}
+			// Component access
 			{
 				err = mfgAnnotateExpression(state, term1);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
-				if (term1->info->type != MFG_V2X_TOKEN_REFERENCE)
+				if (term1->info->type == MFG_V2X_TOKEN_REFERENCE)
+				{
+					node->info = &MFG_V2X_TINFO_CMP_REFERENCE;
+					node->ref.varID = term1->ref.varID;
+					node->ref.type = term1->ref.type;
+					node->first = NULL;
+				}
+				else if (term1->info->type == MFG_V2X_TOKEN_CMP_REFERENCE)
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Member expression first term must be a reference");
+					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] A component cannot have its components accessed");
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}
+				else
+				{
+					node->info = &MFG_V2X_TINFO_CMP_REFERENCE;
+					node->ref.varID = 0xFFFF;
+					node->ref.type = term1->returnType;
+					term1->next = NULL;
+				}
 
-				err = mfgAnnotateExpression(state, term2);
-				if (err != MF_ERROR_OKAY)
-					return err;
+				node->ref.cmpVarID = state->nextVarIndex++;
 
 				if (term2->info->type != MFG_V2X_TOKEN_IDENTIFIER)
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Member expression second term must be an identifier");
+					mfsDestroyLocalStringStream(&ss);
+					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+				}
+
+				if (strcmp(term2->attribute, u8"x") == 0)
+					node->ref.cmpIndex = 0;
+				else if (strcmp(term2->attribute, u8"y") == 0)
+					node->ref.cmpIndex = 1;
+				else if (strcmp(term2->attribute, u8"z") == 0)
+					node->ref.cmpIndex = 2;
+				else if (strcmp(term2->attribute, u8"w") == 0)
+					node->ref.cmpIndex = 3;
+				else
+				{
+					mfsStringStream ss;
+					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Invalid member expression second term");
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}

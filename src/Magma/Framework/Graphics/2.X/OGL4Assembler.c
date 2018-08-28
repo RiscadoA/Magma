@@ -368,6 +368,7 @@ static mfError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* 
 					err = mfsPutString(out, u8"]");
 					if (err != MF_ERROR_OKAY)
 						return err;
+					return MF_ERROR_OKAY;
 				}
 				else if (data->references[i].rows == 2 && data->references[i].cols == 1)
 					switch (data->references[i].index)
@@ -2087,12 +2088,12 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 
 			case MFG_BYTECODE_CLSCOPE:
 			{
+				--tabs;
 				for (mfmU64 i = 0; i < tabs; ++i)
 					if (mfsPutByte(outputStream, '\t') != MF_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				if (mfsPrintFormatUTF8(outputStream, u8"}\n") != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
-				--tabs;
 				++it;
 				break;
 			}

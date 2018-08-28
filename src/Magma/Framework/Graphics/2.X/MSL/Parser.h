@@ -11,6 +11,14 @@ extern "C"
 
 	typedef struct mfgV2XNode mfgV2XNode;
 
+	typedef struct
+	{
+		mfmU16 varID;
+		mfmU16 cmpIndex;
+		mfgV2XEnum type;
+		mfmU16 cmpVarID;
+	} mfgV2XReference;
+	
 	struct mfgV2XNode
 	{
 		mfgV2XTokenInfo* info;
@@ -21,7 +29,7 @@ extern "C"
 		mfgV2XEnum returnType;
 		mfmBool isConstant;
 		mfmBool isLValue;
-		mfmU16 refIndex;
+		mfgV2XReference ref;
 	};
 
 	typedef struct

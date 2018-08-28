@@ -24,7 +24,7 @@ int main(int argc, const char** argv)
 
 		u8"void main()"
 		u8"{"
-		u8"		Output.position = Input.position;"
+		u8"		Output.position = buffer.transforms[Input.instanceID];"
 		u8"}"
 		;
 
