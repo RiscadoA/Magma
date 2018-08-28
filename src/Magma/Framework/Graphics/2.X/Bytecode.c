@@ -228,6 +228,10 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 					mfmFromBigEndian2(metaData + readPtr, &var->id);
 					readPtr += 2;
 
+					// Get array size
+					mfmFromBigEndian2(metaData + readPtr, &var->arraySize);
+					readPtr += 2;
+
 					// Get type
 					var->type = metaData[readPtr++];
 				}

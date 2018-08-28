@@ -13,6 +13,8 @@ typedef struct
 	mfmU8 rows;
 	mfmU8 cols;
 	mfmBool active;
+	mfmBool isArray;
+	mfmU16 accessID;
 } mfgComponentReference;
 
 typedef struct
@@ -318,7 +320,7 @@ static mfError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* 
 			}
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
-				mfgMetaDataTexture1D* tex = bp;
+				mfgMetaDataTexture2D* tex = bp;
 				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex2d_%d", id) != MF_ERROR_OKAY)
@@ -328,7 +330,7 @@ static mfError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* 
 			}
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
-				mfgMetaDataTexture1D* tex = bp;
+				mfgMetaDataTexture3D* tex = bp;
 				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex3d_%d", id) != MF_ERROR_OKAY)
@@ -355,7 +357,19 @@ static mfError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* 
 					return err;
 
 				// Get component
-				if (data->references[i].rows == 2 && data->references[i].cols == 1)
+				if (data->references[i].isArray == MFM_TRUE)
+				{
+					err = mfsPutString(out, u8"[");
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgD3D11PutID(data->references[i].accessID, data, out);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfsPutString(out, u8"]");
+					if (err != MF_ERROR_OKAY)
+						return err;
+				}
+				else if (data->references[i].rows == 2 && data->references[i].cols == 1)
 					switch (data->references[i].index)
 					{
 						case 0x00:
@@ -518,8 +532,16 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 					if (err != MF_ERROR_OKAY)
 						return err;
 
-					if (mfsPrintFormatUTF8(outputStream, u8" buf_%s_%d;\n", bp->name, var->id) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
+					if (var->arraySize == 0)
+					{
+						if (mfsPrintFormatUTF8(outputStream, u8" buf_%s_%d;\n", bp->name, var->id) != MF_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+					}
+					else
+					{
+						if (mfsPrintFormatUTF8(outputStream, u8" buf_%s_%d[%d];\n", bp->name, var->id, var->arraySize) != MF_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+					}
 
 					var = var->next;
 				}
@@ -997,10 +1019,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1013,10 +1032,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"ivec2 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"ivec2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1029,10 +1045,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"ivec3 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"ivec3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1045,10 +1058,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"ivec4 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"ivec4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1061,10 +1071,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"imat2 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"imat2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1077,10 +1084,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"imat3 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"imat3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1093,10 +1097,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"imat4 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"imat4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1188,10 +1189,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1204,10 +1202,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"vec2 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"vec2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1220,10 +1215,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"vec3 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"vec3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1236,10 +1228,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"vec4 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"vec4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1252,10 +1241,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"mat2 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"mat2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1268,10 +1254,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"mat3 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"mat3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1284,10 +1267,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"mat4 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"mat4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -2061,6 +2041,35 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 					}
 
 				it += 6;
+				break;
+			}
+
+			case MFG_BYTECODE_GETACMP:
+			{
+				mfmU16 id1 = 0;
+				mfmFromBigEndian2(it + 1, &id1);
+
+				mfmU16 id2 = 0;
+				mfmFromBigEndian2(it + 3, &id2);
+
+				mfmU16 id3 = 0;
+				mfmFromBigEndian2(it + 5, &id3);
+
+				for (mfmU8 i = 0; i < 128; ++i)
+					if (assemblerData.references[i].active == MFM_FALSE)
+					{
+						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].rows = 0;
+						assemblerData.references[i].cols = 0;
+						assemblerData.references[i].index = 0;
+						assemblerData.references[i].active = MFM_TRUE;
+						assemblerData.references[i].isArray = MFM_TRUE;
+						assemblerData.references[i].id = id1;
+						assemblerData.references[i].accessID = id3;
+						break;
+					}
+
+				it += 7;
 				break;
 			}
 
