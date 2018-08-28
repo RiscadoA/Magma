@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-const static mfmU8 mfgOGL4AssemblerMinorVersion = 0x00;
+const static mfmU8 mfgOGL4AssemblerMinorVersion = 0x01;
 
 typedef struct
 {

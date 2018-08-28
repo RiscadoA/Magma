@@ -1,7 +1,7 @@
 #include "D3D11Assembler.h"
 #include "../../Memory/Endianness.h"
 
-const static mfmU8 mfgD3D11AssemblerMinorVersion = 0x00;
+const static mfmU8 mfgD3D11AssemblerMinorVersion = 0x01;
 
 typedef struct
 {
