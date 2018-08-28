@@ -2,6 +2,7 @@
 #include <Magma/Framework/String/Stream.h>
 #include <Magma/Framework/Graphics/2.X/MSL/Lexer.h>
 #include <Magma/Framework/Graphics/2.X/MSL/Parser.h>
+#include <Magma/Framework/Graphics/2.X/MSL/Generator.h>
 
 #include <stdlib.h>
 
@@ -50,6 +51,16 @@ int main(int argc, const char** argv)
 	}
 
 	mfgV2XPrintNode(mfsOutStream, &nodes[0], 0);
+
+	mfmU8 bytecode[4096];
+	mfmU8 metaData[4096];
+	mfgV2XGeneratorState generatorState;
+	
+	if (mfgV2XRunMVLGenerator(&nodes[0], bytecode, sizeof(bytecode), metaData, sizeof(metaData), &generatorState, &compilerState) != MF_ERROR_OKAY)
+	{
+		mfsPutString(mfsErrStream, generatorState.errorMsg);
+		abort();
+	}
 
 	mfTerminate();
 
