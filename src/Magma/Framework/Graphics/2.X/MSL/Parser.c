@@ -2,6 +2,7 @@
 #include "../../../String/StringStream.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -1074,8 +1075,60 @@ static mfError mfgParseInput(mfgV2XParserInternalState* state)
 	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_INPUT, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_OPEN_BRACES, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	// Extract input variables
+	mfmU64 nextVar = 0;
+	while (mfgAcceptTokenType(state, &MFG_V2X_TINFO_CLOSE_BRACES, NULL) == MFM_FALSE)
+	{
+		mfgV2XToken* tok = NULL;
+		
+		// Get type
+		err = mfgExpectType(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		if (nextVar >= MFG_V2X_MAX_INPUT_VARS)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgParseInput] Failed to parse input variable, input variable limit (%d) reached", MFG_V2X_MAX_INPUT_VARS);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_TOO_MANY_VARIABLES;
+		}
+
+		state->compilerState->input.variables[nextVar].type = tok->info->type;
+		state->compilerState->input.variables[nextVar].arraySize = 0;
+
+		// Get ID
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		strcpy(state->compilerState->input.variables[nextVar].id, tok->attribute);
+
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_COLON, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get name
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		strcpy(state->compilerState->input.variables[nextVar].name, tok->attribute);
+
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		state->compilerState->input.variables[nextVar].active = MFM_TRUE;
+		++nextVar;
+	}
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	return MF_ERROR_OKAY;
 }
@@ -1090,9 +1143,61 @@ static mfError mfgParseOutput(mfgV2XParserInternalState* state)
 	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_OUTPUT, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_OPEN_BRACES, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	// Extract output variables
-	
+	mfmU64 nextVar = 0;
+	while (mfgAcceptTokenType(state, &MFG_V2X_TINFO_CLOSE_BRACES, NULL) == MFM_FALSE)
+	{
+		mfgV2XToken* tok = NULL;
+
+		// Get type
+		err = mfgExpectType(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		if (nextVar >= MFG_V2X_MAX_OUTPUT_VARS)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgParseOutput] Failed to parse output variable, output variable limit (%d) reached", MFG_V2X_MAX_OUTPUT_VARS);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_TOO_MANY_VARIABLES;
+		}
+
+		state->compilerState->output.variables[nextVar].type = tok->info->type;
+		state->compilerState->output.variables[nextVar].arraySize = 0;
+
+		// Get ID
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		strcpy(state->compilerState->output.variables[nextVar].id, tok->attribute);
+
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_COLON, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get name
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		strcpy(state->compilerState->output.variables[nextVar].name, tok->attribute);
+
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		state->compilerState->output.variables[nextVar].active = MFM_TRUE;
+		++nextVar;
+	}
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -1102,13 +1207,101 @@ static mfError mfgParseConstantBuffer(mfgV2XParserInternalState* state)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;
+	mfgV2XToken* tok = NULL;
 
+	// Get buffer ID
 	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_CONSTANT_BUFFER, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
+	mfmU64 bufferID = 0;
+	for (bufferID = 0; bufferID < MFG_V2X_MAX_CONSTANT_BUFFERS; ++bufferID)
+		if (state->compilerState->constantBuffers[bufferID].active == MFM_FALSE)
+		{
+			state->compilerState->constantBuffers[bufferID].active = MFM_TRUE;
+			break;
+		}
+	if (bufferID == MFG_V2X_MAX_CONSTANT_BUFFERS)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgParseConstantBuffer] Failed to parse constant buffer, constant buffer limit (%d) reached", MFG_V2X_MAX_CONSTANT_BUFFERS);
+		mfsDestroyLocalStringStream(&ss);
+		return MFG_ERROR_TOO_MANY_VARIABLES;
+	}
+
+	// Get ID
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->constantBuffers[bufferID].id, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_COLON, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Get name
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->constantBuffers[bufferID].name, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_OPEN_BRACES, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	// Extract constant buffer variables
-	
+	mfmU64 nextVar = 0;
+	while (mfgAcceptTokenType(state, &MFG_V2X_TINFO_CLOSE_BRACES, NULL) == MFM_FALSE)
+	{
+		// Get type
+		err = mfgExpectType(state, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		if (nextVar >= MFG_V2X_MAX_CONSTANT_BUFFER_VARS)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgParseInput] Failed to parse constant buffer variable, constant buffer variable limit (%d) reached", MFG_V2X_MAX_CONSTANT_BUFFER_VARS);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_TOO_MANY_VARIABLES;
+		}
+
+		state->compilerState->constantBuffers[bufferID].variables[nextVar].type = tok->info->type;
+		
+		// Get ID
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		strcpy(state->compilerState->constantBuffers[bufferID].variables[nextVar].id, tok->attribute);
+
+		// Check if the variable is an array
+		if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_OPEN_BRACKETS, NULL) == MFM_TRUE)
+		{
+			err = mfgExpectTokenType(state, &MFG_V2X_TINFO_INT_LITERAL, &tok);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			state->compilerState->constantBuffers[bufferID].variables[nextVar].arraySize = atoll(tok->attribute);
+			err = mfgExpectTokenType(state, &MFG_V2X_TINFO_CLOSE_BRACKETS, NULL);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+		else
+			state->compilerState->constantBuffers[bufferID].variables[nextVar].arraySize = 0;
+
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		state->compilerState->constantBuffers[bufferID].variables[nextVar].active = MFM_TRUE;
+		++nextVar;
+	}
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -1199,6 +1392,13 @@ static mfError mfgParseProgram(mfgV2XParserInternalState* state)
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
+		// Check if it is a ConstantBuffer struct
+		else if (tok->info->type == MFG_V2X_TOKEN_CONSTANT_BUFFER)
+		{
+			err = mfgParseConstantBuffer(state);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
 		// Check if it is a function
 		else if (tok->info->isType == MFM_TRUE)
 		{
@@ -1208,6 +1408,15 @@ static mfError mfgParseProgram(mfgV2XParserInternalState* state)
 			err = mfgAddToNode(&state->nodes[0], node);
 			if (err != MF_ERROR_OKAY)
 				return err;
+		}
+		// Else error
+		else
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgParseProgram] Failed to parse program, unexpected token '%s' on the global scope", tok->info->name);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_TOO_MANY_VARIABLES;
 		}
 	}
 
@@ -1234,6 +1443,23 @@ mfError mfgV2XRunMVLParser(const mfgV2XToken * tokens, mfgV2XNode * nodeArray, m
 	state->nodeCount = 0;
 	for (mfmU64 i = 0; i < maxNodeCount; ++i)
 		nodeArray[i].active = MFM_FALSE;
+
+	for (mfmU64 i = 0; i < MFG_V2X_MAX_INPUT_VARS; ++i)
+		compilerState->input.variables[i].active = MFM_FALSE;
+	for (mfmU64 i = 0; i < MFG_V2X_MAX_OUTPUT_VARS; ++i)
+		compilerState->output.variables[i].active = MFM_FALSE;
+	for (mfmU64 i = 0; i < MFG_V2X_MAX_CONSTANT_BUFFERS; ++i)
+	{
+		compilerState->constantBuffers[i].active = MFM_FALSE;
+		for (mfmU64 j = 0; j < MFG_V2X_MAX_CONSTANT_BUFFER_VARS; ++j)
+			compilerState->constantBuffers[i].variables[j].active = MFM_FALSE;
+	}
+	for (mfmU64 i = 0; i < MFG_V2X_MAX_TEXTURE_1DS; ++i)
+		compilerState->texture1Ds[i].active = MFM_FALSE;
+	for (mfmU64 i = 0; i < MFG_V2X_MAX_TEXTURE_2DS; ++i)
+		compilerState->texture2Ds[i].active = MFM_FALSE;
+	for (mfmU64 i = 0; i < MFG_V2X_MAX_TEXTURE_3DS; ++i)
+		compilerState->texture3Ds[i].active = MFM_FALSE;
 
 	err = mfgParseProgram(&internalState);
 	if (err != MF_ERROR_OKAY)

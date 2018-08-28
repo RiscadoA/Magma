@@ -27,6 +27,7 @@ extern "C"
 #define MFG_ERROR_UNEXPECTED_EOF			0x0512
 #define MFG_ERROR_INACTIVE_NODE				0x0513
 #define MFG_ERROR_FAILED_TO_PARSE			0x0514
+#define MFG_ERROR_TOO_MANY_VARIABLES		0x0515
 
 #ifdef __cplusplus
 }

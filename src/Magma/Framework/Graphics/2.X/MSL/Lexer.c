@@ -265,7 +265,7 @@ static mfError mfgV2XReadToken(mfgV2XLexerInternalState* state)
 			if (mfgV2XIsWhiteSpace(state->it[attrIt]) == MFM_TRUE ||
 				(mfgV2XIsNumeric(state->it[attrIt]) == MFM_FALSE &&
 				 mfgV2XIsAlpha(state->it[attrIt]) == MFM_FALSE &&
-				 *state->it != '_'))
+				 state->it[attrIt] != '_'))
 			{
 				tok.attribute[attrIt] = '\0';
 				tok.info = &MFG_V2X_TINFO_IDENTIFIER;
@@ -277,7 +277,7 @@ static mfError mfgV2XReadToken(mfgV2XLexerInternalState* state)
 			}
 			else if (mfgV2XIsAlpha(state->it[attrIt]) == MFM_FALSE &&
 					 mfgV2XIsNumeric(state->it[attrIt]) == MFM_FALSE &&
-					 *state->it != '_')
+					 state->it[attrIt] != '_')
 				break;
 			else
 			{

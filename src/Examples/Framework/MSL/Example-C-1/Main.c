@@ -11,7 +11,9 @@ int main(int argc, const char** argv)
 		abort();
 
 	const mfsUTF8CodeUnit* src =
-		u8"Input { float4 position : POSITION; }"
+		u8"Input { float4 position : POSITION; };"
+		u8"Output { float4 position : _POSITION; };"
+		u8"ConstantBuffer buffer : BUFFER { float4x4 transforms[256]; };"
 		;
 
 	mfgV2XToken tokens[2048];
