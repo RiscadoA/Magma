@@ -38,6 +38,8 @@ extern "C"
 	static const mfgV2XTokenInfo MFG_V2X_TINFO_CALL						 = { MFG_V2X_TOKEN_CALL, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"call" };
 #define MFG_V2X_TOKEN_CALL_PARAMS										0x0105
 	static const mfgV2XTokenInfo MFG_V2X_TINFO_CALL_PARAMS				= { MFG_V2X_TOKEN_CALL_PARAMS, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"call-params" };
+#define MFG_V2X_TOKEN_ARRAY_ACCESS										0x0106
+	static const mfgV2XTokenInfo MFG_V2X_TINFO_ARRAY_ACCESS				= { MFG_V2X_TOKEN_ARRAY_ACCESS, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"array-access" };
 
 	mfError mfgV2XRunMVLParser(const mfgV2XToken* tokens, mfgV2XNode* nodeArray, mfmU64 maxNodeCount, const mfgV2XLexerState* lexerState, mfgV2XParserState* state, mfgV2XCompilerState* compilerState);
 

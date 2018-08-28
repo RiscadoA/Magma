@@ -11,12 +11,17 @@ int main(int argc, const char** argv)
 		abort();
 
 	const mfsUTF8CodeUnit* src =
-		u8"Input { float4 position : POSITION; };"
+		u8"Input { float4 position : POSITION; int instanceID : _INSTANCEID; };"
 		u8"Output { float4 position : _POSITION; };"
 		u8"ConstantBuffer buffer : BUFFER { float4x4 transforms[256]; };"
 		u8"Texture1D tex1d : TEXTURE_1D;"
 		u8"Texture2D tex2d : TEXTURE_2D;"
 		u8"Texture3D tex3d : TEXTURE_3D;"
+
+		u8"void entry()"
+		u8"{"
+		u8"		Output.position = buffer.transforms[Input.instanceID] * Input.position;"
+		u8"}"
 		;
 
 	mfgV2XToken tokens[2048];
