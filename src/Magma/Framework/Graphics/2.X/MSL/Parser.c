@@ -1641,7 +1641,7 @@ static mfError mfgParseProgram(mfgV2XParserInternalState* state)
 
 mfError mfgV2XRunMVLParser(const mfgV2XToken * tokens, mfgV2XNode * nodeArray, mfmU64 maxNodeCount, const mfgV2XLexerState * lexerState, mfgV2XParserState * state, mfgV2XCompilerState* compilerState)
 {
-	if (tokens == NULL || tokens == NULL || maxNodeCount == 0 || lexerState == NULL || state == NULL)
+	if (tokens == NULL || nodeArray == NULL || maxNodeCount == 0 || lexerState == NULL || state == NULL || compilerState == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;
