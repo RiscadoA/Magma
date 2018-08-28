@@ -18,6 +18,10 @@ extern "C"
 		mfgV2XNode* first;
 		mfgV2XNode* next;
 		mfmBool active;
+		mfgV2XEnum returnType;
+		mfmBool isConstant;
+		mfmBool isLValue;
+		mfmU16 refIndex;
 	};
 
 	typedef struct

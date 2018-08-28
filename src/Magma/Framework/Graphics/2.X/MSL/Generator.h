@@ -15,6 +15,9 @@ extern "C"
 		mfmU64 metaDataSize;
 	} mfgV2XGeneratorState;
 
+#define MFG_V2X_TOKEN_REFERENCE										0x0200
+	static const mfgV2XTokenInfo MFG_V2X_TINFO_REFERENCE			= { MFG_V2X_TOKEN_REFERENCE, MFM_FALSE, MFM_FALSE, MFM_FALSE, u8"reference" };
+
 	mfError mfgV2XRunMVLGenerator(const mfgV2XNode* root, mfmU8* bytecode, mfmU64 maxBytecodeSize, mfmU8* metaData, mfmU64 maxMetaDataSize, mfgV2XGeneratorState* state, const mfgV2XCompilerState* compilerState, mfgV2XEnum shaderType);
 
 #ifdef __cplusplus

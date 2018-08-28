@@ -22,9 +22,9 @@ int main(int argc, const char** argv)
 		u8"Texture2D tex2d : texture2D;"
 		u8"Texture3D tex3d : texture3D;"
 
-		u8"void entry()"
+		u8"void main()"
 		u8"{"
-		u8"		Output.position = buffer.transforms[Input.instanceID] * Input.position;"
+		u8"		Output.position = Input.position.x;"
 		u8"}"
 		;
 
