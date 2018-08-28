@@ -60,7 +60,7 @@ extern "C"
 {
 #endif
 
-	// MSL Bytecode version 2.0
+	// MSL Bytecode version 2.1
 	// Binary bytecode shaders are composed of two files:
 	// - the binary bytecode instruction file (.mbb)
 	// - the binary meta data file (.mbd)
