@@ -362,7 +362,7 @@ static mfError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* 
 					err = mfsPutString(out, u8"[");
 					if (err != MF_ERROR_OKAY)
 						return err;
-					err = mfgD3D11PutID(data->references[i].accessID, data, out);
+					err = mfgOGL4PutID(data->references[i].accessID, data, out);
 					if (err != MF_ERROR_OKAY)
 						return err;
 					err = mfsPutString(out, u8"]");
