@@ -14,6 +14,9 @@ int main(int argc, const char** argv)
 		u8"Input { float4 position : POSITION; };"
 		u8"Output { float4 position : _POSITION; };"
 		u8"ConstantBuffer buffer : BUFFER { float4x4 transforms[256]; };"
+		u8"Texture1D tex1d : TEXTURE_1D;"
+		u8"Texture2D tex2d : TEXTURE_2D;"
+		u8"Texture3D tex3d : TEXTURE_3D;"
 		;
 
 	mfgV2XToken tokens[2048];

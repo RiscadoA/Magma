@@ -1311,12 +1311,48 @@ static mfError mfgParseTexture1D(mfgV2XParserInternalState* state)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;
+	mfgV2XToken* tok = NULL;
 
+	// Get texture ID
 	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_TEXTURE_1D, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	// Extract texture identifier and name
+	mfmU64 texID = 0;
+	for (texID = 0; texID < MFG_V2X_MAX_TEXTURE_1DS; ++texID)
+		if (state->compilerState->texture1Ds[texID].active == MFM_FALSE)
+		{
+			state->compilerState->texture1Ds[texID].active = MFM_TRUE;
+			break;
+		}
+	if (texID == MFG_V2X_MAX_TEXTURE_1DS)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgParseTexture1D] Failed to parse texture 1D, texture 1D limit (%d) reached", MFG_V2X_MAX_TEXTURE_1DS);
+		mfsDestroyLocalStringStream(&ss);
+		return MFG_ERROR_TOO_MANY_VARIABLES;
+	}
+
+	// Get ID
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->texture1Ds[texID].id, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_COLON, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Get name
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->texture1Ds[texID].name, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	return MF_ERROR_OKAY;
 }
@@ -1327,13 +1363,49 @@ static mfError mfgParseTexture2D(mfgV2XParserInternalState* state)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;
+	mfgV2XToken* tok = NULL;
 
+	// Get texture ID
 	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_TEXTURE_2D, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	// Extract texture identifier and name
-	
+	mfmU64 texID = 0;
+	for (texID = 0; texID < MFG_V2X_MAX_TEXTURE_2DS; ++texID)
+		if (state->compilerState->texture2Ds[texID].active == MFM_FALSE)
+		{
+			state->compilerState->texture2Ds[texID].active = MFM_TRUE;
+			break;
+		}
+	if (texID == MFG_V2X_MAX_TEXTURE_2DS)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgParseTexture2D] Failed to parse texture 2D, texture 2D limit (%d) reached", MFG_V2X_MAX_TEXTURE_2DS);
+		mfsDestroyLocalStringStream(&ss);
+		return MFG_ERROR_TOO_MANY_VARIABLES;
+	}
+
+	// Get ID
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->texture2Ds[texID].id, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_COLON, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Get name
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->texture2Ds[texID].name, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -1343,13 +1415,49 @@ static mfError mfgParseTexture3D(mfgV2XParserInternalState* state)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;
+	mfgV2XToken* tok = NULL;
 
+	// Get texture ID
 	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_TEXTURE_3D, NULL);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	// Extract texture identifier and name
-	
+	mfmU64 texID = 0;
+	for (texID = 0; texID < MFG_V2X_MAX_TEXTURE_3DS; ++texID)
+		if (state->compilerState->texture3Ds[texID].active == MFM_FALSE)
+		{
+			state->compilerState->texture3Ds[texID].active = MFM_TRUE;
+			break;
+		}
+	if (texID == MFG_V2X_MAX_TEXTURE_3DS)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgParseTexture3D] Failed to parse texture 3D, texture 3D limit (%d) reached", MFG_V2X_MAX_TEXTURE_3DS);
+		mfsDestroyLocalStringStream(&ss);
+		return MFG_ERROR_TOO_MANY_VARIABLES;
+	}
+
+	// Get ID
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->texture3Ds[texID].id, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_COLON, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Get name
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	strcpy(state->compilerState->texture3Ds[texID].name, tok->attribute);
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -1396,6 +1504,27 @@ static mfError mfgParseProgram(mfgV2XParserInternalState* state)
 		else if (tok->info->type == MFG_V2X_TOKEN_CONSTANT_BUFFER)
 		{
 			err = mfgParseConstantBuffer(state);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+		// Check if it is a Texture1D
+		else if (tok->info->type == MFG_V2X_TOKEN_TEXTURE_1D)
+		{
+			err = mfgParseTexture1D(state);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+		// Check if it is a Texture2D
+		else if (tok->info->type == MFG_V2X_TOKEN_TEXTURE_2D)
+		{
+			err = mfgParseTexture2D(state);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+		// Check if it is a Texture3D
+		else if (tok->info->type == MFG_V2X_TOKEN_TEXTURE_3D)
+		{
+			err = mfgParseTexture3D(state);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
