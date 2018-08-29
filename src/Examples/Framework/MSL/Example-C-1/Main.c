@@ -24,8 +24,8 @@ int main(int argc, const char** argv)
 
 		u8"void main()"
 		u8"{"
-		u8"		Output.position = true + true && (2 == 9);"
-		u8"		Output.position = buffer.transforms[Input.instanceID / 2 * 4];"
+		u8"		float4 localVar = Input.position * 2.0;"
+		u8"		Output.position = localVar;"
 		u8"}"
 		;
 

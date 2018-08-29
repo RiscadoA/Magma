@@ -7,7 +7,7 @@ const static mfmU8 mfgOGL4AssemblerMinorVersion = 0x01;
 
 typedef struct
 {
-	mfmU16 varID;
+	mfmU16 varIndex;
 	mfmU16 id;
 	mfmU8 index;
 	mfmU8 rows;
@@ -352,7 +352,7 @@ static mfError mfgOGL4PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream* 
 			if (id == data->references[i].id)
 			{
 				// Get variable reference
-				mfError err = mfgOGL4PutID(data->references[i].varID, data, out);
+				mfError err = mfgOGL4PutID(data->references[i].varIndex, data, out);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1902,7 +1902,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 2;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1928,7 +1928,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 3;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1954,7 +1954,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 4;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1980,7 +1980,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 2;
 						assemblerData.references[i].cols = 2;
 						assemblerData.references[i].index = index;
@@ -2006,7 +2006,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 3;
 						assemblerData.references[i].cols = 3;
 						assemblerData.references[i].index = index;
@@ -2032,7 +2032,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 4;
 						assemblerData.references[i].cols = 4;
 						assemblerData.references[i].index = index;
@@ -2059,7 +2059,7 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 0;
 						assemblerData.references[i].cols = 0;
 						assemblerData.references[i].index = 0;

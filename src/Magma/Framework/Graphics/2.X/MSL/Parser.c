@@ -149,6 +149,33 @@ static mfmBool mfgAcceptTokenType(mfgV2XParserInternalState* state, const mfgV2X
 	return MFM_TRUE;
 }
 
+static mfmBool mfgAcceptType(mfgV2XParserInternalState* state, const mfgV2XToken** out)
+{
+	if (state == NULL)
+		return MFM_FALSE;
+	if (state->it > state->lastToken)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgAcceptType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected a type token");
+		mfsDestroyLocalStringStream(&ss);
+		return MFM_FALSE;
+	}
+
+	if (state->it->info->isType == MFM_FALSE)
+	{
+		if (out != NULL)
+			*out = NULL;
+		return MFM_FALSE;
+	}
+
+	if (out != NULL)
+		*out = state->it;
+	++state->it;
+
+	return MFM_TRUE;
+}
+
 static mfError mfgPeekToken(mfgV2XParserInternalState* state, const mfgV2XToken** out)
 {
 	if (state == NULL || out == NULL)
@@ -913,6 +940,73 @@ static mfError mfgParseCompoundStatement(mfgV2XParserInternalState* state, mfgV2
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgParseDeclarationStatement(mfgV2XParserInternalState* state, mfgV2XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	mfgV2XToken* tok = NULL;
+
+	if (mfgAcceptType(state, &tok) == MFM_FALSE)
+	{
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	err = mfgV2XGetNode(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	(*outNode)->info = &MFG_V2X_TINFO_DECLARATION_STATEMENT;
+
+	{
+		mfgV2XNode* type = NULL;
+		err = mfgV2XGetNode(state, &type);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		type->info = tok->info;
+		err = mfgAddToNode(*outNode, type);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	{
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfgV2XNode* id = NULL;
+		err = mfgV2XGetNode(state, &id);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		id->info = tok->info;
+		strcpy(id->attribute, tok->attribute);
+		err = mfgAddToNode(*outNode, id);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	// If has definition
+	if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_ASSIGN, NULL))
+	{
+		mfgV2XNode* exp = NULL;
+		err = mfgParseExpression(state, &exp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		if (exp != NULL)
+		{
+			err = mfgAddToNode(*outNode, exp);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+	}
+
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_SEMICOLON, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgParseReturnStatement(mfgV2XParserInternalState* state, mfgV2XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
@@ -990,6 +1084,13 @@ static mfError mfgParseStatement(mfgV2XParserInternalState* state, mfgV2XNode** 
 
 	// Check if it is an expression statement
 	err = mfgParseExpressionStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is a declaration statement
+	err = mfgParseDeclarationStatement(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (*outNode != NULL)

@@ -5,7 +5,7 @@ const static mfmU8 mfgD3D11AssemblerMinorVersion = 0x01;
 
 typedef struct
 {
-	mfmU16 varID;
+	mfmU16 varIndex;
 	mfmU16 id;
 	mfmU8 index;
 	mfmU8 rows;
@@ -350,7 +350,7 @@ static mfError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			if (id == data->references[i].id)
 			{
 				// Get variable reference
-				mfError err = mfgD3D11PutID(data->references[i].varID, data, out);
+				mfError err = mfgD3D11PutID(data->references[i].varIndex, data, out);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -968,7 +968,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int22 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int2x2 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -979,7 +979,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int33 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int3x3 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -990,7 +990,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int44 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int4x4 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1886,7 +1886,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 2;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1912,7 +1912,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 3;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1938,7 +1938,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 4;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1964,7 +1964,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 2;
 						assemblerData.references[i].cols = 2;
 						assemblerData.references[i].index = index;
@@ -1990,7 +1990,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 3;
 						assemblerData.references[i].cols = 3;
 						assemblerData.references[i].index = index;
@@ -2016,7 +2016,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 4;
 						assemblerData.references[i].cols = 4;
 						assemblerData.references[i].index = index;
@@ -2043,7 +2043,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				for (mfmU8 i = 0; i < 128; ++i)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 0;
 						assemblerData.references[i].cols = 0;
 						assemblerData.references[i].index = 0;

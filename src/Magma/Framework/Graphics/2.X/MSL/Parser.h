@@ -11,9 +11,21 @@ extern "C"
 
 	typedef struct mfgV2XNode mfgV2XNode;
 
+
+#define MFG_V2X_STACK_FRAME_MAX_VARS 32
+#define MFG_V2X_MAX_STACK_FRAMES 64
+
+	typedef struct mfgV2XStackFrame mfgV2XStackFrame;
+
+	struct mfgV2XStackFrame
+	{
+		mfgV2XStackFrame* parent;
+		mfgV2XCompilerMSLVariable localVariables[MFG_V2X_STACK_FRAME_MAX_VARS];
+	};
+
 	typedef struct
 	{
-		mfmU16 varID;
+		mfmU16 varIndex;
 		mfmU16 cmpIndex;
 		mfgV2XEnum type;
 		mfmU16 cmpVarID;
@@ -30,6 +42,7 @@ extern "C"
 		mfmBool isConstant;
 		mfmBool isLValue;
 		mfgV2XReference ref;
+		mfgV2XStackFrame* stackFrame;
 	};
 
 	typedef struct

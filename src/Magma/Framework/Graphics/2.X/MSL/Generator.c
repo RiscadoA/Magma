@@ -16,7 +16,87 @@ typedef struct
 	mfgV2XEnum shaderType;
 	mfmU16 nextVarIndex;
 	mfmU16 nextBufIndex;
+	mfgV2XStackFrame stackFrames[MFG_V2X_MAX_STACK_FRAMES];
+	mfgV2XStackFrame* currentStackFrame;
+	mfmU32 nextStack;
 } mfgV2XGeneratorInternalState;
+
+static mfgV2XCompilerMSLVariable* mfgGetLocalVariable(mfgV2XGeneratorInternalState* state, mfgV2XStackFrame* frame, const mfsUTF8CodeUnit* name)
+{
+	if (state == NULL || name == NULL)
+		return NULL;
+
+	while (frame != NULL)
+	{
+		for (mfmU32 i = 0; i < MFG_V2X_STACK_FRAME_MAX_VARS; ++i)
+		{
+			if (frame->localVariables[i].active == MFM_FALSE)
+				continue;
+			if (strcmp(frame->localVariables[i].id, name) == 0)
+				return &frame->localVariables[i];
+		}
+
+		frame = frame->parent;
+	}
+
+	return NULL;
+}
+
+static mfgV2XCompilerMSLVariable* mfgDeclareLocalVariable(mfgV2XGeneratorInternalState* state, const mfsUTF8CodeUnit* name, mfgV2XEnum type)
+{
+	if (state == NULL || name == NULL)
+		return NULL;
+
+	for (mfmU32 i = 0; i < MFG_V2X_STACK_FRAME_MAX_VARS; ++i)
+	{
+		if (state->currentStackFrame->localVariables[i].active == MFM_TRUE)
+			continue;
+		strcpy(state->currentStackFrame->localVariables[i].id, name);
+		state->currentStackFrame->localVariables[i].active = MFM_TRUE;
+		state->currentStackFrame->localVariables[i].arraySize = 0;
+		state->currentStackFrame->localVariables[i].type = type;
+		state->currentStackFrame->localVariables[i].index = state->nextVarIndex++;
+		return &state->currentStackFrame->localVariables[i];
+	}
+
+	return NULL;
+}
+
+static mfError mfgCreateStackFrame(mfgV2XGeneratorInternalState* state, mfgV2XStackFrame** frame)
+{
+	if (state == NULL || frame == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+	if (state->nextStack >= MFG_V2X_MAX_STACK_FRAMES)
+		return MFG_ERROR_STACK_FRAMES_OVERFLOW;
+	for (mfmU32 i = 0; i < MFG_V2X_STACK_FRAME_MAX_VARS; ++i)
+		state->stackFrames[state->nextStack].localVariables[i].active = MFM_FALSE;
+	*frame = &state->stackFrames[state->nextStack];
+	++state->nextStack;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgPushStackFrame(mfgV2XGeneratorInternalState* state)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+	mfgV2XStackFrame* frame = NULL;
+	mfError err = mfgCreateStackFrame(state, &frame);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	frame->parent = state->currentStackFrame;
+	state->currentStackFrame = frame;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfgPopStackFrame(mfgV2XGeneratorInternalState* state)
+{
+	if (state == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+	if (state->currentStackFrame->parent == NULL)
+		return MFG_ERROR_STACK_FRAMES_UNDERFLOW;
+	state->currentStackFrame = state->currentStackFrame->parent;
+	return MF_ERROR_OKAY;
+}
 
 static mfError mfgBytecodePut8(mfgV2XGeneratorInternalState* state, const void* data)
 {
@@ -151,7 +231,7 @@ static mfError mfgDeclareType(mfgV2XGeneratorInternalState* state, mfgV2XEnum ty
 	return MF_ERROR_OKAY;
 }
 
-static mfError mfgGetComponent(mfgV2XGeneratorInternalState* state, mfgV2XEnum type, mfmU16 varID, mfmU16 outID, mfmU8 index)
+static mfError mfgGetComponent(mfgV2XGeneratorInternalState* state, mfgV2XEnum type, mfmU16 varIndex, mfmU16 outID, mfmU8 index)
 {
 	if (state == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -187,7 +267,7 @@ static mfError mfgGetComponent(mfgV2XGeneratorInternalState* state, mfgV2XEnum t
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	err = mfgBytecodePut16(state, &varID);
+	err = mfgBytecodePut16(state, &varIndex);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -198,7 +278,7 @@ static mfError mfgGetComponent(mfgV2XGeneratorInternalState* state, mfgV2XEnum t
 	return MF_ERROR_OKAY;
 }
 
-static mfError mfgAccessArray(mfgV2XGeneratorInternalState* state, mfmU16 varID, mfmU16 outID, mfmU16 indexID)
+static mfError mfgAccessArray(mfgV2XGeneratorInternalState* state, mfmU16 varIndex, mfmU16 outID, mfmU16 indexID)
 {
 	if (state == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -214,7 +294,7 @@ static mfError mfgAccessArray(mfgV2XGeneratorInternalState* state, mfmU16 varID,
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	err = mfgBytecodePut16(state, &varID);
+	err = mfgBytecodePut16(state, &varIndex);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -225,7 +305,7 @@ static mfError mfgAccessArray(mfgV2XGeneratorInternalState* state, mfmU16 varID,
 	return MF_ERROR_OKAY;
 }
 
-static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2XNode* node, mfmU16 outVar, mfmU16* prodVar)
+static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2XNode* node, mfmU16 outVar)
 {
 	if (state == NULL || node == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
@@ -246,7 +326,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 		{
 			if (term1->info->type == MFG_V2X_TOKEN_REFERENCE)
 			{
-				err = mfgGenerateExpression(state, term2, term1->ref.varID, NULL);
+				err = mfgGenerateExpression(state, term2, term1->ref.varIndex);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -262,7 +342,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					if (err != MF_ERROR_OKAY)
 						return err;
 
-					u16T = term1->ref.varID;
+					u16T = term1->ref.varIndex;
 					err = mfgBytecodePut16(state, &u16T);
 					if (err != MF_ERROR_OKAY)
 						return err;
@@ -278,11 +358,11 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					if (err != MF_ERROR_OKAY)
 						return err;
 					// Get component reference
-					err = mfgGetComponent(state, term1->ref.type, term1->ref.varID, term1->ref.cmpVarID, term1->ref.cmpIndex);
+					err = mfgGetComponent(state, term1->ref.type, term1->ref.varIndex, term1->ref.cmpVarID, term1->ref.cmpIndex);
 					if (err != MF_ERROR_OKAY)
 						return err;
 					// Set component value
-					err = mfgGenerateExpression(state, term2, term1->ref.cmpVarID, NULL);
+					err = mfgGenerateExpression(state, term2, term1->ref.cmpVarID);
 					if (err != MF_ERROR_OKAY)
 						return err;
 					// Set out value
@@ -319,7 +399,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					err = mfgDeclareType(state, term1->first->returnType, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
-					err = mfgGenerateExpression(state, term1->first, term1Temp, NULL);
+					err = mfgGenerateExpression(state, term1->first, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
 					// Get component reference
@@ -327,7 +407,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					if (err != MF_ERROR_OKAY)
 						return err;
 					// Set component value
-					err = mfgGenerateExpression(state, term2, term1->ref.cmpVarID, NULL);
+					err = mfgGenerateExpression(state, term2, term1->ref.cmpVarID);
 					if (err != MF_ERROR_OKAY)
 						return err;
 					// Set out value
@@ -364,7 +444,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				if (term2 == NULL)
 				{
-					err = mfgGenerateExpression(state, term1, outVar, NULL);
+					err = mfgGenerateExpression(state, term1, outVar);
 					if (err != MF_ERROR_OKAY)
 						return err;
 				}
@@ -380,7 +460,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					err = mfgDeclareType(state, term1->returnType, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
-					err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+					err = mfgGenerateExpression(state, term1, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
 
@@ -389,7 +469,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					err = mfgDeclareType(state, term2->returnType, term2Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
-					err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+					err = mfgGenerateExpression(state, term2, term2Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
 
@@ -443,7 +523,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					err = mfgDeclareType(state, term1->returnType, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
-					err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+					err = mfgGenerateExpression(state, term1, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
 
@@ -452,7 +532,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					err = mfgDeclareType(state, term2->returnType, term2Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
-					err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+					err = mfgGenerateExpression(state, term2, term2Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
 
@@ -484,7 +564,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					err = mfgDeclareType(state, term1->returnType, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
-					err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+					err = mfgGenerateExpression(state, term1, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
 
@@ -527,7 +607,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -536,7 +616,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -583,7 +663,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -592,7 +672,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -639,7 +719,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -648,7 +728,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -695,7 +775,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -704,7 +784,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -751,7 +831,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -760,7 +840,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -807,7 +887,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -816,7 +896,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -863,7 +943,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -872,7 +952,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -919,7 +999,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -928,7 +1008,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -975,7 +1055,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -984,7 +1064,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1031,7 +1111,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1040,7 +1120,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term2->returnType, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				err = mfgGenerateExpression(state, term2, term2Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1089,7 +1169,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				err = mfgDeclareType(state, term1->returnType, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
-				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				err = mfgGenerateExpression(state, term1, term1Temp);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1131,7 +1211,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				if (err != MF_ERROR_OKAY)
 					return err;
 
-				u16T = node->ref.varID;
+				u16T = node->ref.varIndex;
 				err = mfgBytecodePut16(state, &u16T);
 				if (err != MF_ERROR_OKAY)
 					return err;
@@ -1146,7 +1226,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				if (node->first == NULL)
 				{
 					// Get component reference
-					err = mfgGetComponent(state, node->ref.type, node->ref.varID, node->ref.cmpVarID, node->ref.cmpIndex);
+					err = mfgGetComponent(state, node->ref.type, node->ref.varIndex, node->ref.cmpVarID, node->ref.cmpIndex);
 					if (err != MF_ERROR_OKAY)
 						return err;
 
@@ -1222,7 +1302,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					return err;
 
 				// Get array reference
-				err = mfgAccessArray(state, node->ref.varID, node->ref.cmpVarID, index);
+				err = mfgAccessArray(state, node->ref.varIndex, node->ref.cmpVarID, index);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1366,6 +1446,30 @@ static mfError mfgGenerateCompoundStatement(mfgV2XGeneratorInternalState* state,
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgGenerateDeclarationStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	mfgV2XNode* ref = node->first;
+	mfgV2XNode* exp = ref->next;
+
+	err = mfgDeclareType(state, ref->ref.type, ref->ref.varIndex);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	if (exp != NULL)
+	{
+		err = mfgGenerateExpression(state, exp, ref->ref.varIndex);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
 {
 	if (state == NULL || node == NULL)
@@ -1382,6 +1486,12 @@ static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 	else if (node->info->type == MFG_V2X_TOKEN_COMPOUND_STATEMENT)
 	{
 		err = mfgGenerateCompoundStatement(state, node, 0xFFFF, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_DECLARATION_STATEMENT)
+	{
+		err = mfgGenerateDeclarationStatement(state, node, 0xFFFF, NULL);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -1485,6 +1595,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 	if (state == NULL || node == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
 
+	node->stackFrame = state->currentStackFrame;
 	mfError err;
 
 	mfgV2XNode* term1 = node->first;
@@ -1624,7 +1735,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			for (mfmU32 i = 0; i < MFG_V2X_MAX_TEXTURE_1DS; ++i)
 				if (strcmp(state->compilerState->texture1Ds[i].id, node->attribute) == 0)
 				{
-					node->ref.varID = state->compilerState->texture1Ds[i].index;
+					node->ref.varIndex = state->compilerState->texture1Ds[i].index;
 					node->ref.type = MFG_V2X_TOKEN_TEXTURE_1D;
 					node->returnType = MFG_V2X_TOKEN_TEXTURE_1D;
 					node->info = &MFG_V2X_TINFO_REFERENCE;
@@ -1634,7 +1745,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			for (mfmU32 i = 0; i < MFG_V2X_MAX_TEXTURE_2DS; ++i)
 				if (strcmp(state->compilerState->texture2Ds[i].id, node->attribute) == 0)
 				{
-					node->ref.varID = state->compilerState->texture2Ds[i].index;
+					node->ref.varIndex = state->compilerState->texture2Ds[i].index;
 					node->ref.type = MFG_V2X_TOKEN_TEXTURE_2D;
 					node->returnType = MFG_V2X_TOKEN_TEXTURE_2D;
 					node->info = &MFG_V2X_TINFO_REFERENCE;
@@ -1644,14 +1755,22 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			for (mfmU32 i = 0; i < MFG_V2X_MAX_TEXTURE_3DS; ++i)
 				if (strcmp(state->compilerState->texture3Ds[i].id, node->attribute) == 0)
 				{
-					node->ref.varID = state->compilerState->texture3Ds[i].index;
+					node->ref.varIndex = state->compilerState->texture3Ds[i].index;
 					node->ref.type = MFG_V2X_TOKEN_TEXTURE_3D;
 					node->returnType = MFG_V2X_TOKEN_TEXTURE_3D;
 					node->info = &MFG_V2X_TINFO_REFERENCE;
 					return MF_ERROR_OKAY;
 				}
 
-			// TO DO: GET LOCAL VARIABLES
+			mfgV2XCompilerMSLVariable* var = mfgGetLocalVariable(state, state->currentStackFrame, node->attribute);
+			if (var != NULL)
+			{
+				node->ref.varIndex = var->index;
+				node->ref.type = var->type;
+				node->returnType = var->type;
+				node->info = &MFG_V2X_TINFO_REFERENCE;
+				return MF_ERROR_OKAY;
+			}
 
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
@@ -1679,7 +1798,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			}
 
 			node->info = &MFG_V2X_TINFO_ARRAY_REFERENCE;
-			node->ref.varID = term1->ref.varID;
+			node->ref.varIndex = term1->ref.varIndex;
 			node->ref.type = term1->ref.type;
 			node->ref.cmpVarID = state->nextVarIndex++;
 			node->first = term2;
@@ -1707,7 +1826,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					if (strcmp(term2->attribute, state->compilerState->input.variables[i].id) == 0)
 					{
 						node->first = NULL;
-						node->ref.varID = state->compilerState->input.variables[i].index;
+						node->ref.varIndex = state->compilerState->input.variables[i].index;
 						node->ref.type = state->compilerState->input.variables[i].type;
 						node->isLValue = MFM_TRUE;
 						node->isConstant = MFM_FALSE;
@@ -1738,7 +1857,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					if (strcmp(term2->attribute, state->compilerState->output.variables[i].id) == 0)
 					{
 						node->first = NULL;
-						node->ref.varID = state->compilerState->output.variables[i].index;
+						node->ref.varIndex = state->compilerState->output.variables[i].index;
 						node->ref.type = state->compilerState->output.variables[i].type;
 						node->isLValue = MFM_TRUE;
 						node->isConstant = MFM_FALSE;
@@ -1764,7 +1883,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 							{
 								node->info = &MFG_V2X_TINFO_REFERENCE;
 								node->first = NULL;
-								node->ref.varID = state->compilerState->constantBuffers[i].variables[j].index;
+								node->ref.varIndex = state->compilerState->constantBuffers[i].variables[j].index;
 								node->ref.type = state->compilerState->constantBuffers[i].variables[j].type;
 								node->isLValue = MFM_TRUE;
 								node->isConstant = MFM_FALSE;
@@ -1789,7 +1908,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				if (term1->info->type == MFG_V2X_TOKEN_REFERENCE)
 				{
 					node->info = &MFG_V2X_TINFO_CMP_REFERENCE;
-					node->ref.varID = term1->ref.varID;
+					node->ref.varIndex = term1->ref.varIndex;
 					node->ref.type = term1->ref.type;
 					node->first = NULL;
 				}
@@ -1804,7 +1923,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				else
 				{
 					node->info = &MFG_V2X_TINFO_CMP_REFERENCE;
-					node->ref.varID = 0xFFFF;
+					node->ref.varIndex = 0xFFFF;
 					node->ref.type = term1->returnType;
 					term1->next = NULL;
 				}
@@ -1850,6 +1969,10 @@ static mfError mfgAnnotateCompoundStatement(mfgV2XGeneratorInternalState* state,
 
 	mfError err;
 
+	err = mfgPushStackFrame(state);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	node->isConstant = MFM_FALSE;
 	node->isLValue = MFM_FALSE;
 	node->returnType = 0;
@@ -1863,6 +1986,10 @@ static mfError mfgAnnotateCompoundStatement(mfgV2XGeneratorInternalState* state,
 		statement = statement->next;
 	}
 
+	err = mfgPopStackFrame(state);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -1873,6 +2000,7 @@ static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 
 	mfError err;
 
+	node->stackFrame = state->currentStackFrame;
 	if (node->info->isOperator == MFM_TRUE)
 	{
 		err = mfgAnnotateExpression(state, node);
@@ -1884,6 +2012,36 @@ static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 		err = mfgAnnotateCompoundStatement(state, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
+	}
+	else if(node->info->type == MFG_V2X_TOKEN_DECLARATION_STATEMENT)
+	{
+		mfgV2XNode* type = node->first;
+		mfgV2XNode* id = type->next;
+		mfgV2XNode* exp = id->next;
+
+		mfgV2XCompilerMSLVariable* var = mfgDeclareLocalVariable(state, id->attribute, type->info->type);
+		if (var == NULL)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPutString(&ss, u8"[mfgAnnotateExpression] 'not' term must be a boolean");
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_FAILED_TO_GENERATE_STATEMENT;
+		}
+
+		node->first->next = exp;
+		node->first->info = &MFG_V2X_TINFO_REFERENCE;
+		node->first->ref.type = var->type;
+		node->first->ref.varIndex = var->index;
+
+		if (exp != NULL)
+		{
+			err = mfgAnnotateExpression(state, exp);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+
+		return MF_ERROR_OKAY;
 	}
 
 	return MF_ERROR_OKAY;
@@ -2309,6 +2467,11 @@ mfError mfgV2XRunMVLGenerator(const mfgV2XNode * root, mfmU8 * bytecode, mfmU64 
 	internalState.shaderType = shaderType;
 	internalState.nextVarIndex = 0;
 	internalState.nextBufIndex = 0;
+	internalState.nextStack = 0;
+	internalState.currentStackFrame = NULL;
+	err = mfgCreateStackFrame(&internalState, &internalState.currentStackFrame);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	state->bytecodeSize = 0;
 	state->metaDataSize = 0;

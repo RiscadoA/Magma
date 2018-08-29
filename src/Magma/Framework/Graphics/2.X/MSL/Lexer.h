@@ -43,11 +43,11 @@ static const mfgV2XTokenInfo MFG_V2X_TINFO_INT3					= { MFG_V2X_TOKEN_INT3, MFM_
 #define MFG_V2X_TOKEN_INT4										0x0004
 static const mfgV2XTokenInfo MFG_V2X_TINFO_INT4					= { MFG_V2X_TOKEN_INT4, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"int4" };
 #define MFG_V2X_TOKEN_INT22										0x0005
-static const mfgV2XTokenInfo MFG_V2X_TINFO_INT22				= { MFG_V2X_TOKEN_INT2, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"int2x2" };
+static const mfgV2XTokenInfo MFG_V2X_TINFO_INT22				= { MFG_V2X_TOKEN_INT22, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"int2x2" };
 #define MFG_V2X_TOKEN_INT33										0x0006
-static const mfgV2XTokenInfo MFG_V2X_TINFO_INT33				= { MFG_V2X_TOKEN_INT3, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"int3x3" };
+static const mfgV2XTokenInfo MFG_V2X_TINFO_INT33				= { MFG_V2X_TOKEN_INT33, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"int3x3" };
 #define MFG_V2X_TOKEN_INT44										0x0007
-static const mfgV2XTokenInfo MFG_V2X_TINFO_INT44				= { MFG_V2X_TOKEN_INT4, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"int4x4" };
+static const mfgV2XTokenInfo MFG_V2X_TINFO_INT44				= { MFG_V2X_TOKEN_INT44, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"int4x4" };
 #define MFG_V2X_TOKEN_FLOAT1									0x0008
 static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT1				= { MFG_V2X_TOKEN_FLOAT1, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float1" };
 #define MFG_V2X_TOKEN_FLOAT2									0x0009
@@ -57,11 +57,11 @@ static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT3				= { MFG_V2X_TOKEN_FLOAT3, M
 #define MFG_V2X_TOKEN_FLOAT4									0x000B
 static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT4				= { MFG_V2X_TOKEN_FLOAT4, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float4" };
 #define MFG_V2X_TOKEN_FLOAT22									0x000C
-static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT22				= { MFG_V2X_TOKEN_FLOAT2, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float2x2" };
+static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT22				= { MFG_V2X_TOKEN_FLOAT22, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float2x2" };
 #define MFG_V2X_TOKEN_FLOAT33									0x000D
-static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT33				= { MFG_V2X_TOKEN_FLOAT3, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float3x3" };
+static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT33				= { MFG_V2X_TOKEN_FLOAT33, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float3x3" };
 #define MFG_V2X_TOKEN_FLOAT44									0x000E
-static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT44				= { MFG_V2X_TOKEN_FLOAT4, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float4x4" };
+static const mfgV2XTokenInfo MFG_V2X_TINFO_FLOAT44				= { MFG_V2X_TOKEN_FLOAT44, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"float4x4" };
 #define MFG_V2X_TOKEN_BOOL										0x000F
 static const mfgV2XTokenInfo MFG_V2X_TINFO_BOOL					= { MFG_V2X_TOKEN_BOOL, MFM_TRUE, MFM_FALSE, MFM_FALSE, u8"bool" };
 
