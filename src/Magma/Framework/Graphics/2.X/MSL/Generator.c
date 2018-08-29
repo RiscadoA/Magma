@@ -134,6 +134,7 @@ static mfError mfgCreateStackFrame(mfgV2XGeneratorInternalState* state, mfgV2XSt
 	for (mfmU32 i = 0; i < MFG_V2X_STACK_FRAME_MAX_VARS; ++i)
 		state->stackFrames[state->nextStack].localVariables[i].active = MFM_FALSE;
 	*frame = &state->stackFrames[state->nextStack];
+	(*frame)->parent = NULL;
 	++state->nextStack;
 	return MF_ERROR_OKAY;
 }
@@ -497,6 +498,144 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 			return err;
 
 		u16T = param1Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param2Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = outVar;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u8T = MFG_BYTECODE_CLSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (strcmp(u8"sample1D", id->attribute) == 0)
+	{
+		mfgV2XNode* param1 = params->first;
+		mfgV2XNode* param2 = param1->next;
+		mfmU16 param2Temp;
+
+		u8T = MFG_BYTECODE_OPSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get second param value
+		param2Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param2->returnType, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param2, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Perform operation
+		u8T = MFG_BYTECODE_SAMPLE1D;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param1->ref.varIndex;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param2Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = outVar;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u8T = MFG_BYTECODE_CLSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (strcmp(u8"sample2D", id->attribute) == 0)
+	{
+		mfgV2XNode* param1 = params->first;
+		mfgV2XNode* param2 = param1->next;
+		mfmU16 param2Temp;
+
+		u8T = MFG_BYTECODE_OPSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get second param value
+		param2Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param2->returnType, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param2, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Perform operation
+		u8T = MFG_BYTECODE_SAMPLE2D;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param1->ref.varIndex;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param2Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = outVar;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u8T = MFG_BYTECODE_CLSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (strcmp(u8"sample3D", id->attribute) == 0)
+	{
+		mfgV2XNode* param1 = params->first;
+		mfgV2XNode* param2 = param1->next;
+		mfmU16 param2Temp;
+
+		u8T = MFG_BYTECODE_OPSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get second param value
+		param2Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param2->returnType, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param2, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Perform operation
+		u8T = MFG_BYTECODE_SAMPLE3D;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param1->ref.varIndex;
 		err = mfgBytecodePut16(state, &u16T);
 		if (err != MF_ERROR_OKAY)
 			return err;

@@ -24,6 +24,7 @@ int main(int argc, const char** argv)
 
 		u8"void main()"
 		u8"{"
+		u8"		float i = sample1D(tex1d, 0.5f);"
 		u8"		Output.position = mulvec(buffer.transforms[Input.instanceID], Input.position);"
 		u8"}"
 		;
