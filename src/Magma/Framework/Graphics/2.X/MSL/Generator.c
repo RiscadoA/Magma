@@ -15,6 +15,9 @@ typedef struct
 
 static mfgV2XFunction mfgV2XFunctions[] = 
 {
+	{ u8"ftoi",			MFG_V2X_TOKEN_INT1,			1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"itof",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_INT1 } },
+
 	{ u8"mulmat",		MFG_V2X_TOKEN_FLOAT44,		2, { MFG_V2X_TOKEN_FLOAT44 , MFG_V2X_TOKEN_FLOAT44 } },
 	{ u8"mulvec",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_FLOAT44 , MFG_V2X_TOKEN_FLOAT4 } },
 	{ u8"sample1D",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_TEXTURE_1D , MFG_V2X_TOKEN_FLOAT1 } },
@@ -443,18 +446,83 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 	if (outVar == 0xFFFF)
 		return MF_ERROR_OKAY;
 
+	mfError err;
 	mfgV2XNode* id = node->first;
+	mfgV2XNode* params = id->next;
+	mfmU8 u8T;
+	mfmU16 u16T;
 
-	if (strcmp(u8"cos", id->attribute) == 0)
+	if (strcmp(u8"ftoi", id->attribute) == 0 ||
+		strcmp(u8"itof", id->attribute) == 0)
 	{
+		err = mfgGenerateExpression(state, params->first, outVar);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (strcmp(u8"mulmat", id->attribute) == 0 ||
+			 strcmp(u8"mulvec", id->attribute) == 0)
+	{
+		mfgV2XNode* param1 = params->first;
+		mfgV2XNode* param2 = param1->next;
+		mfmU16 param1Temp;
+		mfmU16 param2Temp;
 
+		u8T = MFG_BYTECODE_OPSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get first param value
+		param1Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param1->returnType, param1Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param1, param1Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get second param value
+		param2Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param2->returnType, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param2, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Perform operation
+		u8T = MFG_BYTECODE_MULMAT;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param1Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param2Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = outVar;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u8T = MFG_BYTECODE_CLSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
 	}
 	else
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateCall] Failed to generate function call, unknown function '%s'", id->attribute);
+		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateCall] Failed to generate function call, unsupported function '%s'", id->attribute);
 		mfsDestroyLocalStringStream(&ss);
+		return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 	}
 
 	return MF_ERROR_OKAY;
@@ -550,7 +618,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					if (err != MF_ERROR_OKAY)
 						return err;
 					// Get first term value
-					mfmU16 term1Temp;
+					mfmU16 term1Temp = state->nextVarIndex++;
 					err = mfgDeclareType(state, term1->first->returnType, term1Temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
@@ -729,7 +797,6 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 				mfmU16 term1Temp = 0;
 				mfmU16 term2Temp = 0;
-
 				
 				if (term2 != NULL)
 				{
@@ -2060,6 +2127,9 @@ static mfError mfgAnnotateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 		}
+
+		if (param == NULL)
+			break;
 
 		
 		err = mfgAnnotateExpression(state, param);

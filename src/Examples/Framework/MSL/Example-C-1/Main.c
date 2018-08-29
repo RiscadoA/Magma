@@ -24,9 +24,7 @@ int main(int argc, const char** argv)
 
 		u8"void main()"
 		u8"{"
-		u8"		float delta = float2(0.5f, 0.0f).x;"
-		u8"		delta = minf(delta, 0.0f);"
-		u8"		Output.position = Input.position + float4(delta, delta, 0.0f, 1.0f);"
+		u8"		Output.position = mulvec(buffer.transforms[Input.instanceID], Input.position);"
 		u8"}"
 		;
 
