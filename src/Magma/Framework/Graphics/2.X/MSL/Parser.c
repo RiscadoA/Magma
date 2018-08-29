@@ -985,8 +985,28 @@ static mfError mfgParseDeclarationStatement(mfgV2XParserInternalState* state, mf
 			return err;
 	}
 
+	// if is array
+	if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_OPEN_BRACKETS, NULL))
+	{
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_INT_LITERAL, &tok);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_CLOSE_BRACKETS, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		mfgV2XNode* arraySize = NULL;
+		err = mfgV2XGetNode(state, &arraySize);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		arraySize->info = tok->info;
+		strcpy(arraySize->attribute, tok->attribute);
+		err = mfgAddToNode(*outNode, arraySize);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
 	// If has definition
-	if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_ASSIGN, NULL))
+	else if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_ASSIGN, NULL))
 	{
 		mfgV2XNode* exp = NULL;
 		err = mfgParseExpression(state, &exp);

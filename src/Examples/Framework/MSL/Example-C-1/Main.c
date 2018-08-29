@@ -24,8 +24,9 @@ int main(int argc, const char** argv)
 
 		u8"void main()"
 		u8"{"
-		u8"		float4 localVar = Input.position * 2.0;"
-		u8"		Output.position = localVar;"
+		u8"		float4 localVar[32];"
+		u8"		localVar[0] = Input.position * 2.0;"
+		u8"		Output.position = localVar[0];"
 		u8"}"
 		;
 
