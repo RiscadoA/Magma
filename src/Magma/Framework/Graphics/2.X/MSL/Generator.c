@@ -625,6 +625,454 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			break;
 		}
 
+		case MFG_V2X_TOKEN_AND:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_AND;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_OR:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_OR;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_EQUAL:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_EQUAL;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_DIFFERENT:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_DIFFERENT;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_GREATER:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_GREATER;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_LESS:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_LESS;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_GEQUAL:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_GEQUAL;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
+		case MFG_V2X_TOKEN_LEQUAL:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get first term value
+				mfmU16 term1Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term1->returnType, term1Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term1, term1Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get second term value
+				mfmU16 term2Temp = state->nextVarIndex++;
+				err = mfgDeclareType(state, term2->returnType, term2Temp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfgGenerateExpression(state, term2, term2Temp, NULL);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Perform operation
+				u8T = MFG_BYTECODE_LEQUAL;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term1Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = term2Temp;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u16T = outVar;
+				err = mfgBytecodePut16(state, &u16T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
 		case MFG_V2X_TOKEN_NOT:
 		{
 			if (outVar != 0xFFFF)
@@ -754,7 +1202,6 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			}
 			break;
 		}
-
 
 		case MFG_V2X_TOKEN_ARRAY_REFERENCE:
 		{
