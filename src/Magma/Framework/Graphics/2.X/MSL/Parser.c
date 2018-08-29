@@ -1088,6 +1088,63 @@ static mfError mfgParseDiscardStatement(mfgV2XParserInternalState* state, mfgV2X
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgParseIfStatement(mfgV2XParserInternalState* state, mfgV2XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_IF, NULL) == MFM_FALSE)
+	{
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	err = mfgV2XGetNode(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	(*outNode)->info = &MFG_V2X_TINFO_IF;
+
+	// Parse expression
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_OPEN_PARENTHESIS, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	mfgV2XNode* exp = NULL;
+	err = mfgParseExpression(state, &exp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgAddToNode(*outNode, exp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_CLOSE_PARENTHESIS, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Parse statement
+	mfgV2XNode* statement = NULL;
+	err = mfgParseStatement(state, &statement);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgAddToNode(*outNode, statement);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Check if the 'if' has an 'else' statement
+	if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_ELSE, NULL) == MFM_TRUE)
+	{
+		// Parse 'else' statement
+		err = mfgParseStatement(state, &statement);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgAddToNode(*outNode, statement);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgParseStatement(mfgV2XParserInternalState* state, mfgV2XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
@@ -1125,6 +1182,13 @@ static mfError mfgParseStatement(mfgV2XParserInternalState* state, mfgV2XNode** 
 
 	// Check if it is a discard statement
 	err = mfgParseDiscardStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is a if statement
+	err = mfgParseIfStatement(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (*outNode != NULL)

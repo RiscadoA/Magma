@@ -1550,6 +1550,64 @@ static mfError mfgGenerateCompoundStatement(mfgV2XGeneratorInternalState* state,
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgGenerateIfStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	mfmU8 u8T = MFG_BYTECODE_OPSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	mfgV2XNode* exp = node->first;
+	mfmU16 tempExp = state->nextVarIndex++;
+	err = mfgDeclareType(state, exp->returnType, tempExp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgGenerateExpression(state, exp, tempExp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	mfgV2XNode* ifStatement = exp->next;
+	mfgV2XNode* elseStatement = ifStatement->next;
+	
+	u8T = MFG_BYTECODE_IF;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &tempExp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgGenerateStatement(state, ifStatement);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	if (elseStatement != NULL)
+	{
+		u8T = MFG_BYTECODE_ELSE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		err = mfgGenerateStatement(state, elseStatement);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	u8T = MFG_BYTECODE_CLSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgGenerateDeclarationStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
 {
 	if (state == NULL || node == NULL)
@@ -1592,19 +1650,25 @@ static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 
 	if (node->info->isOperator == MFM_TRUE)
 	{
-		err = mfgGenerateExpression(state, node, 0xFFFF, NULL);
+		err = mfgGenerateExpression(state, node, 0xFFFF);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	else if (node->info->type == MFG_V2X_TOKEN_COMPOUND_STATEMENT)
 	{
-		err = mfgGenerateCompoundStatement(state, node, 0xFFFF, NULL);
+		err = mfgGenerateCompoundStatement(state, node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_IF)
+	{
+		err = mfgGenerateIfStatement(state, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 	else if (node->info->type == MFG_V2X_TOKEN_DECLARATION_STATEMENT)
 	{
-		err = mfgGenerateDeclarationStatement(state, node, 0xFFFF, NULL);
+		err = mfgGenerateDeclarationStatement(state, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -2120,6 +2184,33 @@ static mfError mfgAnnotateCompoundStatement(mfgV2XGeneratorInternalState* state,
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgAnnotateIfStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	node->isConstant = MFM_FALSE;
+	node->isLValue = MFM_FALSE;
+	node->returnType = 0;
+
+	err = mfgAnnotateExpression(state, node->first);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgAnnotateStatement(state, node->first->next);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (node->first->next->next != NULL)
+	{
+		err = mfgAnnotateStatement(state, node->first->next->next);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
 {
 	if (state == NULL || node == NULL)
@@ -2137,6 +2228,12 @@ static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 	else if (node->info->type == MFG_V2X_TOKEN_COMPOUND_STATEMENT)
 	{
 		err = mfgAnnotateCompoundStatement(state, node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_IF)
+	{
+		err = mfgAnnotateIfStatement(state, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}

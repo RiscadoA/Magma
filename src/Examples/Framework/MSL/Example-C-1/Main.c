@@ -28,7 +28,10 @@ int main(int argc, const char** argv)
 		u8"		localVar[0] = Input.position * 2.0;"
 		u8"		Output.position = localVar[0];"
 		u8"		bool condition = true;"
-		u8""
+		u8"		if (condition == true)"
+		u8"			{ return; }"
+		u8"		else"
+		u8"			discard;"
 		u8"}"
 		;
 
