@@ -1538,6 +1538,11 @@ static mfError mfgGenerateCompoundStatement(mfgV2XGeneratorInternalState* state,
 
 	mfError err;
 
+	mfmU8 u8T = MFG_BYTECODE_OPSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	mfgV2XNode* statement = node->first;
 	while (statement != NULL)
 	{
@@ -1546,6 +1551,11 @@ static mfError mfgGenerateCompoundStatement(mfgV2XGeneratorInternalState* state,
 			return err;
 		statement = statement->next;
 	}
+
+	u8T = MFG_BYTECODE_CLSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	return MF_ERROR_OKAY;
 }
