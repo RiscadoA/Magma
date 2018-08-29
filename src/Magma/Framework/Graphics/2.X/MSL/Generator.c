@@ -7,6 +7,66 @@
 
 typedef struct
 {
+	const mfsUTF8CodeUnit* id;
+	mfgV2XEnum returnType;
+	mfmU8 paramCount;
+	mfgV2XEnum paramTypes[4];
+} mfgV2XFunction;
+
+static mfgV2XFunction mfgV2XFunctions[] = 
+{
+	{ u8"mulmat",		MFG_V2X_TOKEN_FLOAT44,		2, { MFG_V2X_TOKEN_FLOAT44 , MFG_V2X_TOKEN_FLOAT44 } },
+	{ u8"mulvec",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_FLOAT44 , MFG_V2X_TOKEN_FLOAT4 } },
+	{ u8"sample1D",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_TEXTURE_1D , MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"sample2D",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_TEXTURE_2D , MFG_V2X_TOKEN_FLOAT2 } },
+	{ u8"sample3D",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_TEXTURE_3D , MFG_V2X_TOKEN_FLOAT3 } },
+	{ u8"cos",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"sin",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"tan",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"acos",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"asin",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"atan",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"degrees",		MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"radians",		MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"exp",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"log",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"exp2",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"log2",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"powf",			MFG_V2X_TOKEN_FLOAT1,		2, { MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"powi",			MFG_V2X_TOKEN_INT1,			2, { MFG_V2X_TOKEN_INT1, MFG_V2X_TOKEN_INT1 } },
+	{ u8"sqrt",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"isqrt",		MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"absf",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"absi",			MFG_V2X_TOKEN_INT1,			1, { MFG_V2X_TOKEN_INT1 } },
+	{ u8"signf",		MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"signi",		MFG_V2X_TOKEN_INT1,			1, { MFG_V2X_TOKEN_INT1 } },
+	{ u8"floor",		MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"ceil",			MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"round",		MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"fract",		MFG_V2X_TOKEN_FLOAT1,		1, { MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"lerp1",		MFG_V2X_TOKEN_FLOAT1,		3, { MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"lerp2",		MFG_V2X_TOKEN_FLOAT2,		3, { MFG_V2X_TOKEN_FLOAT2, MFG_V2X_TOKEN_FLOAT2, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"lerp3",		MFG_V2X_TOKEN_FLOAT3,		3, { MFG_V2X_TOKEN_FLOAT3, MFG_V2X_TOKEN_FLOAT3, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"lerp4",		MFG_V2X_TOKEN_FLOAT4,		3, { MFG_V2X_TOKEN_FLOAT4, MFG_V2X_TOKEN_FLOAT4, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"clampf",		MFG_V2X_TOKEN_FLOAT1,		3, { MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"clampi",		MFG_V2X_TOKEN_INT1,			3, { MFG_V2X_TOKEN_INT1, MFG_V2X_TOKEN_INT1, MFG_V2X_TOKEN_INT1 } },
+	{ u8"dot",			MFG_V2X_TOKEN_FLOAT1,		2, { MFG_V2X_TOKEN_FLOAT3, MFG_V2X_TOKEN_FLOAT3 } },
+	{ u8"cross",		MFG_V2X_TOKEN_FLOAT3,		2, { MFG_V2X_TOKEN_FLOAT3, MFG_V2X_TOKEN_FLOAT3 } },
+	{ u8"normalize3",	MFG_V2X_TOKEN_FLOAT3,		1, { MFG_V2X_TOKEN_FLOAT3 } },
+	{ u8"transpose2x2",	MFG_V2X_TOKEN_FLOAT22,		1, { MFG_V2X_TOKEN_FLOAT22 } },
+	{ u8"transpose3x3",	MFG_V2X_TOKEN_FLOAT33,		1, { MFG_V2X_TOKEN_FLOAT33 } },
+	{ u8"transpose4x4",	MFG_V2X_TOKEN_FLOAT44,		1, { MFG_V2X_TOKEN_FLOAT44 } },
+	{ u8"reflect",		MFG_V2X_TOKEN_FLOAT3,		2, { MFG_V2X_TOKEN_FLOAT3, MFG_V2X_TOKEN_FLOAT3 } },
+	{ u8"minf",			MFG_V2X_TOKEN_FLOAT1,		2, { MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"mini",			MFG_V2X_TOKEN_INT1,			2, { MFG_V2X_TOKEN_INT1, MFG_V2X_TOKEN_INT1 } },
+	{ u8"maxf",			MFG_V2X_TOKEN_FLOAT1,		2, { MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1 } },
+	{ u8"maxi",			MFG_V2X_TOKEN_INT1,			2, { MFG_V2X_TOKEN_INT1, MFG_V2X_TOKEN_INT1 } },
+};
+
+#define MFG_V2X_FUNCTION_COUNT (sizeof(mfgV2XFunctions) / sizeof(mfgV2XFunction))
+
+typedef struct
+{
 	mfgV2XGeneratorState* state;
 	mfgV2XCompilerState* compilerState;
 	mfmU8* bytecode;
@@ -374,6 +434,32 @@ static mfError mfgAccessArray(mfgV2XGeneratorInternalState* state, mfmU16 varInd
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2XNode* node, mfmU16 outVar);
+
+static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* node, mfmU16 outVar)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+	if (outVar == 0xFFFF)
+		return MF_ERROR_OKAY;
+
+	mfgV2XNode* id = node->first;
+
+	if (strcmp(u8"cos", id->attribute) == 0)
+	{
+
+	}
+	else
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateCall] Failed to generate function call, unknown function '%s'", id->attribute);
+		mfsDestroyLocalStringStream(&ss);
+	}
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2XNode* node, mfmU16 outVar)
 {
 	if (state == NULL || node == NULL)
@@ -554,6 +640,15 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				if (err != MF_ERROR_OKAY)
 					return err;
 			}
+
+			break;
+		}
+
+		case MFG_V2X_TOKEN_CALL:
+		{	
+			err = mfgGenerateCall(state, node, outVar);
+			if (err != MF_ERROR_OKAY)
+				return err;
 
 			break;
 		}
@@ -1918,6 +2013,77 @@ static mfError mfgGenerateBytecode(mfgV2XGeneratorInternalState* state, const mf
 }
 
 static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node);
+static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2XNode* node);
+
+static mfError mfgAnnotateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	mfgV2XNode* id = node->first;
+	mfgV2XNode* param = id->next->first;
+
+	// Get function
+	mfgV2XFunction* func = NULL;
+	for (mfmU64 i = 0; i < MFG_V2X_FUNCTION_COUNT; ++i)
+		if (strcmp(mfgV2XFunctions[i].id, id->attribute) == 0)
+		{
+			func = &mfgV2XFunctions[i];
+			break;
+		}
+
+	if (func == NULL)
+	{
+		mfsStringStream ss;
+		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Unknown function '%s'", id->attribute);
+		mfsDestroyLocalStringStream(&ss);
+		return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+	}
+
+	for (mfmU64 i = 0;; ++i)
+	{
+		if (param == NULL && i != func->paramCount)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Function '%s' has %d params (not enough params)", id->attribute, func->paramCount);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+		}
+		else if (param != NULL && i == func->paramCount)
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Function '%s' has %d params (too many params)", id->attribute, func->paramCount);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+		}
+
+		
+		err = mfgAnnotateExpression(state, param);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		
+		if (param->returnType != func->paramTypes[i])
+		{
+			mfsStringStream ss;
+			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Function '%s' param %d type doesn't match", id->attribute, i + 1);
+			mfsDestroyLocalStringStream(&ss);
+			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+		}
+
+		param = param->next;
+	}
+
+	node->isLValue = MFM_FALSE;
+	node->isConstant = MFM_FALSE;
+	node->returnType = func->returnType;
+
+	return MF_ERROR_OKAY;
+}
 
 static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
 {
@@ -1951,6 +2117,12 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
 
+			return MF_ERROR_OKAY;
+
+		case MFG_V2X_TOKEN_CALL:
+			err = mfgAnnotateCall(state, node);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			return MF_ERROR_OKAY;
 
 		case MFG_V2X_TOKEN_ADD:
