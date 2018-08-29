@@ -1572,7 +1572,7 @@ static mfError mfgGenerateDeclarationStatement(mfgV2XGeneratorInternalState* sta
 		if (err != MF_ERROR_OKAY)
 			return err;
 
-		if (term3 != NULL && term3->info->isOperator == MFM_TRUE)
+		if (term3 != NULL)
 		{
 			err = mfgGenerateExpression(state, term3, ref->ref.varIndex);
 			if (err != MF_ERROR_OKAY)
@@ -1605,6 +1605,20 @@ static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 	else if (node->info->type == MFG_V2X_TOKEN_DECLARATION_STATEMENT)
 	{
 		err = mfgGenerateDeclarationStatement(state, node, 0xFFFF, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_RETURN)
+	{
+		mfmU8 u8T = MFG_BYTECODE_RETURN;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_DISCARD)
+	{
+		mfmU8 u8T = MFG_BYTECODE_DISCARD;
+		err = mfgBytecodePut8(state, &u8T);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -2146,20 +2160,20 @@ static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 		node->first->ref.type = var->type;
 		node->first->ref.varIndex = var->index;
 
-		if (term3 != NULL && term3->info->isOperator == MFM_TRUE)
-		{
-			err = mfgAnnotateExpression(state, term3);
-			if (err != MF_ERROR_OKAY)
-				return err;
-			node->first->next = term3;
-		}
-		else if (term3 != NULL && term3->info->type == MFG_V2X_TOKEN_INT_LITERAL)
+		if (term3 != NULL && term3->info->type == MFG_V2X_TOKEN_INT_LITERAL)
 		{
 			err = mfgAnnotateExpression(state, term3);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			node->first->next = term3;
 			var->arraySize = atoi(term3->attribute);
+		}
+		else if (term3 != NULL)
+		{
+			err = mfgAnnotateExpression(state, term3);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			node->first->next = term3;
 		}
 
 		return MF_ERROR_OKAY;
