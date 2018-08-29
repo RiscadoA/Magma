@@ -186,11 +186,14 @@ static mfError mfgV2XReadToken(mfgV2XLexerInternalState* state)
 			}
 			else if (mfgV2XIsWhiteSpace(state->it[attrIt]) == MFM_TRUE ||
 				(mfgV2XIsNumeric(state->it[attrIt]) == MFM_FALSE &&
-					mfgV2XIsAlpha(state->it[attrIt]) == MFM_FALSE))
+					mfgV2XIsAlpha(state->it[attrIt]) == MFM_FALSE) ||
+					 state->it[attrIt] == 'f')
 			{
 				if (foundDot == MFM_FALSE)
 					break;
 				tok.attribute[attrIt] = '\0';
+				if (state->it[attrIt] == 'f')
+					++attrIt;
 				tok.info = &MFG_V2X_TINFO_FLOAT_LITERAL;
 				err = mfgV2XPutToken(state, &tok);
 				if (err != MF_ERROR_OKAY)

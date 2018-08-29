@@ -219,6 +219,45 @@ static mfError mfgParseOperatorLast(mfgV2XParserInternalState* state, mfgV2XNode
 		return MF_ERROR_OKAY;
 	}
 
+	// <constructor>
+	if (mfgAcceptType(state, &tok) == MFM_TRUE)
+	{
+		err = mfgV2XGetNode(state, outNode);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		(*outNode)->info = &MFG_V2X_TINFO_CONSTRUCTOR;
+
+		mfgV2XNode* type = NULL;
+		err = mfgV2XGetNode(state, &type);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		type->info = tok->info;
+		err = mfgAddToNode(*outNode, type);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_OPEN_PARENTHESIS, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		for (;;)
+		{
+			mfgV2XNode* exp = NULL;
+			err = mfgParseExpression(state, &exp);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfgAddToNode(*outNode, exp);
+			if (err != MF_ERROR_OKAY)
+				return err;
+
+			if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_COMMA, NULL) == MFM_FALSE)
+				break;
+		}
+		err = mfgExpectTokenType(state, &MFG_V2X_TINFO_CLOSE_PARENTHESIS, NULL);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		return MF_ERROR_OKAY;
+	}
+
 	// <id> | <call>
 	else if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_IDENTIFIER, &tok) == MFM_TRUE)
 	{
@@ -1145,6 +1184,52 @@ static mfError mfgParseIfStatement(mfgV2XParserInternalState* state, mfgV2XNode*
 	return MF_ERROR_OKAY;
 }
 
+
+static mfError mfgParseWhileStatement(mfgV2XParserInternalState* state, mfgV2XNode** outNode)
+{
+	if (state == NULL || outNode == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	if (mfgAcceptTokenType(state, &MFG_V2X_TINFO_WHILE, NULL) == MFM_FALSE)
+	{
+		*outNode = NULL;
+		return MF_ERROR_OKAY;
+	}
+
+	err = mfgV2XGetNode(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	(*outNode)->info = &MFG_V2X_TINFO_WHILE;
+
+	// Parse expression
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_OPEN_PARENTHESIS, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	mfgV2XNode* exp = NULL;
+	err = mfgParseExpression(state, &exp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgAddToNode(*outNode, exp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgExpectTokenType(state, &MFG_V2X_TINFO_CLOSE_PARENTHESIS, NULL);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Parse statement
+	mfgV2XNode* statement = NULL;
+	err = mfgParseStatement(state, &statement);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgAddToNode(*outNode, statement);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgParseStatement(mfgV2XParserInternalState* state, mfgV2XNode** outNode)
 {
 	if (state == NULL || outNode == NULL)
@@ -1154,13 +1239,6 @@ static mfError mfgParseStatement(mfgV2XParserInternalState* state, mfgV2XNode** 
 	
 	// Check if it is a compound statement
 	err = mfgParseCompoundStatement(state, outNode);
-	if (err != MF_ERROR_OKAY)
-		return err;
-	if (*outNode != NULL)
-		return MF_ERROR_OKAY;
-
-	// Check if it is an expression statement
-	err = mfgParseExpressionStatement(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (*outNode != NULL)
@@ -1189,6 +1267,20 @@ static mfError mfgParseStatement(mfgV2XParserInternalState* state, mfgV2XNode** 
 
 	// Check if it is a if statement
 	err = mfgParseIfStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is a while statement
+	err = mfgParseWhileStatement(state, outNode);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	if (*outNode != NULL)
+		return MF_ERROR_OKAY;
+
+	// Check if it is an expression statement
+	err = mfgParseExpressionStatement(state, outNode);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (*outNode != NULL)

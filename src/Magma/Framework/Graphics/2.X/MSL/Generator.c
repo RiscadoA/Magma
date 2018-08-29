@@ -284,6 +284,22 @@ static mfError mfgDeclareArray(mfgV2XGeneratorInternalState* state, mfgV2XEnum t
 	return MF_ERROR_OKAY;
 }
 
+static mfgV2XEnum mfgGetComponentType(mfgV2XEnum type)
+{
+	switch (type)
+	{
+		case MFG_V2X_TOKEN_INT2: return MFG_V2X_TOKEN_INT1; break;
+		case MFG_V2X_TOKEN_INT3: return MFG_V2X_TOKEN_INT1; break;
+		case MFG_V2X_TOKEN_INT4: return MFG_V2X_TOKEN_INT1; break;
+
+		case MFG_V2X_TOKEN_FLOAT2: return MFG_V2X_TOKEN_FLOAT1; break;
+		case MFG_V2X_TOKEN_FLOAT3: return MFG_V2X_TOKEN_FLOAT1; break;
+		case MFG_V2X_TOKEN_FLOAT4: return MFG_V2X_TOKEN_FLOAT1; break;
+	}
+
+	return 0;
+}
+
 static mfError mfgGetComponent(mfgV2XGeneratorInternalState* state, mfgV2XEnum type, mfmU16 varIndex, mfmU16 outID, mfmU8 index)
 {
 	if (state == NULL)
@@ -1352,8 +1368,13 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				}
 				else
 				{
+					u8T = MFG_BYTECODE_OPSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
 					// Calculate temp
-					mfmU16 temp;
+					mfmU16 temp = state->nextVarIndex++;
 					err = mfgDeclareType(state, node->first->returnType, temp);
 					if (err != MF_ERROR_OKAY)
 						return err;
@@ -1379,6 +1400,11 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 					u16T = node->ref.cmpVarID;
 					err = mfgBytecodePut16(state, &u16T);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					u8T = MFG_BYTECODE_CLSCOPE;
+					err = mfgBytecodePut8(state, &u8T);
 					if (err != MF_ERROR_OKAY)
 						return err;
 				}
@@ -1516,6 +1542,42 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			break;
 		}
 
+		case MFG_V2X_TOKEN_CONSTRUCTOR:
+		{
+			if (outVar != 0xFFFF)
+			{
+				u8T = MFG_BYTECODE_OPSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				// Get component index
+				mfmU16 cmpIndex = state->nextVarIndex++;
+				mfgV2XNode* exp = node->first->next;
+				for (mfmU8 i = 0; i < 255; ++i)
+				{
+					if (exp == NULL)
+						break;
+
+					err = mfgGetComponent(state, node->first->info->type, outVar, cmpIndex, i);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					err = mfgGenerateExpression(state, exp, cmpIndex);
+					if (err != MF_ERROR_OKAY)
+						return err;
+
+					exp = exp->next;
+				}
+
+				u8T = MFG_BYTECODE_CLSCOPE;
+				err = mfgBytecodePut8(state, &u8T);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			break;
+		}
+
 		default:
 		{
 			mfsStringStream ss;
@@ -1618,6 +1680,66 @@ static mfError mfgGenerateIfStatement(mfgV2XGeneratorInternalState* state, mfgV2
 	return MF_ERROR_OKAY;
 }
 
+
+static mfError mfgGenerateWhileStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	mfmU8 u8T = MFG_BYTECODE_OPSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	mfgV2XNode* exp = node->first;
+	mfmU16 tempExp = state->nextVarIndex++;
+	err = mfgDeclareType(state, exp->returnType, tempExp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgGenerateExpression(state, exp, tempExp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	mfgV2XNode* whileStatement = exp->next;
+
+	u8T = MFG_BYTECODE_WHILE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgBytecodePut16(state, &tempExp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	u8T = MFG_BYTECODE_OPSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgGenerateStatement(state, whileStatement);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfgGenerateExpression(state, exp, tempExp);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	u8T = MFG_BYTECODE_CLSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	u8T = MFG_BYTECODE_CLSCOPE;
+	err = mfgBytecodePut8(state, &u8T);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgGenerateDeclarationStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
 {
 	if (state == NULL || node == NULL)
@@ -1673,6 +1795,12 @@ static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 	else if (node->info->type == MFG_V2X_TOKEN_IF)
 	{
 		err = mfgGenerateIfStatement(state, node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_WHILE)
+	{
+		err = mfgGenerateWhileStatement(state, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -1926,6 +2054,22 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			node->isConstant = MFM_TRUE;
 			node->returnType = MFG_V2X_TOKEN_BOOL;
 			return MF_ERROR_OKAY;
+
+		case MFG_V2X_TOKEN_CONSTRUCTOR:
+		{
+			node->isLValue = MFM_FALSE;
+			node->isConstant = MFM_FALSE;
+			node->returnType = node->first->info->type;
+			mfgV2XNode* exp = node->first->next;
+			while (exp != NULL)
+			{
+				err = mfgAnnotateExpression(state, exp);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				exp = exp->next;
+			}
+			return MF_ERROR_OKAY;
+		}
 
 		case MFG_V2X_TOKEN_IDENTIFIER:
 		{
@@ -2221,6 +2365,27 @@ static mfError mfgAnnotateIfStatement(mfgV2XGeneratorInternalState* state, mfgV2
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfgAnnotateWhileStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
+{
+	if (state == NULL || node == NULL)
+		return MFG_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+
+	node->isConstant = MFM_FALSE;
+	node->isLValue = MFM_FALSE;
+	node->returnType = 0;
+
+	err = mfgAnnotateExpression(state, node->first);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	err = mfgAnnotateStatement(state, node->first->next);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XNode* node)
 {
 	if (state == NULL || node == NULL)
@@ -2244,6 +2409,12 @@ static mfError mfgAnnotateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 	else if (node->info->type == MFG_V2X_TOKEN_IF)
 	{
 		err = mfgAnnotateIfStatement(state, node);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (node->info->type == MFG_V2X_TOKEN_WHILE)
+	{
+		err = mfgAnnotateWhileStatement(state, node);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
