@@ -500,6 +500,106 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 			return err;\
 	}
 
+#define TWO_PARAM_FUNC_REV(name, instruction)\
+	else if (strcmp(name, id->attribute) == 0)\
+	{\
+		mfgV2XNode* param1 = params->first;\
+		mfgV2XNode* param2 = param1->next;\
+		mfmU16 param1Temp;\
+		mfmU16 param2Temp;\
+		u8T = MFG_BYTECODE_OPSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		param1Temp = state->nextVarIndex++;\
+		err = mfgDeclareType(state, param1->returnType, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		err = mfgGenerateExpression(state, param1, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		param2Temp = state->nextVarIndex++;\
+		err = mfgDeclareType(state, param2->returnType, param2Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		err = mfgGenerateExpression(state, param2, param2Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = instruction;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = outVar;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param1Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param2Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = MFG_BYTECODE_CLSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+	}
+
+#define THREE_PARAM_FUNC_REV(name, instruction)\
+	else if (strcmp(name, id->attribute) == 0)\
+	{\
+		mfgV2XNode* param1 = params->first;\
+		mfgV2XNode* param2 = param1->next;\
+		mfgV2XNode* param3 = param2->next;\
+		mfmU16 param1Temp;\
+		mfmU16 param2Temp;\
+		mfmU16 param3Temp;\
+		u8T = MFG_BYTECODE_OPSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		param1Temp = state->nextVarIndex++;\
+		err = mfgDeclareType(state, param1->returnType, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		err = mfgGenerateExpression(state, param1, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		param2Temp = state->nextVarIndex++;\
+		err = mfgDeclareType(state, param2->returnType, param2Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		err = mfgGenerateExpression(state, param2, param2Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = instruction;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = outVar;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param1Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param2Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param3Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = MFG_BYTECODE_CLSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+	}
+
 #define ONE_PARAM_FUNC(name, instruction)\
 	else if (strcmp(name, id->attribute) == 0)\
 	{\
@@ -689,6 +789,39 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 	ONE_PARAM_FUNC(u8"atan", MFG_BYTECODE_ATAN)
 	ONE_PARAM_FUNC(u8"degrees", MFG_BYTECODE_DEGREES)
 	ONE_PARAM_FUNC(u8"radians", MFG_BYTECODE_RADIANS)
+	ONE_PARAM_FUNC(u8"exp", MFG_BYTECODE_EXP)
+	ONE_PARAM_FUNC(u8"log", MFG_BYTECODE_LOG)
+	ONE_PARAM_FUNC(u8"exp2", MFG_BYTECODE_EXP2)
+	ONE_PARAM_FUNC(u8"log2", MFG_BYTECODE_LOG2)
+	TWO_PARAM_FUNC_REV(u8"powf", MFG_BYTECODE_POW)
+	TWO_PARAM_FUNC_REV(u8"powi", MFG_BYTECODE_POW)
+	ONE_PARAM_FUNC(u8"sqrt", MFG_BYTECODE_SQRT)
+	ONE_PARAM_FUNC(u8"isqrt", MFG_BYTECODE_SQRT)
+	ONE_PARAM_FUNC(u8"absf", MFG_BYTECODE_ABS)
+	ONE_PARAM_FUNC(u8"absi", MFG_BYTECODE_ABS)
+	ONE_PARAM_FUNC(u8"signf", MFG_BYTECODE_SIGN)
+	ONE_PARAM_FUNC(u8"signi", MFG_BYTECODE_SIGN)
+	ONE_PARAM_FUNC(u8"floor", MFG_BYTECODE_FLOOR)
+	ONE_PARAM_FUNC(u8"ceil", MFG_BYTECODE_CEIL)
+	ONE_PARAM_FUNC(u8"round", MFG_BYTECODE_ROUND)
+	ONE_PARAM_FUNC(u8"fract", MFG_BYTECODE_FRACT)
+	THREE_PARAM_FUNC_REV(u8"lerp1", MFG_BYTECODE_LERP)
+	THREE_PARAM_FUNC_REV(u8"lerp2", MFG_BYTECODE_LERP)
+	THREE_PARAM_FUNC_REV(u8"lerp3", MFG_BYTECODE_LERP)
+	THREE_PARAM_FUNC_REV(u8"lerp4", MFG_BYTECODE_LERP)
+	THREE_PARAM_FUNC_REV(u8"clampf", MFG_BYTECODE_CLAMP)
+	THREE_PARAM_FUNC_REV(u8"clampi", MFG_BYTECODE_CLAMP)
+	TWO_PARAM_FUNC_REV(u8"dot", MFG_BYTECODE_DOT)
+	TWO_PARAM_FUNC_REV(u8"cross", MFG_BYTECODE_CROSS)
+	ONE_PARAM_FUNC(u8"normalize3", MFG_BYTECODE_NORMALIZE)
+	ONE_PARAM_FUNC(u8"transpose2x2", MFG_BYTECODE_TRANSPOSE)
+	ONE_PARAM_FUNC(u8"transpose3x3", MFG_BYTECODE_TRANSPOSE)
+	ONE_PARAM_FUNC(u8"transpose4x4", MFG_BYTECODE_TRANSPOSE)
+	TWO_PARAM_FUNC_REV(u8"reflect", MFG_BYTECODE_REFLECT)
+	TWO_PARAM_FUNC_REV(u8"minf", MFG_BYTECODE_MIN)
+	TWO_PARAM_FUNC_REV(u8"mini", MFG_BYTECODE_MIN)
+	TWO_PARAM_FUNC_REV(u8"maxf", MFG_BYTECODE_MAX)
+	TWO_PARAM_FUNC_REV(u8"maxi", MFG_BYTECODE_MAX)
 	else
 	{
 		mfsStringStream ss;
