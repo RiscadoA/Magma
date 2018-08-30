@@ -1,5 +1,6 @@
 ﻿#include <Magma/Framework/Graphics/2.X/D3D11RenderDevice.h>
 #include <Magma/Framework/Graphics/2.X/OGL4RenderDevice.h>
+#include <Magma/Framework/Graphics/2.X/MSL/Compiler.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <Magma/Framework/String/Stream.h>
 
@@ -79,6 +80,32 @@ int main(int argc, const char** argv)
 	// Load vertex shader
 	{
 		mfgMetaData* metaData = NULL;
+
+		const mfmU8* src =
+			u8"Input"
+			u8"{"
+			u8"		float4 position : position;"
+			u8"		float2 uvs : uvs;"
+			u8"};"
+
+			u8"Output"
+			u8"{"
+			u8"		float2 uvs : _out0;"
+			u8"		float4 position : _position;"
+			u8"};"
+
+			u8"ConstantBuffer buffer : buffer"
+			u8"{"
+			u8"		float4 offset;"
+			u8"};"
+
+			u8"void main()"
+			u8"{"
+			u8"		Output.uvs = Input.uvs;"
+			u8"		Output.position = Input.position + buffer.offset;"
+			u8"		Output.position.w = 1.0f;"
+			u8"}"
+			;
 
 		// Load meta data
 		{
