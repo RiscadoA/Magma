@@ -2945,6 +2945,38 @@ mfError mfgV2XOGL4Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfg
 				break;
 			}
 
+			case MFG_BYTECODE_FETCH1D:
+			case MFG_BYTECODE_FETCH2D:
+			case MFG_BYTECODE_FETCH3D:
+			{
+				for (mfmU64 i = 0; i < tabs; ++i)
+					if (mfsPutByte(outputStream, '\t') != MF_ERROR_OKAY)
+						return MFG_ERROR_FAILED_TO_WRITE;
+				mfmU16 id1 = 0;
+				mfmFromBigEndian2(it + 1, &id1);
+				mfmU16 id2 = 0;
+				mfmFromBigEndian2(it + 3, &id2);
+				mfmU16 id3 = 0;
+				mfmFromBigEndian2(it + 5, &id3);
+				mfError err = mfgOGL4PutID(id3, &assemblerData, outputStream);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (mfsPrintFormatUTF8(outputStream, u8" = texelFetch(") != MF_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				err = mfgOGL4PutID(id1, &assemblerData, outputStream);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (mfsPrintFormatUTF8(outputStream, u8" , ") != MF_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				err = mfgOGL4PutID(id2, &assemblerData, outputStream);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				if (mfsPrintFormatUTF8(outputStream, u8" , 0);\n") != MF_ERROR_OKAY)
+					return MFG_ERROR_FAILED_TO_WRITE;
+				it += 7;
+				break;
+			}
+
 			default:
 				return MFG_ERROR_INVALID_DATA;
 				break;

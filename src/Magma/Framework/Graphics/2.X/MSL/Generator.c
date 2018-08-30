@@ -64,6 +64,9 @@ static mfgV2XFunction mfgV2XFunctions[] =
 	{ u8"mini",			MFG_V2X_TOKEN_INT1,			2, { MFG_V2X_TOKEN_INT1, MFG_V2X_TOKEN_INT1 } },
 	{ u8"maxf",			MFG_V2X_TOKEN_FLOAT1,		2, { MFG_V2X_TOKEN_FLOAT1, MFG_V2X_TOKEN_FLOAT1 } },
 	{ u8"maxi",			MFG_V2X_TOKEN_INT1,			2, { MFG_V2X_TOKEN_INT1, MFG_V2X_TOKEN_INT1 } },
+	{ u8"fetch1D",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_TEXTURE_1D , MFG_V2X_TOKEN_INT1 } },
+	{ u8"fetch2D",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_TEXTURE_2D , MFG_V2X_TOKEN_INT2 } },
+	{ u8"fetch3D",		MFG_V2X_TOKEN_FLOAT4,		2, { MFG_V2X_TOKEN_TEXTURE_3D , MFG_V2X_TOKEN_INT3 } },
 };
 
 #define MFG_V2X_FUNCTION_COUNT (sizeof(mfgV2XFunctions) / sizeof(mfgV2XFunction))
@@ -822,6 +825,144 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 	TWO_PARAM_FUNC_REV(u8"mini", MFG_BYTECODE_MIN)
 	TWO_PARAM_FUNC_REV(u8"maxf", MFG_BYTECODE_MAX)
 	TWO_PARAM_FUNC_REV(u8"maxi", MFG_BYTECODE_MAX)
+	else if (strcmp(u8"fetch1D", id->attribute) == 0)
+	{
+		mfgV2XNode* param1 = params->first;
+		mfgV2XNode* param2 = param1->next;
+		mfmU16 param2Temp;
+
+		u8T = MFG_BYTECODE_OPSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get second param value
+		param2Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param2->returnType, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param2, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Perform operation
+		u8T = MFG_BYTECODE_FETCH1D;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param1->ref.varIndex;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param2Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = outVar;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u8T = MFG_BYTECODE_CLSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (strcmp(u8"fetch2D", id->attribute) == 0)
+	{
+		mfgV2XNode* param1 = params->first;
+		mfgV2XNode* param2 = param1->next;
+		mfmU16 param2Temp;
+
+		u8T = MFG_BYTECODE_OPSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get second param value
+		param2Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param2->returnType, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param2, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Perform operation
+		u8T = MFG_BYTECODE_FETCH2D;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param1->ref.varIndex;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param2Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = outVar;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u8T = MFG_BYTECODE_CLSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	else if (strcmp(u8"fetch3D", id->attribute) == 0)
+	{
+		mfgV2XNode* param1 = params->first;
+		mfgV2XNode* param2 = param1->next;
+		mfmU16 param2Temp;
+
+		u8T = MFG_BYTECODE_OPSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Get second param value
+		param2Temp = state->nextVarIndex++;
+		err = mfgDeclareType(state, param2->returnType, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfgGenerateExpression(state, param2, param2Temp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		// Perform operation
+		u8T = MFG_BYTECODE_FETCH3D;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param1->ref.varIndex;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = param2Temp;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u16T = outVar;
+		err = mfgBytecodePut16(state, &u16T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		u8T = MFG_BYTECODE_CLSCOPE;
+		err = mfgBytecodePut8(state, &u8T);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
 	else
 	{
 		mfsStringStream ss;
