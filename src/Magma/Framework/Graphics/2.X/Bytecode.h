@@ -4,8 +4,12 @@
 #include "../../Memory/Object.h"
 #include "../../String/UTF8.h"
 
-
 /*
+	MSL Bytecode version 2.3.
+	Changes:
+		- Added I1TOF1, I2TOF2, I3TOF3, I4TOF4.
+		- Added F1TOI1, F2TOI2, F3TOI3, F4TOI4.
+
 	MSL Bytecode version 2.2.
 	Changes:
 		- Added FETCH1D, FETCH2D and FETCH3D.
@@ -286,6 +290,14 @@ extern "C"
 #define MFG_BYTECODE_FETCH1D			0xB2	// Gets a pixel (no filter) from the 1D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
 #define MFG_BYTECODE_FETCH2D			0xB3	// Gets a pixel (no filter) from the 2D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
 #define MFG_BYTECODE_FETCH3D			0xB4	// Gets a pixel (no filter) from the 3D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_I1TOF1				0xB5	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from I1 to F1.
+#define MFG_BYTECODE_I2TOF2				0xB6	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from I2 to F2.
+#define MFG_BYTECODE_I3TOF3				0xB7	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from I3 to F3.
+#define MFG_BYTECODE_I4TOF4				0xB8	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from I4 to F4.
+#define MFG_BYTECODE_F1TOI1				0xB9	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from F1 to I1.
+#define MFG_BYTECODE_F2TOI2				0xBA	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from F2 to I2.
+#define MFG_BYTECODE_F3TOI3				0xBB	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from F3 to I3.
+#define MFG_BYTECODE_F4TOI4				0xBC	// Sets the variable on the index on { param 1x2 } to the converted value of the variable on index { param 2x2 } from F4 to I4.
 
 typedef  struct
 {
