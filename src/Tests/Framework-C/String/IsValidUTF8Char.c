@@ -1,14 +1,12 @@
-#include "Testing.hpp"
+#include "../../Test.h"
 
-#include "../Magma/Framework/String/UTF8.hpp"
+#include <Magma/Framework/String/UTF8.h>
 
 int main()
 {
-	using namespace Magma::Framework::String;
-
 	// Valid chars
 	{
-		UTF8CodeUnit valid[][4] =
+		mfsUTF8CodeUnit valid[][4] =
 		{
 			{ 0x24, 0x00, 0x00, 0x00 },
 			{ 0xC2, 0xA2, 0x00, 0x00 },
@@ -19,12 +17,12 @@ int main()
 		};
 
 		for (int i = 0; valid[i][0] != 0x00; ++i)
-			TEST_REQUIRE_PASS(IsValidU8Char(valid[i]));
+			TEST_REQUIRE_PASS(mfsIsValidUTF8Char(valid[i]) == MFM_TRUE);
 	}
 
 	// Invalid chars
 	{
-		UTF8CodeUnit invalid[][4] =
+		mfsUTF8CodeUnit invalid[][4] =
 		{
 			{ 0xED, 0xA0, 0x80, 0x00 },
 			{ 0xC0, 0x00, 0x00, 0x00 },
@@ -40,7 +38,7 @@ int main()
 		};
 
 		for (int i = 0; invalid[i][0] != 0x00; ++i)
-			TEST_REQUIRE_FAIL(IsValidU8Char(invalid[i]));
+			TEST_REQUIRE_FAIL(mfsIsValidUTF8Char(invalid[i]) == MFM_TRUE);
 	}
 
 	EXIT_PASS();
