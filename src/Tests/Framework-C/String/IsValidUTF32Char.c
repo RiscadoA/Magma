@@ -1,14 +1,12 @@
-#include "Testing.hpp"
+#include "../../Test.h"
 
-#include "../Magma/Framework/String/UTF32.hpp"
+#include <Magma/Framework/String/UTF32.h>
 
 int main()
 {
-	using namespace Magma::Framework::String;
-
 	// Valid chars
 	{
-		UnicodePoint valid[] =
+		mfsUnicodePoint valid[] =
 		{
 			0xE1,
 			0x1374,
@@ -17,12 +15,12 @@ int main()
 		};
 
 		for (int i = 0; valid[i] != 0x00; ++i)
-			TEST_REQUIRE_PASS(IsValidUnicode(valid[i]));
+			TEST_REQUIRE_PASS(mfsIsValidUTF32Char(valid[i]) == MFM_TRUE);
 	}
 
 	// Invalid chars
 	{
-		UnicodePoint invalid[] =
+		mfsUnicodePoint invalid[] =
 		{
 			0x110000,
 			0xD800,
@@ -31,7 +29,7 @@ int main()
 		};
 
 		for (int i = 0; invalid[i] != 0x00; ++i)
-			TEST_REQUIRE_FAIL(IsValidUnicode(invalid[i]));
+			TEST_REQUIRE_FAIL(mfsIsValidUTF32Char(invalid[i]) == MFM_TRUE);
 	}
 
 	EXIT_PASS();

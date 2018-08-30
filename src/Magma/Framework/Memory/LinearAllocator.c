@@ -67,6 +67,8 @@ mfError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator ** linearAllocator, 
 
 void mfmDestroyLinearAllocator(void * linearAllocator)
 {
+	if (linearAllocator == NULL)
+		abort();
 	if (((mfmLinearAllocator*)linearAllocator)->onMemory == MFM_FALSE)
 		if (mfmDeallocate(NULL, linearAllocator) != MF_ERROR_OKAY)
 			abort();
@@ -74,6 +76,8 @@ void mfmDestroyLinearAllocator(void * linearAllocator)
 
 mfError mfmLinearAllocate(mfmLinearAllocator * linearAllocator, void ** memory, mfmU64 size)
 {
+	if (linearAllocator == NULL || memory == NULL || size == 0)
+		return MFM_ERROR_INVALID_ARGUMENTS;
 	// Check if allocation fits on the linear buffer
 	if (linearAllocator->head + size > linearAllocator->begin + linearAllocator->size)
 		return MFM_ERROR_ALLOCATOR_OVERFLOW;
@@ -84,8 +88,10 @@ mfError mfmLinearAllocate(mfmLinearAllocator * linearAllocator, void ** memory, 
 	return MF_ERROR_OKAY;
 }
 
-void mfmLinearReset(mfmLinearAllocator * linearAllocator)
+mfError mfmLinearReset(mfmLinearAllocator * linearAllocator)
 {
+	if (linearAllocator == NULL)
+		return MFM_ERROR_INVALID_ARGUMENTS;
 	// Reset the linear allocator head
 	linearAllocator->head = linearAllocator->begin;
 }
