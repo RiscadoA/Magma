@@ -63,6 +63,7 @@ extern "C"
 	/// <returns>
 	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Returns MFM_ERROR_ALLOCATOR_OVERFLOW if the linear buffer overflows.
+	///		Returns MFM_ERROR_INVALID_ARGUMENTS the linear allocator or memory are NULL or size is 0.
 	/// </returns>
 	mfError mfmLinearAllocate(mfmLinearAllocator* linearAllocator, void** memory, mfmU64 size);
 
@@ -70,7 +71,11 @@ extern "C"
 	///		Resets the head on a magma framework memory linear allocator.
 	/// </summary>
 	/// <param name="linearAllocator">Magma framework memory linear allocator</param>
-	void mfmLinearReset(mfmLinearAllocator* linearAllocator);
+	/// <returns>
+	///		Returns MF_ERROR_OKAY if there were no errors.
+	///		Returns MFM_ERROR_INVALID_ARGUMENTS the linear allocator is NULL.
+	/// </returns>
+	mfError mfmLinearReset(mfmLinearAllocator* linearAllocator);
 
 #ifdef __cplusplus
 }
