@@ -6,6 +6,16 @@
 
 
 /*
+	MSL Bytecode version 2.2.
+	Changes:
+		- Added FETCH1D, FETCH2D and FETCH3D.
+
+	MSL Bytecode version 2.1.
+	Changes:
+		- Constant buffer variables have now an array size specifier.
+		- Added array access instructions.
+		- Improved array system.
+
 	MSL Bytecode version 2.0.
 	Changes:
 		- Now in C;
@@ -53,17 +63,16 @@
 		- "_target5";
 		- "_target6";
 		- "_target7";
+
+	Binary bytecode shaders are composed of two files:
+		- the binary bytecode instruction file (.mbb)
+		- the binary meta data file (.mbd)
 */
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-	// MSL Bytecode version 2.1
-	// Binary bytecode shaders are composed of two files:
-	// - the binary bytecode instruction file (.mbb)
-	// - the binary meta data file (.mbd)
 
 	// ----------------- SHADER TYPES -----------------
 #define MFG_VERTEX_SHADER				0x01	// Vertex shader
@@ -274,6 +283,9 @@ extern "C"
 	// Functions 3
 #define MFG_BYTECODE_MIN				0xB0	// Sets the variable on the index on { param 1x2 } to the minimum value passed (either { param 2x2 } or { param 3x2 }).
 #define MFG_BYTECODE_MAX				0xB1	// Sets the variable on the index on { param 1x2 } to the maximum value passed (either { param 2x2 } or { param 3x2 }).
+#define MFG_BYTECODE_FETCH1D			0xB2	// Gets a pixel (no filter) from the 1D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_FETCH2D			0xB3	// Gets a pixel (no filter) from the 2D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
+#define MFG_BYTECODE_FETCH3D			0xB4	// Gets a pixel (no filter) from the 3D texture on the index on { param 1x2 } from the coordinates on the index on { param 2x2 } (output variable on { param 3x2 }).
 
 typedef  struct
 {

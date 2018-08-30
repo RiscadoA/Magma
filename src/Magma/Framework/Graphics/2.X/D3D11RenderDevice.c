@@ -819,7 +819,7 @@ mfError mfgD3D11CreatePipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline** pp, mfgV
 	d3dPP->pixel = ps;
 
 	{
-		mfError err = mfmIncObjectRef(&d3dPP->pixel->base.object);
+		mfError err = mfmIncObjectRef(&d3dPP->vertex->base.object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		err = mfmIncObjectRef(&d3dPP->pixel->base.object);
