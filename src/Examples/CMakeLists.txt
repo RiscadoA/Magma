@@ -1,6 +1,4 @@
 # ./src/Examples/CMakeLists.txt
 
-add_subdirectory(Framework/)
-
-add_subdirectory(Example-10/)
-add_subdirectory(Example-11/)
+add_subdirectory(Framework-C/)
+add_subdirectory(Framework-CPP/)

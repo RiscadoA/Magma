@@ -1,6 +1,5 @@
 ﻿#include <Magma/Framework/Entry.h>
 #include <Magma/Framework/Graphics/2.X/Bytecode.h>
-#include <Magma/Framework/Graphics/2.X/D3D11Assembler.h>
 #include <Magma/Framework/String/Stream.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,16 +47,22 @@ int main(int argc, const char** argv)
 	memcpy(metaData + ptr, "buf1", 5);
 	ptr += 16;
 	metaData[ptr++] = MFG_CONSTANT_BUFFER;
+	metaData[ptr++] = 0x00; // Index 0
+	metaData[ptr++] = 0x00;
 	metaData[ptr++] = 0x00; // 2 elements
 	metaData[ptr++] = 0x02;
 	// Elements:
 	{
 		metaData[ptr++] = 0x00; // Var index 4
-		metaData[ptr++] = 0x04; 
+		metaData[ptr++] = 0x04;
+		metaData[ptr++] = 0x00; // Not an array
+		metaData[ptr++] = 0x00;
 		metaData[ptr++] = MFG_FLOAT44;
 
 		metaData[ptr++] = 0x00; // Var index 5
 		metaData[ptr++] = 0x05;
+		metaData[ptr++] = 0x00; // Not an array
+		metaData[ptr++] = 0x00;
 		metaData[ptr++] = MFG_FLOAT22;
 	}
 

@@ -19,7 +19,7 @@ int main(int argc, const char** argv)
 	mfError err;
 
 	mfsStream* file;
-	err = mfsOpenFile(&file, MFS_FILE_WRITE, u8"../../../../../../resources/Example-C-3/test.txt");
+	err = mfsOpenFile(&file, MFS_FILE_WRITE, u8"test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
