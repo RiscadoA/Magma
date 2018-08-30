@@ -453,6 +453,87 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 	mfmU8 u8T;
 	mfmU16 u16T;
 
+#define TWO_PARAM_FUNC(name, instruction)\
+	else if (strcmp(name, id->attribute) == 0)\
+	{\
+		mfgV2XNode* param1 = params->first;\
+		mfgV2XNode* param2 = param1->next;\
+		mfmU16 param1Temp;\
+		mfmU16 param2Temp;\
+		u8T = MFG_BYTECODE_OPSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		param1Temp = state->nextVarIndex++;\
+		err = mfgDeclareType(state, param1->returnType, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		err = mfgGenerateExpression(state, param1, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		param2Temp = state->nextVarIndex++;\
+		err = mfgDeclareType(state, param2->returnType, param2Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		err = mfgGenerateExpression(state, param2, param2Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = instruction;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param1Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param2Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = outVar;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = MFG_BYTECODE_CLSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+	}
+
+#define ONE_PARAM_FUNC(name, instruction)\
+	else if (strcmp(name, id->attribute) == 0)\
+	{\
+		mfgV2XNode* param1 = params->first;\
+		mfmU16 param1Temp;\
+		u8T = MFG_BYTECODE_OPSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		param1Temp = state->nextVarIndex++;\
+		err = mfgDeclareType(state, param1->returnType, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		err = mfgGenerateExpression(state, param1, param1Temp);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = instruction;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = outVar;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u16T = param1Temp;\
+		err = mfgBytecodePut16(state, &u16T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+		u8T = MFG_BYTECODE_CLSCOPE;\
+		err = mfgBytecodePut8(state, &u8T);\
+		if (err != MF_ERROR_OKAY)\
+			return err;\
+	}
+
 	if (strcmp(u8"ftoi", id->attribute) == 0 ||
 		strcmp(u8"itof", id->attribute) == 0)
 	{
@@ -460,63 +541,8 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
-	else if (strcmp(u8"mulmat", id->attribute) == 0 ||
-			 strcmp(u8"mulvec", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfgV2XNode* param2 = param1->next;
-		mfmU16 param1Temp;
-		mfmU16 param2Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get first param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get second param value
-		param2Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param2->returnType, param2Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param2, param2Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_MULMAT;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param2Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
+	TWO_PARAM_FUNC(u8"mulmat", MFG_BYTECODE_MULMAT)
+	TWO_PARAM_FUNC(u8"mulvec", MFG_BYTECODE_MULMAT)
 	else if (strcmp(u8"sample1D", id->attribute) == 0)
 	{
 		mfgV2XNode* param1 = params->first;
@@ -655,326 +681,14 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
-	else if (strcmp(u8"cos", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_COS;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else if (strcmp(u8"sin", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_RADIANS;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else if (strcmp(u8"tan", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_TAN;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else if (strcmp(u8"acos", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_ACOS;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else if (strcmp(u8"asin", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_ASIN;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else if (strcmp(u8"atan", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_ATAN;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else if (strcmp(u8"degrees", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_DEGREES;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-	else if (strcmp(u8"radians", id->attribute) == 0)
-	{
-		mfgV2XNode* param1 = params->first;
-		mfmU16 param1Temp;
-
-		u8T = MFG_BYTECODE_OPSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Get param value
-		param1Temp = state->nextVarIndex++;
-		err = mfgDeclareType(state, param1->returnType, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-		err = mfgGenerateExpression(state, param1, param1Temp);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		// Perform operation
-		u8T = MFG_BYTECODE_COS;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = outVar;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u16T = param1Temp;
-		err = mfgBytecodePut16(state, &u16T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-
-		u8T = MFG_BYTECODE_CLSCOPE;
-		err = mfgBytecodePut8(state, &u8T);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
+	ONE_PARAM_FUNC(u8"cos", MFG_BYTECODE_COS)
+	ONE_PARAM_FUNC(u8"sin", MFG_BYTECODE_SIN)
+	ONE_PARAM_FUNC(u8"tan", MFG_BYTECODE_TAN)
+	ONE_PARAM_FUNC(u8"acos", MFG_BYTECODE_ACOS)
+	ONE_PARAM_FUNC(u8"asin", MFG_BYTECODE_ASIN)
+	ONE_PARAM_FUNC(u8"atan", MFG_BYTECODE_ATAN)
+	ONE_PARAM_FUNC(u8"degrees", MFG_BYTECODE_DEGREES)
+	ONE_PARAM_FUNC(u8"radians", MFG_BYTECODE_RADIANS)
 	else
 	{
 		mfsStringStream ss;
@@ -983,6 +697,9 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 	}
+
+#undef TWO_PARAM_FUNC
+#undef ONE_PARAM_FUNC
 
 	return MF_ERROR_OKAY;
 }
