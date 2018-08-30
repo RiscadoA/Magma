@@ -3375,7 +3375,7 @@ static mfError mfgGenerateMetaData(mfgV2XGeneratorInternalState* state)
 							return err;
 
 						// Write variable type
-						switch (state->compilerState->output.variables[i].type)
+						switch (state->compilerState->constantBuffers[i].variables[j].type)
 						{
 							case MFG_V2X_TOKEN_INT1: u8T = MFG_INT1; break;
 							case MFG_V2X_TOKEN_INT2: u8T = MFG_INT2; break;

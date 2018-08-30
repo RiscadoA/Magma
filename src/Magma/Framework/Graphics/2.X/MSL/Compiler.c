@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-mfError mfgV2XRunMVLCompiler(const mfsUTF8CodeUnit * msl, mfmU8 * bytecode, mfmU64 maxBytecodeSize, mfmU8 * metaData, mfmU64 maxMetaDataSize, mfgV2XEnum shaderType, mfgV2XMVLCompilerInfo * info)
+mfError mfgV2XRunMVLCompiler(const mfsUTF8CodeUnit* msl, mfmU8* bytecode, mfmU64 maxBytecodeSize, mfmU8* metaData, mfmU64 maxMetaDataSize, mfgV2XEnum shaderType, mfgV2XMVLCompilerInfo* info)
 {
 	if (msl == NULL || bytecode == NULL || maxBytecodeSize == 0 || metaData == NULL || maxMetaDataSize == 0 || info == NULL)
 		return MFG_ERROR_INVALID_ARGUMENTS;
