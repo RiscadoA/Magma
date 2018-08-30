@@ -2656,6 +2656,15 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
 
+			if (term1->returnType != term2->returnType)
+			{
+				mfsStringStream ss;
+				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Assign expression types don't match");
+				mfsDestroyLocalStringStream(&ss);
+				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+			}
+
 			return MF_ERROR_OKAY;
 
 		case MFG_V2X_TOKEN_CALL:
@@ -2679,6 +2688,15 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					return err;
 			}
 
+			if (term1->returnType != term2->returnType)
+			{
+				mfsStringStream ss;
+				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Operator term/factor types don't match");
+				mfsDestroyLocalStringStream(&ss);
+				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+			}
+
 			node->isConstant = MFM_FALSE;
 			node->isLValue = MFM_FALSE;
 			node->returnType = term1->returnType;
@@ -2697,6 +2715,15 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			err = mfgAnnotateExpression(state, term2);
 			if (err != MF_ERROR_OKAY)
 				return err;
+
+			if (term1->returnType != term2->returnType)
+			{
+				mfsStringStream ss;
+				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Coonditional operator term types don't match");
+				mfsDestroyLocalStringStream(&ss);
+				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+			}
 
 			node->isConstant = MFM_FALSE;
 			node->isLValue = MFM_FALSE;
@@ -2718,7 +2745,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPutString(&ss, u8"[mfgAnnotateExpression] 'and' and 'or' terms must be booleans");
+				mfsPutString(&ss, u8"[mfgAnnotateExpression] Logic operators 'and' and 'or' terms must be booleans");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2737,7 +2764,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPutString(&ss, u8"[mfgAnnotateExpression] 'not' term must be a boolean");
+				mfsPutString(&ss, u8"[mfgAnnotateExpression] Logical operator 'not' term must be a boolean");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2849,6 +2876,15 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
 				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] First term in a array access operator must be a reference");
+				mfsDestroyLocalStringStream(&ss);
+				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
+			}
+
+			if (term2->returnType != MFG_V2X_TOKEN_INT1)
+			{
+				mfsStringStream ss;
+				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Array access operator index must be a scalar integer");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -3011,6 +3047,8 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}
+
+				node->returnType = mfgGetComponentType(term1->returnType);
 
 				return MF_ERROR_OKAY;
 			}
