@@ -20,19 +20,19 @@ namespace Magma
 			/// <summary>
 			///		Shader type
 			/// </summary>
-			Framework::Graphics_V1X::ShaderType type = Framework::Graphics_V1X::ShaderType::Invalid;
+			Framework::Graphics::V1X::ShaderType type = Framework::Graphics::V1X::ShaderType::Invalid;
 
 			union
 			{
 				/// <summary>
 				///		Vertex shader handle
 				/// </summary>
-				Framework::Graphics_V1X::VertexShader* vertexShader = nullptr;
+				Framework::Graphics::V1X::VertexShader* vertexShader = nullptr;
 
 				/// <summary>
 				///		Pixel shader handle
 				/// </summary>
-				Framework::Graphics_V1X::PixelShader* pixelShader;
+				Framework::Graphics::V1X::PixelShader* pixelShader;
 			};
 		};
 
@@ -42,7 +42,7 @@ namespace Magma
 		class ShaderImporter final : public Importer
 		{
 		public:
-			ShaderImporter(Manager* manager, Framework::Graphics_V1X::RenderDevice* device);
+			ShaderImporter(Manager* manager, Framework::Graphics::V1X::RenderDevice* device);
 			virtual ~ShaderImporter() final;
 
 			// Inherited via Importer
@@ -52,7 +52,7 @@ namespace Magma
 			virtual ResourceMode GetMode(Resource* resources) final;
 
 		private:
-			Framework::Graphics_V1X::RenderDevice* m_device;
+			Framework::Graphics::V1X::RenderDevice* m_device;
 			Framework::Memory::PoolAllocator m_pool;
 		};
 	}

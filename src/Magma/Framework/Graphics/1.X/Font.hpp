@@ -10,7 +10,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics_V1X
+		namespace Graphics::V1X
 		{
 			/// <summary>
 			///		Holds info about a single font character.
@@ -62,7 +62,7 @@ namespace Magma
 				/// <summary>
 				///		Loads a font from memory
 				/// </summary>
-				/// <param name="device">Graphics_V1X render device</param>
+				/// <param name="device">Graphics::V1X render device</param>
 				/// <param name="data">Data pointer</param>
 				/// <param name="size">Data size</param>
 				/// <param name="charWidth">Character width (set automatically if 0)</param>

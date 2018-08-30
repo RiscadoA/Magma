@@ -1,6 +1,7 @@
 #include "Window.hpp"
 #include "Exception.hpp"
 #include "ErrorString.h"
+#include "Config.h"
 
 void Magma::Framework::Input::Window::PollEvents()
 {
@@ -74,6 +75,15 @@ void Magma::Framework::Input::Window::SetOnKeyDownCallback(mfiOnKeyDownCallback 
 
 Magma::Framework::Input::Window Magma::Framework::Input::CreateWindow(const mfsUTF8CodeUnit * type, mfmU32 width, mfmU32 height, WindowMode mode, const mfsUTF8CodeUnit * title)
 {
+	if (type == NULL)
+	{
+#if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
+		type = u8"d3d";
+#elif defined(MAGMA_FRAMEWORK_USE_OPENGL)
+		type = u8"ogl";
+#endif
+	}
+
 	mfiWindow* win = NULL;
 	mfError err = mfiCreateWindow(type, &win, width, height, static_cast<mfiEnum>(mode), title);
 	if (err != MF_ERROR_OKAY)

@@ -9,7 +9,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics_V1X
+		namespace Graphics::V1X
 		{
 			/// <summary>
 			///		Holds data about a single shader line

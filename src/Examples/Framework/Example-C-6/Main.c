@@ -1,5 +1,6 @@
 ﻿#include <Magma/Framework/Graphics/2.X/D3D11RenderDevice.h>
 #include <Magma/Framework/Graphics/2.X/OGL4RenderDevice.h>
+#include <Magma/Framework/Graphics/2.X/MSL/Compiler.h>
 #include <Magma/Framework/String/UTF8.h>
 #include <Magma/Framework/String/Stream.h>
 
@@ -80,8 +81,54 @@ int main(int argc, const char** argv)
 	{
 		mfgMetaData* metaData = NULL;
 
-		// Load meta data
+		const mfmU8* src =
+			u8"Input"
+			u8"{"
+			u8"		float4 position : position;"
+			u8"		float2 uvs : uvs;"
+			u8"};"
+
+			u8"Output"
+			u8"{"
+			u8"		float2 uvs : _out0;"
+			u8"		float4 position : _position;"
+			u8"};"
+
+			u8"ConstantBuffer buffer : transform"
+			u8"{"
+			u8"		float4 offset;"
+			u8"};"
+
+			u8"void main()"
+			u8"{"
+			u8"		Output.uvs = Input.uvs;"
+			u8"		Output.position = Input.position + buffer.offset;"
+			u8"		Output.position.w = 1.0f;"
+			u8"}"
+			;
+
+
+		mfmU8 bytecode[256];
+		mfmU64 bytecodeSize = 0;
+		mfmU8 metaDataB[256];
+		mfmU64 metaDataSize = 0;
+
 		{
+			mfgV2XMVLCompilerInfo info;
+			if (mfgV2XRunMVLCompiler(src, bytecode, sizeof(bytecode), metaDataB, sizeof(metaDataB), MFG_VERTEX_SHADER, &info) != MF_ERROR_OKAY)
+			{
+				mfsPutString(mfsErrStream, info.errorMsg);
+				abort();
+			}
+			bytecodeSize = info.bytecodeSize;
+			metaDataSize = info.metaDataSize;
+		}
+
+		if (mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL) != MF_ERROR_OKAY)
+			abort();
+
+		// Load meta data
+		/*{
 			mfmU8 metaDataB[256];
 			mfmU64 ptr = 0;
 			metaDataB[ptr++] = MFG_METADATA_HEADER_MARKER_0;
@@ -134,6 +181,8 @@ int main(int argc, const char** argv)
 			{
 				metaDataB[ptr++] = 0x00; // Var index 1
 				metaDataB[ptr++] = 0x02;
+				metaDataB[ptr++] = 0x00; // Array size 0 (not an array)
+				metaDataB[ptr++] = 0x00;
 				metaDataB[ptr++] = MFG_FLOAT4;
 			}
 
@@ -141,9 +190,9 @@ int main(int argc, const char** argv)
 			if (mfgLoadMetaData(metaDataB, sizeof(metaDataB), &metaData, NULL) != MF_ERROR_OKAY)
 				abort();
 		}
-
+		*/
 		// Load bytecode
-		mfmU8 bytecode[] =
+		/*mfmU8 bytecode[] =
 		{
 			MFG_BYTECODE_HEADER_MARKER_0,
 			MFG_BYTECODE_HEADER_MARKER_1,
@@ -155,10 +204,10 @@ int main(int argc, const char** argv)
 			MFG_BYTECODE_GET4CMP, 0x00, 0xFF, 0x00, 0x01, 0x03,
 			MFG_BYTECODE_LITI1, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x01,
 			MFG_BYTECODE_ASSIGN, 0x00, 0x04, 0x00, 0x03,
-		};
+		};*/
 
 		// Create shader
-		if (mfgV2XCreateVertexShader(renderDevice, &vs, bytecode, sizeof(bytecode), metaData) != MF_ERROR_OKAY)
+		if (mfgV2XCreateVertexShader(renderDevice, &vs, bytecode, bytecodeSize, metaData) != MF_ERROR_OKAY)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));

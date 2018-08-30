@@ -11,7 +11,7 @@
 
 #include "../../Memory/Endianness.hpp"
 
-void Magma::Framework::Graphics_V1X::ShaderCompiler::Run(const std::string & in, std::string& outBC, std::string& outMD)
+void Magma::Framework::Graphics::V1X::ShaderCompiler::Run(const std::string & in, std::string& outBC, std::string& outMD)
 {
 	ShaderCompilerData data;
 	std::vector<ShaderLine> preprocessed;
@@ -48,7 +48,7 @@ void Magma::Framework::Graphics_V1X::ShaderCompiler::Run(const std::string & in,
 	}
 }
 
-size_t Magma::Framework::Graphics_V1X::ShaderCompiler::Run(const std::string & in, char * binaryObject, size_t maxSize)
+size_t Magma::Framework::Graphics::V1X::ShaderCompiler::Run(const std::string & in, char * binaryObject, size_t maxSize)
 {
 	std::string bc, md;
 
@@ -114,7 +114,7 @@ size_t Magma::Framework::Graphics_V1X::ShaderCompiler::Run(const std::string & i
 	return bytecodeSize + metaDataSize + sizeof(unsigned long) * 2;
 }
 
-Magma::Framework::Graphics_V1X::ShaderVariable* Magma::Framework::Graphics_V1X::ShaderScope::GetVar(const std::string& name)
+Magma::Framework::Graphics::V1X::ShaderVariable* Magma::Framework::Graphics::V1X::ShaderScope::GetVar(const std::string& name)
 {
 	for (auto& v : this->variables)
 		if (v.id == name)

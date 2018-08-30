@@ -6,7 +6,8 @@
 #include <sstream>
 #include <map>
 
-using namespace Magma::Framework::Graphics_V1X;
+using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::V1X;
 using namespace Magma::Framework;
 
 std::map<std::string, BytecodeOpCode> instructionSet =
@@ -130,7 +131,7 @@ BytecodeOpCode GetOpCode(const std::string& str)
 		return it->second;
 }
 
-size_t Magma::Framework::Graphics_V1X::BytecodeAssembler::Assemble(const std::string & code, char * out, size_t maxSize)
+size_t Magma::Framework::Graphics::V1X::BytecodeAssembler::Assemble(const std::string & code, char * out, size_t maxSize)
 {
 	std::stringstream ss(code);
 

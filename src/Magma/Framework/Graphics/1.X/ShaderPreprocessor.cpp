@@ -6,7 +6,7 @@
 #include <regex>
 #include <iostream>
 
-void Magma::Framework::Graphics_V1X::ShaderPreprocessor::Run(const std::string & in, std::vector<ShaderLine>& out, ShaderCompilerData& data)
+void Magma::Framework::Graphics::V1X::ShaderPreprocessor::Run(const std::string & in, std::vector<ShaderLine>& out, ShaderCompilerData& data)
 {
 	std::stringstream ss(in);
 	std::string line;

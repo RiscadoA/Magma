@@ -24,7 +24,7 @@ using namespace Magma;
 struct Scene
 {
 	Framework::Input::Window* window;
-	Framework::Graphics_V1X::RenderDevice* Graphics_V1XDevice;
+	Framework::Graphics::V1X::RenderDevice* Graphics_V1XDevice;
 	Framework::Audio::RenderDevice* audioDevice;
 	bool running;
 };
@@ -49,13 +49,13 @@ void LoadScene(Scene& scene)
 		scene.window->OnClose.AddListener([&scene]() { scene.running = false; });
 	}
 
-	// Create Graphics_V1X render device
+	// Create Graphics::V1X render device
 	{
-		Framework::Graphics_V1X::RenderDeviceSettings settings;
+		Framework::Graphics::V1X::RenderDeviceSettings settings;
 #ifdef USE_GL
-		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::OGL410RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics::V1X::OGL410RenderDevice();
 #else
-		scene.Graphics_V1XDevice = new Framework::Graphics_V1X::D3D11RenderDevice();
+		scene.Graphics_V1XDevice = new Framework::Graphics::V1X::D3D11RenderDevice();
 #endif
 		scene.Graphics_V1XDevice->Init(scene.window, settings);
 	}
@@ -78,7 +78,7 @@ void LoadScene(Scene& scene)
 void CleanScene(Scene& scene)
 {
 
-	// Destroy audio and Graphics_V1X devices, window and filesytem
+	// Destroy audio and Graphics::V1X devices, window and filesytem
 	delete scene.audioDevice;
 	delete scene.Graphics_V1XDevice;
 	delete scene.window;
@@ -147,19 +147,19 @@ int main(int argc, const char** argv) try
 	mfTerminate();
 	return 0;
 }
-catch (Framework::Graphics_V1X::ShaderError& e)
+catch (Framework::Graphics::ShaderError& e)
 {
 	std::cout << "Shader error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }
-catch (Framework::Graphics_V1X::RenderDeviceError& e)
+catch (Framework::Graphics::RenderDeviceError& e)
 {
 	std::cout << "Render device error caught:" << std::endl;
 	std::cout << e.what() << std::endl;
 	getchar();
 }
-catch (Framework::Graphics_V1X::TextError& e)
+catch (Framework::Graphics::TextError& e)
 {
 	std::cout << "Text error caught:" << std::endl;
 	std::cout << e.what() << std::endl;

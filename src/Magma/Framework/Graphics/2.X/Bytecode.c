@@ -66,23 +66,14 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 
 				// Get constant buffer size
 				bpAllocSize += sizeof(mfgMetaDataConstantBufferVariable) * elementCount;
-				readPtr += elementCount * (2 + 1);
+				readPtr += elementCount * (2 + 2 + 1);
 			}
 			else if (type == MFG_TEXTURE_1D)
-			{
 				bpAllocSize += sizeof(mfgMetaDataTexture1D);
-				readPtr += 2;
-			}
 			else if (type == MFG_TEXTURE_2D)
-			{
 				bpAllocSize += sizeof(mfgMetaDataTexture2D);
-				readPtr += 2;
-			}
 			else if (type == MFG_TEXTURE_3D)
-			{
 				bpAllocSize += sizeof(mfgMetaDataTexture3D);
-				readPtr += 2;
-			}
 			else
 				return MFG_ERROR_INVALID_DATA;
 		}
@@ -226,6 +217,10 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 
 					// Get index
 					mfmFromBigEndian2(metaData + readPtr, &var->id);
+					readPtr += 2;
+
+					// Get array size
+					mfmFromBigEndian2(metaData + readPtr, &var->arraySize);
 					readPtr += 2;
 
 					// Get type

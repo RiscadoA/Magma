@@ -60,7 +60,7 @@ extern "C"
 {
 #endif
 
-	// MSL Bytecode version 2.0
+	// MSL Bytecode version 2.1
 	// Binary bytecode shaders are composed of two files:
 	// - the binary bytecode instruction file (.mbb)
 	// - the binary meta data file (.mbd)
@@ -114,11 +114,12 @@ extern "C"
 	// [number of binding points]
 	//		- 16 bytes for binding point name with null terminator.
 	//		- (mfmU8) binding point type.
-	//		- (mfmU16) variable index.
+	//		- (mfmU16) binding point index.
 	//		if type = MFG_CONSTANT_BUFFER then
 	//			- (mfmU16) variable count.
 	//			[variable count]
 	//				- (mfmU16) variable index.
+	//				- (mfmU16) array size. (0 if variable is not an array)
 	//				- (mfmU8) variable type.
 	//		else if type = MFG_TEXTURE_1D then
 	//			NONE
@@ -156,13 +157,13 @@ extern "C"
 #define MFG_BYTECODE_DECLI44			0x07	// Declares an integer 4x4 matrix variable { variable index stored on param 1x2 }.
 
 	// Integer component arrays.
-#define MFG_BYTECODE_DECLI1A			0x10	// Declares an integer scalar variable array { array starting index stored on param 1x2, element count on param 2x2 }.
-#define MFG_BYTECODE_DECLI2A			0x11	// Declares an integer 2 component vector variable array { array starting index stored on param 1x2, element count on param 2x2 }.
-#define MFG_BYTECODE_DECLI3A			0x12	// Declares an integer 3 component vector variable array { array starting index stored on param 1x2, element count on param 2x2 }.
-#define MFG_BYTECODE_DECLI4A			0x13	// Declares an integer 4 component vector variable array { array starting index stored on param 1x2, element count on param 2x2 }.
-#define MFG_BYTECODE_DECLI22A			0x14	// Declares an integer 2x2 matrix variable array { array starting index stored on param 1x2, element count on param 2x2 }.
-#define MFG_BYTECODE_DECLI33A			0x15	// Declares an integer 3x3 matrix variable array { array starting index stored on param 1x2, element count on param 2x2 }.
-#define MFG_BYTECODE_DECLI44A			0x16	// Declares an integer 4x4 matrix variable array { array starting index stored on param 1x2, element count on param 2x2 }.
+#define MFG_BYTECODE_DECLI1A			0x10	// Declares an integer scalar variable array { array index stored on param 1x2, element count on param 2x2 }.
+#define MFG_BYTECODE_DECLI2A			0x11	// Declares an integer 2 component vector variable array { array index stored on param 1x2, element count on param 2x2 }.
+#define MFG_BYTECODE_DECLI3A			0x12	// Declares an integer 3 component vector variable array { array index stored on param 1x2, element count on param 2x2 }.
+#define MFG_BYTECODE_DECLI4A			0x13	// Declares an integer 4 component vector variable array { array index stored on param 1x2, element count on param 2x2 }.
+#define MFG_BYTECODE_DECLI22A			0x14	// Declares an integer 2x2 matrix variable array { array index stored on param 1x2, element count on param 2x2 }.
+#define MFG_BYTECODE_DECLI33A			0x15	// Declares an integer 3x3 matrix variable array { array index stored on param 1x2, element count on param 2x2 }.
+#define MFG_BYTECODE_DECLI44A			0x16	// Declares an integer 4x4 matrix variable array { array index stored on param 1x2, element count on param 2x2 }.
 
 	// Floating point components.
 #define MFG_BYTECODE_DECLF1				0x20	// Declares an floating point scalar variable { variable index stored on param 1x2 }.
@@ -223,6 +224,7 @@ extern "C"
 #define MFG_BYTECODE_GET22CMP			0x73	// Sets variable index { param 1x2 } to a reference to a component of a 2x2 matrix  { matrix index on param 2x2, component index on param 3x1 (the top left component has index 0, the bottom right component has the last index) }.
 #define MFG_BYTECODE_GET33CMP			0x74	// Sets variable index { param 1x2 } to a reference to a component of a 3x3 matrix  { matrix index on param 2x2, component index on param 3x1 (the top left component has index 0, the bottom right component has the last index) }.
 #define MFG_BYTECODE_GET44CMP			0x75	// Sets variable index { param 1x2 } to a reference to a component of a 4x4 matrix  { matrix index on param 2x2, component index on param 3x1 (the top left component has index 0, the bottom right component has the last index) }.
+#define MFG_BYTECODE_GETACMP			0x76	// Sets variable index { param 1x2 } to a reference to a component of an array { array on param 2x2, index on the variable on param 3x2 }
 
 	// Scope and flow control
 #define MFG_BYTECODE_OPSCOPE			0x80	// Open a new scope (new variable declarations with previously used indexes overrides previous variables until the scope is closed).
@@ -300,6 +302,7 @@ typedef struct
 typedef struct
 {
 	mfmU16 id;
+	mfmU16 arraySize;
 	mfmU8 type;
 	void* next;
 } mfgMetaDataConstantBufferVariable;

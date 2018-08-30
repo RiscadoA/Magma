@@ -10,7 +10,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics_V1X
+		namespace Graphics::V1X
 		{
 			/// <summary>
 			///		Describes a shader variable type
@@ -238,13 +238,13 @@ namespace Magma
 				/// <summary>
 				///		Creates a shader data container (makes a copy from the input data and stores it)
 				/// </summary>
-				/// <exception cref="Magma::Framework::Graphics_V1X::ShaderError">Thrown if there is an error loading the meta data</exception>
+				/// <exception cref="Magma::Framework::Graphics::ShaderError">Thrown if there is an error loading the meta data</exception>
 				ShaderData(const char* binaryObject, size_t binaryObjectSize);
 
 				/// <summary>
 				///		Creates a shader data container	(makes a copy from the input data and stores it)
 				/// </summary>
-				/// <exception cref="Magma::Framework::Graphics_V1X::ShaderError">Thrown if there is an error loading the meta data</exception>
+				/// <exception cref="Magma::Framework::Graphics::ShaderError">Thrown if there is an error loading the meta data</exception>
 				ShaderData(const char* bytecode, size_t bytecodeSize, const char* metaData, size_t metaDataSize);
 
 				/// <summary>

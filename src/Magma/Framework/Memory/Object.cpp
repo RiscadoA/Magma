@@ -96,6 +96,7 @@ bool Magma::Framework::Memory::Object::Release()
 		throw ObjectError("Failed to get object reference count");
 	if (refCount == 0 && m_obj->destructorFunc != nullptr)
 		m_obj->destructorFunc(m_obj);
+	m_obj = NULL;
 	return true;
 }
 

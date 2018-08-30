@@ -9,7 +9,8 @@
 
 const int MinorVersion = 2;
 
-using namespace Magma::Framework::Graphics_V1X;
+using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::V1X;
 using namespace Magma::Framework;
 
 void TOGL410(ShaderDataVariableType type, std::stringstream& out)
@@ -41,7 +42,7 @@ void TOGL410(ShaderDataVariableType type, std::stringstream& out)
 	}
 }
 
-void Magma::Framework::Graphics_V1X::OGL410Assembler::Assemble(const ShaderData & data, std::string & out)
+void Magma::Framework::Graphics::V1X::OGL410Assembler::Assemble(const ShaderData & data, std::string & out)
 {
 	if (data.GetMinorVersion() > MinorVersion || data.GetMajorVersion() != 1)
 	{

@@ -38,7 +38,7 @@ int main(int argc, const char** argv)
 				fileSystem->Read(file, code, size);
 				fileSystem->CloseFile(file);
 				code[size] = '\0';
-				Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+				Graphics::V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			}
 
 			// Write bytecode
@@ -56,8 +56,8 @@ int main(int argc, const char** argv)
 			}
 
 			// Assemble shader 
-			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
-			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+			bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+			metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 			// Write binary MSL shader object
 			{
@@ -74,12 +74,12 @@ int main(int argc, const char** argv)
 				fileSystem->CloseFile(file);
 			}
 
-			Graphics_V1X::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
+			Graphics::V1X::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
 
 			// Write HLSL shader
 			{
 				std::string compiled;
-				Graphics_V1X::D3D11Assembler::Assemble(data, compiled);
+				Graphics::V1X::D3D11Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/vertex.hlsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());
@@ -89,7 +89,7 @@ int main(int argc, const char** argv)
 			// Write GLSL shader
 			{
 				std::string compiled;
-				Graphics_V1X::OGL410Assembler::Assemble(data, compiled);
+				Graphics::V1X::OGL410Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/vertex.glsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());
@@ -115,7 +115,7 @@ int main(int argc, const char** argv)
 				fileSystem->Read(file, code, size);
 				fileSystem->CloseFile(file);
 				code[size] = '\0';
-				Graphics_V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
+				Graphics::V1X::ShaderCompiler::Run(code, bytecodeSrc, metaDataSrc);
 			}
 
 			// Write bytecode
@@ -133,8 +133,8 @@ int main(int argc, const char** argv)
 			}
 
 			// Assemble shader 
-			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
-			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
+			bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(bytecodeSrc, bytecode, sizeof(bytecode));
+			metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(metaDataSrc, metaData, sizeof(metaData));
 
 			// Write binary MSL shader object
 			{
@@ -151,12 +151,12 @@ int main(int argc, const char** argv)
 				fileSystem->CloseFile(file);
 			}
 
-			Graphics_V1X::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
+			Graphics::V1X::ShaderData data(bytecode, bytecodeSize, metaData, metaDataSize);
 
 			// Write HLSL shader
 			{
 				std::string compiled;
-				Graphics_V1X::D3D11Assembler::Assemble(data, compiled);
+				Graphics::V1X::D3D11Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/pixel.hlsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());
@@ -166,7 +166,7 @@ int main(int argc, const char** argv)
 			// Write GLSL shader
 			{
 				std::string compiled;
-				Graphics_V1X::OGL410Assembler::Assemble(data, compiled);
+				Graphics::V1X::OGL410Assembler::Assemble(data, compiled);
 
 				auto file = fileSystem->OpenFile(Files::FileMode::Write, "/Example-7/pixel.glsl");
 				fileSystem->Write(file, compiled.data(), compiled.size());

@@ -3,9 +3,9 @@
 
 #include <sstream>
 
-using namespace Magma::Framework::Graphics_V1X;
+using namespace Magma::Framework::Graphics::V1X;
 
-Magma::Framework::Graphics_V1X::ShaderData::ShaderData(const char * binaryObject, size_t binaryObjectSize)
+Magma::Framework::Graphics::V1X::ShaderData::ShaderData(const char * binaryObject, size_t binaryObjectSize)
 {
 	if (4 > binaryObjectSize)
 		throw ShaderError("Faield to create shader data from binary object:\nInvalid size {1}");
@@ -30,7 +30,7 @@ Magma::Framework::Graphics_V1X::ShaderData::ShaderData(const char * binaryObject
 	this->Load();
 }
 
-Magma::Framework::Graphics_V1X::ShaderData::ShaderData(const char * bytecode, size_t bytecodeSize, const char * metaData, size_t metaDataSize)
+Magma::Framework::Graphics::V1X::ShaderData::ShaderData(const char * bytecode, size_t bytecodeSize, const char * metaData, size_t metaDataSize)
 {
 	m_bytecodeSize = bytecodeSize;
 	m_bytecode = (char*)malloc(m_bytecodeSize);
@@ -43,7 +43,7 @@ Magma::Framework::Graphics_V1X::ShaderData::ShaderData(const char * bytecode, si
 	this->Load();
 }
 
-Magma::Framework::Graphics_V1X::ShaderData::~ShaderData()
+Magma::Framework::Graphics::V1X::ShaderData::~ShaderData()
 {
 	if (m_bytecode != nullptr)
 		free(m_bytecode);
@@ -51,7 +51,7 @@ Magma::Framework::Graphics_V1X::ShaderData::~ShaderData()
 		free(m_metaData);
 }
 
-Magma::Framework::Graphics_V1X::ShaderData::ShaderData(ShaderData && rhs)
+Magma::Framework::Graphics::V1X::ShaderData::ShaderData(ShaderData && rhs)
 {
 	m_bytecode = rhs.m_bytecode;
 	m_bytecodeSize = rhs.m_bytecodeSize;
@@ -73,7 +73,7 @@ Magma::Framework::Graphics_V1X::ShaderData::ShaderData(ShaderData && rhs)
 	m_constantBufferVars = std::move(rhs.m_constantBufferVars);
 }
 
-Magma::Framework::Graphics_V1X::ShaderData::ShaderData(const ShaderData & rhs)
+Magma::Framework::Graphics::V1X::ShaderData::ShaderData(const ShaderData & rhs)
 {
 	m_bytecodeSize = rhs.m_bytecodeSize;
 	m_bytecode = (char*)malloc(m_bytecodeSize);
@@ -93,7 +93,7 @@ Magma::Framework::Graphics_V1X::ShaderData::ShaderData(const ShaderData & rhs)
 	m_constantBufferVars = rhs.m_constantBufferVars;
 }
 
-void Magma::Framework::Graphics_V1X::ShaderData::Load()
+void Magma::Framework::Graphics::V1X::ShaderData::Load()
 {
 	// Put meta data into stream
 	std::stringstream ss(std::ios::in | std::ios::out | std::ios::binary);

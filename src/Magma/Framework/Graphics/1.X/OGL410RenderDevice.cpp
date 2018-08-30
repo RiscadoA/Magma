@@ -1,7 +1,8 @@
 #include "OGL410RenderDevice.hpp"
 #include "OGL410Assembler.hpp"
 
-using namespace Magma::Framework::Graphics_V1X;
+using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::V1X;
 using namespace Magma::Framework;
 
 #include <Config.h>
@@ -1074,7 +1075,7 @@ public:
 	GLuint width, height;
 };
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	m_window = dynamic_cast<Input::OGLWindow*>(window);
@@ -1132,7 +1133,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Init(Input::Window * wi
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Terminate()
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::Terminate()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	// Oonly terminated when the OGLWindow closes
@@ -1141,7 +1142,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Terminate()
 #endif
 }
 
-VertexShader * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexShader(const ShaderData& data)
+VertexShader * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateVertexShader(const ShaderData& data)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	if (data.GetShaderType() != ShaderType::Vertex)
@@ -1155,7 +1156,7 @@ VertexShader * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexS
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexShader(VertexShader * vertexShader)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyVertexShader(VertexShader * vertexShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete vertexShader;
@@ -1164,7 +1165,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexShader(Ver
 #endif
 }
 
-PixelShader * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreatePixelShader(const ShaderData& data)
+PixelShader * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreatePixelShader(const ShaderData& data)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	if (data.GetShaderType() != ShaderType::Pixel)
@@ -1178,7 +1179,7 @@ PixelShader * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreatePixelSha
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyPixelShader(PixelShader * pixelShader)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyPixelShader(PixelShader * pixelShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete pixelShader;
@@ -1187,7 +1188,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyPixelShader(Pixe
 #endif
 }
 
-Pipeline * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreatePipeline(VertexShader * vertexShader, PixelShader * pixelShader)
+Pipeline * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreatePipeline(VertexShader * vertexShader, PixelShader * pixelShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410Pipeline(static_cast<OGL410VertexShader*>(vertexShader), static_cast<OGL410PixelShader*>(pixelShader));
@@ -1197,7 +1198,7 @@ Pipeline * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreatePipeline(Ve
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyPipeline(Pipeline * pipeline)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyPipeline(Pipeline * pipeline)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete pipeline;
@@ -1206,7 +1207,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyPipeline(Pipelin
 #endif	
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetPipeline(Pipeline * pipeline)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SetPipeline(Pipeline * pipeline)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	if (pipeline == nullptr)
@@ -1221,7 +1222,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetPipeline(Pipeline * 
 #endif
 }
 
-VertexBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexBuffer(size_t size, const void * data, BufferUsage usage)
+VertexBuffer * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateVertexBuffer(size_t size, const void * data, BufferUsage usage)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410VertexBuffer(size, data, usage);
@@ -1231,7 +1232,7 @@ VertexBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexB
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexBuffer(VertexBuffer * vertexBuffer)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyVertexBuffer(VertexBuffer * vertexBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete vertexBuffer;
@@ -1240,7 +1241,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexBuffer(Ver
 #endif
 }
 
-VertexLayout * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexLayout(size_t elementCount, const VertexElement * elements, VertexShader * vertexShader)
+VertexLayout * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateVertexLayout(size_t elementCount, const VertexElement * elements, VertexShader * vertexShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410VertexLayout(elementCount, elements, static_cast<OGL410VertexShader*>(vertexShader));
@@ -1250,7 +1251,7 @@ VertexLayout * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexL
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexLayout(VertexLayout * vertexLayout)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyVertexLayout(VertexLayout * vertexLayout)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete vertexLayout;
@@ -1259,7 +1260,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexLayout(Ver
 #endif
 }
 
-VertexArray * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexArray(size_t bufferCount, VertexBuffer ** buffers, VertexLayout * layout)
+VertexArray * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateVertexArray(size_t bufferCount, VertexBuffer ** buffers, VertexLayout * layout)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410VertexArray(bufferCount, buffers, layout);
@@ -1269,7 +1270,7 @@ VertexArray * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateVertexAr
 #endif	
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexArray(VertexArray * vertexArray)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyVertexArray(VertexArray * vertexArray)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete vertexArray;
@@ -1278,7 +1279,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyVertexArray(Vert
 #endif	
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetVertexArray(VertexArray * vertexArray)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SetVertexArray(VertexArray * vertexArray)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	if (vertexArray == nullptr)
@@ -1291,7 +1292,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetVertexArray(VertexAr
 #endif	
 }
 
-IndexBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateIndexBuffer(IndexType type, size_t size, const void * data, BufferUsage usage)
+IndexBuffer * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateIndexBuffer(IndexType type, size_t size, const void * data, BufferUsage usage)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410IndexBuffer(type, size, data, usage);
@@ -1301,7 +1302,7 @@ IndexBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateIndexBuf
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyIndexBuffer(IndexBuffer * indexBuffer)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyIndexBuffer(IndexBuffer * indexBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete indexBuffer;
@@ -1310,7 +1311,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyIndexBuffer(Inde
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetIndexBuffer(IndexBuffer * indexBuffer)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SetIndexBuffer(IndexBuffer * indexBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	m_currentIndexBuffer = indexBuffer;
@@ -1324,7 +1325,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetIndexBuffer(IndexBuf
 #endif	
 }
 
-Texture2D * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data, BufferUsage usage, bool isRenderTarget)
+Texture2D * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data, BufferUsage usage, bool isRenderTarget)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410Texture2D(width, height, format, data, usage, isRenderTarget);
@@ -1334,7 +1335,7 @@ Texture2D * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateTexture2D(
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyTexture2D(Texture2D * texture)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyTexture2D(Texture2D * texture)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete texture;
@@ -1343,7 +1344,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyTexture2D(Textur
 #endif
 }
 
-Sampler2D * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateSampler2D(const Sampler2DDesc & desc)
+Sampler2D * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateSampler2D(const Sampler2DDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410Sampler2D(desc);
@@ -1352,7 +1353,7 @@ Sampler2D * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateSampler2D(
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroySampler2D(Sampler2D* sampler)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroySampler2D(Sampler2D* sampler)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete sampler;
@@ -1361,7 +1362,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroySampler2D(Sample
 #endif
 }
 
-RasterState * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateRasterState(const RasterStateDesc & desc)
+RasterState * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateRasterState(const RasterStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410RasterState(desc);
@@ -1371,7 +1372,7 @@ RasterState * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateRasterSt
 #endif	
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyRasterState(RasterState * rasterState)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete rasterState;
@@ -1380,7 +1381,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyRasterState(Rast
 #endif	
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetRasterState(RasterState * rasterState)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SetRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	auto old = m_currentRasterState;
@@ -1407,7 +1408,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetRasterState(RasterSt
 #endif
 }
 
-DepthStencilState * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateDepthStencilState(const DepthStencilStateDesc & desc)
+DepthStencilState * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateDepthStencilState(const DepthStencilStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410DepthStencilState(desc);
@@ -1417,7 +1418,7 @@ DepthStencilState * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateDe
 #endif	
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyDepthStencilState(DepthStencilState * depthStencilState)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete depthStencilState;
@@ -1426,7 +1427,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyDepthStencilStat
 #endif	
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetDepthStencilState(DepthStencilState * depthStencilState)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SetDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	auto old = m_currentDepthStencilState;
@@ -1471,7 +1472,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetDepthStencilState(De
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Clear(glm::vec4 color, float depth, int stencil)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::Clear(glm::vec4 color, float depth, int stencil)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	glClearColor(color.r, color.g, color.b, color.a);
@@ -1483,7 +1484,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::Clear(glm::vec4 color, 
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DrawTriangles(size_t offset, size_t count)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DrawTriangles(size_t offset, size_t count)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	glDrawArrays(GL_TRIANGLES, offset, count);
@@ -1493,7 +1494,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DrawTriangles(size_t of
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DrawTrianglesIndexed(size_t offset, size_t count)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DrawTrianglesIndexed(size_t offset, size_t count)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 #ifdef MAGMA_FRAMEWORK_DEBUG
@@ -1507,7 +1508,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DrawTrianglesIndexed(si
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SwapBuffers()
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SwapBuffers()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	auto glfwWin = (GLFWwindow*)mfiGetGLWindowGLFWHandle(m_window->GetWindow());
@@ -1517,7 +1518,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SwapBuffers()
 #endif
 }
 
-ConstantBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateConstantBuffer(size_t size, const void * data, BufferUsage usage)
+ConstantBuffer * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateConstantBuffer(size_t size, const void * data, BufferUsage usage)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410ConstantBuffer(size, data, usage);
@@ -1527,7 +1528,7 @@ ConstantBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateConst
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyConstantBuffer(ConstantBuffer* constantBuffer)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyConstantBuffer(ConstantBuffer* constantBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete constantBuffer;
@@ -1536,7 +1537,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyConstantBuffer(C
 #endif
 }
 
-BlendState * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateBlendState(const BlendStateDesc & desc)
+BlendState * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateBlendState(const BlendStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410BlendState(desc);
@@ -1546,7 +1547,7 @@ BlendState * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateBlendStat
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyBlendState(BlendState* blendState)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyBlendState(BlendState* blendState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete blendState;
@@ -1555,7 +1556,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyBlendState(Blend
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetBlendState(BlendState* blendState)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SetBlendState(BlendState* blendState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	auto old = m_currentBlendState;
@@ -1587,7 +1588,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetBlendState(BlendStat
 #endif
 }
 
-DepthStencilBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format)
+DepthStencilBuffer * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410DepthStencilBuffer(width, height, format);
@@ -1596,7 +1597,7 @@ DepthStencilBuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateD
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyDepthStencilBuffer(DepthStencilBuffer * depthStencilBuffer)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyDepthStencilBuffer(DepthStencilBuffer * depthStencilBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete depthStencilBuffer;
@@ -1605,7 +1606,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyDepthStencilBuff
 #endif
 }
 
-Framebuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateFramebuffer(size_t attachmentCount, Texture2D ** attachments, DepthStencilBuffer * depthStencilAttachment)
+Framebuffer * Magma::Framework::Graphics::V1X::OGL410RenderDevice::CreateFramebuffer(size_t attachmentCount, Texture2D ** attachments, DepthStencilBuffer * depthStencilAttachment)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	return new OGL410Framebuffer(attachmentCount, attachments, depthStencilAttachment);
@@ -1614,7 +1615,7 @@ Framebuffer * Magma::Framework::Graphics_V1X::OGL410RenderDevice::CreateFramebuf
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyFramebuffer(Framebuffer * framebuffer)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::DestroyFramebuffer(Framebuffer * framebuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	delete framebuffer;
@@ -1623,7 +1624,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::DestroyFramebuffer(Fram
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetFramebuffer(Framebuffer * framebuffer)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::SetFramebuffer(Framebuffer * framebuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	if (framebuffer == nullptr)
@@ -1642,7 +1643,7 @@ void Magma::Framework::Graphics_V1X::OGL410RenderDevice::SetFramebuffer(Framebuf
 #endif
 }
 
-unsigned int Magma::Framework::Graphics_V1X::OGL410RenderDevice::GetMaxAnisotropyLimit()
+unsigned int Magma::Framework::Graphics::V1X::OGL410RenderDevice::GetMaxAnisotropyLimit()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	float max;

@@ -1,16 +1,18 @@
 #include "D3D11Assembler.h"
 #include "../../Memory/Endianness.h"
 
-const static mfmU8 mfgD3D11AssemblerMinorVersion = 0x00;
+const static mfmU8 mfgD3D11AssemblerMinorVersion = 0x01;
 
 typedef struct
 {
-	mfmU16 varID;
+	mfmU16 varIndex;
 	mfmU16 id;
 	mfmU8 index;
 	mfmU8 rows;
 	mfmU8 cols;
 	mfmBool active;
+	mfmBool isArray;
+	mfmU16 accessID;
 } mfgComponentReference;
 
 typedef struct
@@ -316,7 +318,7 @@ static mfError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			}
 			else if (bp->type == MFG_TEXTURE_2D)
 			{
-				mfgMetaDataTexture1D* tex = bp;
+				mfgMetaDataTexture2D* tex = bp;
 				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex2d_%d", id) != MF_ERROR_OKAY)
@@ -326,7 +328,7 @@ static mfError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			}
 			else if (bp->type == MFG_TEXTURE_3D)
 			{
-				mfgMetaDataTexture1D* tex = bp;
+				mfgMetaDataTexture3D* tex = bp;
 				if (bp->id == id)
 				{
 					if (mfsPrintFormatUTF8(out, u8"tex3d_%d", id) != MF_ERROR_OKAY)
@@ -348,12 +350,25 @@ static mfError mfgD3D11PutID(mfmU16 id, const mfgAssemblerData* data, mfsStream*
 			if (id == data->references[i].id)
 			{
 				// Get variable reference
-				mfError err = mfgD3D11PutID(data->references[i].varID, data, out);
+				mfError err = mfgD3D11PutID(data->references[i].varIndex, data, out);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
 				// Get component
-				if (data->references[i].rows == 2 && data->references[i].cols == 1)
+				if (data->references[i].isArray == MFM_TRUE)
+				{
+					err = mfsPutString(out, u8"[");
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfgD3D11PutID(data->references[i].accessID, data, out);
+					if (err != MF_ERROR_OKAY)
+						return err;
+					err = mfsPutString(out, u8"]");
+					if (err != MF_ERROR_OKAY)
+						return err;
+					return MF_ERROR_OKAY;
+				}
+				else if (data->references[i].rows == 2 && data->references[i].cols == 1)
 					switch (data->references[i].index)
 					{
 						case 0x00:
@@ -516,8 +531,16 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 					if (err != MF_ERROR_OKAY)
 						return err;
 
-					if (mfsPrintFormatUTF8(outputStream, u8" buf_%s_%d;\n", bp->name, var->id) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
+					if (var->arraySize == 0)
+					{
+						if (mfsPrintFormatUTF8(outputStream, u8" buf_%s_%d;\n", bp->name, var->id) != MF_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+					}
+					else
+					{
+						if (mfsPrintFormatUTF8(outputStream, u8" buf_%s_%d[%d];\n", bp->name, var->id, var->arraySize) != MF_ERROR_OKAY)
+							return MFG_ERROR_FAILED_TO_WRITE;
+					}
 
 					var = var->next;
 				}
@@ -945,7 +968,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int22 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int2x2 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -956,7 +979,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int33 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int3x3 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -967,7 +990,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int44 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int4x4 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -981,10 +1004,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -997,10 +1017,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int2 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1013,10 +1030,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int3 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1029,10 +1043,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int4 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1045,10 +1056,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int22 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int2x2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1061,10 +1069,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int33 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int3x3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1077,10 +1082,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"int44 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"int4x4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1092,7 +1094,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1103,7 +1105,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int2 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float2 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1114,7 +1116,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int3 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float3 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1125,7 +1127,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int4 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float4 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1136,7 +1138,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int22 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float2x2 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1147,7 +1149,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int33 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float3x3 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1158,7 +1160,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 						return MFG_ERROR_FAILED_TO_WRITE;
 				mfmU16 id = 0;
 				mfmFromBigEndian2(it + 1, &id);
-				if (mfsPrintFormatUTF8(outputStream, u8"int44 local_%d;\n", id) != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float4x4 local_%d;\n", id) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 3;
 			} break;
@@ -1172,10 +1174,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1188,10 +1187,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float2 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1204,10 +1200,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float3 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1220,10 +1213,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float4 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1236,10 +1226,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float22 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float2x2 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1252,10 +1239,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float33 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float3x3 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1268,10 +1252,7 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmFromBigEndian2(it + 1, &id);
 				mfmU16 count = 0;
 				mfmFromBigEndian2(it + 3, &count);
-				for (mfmU16 i = 0; i < count; ++i)
-					if (mfsPrintFormatUTF8(outputStream, u8"float44 local_%d; ", id++) != MF_ERROR_OKAY)
-						return MFG_ERROR_FAILED_TO_WRITE;
-				if (mfsPrintFormatUTF8(outputStream, u8"\n") != MF_ERROR_OKAY)
+				if (mfsPrintFormatUTF8(outputStream, u8"float4x4 local_%d[%d];\n", id++, count) != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
 				it += 5;
 			} break;
@@ -1903,9 +1884,9 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmU8 index = it[5];
 
 				for (mfmU8 i = 0; i < 128; ++i)
-					if (assemblerData.references[i].active == MFM_FALSE)
+					if (assemblerData.references[i].active == MFM_FALSE || assemblerData.references[i].id == id1)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 2;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1929,9 +1910,9 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmU8 index = it[5];
 
 				for (mfmU8 i = 0; i < 128; ++i)
-					if (assemblerData.references[i].active == MFM_FALSE)
+					if (assemblerData.references[i].active == MFM_FALSE || assemblerData.references[i].id == id1)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 3;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1955,9 +1936,9 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmU8 index = it[5];
 
 				for (mfmU8 i = 0; i < 128; ++i)
-					if (assemblerData.references[i].active == MFM_FALSE)
+					if (assemblerData.references[i].active == MFM_FALSE || assemblerData.references[i].id == id1)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 4;
 						assemblerData.references[i].cols = 1;
 						assemblerData.references[i].index = index;
@@ -1980,10 +1961,10 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 
 				mfmU8 index = it[5];
 
-				for (mfmU8 i = 0; i < 128; ++i)
+				for (mfmU8 i = 0; i < 128; ++i || assemblerData.references[i].id == id1)
 					if (assemblerData.references[i].active == MFM_FALSE)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 2;
 						assemblerData.references[i].cols = 2;
 						assemblerData.references[i].index = index;
@@ -2007,9 +1988,9 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmU8 index = it[5];
 
 				for (mfmU8 i = 0; i < 128; ++i)
-					if (assemblerData.references[i].active == MFM_FALSE)
+					if (assemblerData.references[i].active == MFM_FALSE || assemblerData.references[i].id == id1)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 3;
 						assemblerData.references[i].cols = 3;
 						assemblerData.references[i].index = index;
@@ -2033,9 +2014,9 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 				mfmU8 index = it[5];
 
 				for (mfmU8 i = 0; i < 128; ++i)
-					if (assemblerData.references[i].active == MFM_FALSE)
+					if (assemblerData.references[i].active == MFM_FALSE || assemblerData.references[i].id == id1)
 					{
-						assemblerData.references[i].varID = id2;
+						assemblerData.references[i].varIndex = id2;
 						assemblerData.references[i].rows = 4;
 						assemblerData.references[i].cols = 4;
 						assemblerData.references[i].index = index;
@@ -2045,6 +2026,35 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 					}
 
 				it += 6;
+				break;
+			}
+
+			case MFG_BYTECODE_GETACMP:
+			{
+				mfmU16 id1 = 0;
+				mfmFromBigEndian2(it + 1, &id1);
+
+				mfmU16 id2 = 0;
+				mfmFromBigEndian2(it + 3, &id2);
+
+				mfmU16 id3 = 0;
+				mfmFromBigEndian2(it + 5, &id3);
+
+				for (mfmU8 i = 0; i < 128; ++i)
+					if (assemblerData.references[i].active == MFM_FALSE || assemblerData.references[i].id == id1)
+					{
+						assemblerData.references[i].varIndex = id2;
+						assemblerData.references[i].rows = 0;
+						assemblerData.references[i].cols = 0;
+						assemblerData.references[i].index = 0;
+						assemblerData.references[i].active = MFM_TRUE;
+						assemblerData.references[i].isArray = MFM_TRUE;
+						assemblerData.references[i].id = id1;
+						assemblerData.references[i].accessID = id3;
+						break;
+					}
+
+				it += 7;
 				break;
 			}
 
@@ -2062,12 +2072,12 @@ mfError mfgV2XD3D11Assemble(const mfmU8* bytecode, mfmU64 bytecodeSize, const mf
 
 			case MFG_BYTECODE_CLSCOPE:
 			{
+				--tabs;
 				for (mfmU64 i = 0; i < tabs; ++i)
 					if (mfsPutByte(outputStream, '\t') != MF_ERROR_OKAY)
 						return MFG_ERROR_FAILED_TO_WRITE;
 				if (mfsPrintFormatUTF8(outputStream, u8"}\n") != MF_ERROR_OKAY)
 					return MFG_ERROR_FAILED_TO_WRITE;
-				--tabs;
 				++it;
 				break;
 			}

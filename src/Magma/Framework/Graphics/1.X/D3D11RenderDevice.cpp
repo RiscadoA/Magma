@@ -1,7 +1,8 @@
 #include "D3D11RenderDevice.hpp"
 #include "D3D11Assembler.hpp"
 
-using namespace Magma::Framework::Graphics_V1X;
+using namespace Magma::Framework::Graphics;
+using namespace Magma::Framework::Graphics::V1X;
 using namespace Magma::Framework;
 
 #include <Config.h>
@@ -1508,7 +1509,7 @@ public:
 
 #endif
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::Init(Input::Window * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	m_settings = settings;
@@ -1707,7 +1708,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::Init(Input::Window * win
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::Terminate()
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::Terminate()
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	this->DestroyBlendState(m_defaultBlendState);
@@ -1718,7 +1719,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::Terminate()
 #endif
 }
 
-VertexShader * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexShader(const ShaderData & data)
+VertexShader * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateVertexShader(const ShaderData & data)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11VertexShader(this, data);
@@ -1727,7 +1728,7 @@ VertexShader * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexSh
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexShader(VertexShader * vertexShader)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyVertexShader(VertexShader * vertexShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete vertexShader;
@@ -1736,7 +1737,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexShader(Vert
 #endif
 }
 
-PixelShader * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreatePixelShader(const ShaderData & data)
+PixelShader * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreatePixelShader(const ShaderData & data)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11PixelShader(this, data);
@@ -1745,7 +1746,7 @@ PixelShader * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreatePixelShad
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyPixelShader(PixelShader * pixelShader)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyPixelShader(PixelShader * pixelShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete pixelShader;
@@ -1754,7 +1755,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyPixelShader(Pixel
 #endif
 }
 
-Pipeline * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreatePipeline(VertexShader * vertexShader, PixelShader * pixelShader)
+Pipeline * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreatePipeline(VertexShader * vertexShader, PixelShader * pixelShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11Pipeline((D3D11VertexShader*)vertexShader, (D3D11PixelShader*)pixelShader);
@@ -1763,7 +1764,7 @@ Pipeline * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreatePipeline(Ver
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyPipeline(Pipeline * pipeline)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyPipeline(Pipeline * pipeline)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete pipeline;
@@ -1772,7 +1773,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyPipeline(Pipeline
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetPipeline(Pipeline * pipeline)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SetPipeline(Pipeline * pipeline)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	((ID3D11DeviceContext*)m_deviceContext)->VSSetShader(static_cast<D3D11Pipeline*>(pipeline)->vertexShader->vs, NULL, 0);
@@ -1782,7 +1783,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetPipeline(Pipeline * p
 #endif
 }
 
-VertexBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexBuffer(size_t size, const void * data, BufferUsage usage)
+VertexBuffer * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateVertexBuffer(size_t size, const void * data, BufferUsage usage)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11VertexBuffer(this, size, data, usage);
@@ -1791,7 +1792,7 @@ VertexBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexBu
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexBuffer(VertexBuffer * vertexBuffer)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyVertexBuffer(VertexBuffer * vertexBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete vertexBuffer;
@@ -1800,7 +1801,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexBuffer(Vert
 #endif
 }
 
-VertexLayout * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexLayout(size_t elementCount, const VertexElement * elements, VertexShader * vertexShader)
+VertexLayout * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateVertexLayout(size_t elementCount, const VertexElement * elements, VertexShader * vertexShader)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11VertexLayout(this, elementCount, elements, (D3D11VertexShader*)vertexShader);
@@ -1809,7 +1810,7 @@ VertexLayout * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexLa
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexLayout(VertexLayout * vertexLayout)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyVertexLayout(VertexLayout * vertexLayout)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete vertexLayout;
@@ -1818,7 +1819,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexLayout(Vert
 #endif
 }
 
-VertexArray * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexArray(size_t bufferCount, VertexBuffer ** buffers, VertexLayout * layout)
+VertexArray * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateVertexArray(size_t bufferCount, VertexBuffer ** buffers, VertexLayout * layout)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11VertexArray(this, bufferCount, (D3D11VertexBuffer**)buffers, (D3D11VertexLayout*)layout);
@@ -1827,7 +1828,7 @@ VertexArray * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateVertexArr
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexArray(VertexArray * vertexArray)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyVertexArray(VertexArray * vertexArray)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete vertexArray;
@@ -1836,7 +1837,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyVertexArray(Verte
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetVertexArray(VertexArray * vertexArray)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SetVertexArray(VertexArray * vertexArray)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	auto va = static_cast<D3D11VertexArray*>(vertexArray);
@@ -1849,7 +1850,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetVertexArray(VertexArr
 #endif
 }
 
-IndexBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateIndexBuffer(IndexType type, size_t size, const void * data, BufferUsage usage)
+IndexBuffer * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateIndexBuffer(IndexType type, size_t size, const void * data, BufferUsage usage)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11IndexBuffer(this, type, size, data, usage);
@@ -1858,7 +1859,7 @@ IndexBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateIndexBuff
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyIndexBuffer(IndexBuffer * indexBuffer)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyIndexBuffer(IndexBuffer * indexBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete indexBuffer;
@@ -1867,7 +1868,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyIndexBuffer(Index
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetIndexBuffer(IndexBuffer * indexBuffer)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SetIndexBuffer(IndexBuffer * indexBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	auto b = static_cast<D3D11IndexBuffer*>(indexBuffer);
@@ -1877,7 +1878,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetIndexBuffer(IndexBuff
 #endif
 }
 
-Texture2D * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data, BufferUsage usage, bool isRenderTarget)
+Texture2D * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateTexture2D(size_t width, size_t height, TextureFormat format, const void * data, BufferUsage usage, bool isRenderTarget)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11Texture2D(this, width, height, format, data, usage, isRenderTarget);
@@ -1886,7 +1887,7 @@ Texture2D * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateTexture2D(s
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyTexture2D(Texture2D * texture)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyTexture2D(Texture2D * texture)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete texture;
@@ -1895,7 +1896,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyTexture2D(Texture
 #endif
 }
 
-Sampler2D * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateSampler2D(const Sampler2DDesc & desc)
+Sampler2D * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateSampler2D(const Sampler2DDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11Sampler2D(this, desc);
@@ -1904,7 +1905,7 @@ Sampler2D * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateSampler2D(c
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroySampler2D(Sampler2D * sampler)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroySampler2D(Sampler2D * sampler)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete sampler;
@@ -1913,7 +1914,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroySampler2D(Sampler
 #endif
 }
 
-RasterState * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateRasterState(const RasterStateDesc & desc)
+RasterState * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateRasterState(const RasterStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11RasterState(this, desc);
@@ -1922,7 +1923,7 @@ RasterState * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateRasterSta
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyRasterState(RasterState * rasterState)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete rasterState;
@@ -1931,7 +1932,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyRasterState(Raste
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetRasterState(RasterState * rasterState)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SetRasterState(RasterState * rasterState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	if (rasterState == nullptr)
@@ -1945,7 +1946,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetRasterState(RasterSta
 #endif
 }
 
-DepthStencilState * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateDepthStencilState(const DepthStencilStateDesc & desc)
+DepthStencilState * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateDepthStencilState(const DepthStencilStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11DepthStencilState(this, desc);
@@ -1954,7 +1955,7 @@ DepthStencilState * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateDep
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyDepthStencilState(DepthStencilState * depthStencilState)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete depthStencilState;
@@ -1963,7 +1964,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyDepthStencilState
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetDepthStencilState(DepthStencilState * depthStencilState)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SetDepthStencilState(DepthStencilState * depthStencilState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	if (depthStencilState == nullptr)
@@ -1977,7 +1978,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetDepthStencilState(Dep
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::Clear(glm::vec4 color, float depth, int stencil)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::Clear(glm::vec4 color, float depth, int stencil)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	for (size_t i = 0; i < m_renderTargetCount; ++i)
@@ -1988,7 +1989,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::Clear(glm::vec4 color, f
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DrawTriangles(size_t offset, size_t count)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DrawTriangles(size_t offset, size_t count)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1998,7 +1999,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DrawTriangles(size_t off
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DrawTrianglesIndexed(size_t offset, size_t count)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DrawTrianglesIndexed(size_t offset, size_t count)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	((ID3D11DeviceContext*)m_deviceContext)->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -2008,7 +2009,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DrawTrianglesIndexed(siz
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SwapBuffers()
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SwapBuffers()
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	((IDXGISwapChain*)m_swapChain)->Present(m_settings.enableVSync ? 1 : 0, 0);
@@ -2017,7 +2018,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SwapBuffers()
 #endif
 }
 
-ConstantBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateConstantBuffer(size_t size, const void * data, BufferUsage usage)
+ConstantBuffer * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateConstantBuffer(size_t size, const void * data, BufferUsage usage)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11ConstantBuffer(this, size, data, usage);
@@ -2026,7 +2027,7 @@ ConstantBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateConsta
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyConstantBuffer(ConstantBuffer * constantBuffer)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyConstantBuffer(ConstantBuffer * constantBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete constantBuffer;
@@ -2035,7 +2036,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyConstantBuffer(Co
 #endif
 }
 
-BlendState * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateBlendState(const BlendStateDesc & desc)
+BlendState * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateBlendState(const BlendStateDesc & desc)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11BlendState(this, desc);
@@ -2044,7 +2045,7 @@ BlendState * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateBlendState
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyBlendState(BlendState * blendState)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyBlendState(BlendState * blendState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete blendState;
@@ -2053,7 +2054,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyBlendState(BlendS
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetBlendState(BlendState * blendState)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SetBlendState(BlendState * blendState)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	if (blendState == nullptr)
@@ -2068,7 +2069,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetBlendState(BlendState
 #endif
 }
 
-DepthStencilBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format)
+DepthStencilBuffer * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateDepthStencilBuffer(size_t width, size_t height, DepthStencilFormat format)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11DepthStencilBuffer(this, width, height, format);
@@ -2077,7 +2078,7 @@ DepthStencilBuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateDe
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyDepthStencilBuffer(DepthStencilBuffer * depthStencilBuffer)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyDepthStencilBuffer(DepthStencilBuffer * depthStencilBuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete depthStencilBuffer;
@@ -2086,7 +2087,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyDepthStencilBuffe
 #endif
 }
 
-Framebuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateFramebuffer(size_t attachmentCount, Texture2D ** attachments, DepthStencilBuffer * depthStencilAttachment)
+Framebuffer * Magma::Framework::Graphics::V1X::D3D11RenderDevice::CreateFramebuffer(size_t attachmentCount, Texture2D ** attachments, DepthStencilBuffer * depthStencilAttachment)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return new D3D11Framebuffer(attachmentCount, attachments, depthStencilAttachment);
@@ -2095,7 +2096,7 @@ Framebuffer * Magma::Framework::Graphics_V1X::D3D11RenderDevice::CreateFramebuff
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyFramebuffer(Framebuffer * framebuffer)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::DestroyFramebuffer(Framebuffer * framebuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	delete framebuffer;
@@ -2104,7 +2105,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::DestroyFramebuffer(Frame
 #endif
 }
 
-void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetFramebuffer(Framebuffer * framebuffer)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::SetFramebuffer(Framebuffer * framebuffer)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	if (framebuffer == nullptr)
@@ -2144,7 +2145,7 @@ void Magma::Framework::Graphics_V1X::D3D11RenderDevice::SetFramebuffer(Framebuff
 #endif
 }
 
-unsigned int Magma::Framework::Graphics_V1X::D3D11RenderDevice::GetMaxAnisotropyLimit()
+unsigned int Magma::Framework::Graphics::V1X::D3D11RenderDevice::GetMaxAnisotropyLimit()
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	return D3D11_REQ_MAXANISOTROPY;

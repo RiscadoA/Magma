@@ -43,8 +43,8 @@ namespace Magma
 				glm::vec4 m_backgroundColor;
 
 				Resources::ResourceView m_ps;
-				Framework::Graphics_V1X::PixelBindingPoint* m_cbBP;
-				Framework::Graphics_V1X::Pipeline* m_pp;
+				Framework::Graphics::V1X::PixelBindingPoint* m_cbBP;
+				Framework::Graphics::V1X::Pipeline* m_pp;
 
 			};
 
@@ -61,33 +61,33 @@ namespace Magma
 			class BoxRenderer final : public ElementRenderer
 			{
 			public:
-				BoxRenderer(Framework::Graphics_V1X::RenderDevice* renderDevice, Resources::ResourceView vertexShader);
+				BoxRenderer(Framework::Graphics::V1X::RenderDevice* renderDevice, Resources::ResourceView vertexShader);
 				virtual ~BoxRenderer() final;
 
 				virtual void Render(Element* element) final;
 
 			private:
-				Framework::Graphics_V1X::RenderDevice* m_renderDevice;
+				Framework::Graphics::V1X::RenderDevice* m_renderDevice;
 
-				Framework::Graphics_V1X::VertexArray* m_va;
-				Framework::Graphics_V1X::VertexBuffer* m_vb;
-				Framework::Graphics_V1X::VertexLayout* m_vl;			
+				Framework::Graphics::V1X::VertexArray* m_va;
+				Framework::Graphics::V1X::VertexBuffer* m_vb;
+				Framework::Graphics::V1X::VertexLayout* m_vl;			
 
-				Framework::Graphics_V1X::ConstantBuffer* m_boxDataCB;
+				Framework::Graphics::V1X::ConstantBuffer* m_boxDataCB;
 
 				Resources::ResourceView m_vs;
-				Framework::Graphics_V1X::VertexBindingPoint* m_cbBP;
+				Framework::Graphics::V1X::VertexBindingPoint* m_cbBP;
 
 				struct PipelineData
 				{
-					Framework::Graphics_V1X::Pipeline* pp;
-					Framework::Graphics_V1X::VertexShader* vs;
-					Framework::Graphics_V1X::PixelShader* ps;
+					Framework::Graphics::V1X::Pipeline* pp;
+					Framework::Graphics::V1X::VertexShader* vs;
+					Framework::Graphics::V1X::PixelShader* ps;
 				};
 
 				std::list<PipelineData> m_pps;
 
-				Framework::Graphics_V1X::Pipeline* GetPipeline(Box* box);
+				Framework::Graphics::V1X::Pipeline* GetPipeline(Box* box);
 			};
 		}
 	}

@@ -7,7 +7,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics_V1X
+		namespace Graphics::V1X
 		{
 			/// <summary>
 			///		Direct3D 11 render device implementation
@@ -63,14 +63,14 @@ namespace Magma
 
 				Input::D3DWindow* m_window;
 
-				Graphics_V1X::IndexBuffer* m_currentIndexBuffer;
+				Graphics::V1X::IndexBuffer* m_currentIndexBuffer;
 
-				Graphics_V1X::RasterState* m_defaultRasterState;
-				Graphics_V1X::RasterState* m_currentRasterState;
-				Graphics_V1X::DepthStencilState* m_defaultDepthStencilState;
-				Graphics_V1X::DepthStencilState* m_currentDepthStencilState;
-				Graphics_V1X::BlendState* m_defaultBlendState;
-				Graphics_V1X::BlendState* m_currentBlendState;
+				Graphics::V1X::RasterState* m_defaultRasterState;
+				Graphics::V1X::RasterState* m_currentRasterState;
+				Graphics::V1X::DepthStencilState* m_defaultDepthStencilState;
+				Graphics::V1X::DepthStencilState* m_currentDepthStencilState;
+				Graphics::V1X::BlendState* m_defaultBlendState;
+				Graphics::V1X::BlendState* m_currentBlendState;
 
 				RenderDeviceSettings m_settings;
 

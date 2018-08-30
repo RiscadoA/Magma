@@ -21,7 +21,7 @@ namespace Magma
 			/// <summary>
 			///		Constructs a new graphical user interface Renderer
 			/// </summary>
-			Renderer(Framework::Graphics_V1X::RenderDevice* device);
+			Renderer(Framework::Graphics::V1X::RenderDevice* device);
 			~Renderer();
 
 			/// <summary>
@@ -42,9 +42,9 @@ namespace Magma
 
 			std::vector<ElementRenderer*> m_renderers;
 
-			Framework::Graphics_V1X::RenderDevice* m_device;
-			Framework::Graphics_V1X::DepthStencilState* m_depthStencilState;
-			Framework::Graphics_V1X::BlendState* m_blendState;
+			Framework::Graphics::V1X::RenderDevice* m_device;
+			Framework::Graphics::V1X::DepthStencilState* m_depthStencilState;
+			Framework::Graphics::V1X::BlendState* m_blendState;
 		};
 
 		template<typename T, typename ...TArgs>

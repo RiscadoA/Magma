@@ -21,7 +21,7 @@ Magma::GUI::Elements::Box::Box(
 	m_pp(nullptr)
 {
 	// Check if the passed pixel shader is really a pixel shader
-	if (m_ps->GetData<Resources::Shader>()->type != Framework::Graphics_V1X::ShaderType::Pixel)
+	if (m_ps->GetData<Resources::Shader>()->type != Framework::Graphics::V1X::ShaderType::Pixel)
 	{
 		std::stringstream ss;
 		ss << "Failed to create Box element:" << std::endl;
@@ -47,7 +47,7 @@ glm::vec2 Magma::GUI::Elements::Box::GetSize() const
 }
 
 Magma::GUI::Elements::BoxRenderer::BoxRenderer(
-	Framework::Graphics_V1X::RenderDevice * renderDevice,
+	Framework::Graphics::V1X::RenderDevice * renderDevice,
 	Resources::ResourceView vertexShader) :
 
 	ElementRenderer(std::type_index(typeid(Box))),
@@ -55,7 +55,7 @@ Magma::GUI::Elements::BoxRenderer::BoxRenderer(
 	m_vs(vertexShader)
 {
 	// Check if the passed vertex shader is really a vertex shader
-	if (m_vs->GetData<Resources::Shader>()->type != Framework::Graphics_V1X::ShaderType::Vertex)
+	if (m_vs->GetData<Resources::Shader>()->type != Framework::Graphics::V1X::ShaderType::Vertex)
 	{
 		std::stringstream ss;
 		ss << "Failed to create BoxRenderer:" << std::endl;
@@ -76,19 +76,19 @@ Magma::GUI::Elements::BoxRenderer::BoxRenderer(
 			{ 0.0f, 0.0f, },
 		};
 
-		m_vb = m_renderDevice->CreateVertexBuffer(sizeof(glm::vec2) * 6, positions, Framework::Graphics_V1X::BufferUsage::Static);
+		m_vb = m_renderDevice->CreateVertexBuffer(sizeof(glm::vec2) * 6, positions, Framework::Graphics::V1X::BufferUsage::Static);
 	}
 
 	// Create vertex layout
 	{
-		Framework::Graphics_V1X::VertexElement elements[1];
+		Framework::Graphics::V1X::VertexElement elements[1];
 
 		elements[0].bufferIndex = 0;
 		elements[0].name = "POSITION";
 		elements[0].offset = 0;
 		elements[0].size = 2;
 		elements[0].stride = sizeof(glm::vec2);
-		elements[0].type = Framework::Graphics_V1X::VertexElementType::Float;
+		elements[0].type = Framework::Graphics::V1X::VertexElementType::Float;
 
 		m_vl = m_renderDevice->CreateVertexLayout(1, elements, m_vs->GetData<Resources::Shader>()->vertexShader);
 	}
@@ -97,7 +97,7 @@ Magma::GUI::Elements::BoxRenderer::BoxRenderer(
 	m_va = m_renderDevice->CreateVertexArray(1, &m_vb, m_vl);
 
 	// Create constant buffer
-	m_boxDataCB = m_renderDevice->CreateConstantBuffer(sizeof(BoxDataCB), nullptr, Framework::Graphics_V1X::BufferUsage::Dynamic);
+	m_boxDataCB = m_renderDevice->CreateConstantBuffer(sizeof(BoxDataCB), nullptr, Framework::Graphics::V1X::BufferUsage::Dynamic);
 
 	// Get constant buffer binding point
 	m_cbBP = m_vs->GetData<Resources::Shader>()->vertexShader->GetBindingPoint("BOX_DATA");
@@ -122,7 +122,7 @@ Magma::GUI::Elements::BoxRenderer::~BoxRenderer()
 	m_renderDevice->DestroyVertexLayout(m_vl);
 }
 
-Magma::Framework::Graphics_V1X::Pipeline * Magma::GUI::Elements::BoxRenderer::GetPipeline(Box * box)
+Magma::Framework::Graphics::V1X::Pipeline * Magma::GUI::Elements::BoxRenderer::GetPipeline(Box * box)
 {
 	for (auto& pp : m_pps)
 		if (pp.ps == box->m_ps->GetData<Resources::Shader>()->pixelShader &&

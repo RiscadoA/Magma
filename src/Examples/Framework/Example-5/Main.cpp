@@ -29,7 +29,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+			bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 		}
 
 		{
@@ -39,7 +39,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
 		}
 
 		{
@@ -67,10 +67,10 @@ int main(int argc, const char** argv)
 			fileSystem->CloseFile(file);
 		}
 
-		Graphics_V1X::ShaderData data(binaryObject, binaryObjectSize);
+		Graphics::V1X::ShaderData data(binaryObject, binaryObjectSize);
 
 		std::string compiled;
-		Graphics_V1X::D3D11Assembler::Assemble(data, compiled);
+		Graphics::V1X::D3D11Assembler::Assemble(data, compiled);
 
 		std::cout << compiled << std::endl;
 	}
@@ -88,7 +88,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			bytecodeSize = Graphics_V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
+			bytecodeSize = Graphics::V1X::BytecodeAssembler::Assemble(code, bytecode, sizeof(bytecode));
 		}
 
 		{
@@ -98,7 +98,7 @@ int main(int argc, const char** argv)
 			fileSystem->Read(file, code, size);
 			fileSystem->CloseFile(file);
 			code[size] = '\0';
-			metaDataSize = Graphics_V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
+			metaDataSize = Graphics::V1X::MetaDataAssembler::Assemble(code, metaData, sizeof(metaData));
 		}
 
 		{
@@ -126,10 +126,10 @@ int main(int argc, const char** argv)
 			fileSystem->CloseFile(file);
 		}
 
-		Graphics_V1X::ShaderData data(binaryObject, binaryObjectSize);
+		Graphics::V1X::ShaderData data(binaryObject, binaryObjectSize);
 
 		std::string compiled;
-		Graphics_V1X::D3D11Assembler::Assemble(data, compiled);
+		Graphics::V1X::D3D11Assembler::Assemble(data, compiled);
 
 		std::cout << compiled << std::endl;
 	}

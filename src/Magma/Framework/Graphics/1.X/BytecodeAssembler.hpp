@@ -8,7 +8,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics_V1X
+		namespace Graphics::V1X
 		{
 			/// <summary>
 			///		Used to describe a bytecode instruction operation code
@@ -141,7 +141,7 @@ namespace Magma
 				/// <param name="out">Binary bytecode</param>
 				/// <param name="maxSize">Max bytecode size</param>
 				/// <returns>Binary bytecode size in bytes</returns>
-				/// <exception cref="Magma::Framework::Graphics_V1X::ShaderError">Thrown if there is an error in the assembly</exception>
+				/// <exception cref="Magma::Framework::Graphics::ShaderError">Thrown if there is an error in the assembly</exception>
 				static size_t Assemble(const std::string& code, char* out, size_t maxSize);
 			};
 		}
