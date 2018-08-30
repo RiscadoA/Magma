@@ -53,10 +53,14 @@ int main(int argc, const char** argv)
 		{
 			metaDataB[ptr++] = 0x00; // Var index 4
 			metaDataB[ptr++] = 0x04;
+			metaDataB[ptr++] = 0x00; // Not an array
+			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = MFG_FLOAT44;
 
 			metaDataB[ptr++] = 0x00; // Var index 5
 			metaDataB[ptr++] = 0x05;
+			metaDataB[ptr++] = 0x00; // Not an array
+			metaDataB[ptr++] = 0x00;
 			metaDataB[ptr++] = MFG_FLOAT22;
 		}
 

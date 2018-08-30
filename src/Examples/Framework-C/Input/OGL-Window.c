@@ -16,7 +16,7 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfError err = mfiCreateOGLWindow(&window, 800, 600, MFI_WINDOWED, u8"Example-C-2");
+	mfError err = mfiCreateOGLWindow(&window, 800, 600, MFI_WINDOWED, u8"OGL-Window");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
