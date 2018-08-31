@@ -70,7 +70,7 @@ static mfError mfvExpectTokenType(mfvV1XParserInternalState* state, const mfvV1X
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvExpectTokenType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
+		mfsPrintFormat(&ss, u8"[mfvExpectTokenType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_UNEXPECTED_EOF;
 	}
@@ -79,7 +79,7 @@ static mfError mfvExpectTokenType(mfvV1XParserInternalState* state, const mfvV1X
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvExpectTokenType : MFV_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected '%s'", state->it->info->name, info->name);
+		mfsPrintFormat(&ss, u8"[mfvExpectTokenType : MFV_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected '%s'", state->it->info->name, info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_UNEXPECTED_TOKEN;
 	}
@@ -99,7 +99,7 @@ static mfError mfvExpectType(mfvV1XParserInternalState* state, const mfvV1XToken
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvExpectType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected type");
+		mfsPrintFormat(&ss, u8"[mfvExpectType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected type");
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_UNEXPECTED_EOF;
 	}
@@ -108,7 +108,7 @@ static mfError mfvExpectType(mfvV1XParserInternalState* state, const mfvV1XToken
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvExpectType : MFV_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected type", state->it->info->name);
+		mfsPrintFormat(&ss, u8"[mfvExpectType : MFV_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected type", state->it->info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_UNEXPECTED_TOKEN;
 	}
@@ -128,7 +128,7 @@ static mfmBool mfvAcceptTokenType(mfvV1XParserInternalState* state, const mfvV1X
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvAcceptTokenType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
+		mfsPrintFormat(&ss, u8"[mfvAcceptTokenType : MFV_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFM_FALSE;
 	}
@@ -237,7 +237,7 @@ static mfError mfvParseOperatorLast(mfvV1XParserInternalState* state, mfvV1XNode
 					{
 						mfsStringStream ss;
 						mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-						mfsPrintFormatUTF8(&ss, u8"[mfvParseOperatorLast] Failed to parse function call param %d", i);
+						mfsPrintFormat(&ss, u8"[mfvParseOperatorLast] Failed to parse function call param %d", i);
 						mfsDestroyLocalStringStream(&ss);
 						return MFV_ERROR_FAILED_TO_PARSE;
 					}
@@ -327,7 +327,7 @@ static mfError mfvParseOperator5(mfvV1XParserInternalState* state, mfvV1XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator5] Failed to parse '%s' unary operator term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfvParseOperator5] Failed to parse '%s' unary operator term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
@@ -385,7 +385,7 @@ static mfError mfvParseOperator5(mfvV1XParserInternalState* state, mfvV1XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator5] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfvParseOperator5] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
@@ -458,7 +458,7 @@ static mfError mfvParseOperator4(mfvV1XParserInternalState* state, mfvV1XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator4] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfvParseOperator4] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
@@ -531,7 +531,7 @@ static mfError mfvParseOperator3(mfvV1XParserInternalState* state, mfvV1XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator3] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfvParseOperator3] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
@@ -608,7 +608,7 @@ static mfError mfvParseOperator2(mfvV1XParserInternalState* state, mfvV1XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator2] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfvParseOperator2] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
@@ -681,7 +681,7 @@ static mfError mfvParseOperator1(mfvV1XParserInternalState* state, mfvV1XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfvParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
@@ -752,7 +752,7 @@ static mfError mfvParseExpression(mfvV1XParserInternalState* state, mfvV1XNode**
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfvParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFV_ERROR_FAILED_TO_PARSE;
 		}
@@ -868,7 +868,7 @@ static mfError mfvParseThrowStatement(mfvV1XParserInternalState* state, mfvV1XNo
 
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvParseThrowStatement] Failed to parse throw statement, unexpected throw type '%s'", tok->info->name);
+		mfsPrintFormat(&ss, u8"[mfvParseThrowStatement] Failed to parse throw statement, unexpected throw type '%s'", tok->info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_FAILED_TO_PARSE;
 	}
@@ -1161,7 +1161,7 @@ static mfError mfvParseFunction(mfvV1XParserInternalState* state, mfvV1XNode** o
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfvParseFunction] Failed to parse function compound statement");
+			mfsPrintFormat(&ss, u8"[mfvParseFunction] Failed to parse function compound statement");
 			mfsDestroyLocalStringStream(&ss);
 		}
 		err = mfvAddToNode(*outNode, node);
@@ -1257,7 +1257,7 @@ mfError mfvV1XPrintNode(mfsStream * stream, mfvV1XNode * node, mfmU64 indentatio
 
 	if (node->info == NULL)
 	{
-		err = mfsPrintFormatUTF8(stream, u8"- 'ROOT'\n");
+		err = mfsPrintFormat(stream, u8"- 'ROOT'\n");
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -1265,13 +1265,13 @@ mfError mfvV1XPrintNode(mfsStream * stream, mfvV1XNode * node, mfmU64 indentatio
 	{
 		if (node->attribute[0] == '\0')
 		{
-			err = mfsPrintFormatUTF8(stream, u8"- '%s'\n", node->info->name);
+			err = mfsPrintFormat(stream, u8"- '%s'\n", node->info->name);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
 		else
 		{
-			err = mfsPrintFormatUTF8(stream, u8"- '%s' \"%s\"\n", node->info->name, node->attribute);
+			err = mfsPrintFormat(stream, u8"- '%s' \"%s\"\n", node->info->name, node->attribute);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}

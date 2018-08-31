@@ -195,7 +195,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Float literal token is too big:\n\"(%s)\"", state->it);
+					mfsPrintFormat(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Float literal token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
 				}
@@ -233,7 +233,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Int literal token is too big:\n\"(%s)\"", state->it);
+					mfsPrintFormat(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Int literal token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
 				}
@@ -274,7 +274,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Identifier token is too big:\n\"(%s)\"", state->it);
+					mfsPrintFormat(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] Identifier token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
 				}
@@ -316,7 +316,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] String literal token is too big:\n\"(%s)\"", state->it);
+					mfsPrintFormat(&ss, u8"[mfvV1XReadToken : MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG] String literal token is too big:\n\"(%s)\"", state->it);
 					mfsDestroyLocalStringStream(&ss);
 					return MFV_ERROR_TOKEN_ATTRIBUTE_TOO_BIG;
 				}
@@ -330,7 +330,7 @@ static mfError mfvV1XReadToken(mfvV1XLexerInternalState* state)
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFV_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfvV1XReadToken : MFV_ERROR_UNKNOWN_TOKEN] Unknown token found on:\n<<%s>>", state->it);
+		mfsPrintFormat(&ss, u8"[mfvV1XReadToken : MFV_ERROR_UNKNOWN_TOKEN] Unknown token found on:\n<<%s>>", state->it);
 		mfsDestroyLocalStringStream(&ss);
 		return MFV_ERROR_UNKNOWN_TOKEN;
 	}

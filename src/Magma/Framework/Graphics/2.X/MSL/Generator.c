@@ -289,7 +289,7 @@ static mfError mfgDeclareType(mfgV2XGeneratorInternalState* state, mfgV2XEnum ty
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgDeclareType] Unsupported variable type");
+			mfsPrintFormat(&ss, u8"[mfgDeclareType] Unsupported variable type");
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_UNSUPPORTED_TYPE;
 		}
@@ -338,7 +338,7 @@ static mfError mfgDeclareArray(mfgV2XGeneratorInternalState* state, mfgV2XEnum t
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgDeclareType] Unsupported variable type");
+			mfsPrintFormat(&ss, u8"[mfgDeclareType] Unsupported variable type");
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_UNSUPPORTED_TYPE;
 		}
@@ -397,7 +397,7 @@ static mfError mfgGetComponent(mfgV2XGeneratorInternalState* state, mfgV2XEnum t
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgGetComponent] Unsupported variable type");
+			mfsPrintFormat(&ss, u8"[mfgGetComponent] Unsupported variable type");
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_UNSUPPORTED_TYPE;
 		}
@@ -986,7 +986,7 @@ static mfError mfgGenerateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateCall] Failed to generate function call, unsupported function '%s'", id->attribute);
+		mfsPrintFormat(&ss, u8"[mfgGenerateCall] Failed to generate function call, unsupported function '%s'", id->attribute);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 	}
@@ -2213,7 +2213,7 @@ static mfError mfgGenerateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgGenerateExpression] Failed to generate expression, unsupported operator type '%s'", node->info->name);
+			mfsPrintFormat(&ss, u8"[mfgGenerateExpression] Failed to generate expression, unsupported operator type '%s'", node->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 		}
@@ -2459,7 +2459,7 @@ static mfError mfgGenerateStatement(mfgV2XGeneratorInternalState* state, mfgV2XN
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateStatement] Failed to generate statement, unsupported node type '%s'", node->info->name);
+		mfsPrintFormat(&ss, u8"[mfgGenerateStatement] Failed to generate statement, unsupported node type '%s'", node->info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_FAILED_TO_GENERATE_STATEMENT;
 	}
@@ -2479,7 +2479,7 @@ static mfError mfgGenerateFunction(mfgV2XGeneratorInternalState* state, mfgV2XNo
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgGenerateFunction] Returning functions are unsupported for now (only 'void' functions are allowed)");
+		mfsPrintFormat(&ss, u8"[mfgGenerateFunction] Returning functions are unsupported for now (only 'void' functions are allowed)");
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_UNSUPPORTED_FEATURE;
 	}
@@ -2573,7 +2573,7 @@ static mfError mfgAnnotateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Unknown function '%s'", id->attribute);
+		mfsPrintFormat(&ss, u8"[mfgAnnotateCall] Unknown function '%s'", id->attribute);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 	}
@@ -2584,7 +2584,7 @@ static mfError mfgAnnotateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Function '%s' has %d params (not enough params)", id->attribute, func->paramCount);
+			mfsPrintFormat(&ss, u8"[mfgAnnotateCall] Function '%s' has %d params (not enough params)", id->attribute, func->paramCount);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 		}
@@ -2592,7 +2592,7 @@ static mfError mfgAnnotateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Function '%s' has %d params (too many params)", id->attribute, func->paramCount);
+			mfsPrintFormat(&ss, u8"[mfgAnnotateCall] Function '%s' has %d params (too many params)", id->attribute, func->paramCount);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 		}
@@ -2609,7 +2609,7 @@ static mfError mfgAnnotateCall(mfgV2XGeneratorInternalState* state, mfgV2XNode* 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateCall] Function '%s' param %d type doesn't match", id->attribute, i + 1);
+			mfsPrintFormat(&ss, u8"[mfgAnnotateCall] Function '%s' param %d type doesn't match", id->attribute, i + 1);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 		}
@@ -2651,7 +2651,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Assign expression first term must be an lvalue");
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Assign expression first term must be an lvalue");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2660,7 +2660,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Assign expression types don't match");
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Assign expression types don't match");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2692,7 +2692,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Operator term/factor types don't match");
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Operator term/factor types don't match");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2720,7 +2720,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Coonditional operator term types don't match");
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Coonditional operator term types don't match");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2857,7 +2857,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Couldn't find a variable with the ID '%s'", node->attribute);
+			mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Couldn't find a variable with the ID '%s'", node->attribute);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 		}
@@ -2875,7 +2875,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] First term in a array access operator must be a reference");
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] First term in a array access operator must be a reference");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2884,7 +2884,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 			{
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Array access operator index must be a scalar integer");
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Array access operator index must be a scalar integer");
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2909,7 +2909,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Input struct member second term must be an identifier");
+					mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Input struct member second term must be an identifier");
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}
@@ -2928,7 +2928,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] No input variable was found with the ID '%s'", term2->attribute);
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] No input variable was found with the ID '%s'", term2->attribute);
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2940,7 +2940,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Output struct member second term must be an identifier");
+					mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Output struct member second term must be an identifier");
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}
@@ -2959,7 +2959,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 
 				mfsStringStream ss;
 				mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-				mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] No output variable was found with the ID '%s'", term2->attribute);
+				mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] No output variable was found with the ID '%s'", term2->attribute);
 				mfsDestroyLocalStringStream(&ss);
 				return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 			}
@@ -2986,7 +2986,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 						// Couldn't find a matching member variable
 						mfsStringStream ss;
 						mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-						mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] The constant buffer '%s' has no member '%s'", term1->attribute, term2->attribute);
+						mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] The constant buffer '%s' has no member '%s'", term1->attribute, term2->attribute);
 						mfsDestroyLocalStringStream(&ss);
 						return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 					}
@@ -3008,7 +3008,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] A component cannot have its components accessed");
+					mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] A component cannot have its components accessed");
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}
@@ -3026,7 +3026,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Member expression second term must be an identifier");
+					mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Member expression second term must be an identifier");
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}
@@ -3043,7 +3043,7 @@ static mfError mfgAnnotateExpression(mfgV2XGeneratorInternalState* state, mfgV2X
 				{
 					mfsStringStream ss;
 					mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-					mfsPrintFormatUTF8(&ss, u8"[mfgAnnotateExpression] Invalid member expression second term");
+					mfsPrintFormat(&ss, u8"[mfgAnnotateExpression] Invalid member expression second term");
 					mfsDestroyLocalStringStream(&ss);
 					return MFG_ERROR_FAILED_TO_GENERATE_EXPRESSION;
 				}
@@ -3367,7 +3367,7 @@ static mfError mfgGenerateMetaData(mfgV2XGeneratorInternalState* state)
 					{
 						mfsStringStream ss;
 						mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-						mfsPrintFormatUTF8(&ss, u8"[mfgGenerateMetaData] Failed to generate meta data, unsupported input variable type");
+						mfsPrintFormat(&ss, u8"[mfgGenerateMetaData] Failed to generate meta data, unsupported input variable type");
 						mfsDestroyLocalStringStream(&ss);
 						return MFG_ERROR_TOO_MANY_VARIABLES;
 						break;
@@ -3423,7 +3423,7 @@ static mfError mfgGenerateMetaData(mfgV2XGeneratorInternalState* state)
 					{
 						mfsStringStream ss;
 						mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-						mfsPrintFormatUTF8(&ss, u8"[mfgGenerateMetaData] Failed to generate meta data, unsupported output variable type");
+						mfsPrintFormat(&ss, u8"[mfgGenerateMetaData] Failed to generate meta data, unsupported output variable type");
 						mfsDestroyLocalStringStream(&ss);
 						return MFG_ERROR_TOO_MANY_VARIABLES;
 						break;
@@ -3595,7 +3595,7 @@ static mfError mfgGenerateMetaData(mfgV2XGeneratorInternalState* state)
 							{
 								mfsStringStream ss;
 								mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-								mfsPrintFormatUTF8(&ss, u8"[mfgGenerateMetaData] Failed to generate meta data, unsupported constant buffer variable type");
+								mfsPrintFormat(&ss, u8"[mfgGenerateMetaData] Failed to generate meta data, unsupported constant buffer variable type");
 								mfsDestroyLocalStringStream(&ss);
 								return MFG_ERROR_TOO_MANY_VARIABLES;
 								break;

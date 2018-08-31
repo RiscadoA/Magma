@@ -132,7 +132,7 @@ int main(int argc, const char** argv)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsPrintFormat(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
 		}
@@ -204,7 +204,7 @@ int main(int argc, const char** argv)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsPrintFormat(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
 		}
@@ -215,7 +215,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -256,7 +256,7 @@ int main(int argc, const char** argv)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsPrintFormat(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
 		}
@@ -288,7 +288,7 @@ int main(int argc, const char** argv)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsPrintFormat(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
 		}
@@ -299,7 +299,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -316,7 +316,7 @@ int main(int argc, const char** argv)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsPrintFormat(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
 		}
@@ -327,7 +327,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -337,7 +337,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -354,7 +354,7 @@ int main(int argc, const char** argv)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsPrintFormat(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
 		}
@@ -372,7 +372,7 @@ int main(int argc, const char** argv)
 		{
 			mfsUTF8CodeUnit err[512];
 			mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-			mfsPrintFormatUTF8(mfsErrStream, err);
+			mfsPrintFormat(mfsErrStream, err);
 			mfsFlush(mfsErrStream);
 			abort();
 		}
@@ -383,7 +383,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -393,7 +393,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -403,7 +403,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -413,7 +413,7 @@ int main(int argc, const char** argv)
 	{
 		mfsUTF8CodeUnit err[512];
 		mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-		mfsPrintFormatUTF8(mfsErrStream, err);
+		mfsPrintFormat(mfsErrStream, err);
 		mfsFlush(mfsErrStream);
 		abort();
 	}
@@ -450,7 +450,7 @@ int main(int argc, const char** argv)
 				{
 					mfsUTF8CodeUnit err[512];
 					mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-					mfsPrintFormatUTF8(mfsErrStream, err);
+					mfsPrintFormat(mfsErrStream, err);
 					mfsFlush(mfsErrStream);
 					abort();
 				}
@@ -464,7 +464,7 @@ int main(int argc, const char** argv)
 				{
 					mfsUTF8CodeUnit err[512];
 					mfgV2XGetErrorString(renderDevice, err, sizeof(err));
-					mfsPrintFormatUTF8(mfsErrStream, err);
+					mfsPrintFormat(mfsErrStream, err);
 					mfsFlush(mfsErrStream);
 					abort();
 				}

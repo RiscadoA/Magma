@@ -36,9 +36,9 @@ int main(int argc, const char** argv)
 	for (mfmU64 i = 0; i < lexerState.tokenCount; ++i)
 	{
 		if (tokens[i].attribute[0] != '\0')
-			mfsPrintFormatUTF8(mfsOutStream, u8"'%s' \"%s\"\n", tokens[i].info->name, tokens[i].attribute);
+			mfsPrintFormat(mfsOutStream, u8"'%s' \"%s\"\n", tokens[i].info->name, tokens[i].attribute);
 		else
-			mfsPrintFormatUTF8(mfsOutStream, u8"'%s'\n", tokens[i].info->name);
+			mfsPrintFormat(mfsOutStream, u8"'%s'\n", tokens[i].info->name);
 	}
 
 	mfvV1XNode nodes[2048];

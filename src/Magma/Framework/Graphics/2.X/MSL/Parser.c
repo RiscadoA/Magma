@@ -72,7 +72,7 @@ static mfError mfgExpectTokenType(mfgV2XParserInternalState* state, const mfgV2X
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgExpectTokenType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
+		mfsPrintFormat(&ss, u8"[mfgExpectTokenType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_UNEXPECTED_EOF;
 	}
@@ -81,7 +81,7 @@ static mfError mfgExpectTokenType(mfgV2XParserInternalState* state, const mfgV2X
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgExpectTokenType : MFG_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected '%s'", state->it->info->name, info->name);
+		mfsPrintFormat(&ss, u8"[mfgExpectTokenType : MFG_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected '%s'", state->it->info->name, info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_UNEXPECTED_TOKEN;
 	}
@@ -101,7 +101,7 @@ static mfError mfgExpectType(mfgV2XParserInternalState* state, const mfgV2XToken
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgExpectType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected type");
+		mfsPrintFormat(&ss, u8"[mfgExpectType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected type");
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_UNEXPECTED_EOF;
 	}
@@ -110,7 +110,7 @@ static mfError mfgExpectType(mfgV2XParserInternalState* state, const mfgV2XToken
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgExpectType : MFG_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected type", state->it->info->name);
+		mfsPrintFormat(&ss, u8"[mfgExpectType : MFG_ERROR_UNEXPECTED_TOKEN] Unexpected token type '%s', expected type", state->it->info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_UNEXPECTED_TOKEN;
 	}
@@ -130,7 +130,7 @@ static mfmBool mfgAcceptTokenType(mfgV2XParserInternalState* state, const mfgV2X
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgAcceptTokenType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
+		mfsPrintFormat(&ss, u8"[mfgAcceptTokenType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected token type '%s'", info->name);
 		mfsDestroyLocalStringStream(&ss);
 		return MFM_FALSE;
 	}
@@ -157,7 +157,7 @@ static mfmBool mfgAcceptType(mfgV2XParserInternalState* state, const mfgV2XToken
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgAcceptType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected a type token");
+		mfsPrintFormat(&ss, u8"[mfgAcceptType : MFG_ERROR_UNEXPECTED_EOF] Unexpected end of file, expected a type token");
 		mfsDestroyLocalStringStream(&ss);
 		return MFM_FALSE;
 	}
@@ -305,7 +305,7 @@ static mfError mfgParseOperatorLast(mfgV2XParserInternalState* state, mfgV2XNode
 					{
 						mfsStringStream ss;
 						mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-						mfsPrintFormatUTF8(&ss, u8"[mfgParseOperatorLast] Failed to parse function call param %d", i);
+						mfsPrintFormat(&ss, u8"[mfgParseOperatorLast] Failed to parse function call param %d", i);
 						mfsDestroyLocalStringStream(&ss);
 						return MFG_ERROR_FAILED_TO_PARSE;
 					}
@@ -400,7 +400,7 @@ static mfError mfgParseOperator6(mfgV2XParserInternalState* state, mfgV2XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator5] Failed to parse '%s' unary operator term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator5] Failed to parse '%s' unary operator term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -458,7 +458,7 @@ static mfError mfgParseOperator6(mfgV2XParserInternalState* state, mfgV2XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator6] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator6] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -531,7 +531,7 @@ static mfError mfgParseOperator5(mfgV2XParserInternalState* state, mfgV2XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator5] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator5] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -607,7 +607,7 @@ static mfError mfgParseOperator4(mfgV2XParserInternalState* state, mfgV2XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator4] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator4] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -680,7 +680,7 @@ static mfError mfgParseOperator3(mfgV2XParserInternalState* state, mfgV2XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator3] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator3] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -757,7 +757,7 @@ static mfError mfgParseOperator2(mfgV2XParserInternalState* state, mfgV2XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator2] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator2] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -830,7 +830,7 @@ static mfError mfgParseOperator1(mfgV2XParserInternalState* state, mfgV2XNode** 
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -901,7 +901,7 @@ static mfError mfgParseExpression(mfgV2XParserInternalState* state, mfgV2XNode**
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseOperator1] Failed to parse '%s' operator second term", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_FAILED_TO_PARSE;
 		}
@@ -1413,7 +1413,7 @@ static mfError mfgParseFunction(mfgV2XParserInternalState* state, mfgV2XNode** o
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseFunction] Failed to parse function compound statement");
+			mfsPrintFormat(&ss, u8"[mfgParseFunction] Failed to parse function compound statement");
 			mfsDestroyLocalStringStream(&ss);
 		}
 		err = mfgAddToNode(*outNode, node);
@@ -1453,7 +1453,7 @@ static mfError mfgParseInput(mfgV2XParserInternalState* state)
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseInput] Failed to parse input variable, input variable limit (%d) reached", MFG_V2X_MAX_INPUT_VARS);
+			mfsPrintFormat(&ss, u8"[mfgParseInput] Failed to parse input variable, input variable limit (%d) reached", MFG_V2X_MAX_INPUT_VARS);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_TOO_MANY_VARIABLES;
 		}
@@ -1521,7 +1521,7 @@ static mfError mfgParseOutput(mfgV2XParserInternalState* state)
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseOutput] Failed to parse output variable, output variable limit (%d) reached", MFG_V2X_MAX_OUTPUT_VARS);
+			mfsPrintFormat(&ss, u8"[mfgParseOutput] Failed to parse output variable, output variable limit (%d) reached", MFG_V2X_MAX_OUTPUT_VARS);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_TOO_MANY_VARIABLES;
 		}
@@ -1584,7 +1584,7 @@ static mfError mfgParseConstantBuffer(mfgV2XParserInternalState* state)
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgParseConstantBuffer] Failed to parse constant buffer, constant buffer limit (%d) reached", MFG_V2X_MAX_CONSTANT_BUFFERS);
+		mfsPrintFormat(&ss, u8"[mfgParseConstantBuffer] Failed to parse constant buffer, constant buffer limit (%d) reached", MFG_V2X_MAX_CONSTANT_BUFFERS);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_TOO_MANY_VARIABLES;
 	}
@@ -1622,7 +1622,7 @@ static mfError mfgParseConstantBuffer(mfgV2XParserInternalState* state)
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseInput] Failed to parse constant buffer variable, constant buffer variable limit (%d) reached", MFG_V2X_MAX_CONSTANT_BUFFER_VARS);
+			mfsPrintFormat(&ss, u8"[mfgParseInput] Failed to parse constant buffer variable, constant buffer variable limit (%d) reached", MFG_V2X_MAX_CONSTANT_BUFFER_VARS);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_TOO_MANY_VARIABLES;
 		}
@@ -1688,7 +1688,7 @@ static mfError mfgParseTexture1D(mfgV2XParserInternalState* state)
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgParseTexture1D] Failed to parse texture 1D, texture 1D limit (%d) reached", MFG_V2X_MAX_TEXTURE_1DS);
+		mfsPrintFormat(&ss, u8"[mfgParseTexture1D] Failed to parse texture 1D, texture 1D limit (%d) reached", MFG_V2X_MAX_TEXTURE_1DS);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_TOO_MANY_VARIABLES;
 	}
@@ -1740,7 +1740,7 @@ static mfError mfgParseTexture2D(mfgV2XParserInternalState* state)
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgParseTexture2D] Failed to parse texture 2D, texture 2D limit (%d) reached", MFG_V2X_MAX_TEXTURE_2DS);
+		mfsPrintFormat(&ss, u8"[mfgParseTexture2D] Failed to parse texture 2D, texture 2D limit (%d) reached", MFG_V2X_MAX_TEXTURE_2DS);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_TOO_MANY_VARIABLES;
 	}
@@ -1792,7 +1792,7 @@ static mfError mfgParseTexture3D(mfgV2XParserInternalState* state)
 	{
 		mfsStringStream ss;
 		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPrintFormatUTF8(&ss, u8"[mfgParseTexture3D] Failed to parse texture 3D, texture 3D limit (%d) reached", MFG_V2X_MAX_TEXTURE_3DS);
+		mfsPrintFormat(&ss, u8"[mfgParseTexture3D] Failed to parse texture 3D, texture 3D limit (%d) reached", MFG_V2X_MAX_TEXTURE_3DS);
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_TOO_MANY_VARIABLES;
 	}
@@ -1902,7 +1902,7 @@ static mfError mfgParseProgram(mfgV2XParserInternalState* state)
 		{
 			mfsStringStream ss;
 			mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-			mfsPrintFormatUTF8(&ss, u8"[mfgParseProgram] Failed to parse program, unexpected token '%s' on the global scope", tok->info->name);
+			mfsPrintFormat(&ss, u8"[mfgParseProgram] Failed to parse program, unexpected token '%s' on the global scope", tok->info->name);
 			mfsDestroyLocalStringStream(&ss);
 			return MFG_ERROR_TOO_MANY_VARIABLES;
 		}
@@ -1974,7 +1974,7 @@ mfError mfgV2XPrintNode(mfsStream * stream, mfgV2XNode * node, mfmU64 indentatio
 
 	if (node->info == NULL)
 	{
-		err = mfsPrintFormatUTF8(stream, u8"- 'ROOT'\n");
+		err = mfsPrintFormat(stream, u8"- 'ROOT'\n");
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -1982,13 +1982,13 @@ mfError mfgV2XPrintNode(mfsStream * stream, mfgV2XNode * node, mfmU64 indentatio
 	{
 		if (node->attribute[0] == '\0')
 		{
-			err = mfsPrintFormatUTF8(stream, u8"- '%s'\n", node->info->name);
+			err = mfsPrintFormat(stream, u8"- '%s'\n", node->info->name);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
 		else
 		{
-			err = mfsPrintFormatUTF8(stream, u8"- '%s' \"%s\"\n", node->info->name, node->attribute);
+			err = mfsPrintFormat(stream, u8"- '%s' \"%s\"\n", node->info->name, node->attribute);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}

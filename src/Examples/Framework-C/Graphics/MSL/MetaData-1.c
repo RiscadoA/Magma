@@ -84,33 +84,33 @@ int main(int argc, const char** argv)
 	err = mfgGetMetaDataInput(loadedData, u8"test1", &inputVar);
 	if (err != MF_ERROR_OKAY)
 		abort();
-	mfsPrintFormatUTF8(mfsOutStream, u8"Successfully got input variable from the loaded meta data:\n- Type: %d\nIndex: %d\n", inputVar->type, inputVar->id);
+	mfsPrintFormat(mfsOutStream, u8"Successfully got input variable from the loaded meta data:\n- Type: %d\nIndex: %d\n", inputVar->type, inputVar->id);
 
 	// Get param (test2)
 	err = mfgGetMetaDataInput(loadedData, u8"test2", &inputVar);
 	if (err != MF_ERROR_OKAY)
 		abort();
-	mfsPrintFormatUTF8(mfsOutStream, u8"Successfully got input variable from the loaded meta data:\n- Type: %d\nIndex: %d\n", inputVar->type, inputVar->id);
+	mfsPrintFormat(mfsOutStream, u8"Successfully got input variable from the loaded meta data:\n- Type: %d\nIndex: %d\n", inputVar->type, inputVar->id);
 
 	// Get param (out1)
 	const mfgMetaDataOutputVariable* outputVar;
 	err = mfgGetMetaDataOutput(loadedData, u8"out1", &outputVar);
 	if (err != MF_ERROR_OKAY)
 		abort();
-	mfsPrintFormatUTF8(mfsOutStream, u8"Successfully got output variable from the loaded meta data:\n- Type: %d\nIndex: %d\n", outputVar->type, outputVar->id);
+	mfsPrintFormat(mfsOutStream, u8"Successfully got output variable from the loaded meta data:\n- Type: %d\nIndex: %d\n", outputVar->type, outputVar->id);
 
 	// Get constant buffer
 	const mfgMetaDataBindingPoint* bp;
 	err = mfgGetMetaDataBindingPoint(loadedData, u8"buf1", &bp);
 	if (err != MF_ERROR_OKAY)
 		abort();
-	mfsPrintFormatUTF8(mfsOutStream, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\nName: \"%s\"\n", bp->type, bp->name);
+	mfsPrintFormat(mfsOutStream, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\nName: \"%s\"\n", bp->type, bp->name);
 
 	// Get texture
 	err = mfgGetMetaDataBindingPoint(loadedData, u8"texture", &bp);
 	if (err != MF_ERROR_OKAY)
 		abort();
-	mfsPrintFormatUTF8(mfsOutStream, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\nName: \"%s\"\n", bp->type, bp->name);
+	mfsPrintFormat(mfsOutStream, u8"Successfully got binding point from the loaded meta data:\n- Type: %d\nName: \"%s\"\n", bp->type, bp->name);
 
 	// Unload
 	mfgUnloadMetaData(loadedData);

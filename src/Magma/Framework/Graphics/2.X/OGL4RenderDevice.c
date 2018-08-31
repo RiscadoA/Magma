@@ -336,9 +336,9 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 			GLchar infoLog[512];
 			glGetProgramInfoLog(oglVS->program, 512, NULL, infoLog);
 			glDeleteProgram(oglVS->program);
-			mfsPrintFormatUTF8(mfsOutStream, u8"Failed to compile/link vertex shader, source:\n");
-			mfsPrintFormatUTF8(mfsOutStream, bufferSrc);
-			mfsPrintFormatUTF8(mfsOutStream, u8"\n");
+			mfsPrintFormat(mfsOutStream, u8"Failed to compile/link vertex shader, source:\n");
+			mfsPrintFormat(mfsOutStream, bufferSrc);
+			mfsPrintFormat(mfsOutStream, u8"\n");
 			mfsFlush(mfsOutStream);
 			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, infoLog);
 		}
@@ -396,7 +396,7 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}	
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
+				if (mfsPrintFormat(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -424,7 +424,7 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
+				if (mfsPrintFormat(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -452,7 +452,7 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
+				if (mfsPrintFormat(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -570,9 +570,9 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 			GLchar infoLog[512];
 			glGetProgramInfoLog(oglPS->program, 512, NULL, infoLog);
 			glDeleteProgram(oglPS->program);
-			mfsPrintFormatUTF8(mfsOutStream, u8"Failed to compile/link pixel shader, source:\n");
-			mfsPrintFormatUTF8(mfsOutStream, bufferSrc);
-			mfsPrintFormatUTF8(mfsOutStream, u8"\n");
+			mfsPrintFormat(mfsOutStream, u8"Failed to compile/link pixel shader, source:\n");
+			mfsPrintFormat(mfsOutStream, bufferSrc);
+			mfsPrintFormat(mfsOutStream, u8"\n");
 			mfsFlush(mfsOutStream);
 			MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, infoLog);
 		}
@@ -630,7 +630,7 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
+				if (mfsPrintFormat(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -658,7 +658,7 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
+				if (mfsPrintFormat(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -686,7 +686,7 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPutString returned error");
 				}
-				if (mfsPrintFormatUTF8(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
+				if (mfsPrintFormat(ss, u8"%d", bp->id) != MF_ERROR_OKAY)
 				{
 					mfsDestroyStringStream(ss);
 					MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"mfsPrintFormatUTF8 returned error");
@@ -2953,7 +2953,7 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
-		mfsPrintFormatUTF8(mfsErrStream, u8"Failed to create OGL4RenderDevice:\nFailed to init GLEW:\n%s", (const mfsUTF8CodeUnit*)glewGetErrorString(err));
+		mfsPrintFormat(mfsErrStream, u8"Failed to create OGL4RenderDevice:\nFailed to init GLEW:\n%s", (const mfsUTF8CodeUnit*)glewGetErrorString(err));
 		return MFS_ERROR_INTERNAL;
 	}
 
