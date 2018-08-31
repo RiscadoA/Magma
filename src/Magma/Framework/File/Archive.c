@@ -142,3 +142,8 @@ mfError mffCloseFile(mfsStream * stream)
 	stream->object.destructorFunc(stream);
 	return MF_ERROR_OKAY;
 }
+
+mfError mffCreateFile(mffArchive * archive, mffFile ** file, const mfsUTF8CodeUnit * name)
+{
+	return archive->createFile(archive, file, name);
+}

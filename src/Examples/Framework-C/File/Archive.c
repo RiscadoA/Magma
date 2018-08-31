@@ -33,6 +33,10 @@ int main(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
+	err = mffCreateFile(archive, NULL, u8"test.txt");
+	if (err != MF_ERROR_OKAY)
+		abort();
+
 	mffFile* file;
 	err = mffGetFile(archive, &file, u8"Shaders/GUI/box.mni");
 	if (err != MF_ERROR_OKAY)

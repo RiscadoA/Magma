@@ -40,6 +40,7 @@ extern "C"
 	typedef struct mffFile mffFile;
 
 	typedef mfError(*mffArchiveOpenFile)(mfsStream** stream, mffFile* file, mfmU32 mode);
+	typedef mfError(*mffArchiveCreateFile)(mffArchive* archive, mffFile** file, const mfsUTF8CodeUnit* name);
 
 	struct mffFile
 	{
@@ -73,6 +74,9 @@ extern "C"
 		// Opens a file.
 		mffArchiveOpenFile openFile;
 
+		// Creates a file.
+		mffArchiveCreateFile createFile;
+
 		// Archive path (if any).
 		mfsUTF8CodeUnit path[MFF_PATH_MAX_SIZE];
 	};
@@ -103,6 +107,8 @@ extern "C"
 	mfError mffOpenFile(mfsStream** stream, mffFile* file, mfmU32 mode);
 
 	mfError mffCloseFile(mfsStream* stream);
+
+	mfError mffCreateFile(mffArchive* archive, mffFile** file, const mfsUTF8CodeUnit* name);
 
 #ifdef __cplusplus
 }

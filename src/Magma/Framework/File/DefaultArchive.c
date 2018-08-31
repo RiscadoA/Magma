@@ -6,6 +6,8 @@
 
 #ifdef MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM
 #include <Windows.h>
+#else
+#error MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM is required for now
 #endif
 
 typedef struct
@@ -64,6 +66,81 @@ static mfError mffDefaultArchiveOpenFile(mfsStream** stream, mffFile* file, mfmU
 	fs->base.object;*/
 
 	// TO DO
+
+	return MF_ERROR_OKAY;
+}
+
+
+static mfError mffDefaultArchiveCreateFile(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* name)
+{
+	if (archive == NULL || name == NULL)
+		return MFF_ERROR_INVALID_ARGUMENTS;
+
+	mffDefaultArchive* arc = archive;
+	mfError err;
+
+	// Create file
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+	{
+		mfsUTF8CodeUnit path[256];
+		{
+			mfsStringStream ss;
+			err = mfsCreateLocalStringStream(&ss, path, sizeof(path));
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfsPutString(&ss, arc->base.path);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfsPutString(&ss, name);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfsDestroyLocalStringStream(&ss);
+		}
+
+		HANDLE f = CreateFile(path, 0, 0, NULL, CREATE_NEW, 0, NULL);
+		if (f == INVALID_HANDLE_VALUE)
+			return MFF_ERROR_INTERNAL_ERROR;
+		GetLastError();
+		CloseHandle(f);
+	}
+#endif
+
+	mffFile* file;
+
+	// Create archive file
+	err = mfmAllocate(arc->base.base.allocator, &file, sizeof(mffFile));
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfmInitObject(&file->object);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	file->object.destructorFunc = &mffDefaultArchiveDestroyFile;
+
+	file->allocator = arc->base.base.allocator;
+	file->archive = arc;
+
+	if (strlen(name) >= MFF_FILE_NAME_MAX_SIZE)
+	{
+		memcpy(file->name, name, MFF_FILE_NAME_MAX_SIZE - 1);
+		file->name[MFF_FILE_NAME_MAX_SIZE - 1] = '\0';
+	}
+	else
+		strcpy(file->name, name);
+
+	file->nextFile = NULL;
+	file->type = MFF_FILE;
+
+	// Add new file to archive
+	if (arc->base.firstFile == NULL)
+		arc->base.firstFile = file;
+	else
+	{
+		mffFile* prevFile = arc->base.firstFile;
+		while (prevFile->nextFile != NULL)
+			prevFile = prevFile->nextFile;
+		prevFile->nextFile = file;
+	}
 
 	return MF_ERROR_OKAY;
 }
@@ -134,6 +211,7 @@ mfError mffCreateDefaultArchive(mffArchive ** archive, const mfsUTF8CodeUnit * p
 	arc->base.base.nextFile = NULL;
 	arc->base.firstFile = NULL;
 	arc->base.openFile = &mffDefaultArchiveOpenFile;
+	arc->base.createFile = &mffDefaultArchiveCreateFile;
 	arc->base.base.type = MFF_ARCHIVE;
 
 	*archive = arc;
@@ -242,8 +320,6 @@ mfError mffCreateDefaultArchive(mffArchive ** archive, const mfsUTF8CodeUnit * p
 			FindClose(hFind);
 		}
 	}
-#else
-#error MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM is required for now
 #endif
 
 	return MF_ERROR_OKAY;
