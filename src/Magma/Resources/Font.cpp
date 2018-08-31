@@ -44,7 +44,7 @@ void Magma::Resources::FontImporter::Import(Resource * resource)
 	{
 		// Read font data from file
 		auto fs = this->GetManager()->GetFileSystem();
-		auto file = fs->OpenFile(Framework::Files::FileMode::Read, path);
+		auto file = fs->OpenFile(Framework::File::FileMode::Read, path);
 		auto size = fs->GetSize(file);
 		auto buff = new unsigned char[size];
 		fs->Read(file, buff, size);

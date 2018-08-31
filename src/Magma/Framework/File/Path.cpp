@@ -3,9 +3,9 @@
 #include <regex>
 #include <sstream>
 
-using namespace Magma::Framework::Files;
+using namespace Magma::Framework::File;
 
-Magma::Framework::Files::Path::Path(const std::string & path)
+Magma::Framework::File::Path::Path(const std::string & path)
 {
 	if (path.empty() || path.front() != '/')
 	{
@@ -18,17 +18,17 @@ Magma::Framework::Files::Path::Path(const std::string & path)
 	this->Parse(path);
 }
 
-Magma::Framework::Files::Path::Path(const Path & path)
+Magma::Framework::File::Path::Path(const Path & path)
 {
 	m_path = path.m_path;
 }
 
-Magma::Framework::Files::Path::Path(Path && path)
+Magma::Framework::File::Path::Path(Path && path)
 {
 	m_path = std::move(path.m_path);
 }
 
-Magma::Framework::Files::Path::Path(const Path & relative, const std::string & path)
+Magma::Framework::File::Path::Path(const Path & relative, const std::string & path)
 {
 	if (!relative.IsDirectory())
 	{
@@ -41,13 +41,13 @@ Magma::Framework::Files::Path::Path(const Path & relative, const std::string & p
 	this->Parse(relative.ToString() + path);
 }
 
-Path & Magma::Framework::Files::Path::operator=(const Path & path)
+Path & Magma::Framework::File::Path::operator=(const Path & path)
 {
 	m_path = path.m_path;
 	return *this;
 }
 
-Path & Magma::Framework::Files::Path::operator=(const std::string & path)
+Path & Magma::Framework::File::Path::operator=(const std::string & path)
 {
 	if (path.empty() || path.front() != '/')
 	{
@@ -60,7 +60,7 @@ Path & Magma::Framework::Files::Path::operator=(const std::string & path)
 	return *this;
 }
 
-std::string Magma::Framework::Files::Path::GetExtension() const
+std::string Magma::Framework::File::Path::GetExtension() const
 {
 	if (this->IsFile())
 	{
@@ -80,7 +80,7 @@ std::string Magma::Framework::Files::Path::GetExtension() const
 	}
 }
 
-std::string Magma::Framework::Files::Path::GetName() const
+std::string Magma::Framework::File::Path::GetName() const
 {
 	if (this->IsFile())
 	{
@@ -115,17 +115,17 @@ std::string Magma::Framework::Files::Path::GetName() const
 	}
 }
 
-bool Magma::Framework::Files::Path::IsFile() const
+bool Magma::Framework::File::Path::IsFile() const
 {
 	return !m_path.empty() && m_path.back().back() != '/';
 }
 
-bool Magma::Framework::Files::Path::IsDirectory() const
+bool Magma::Framework::File::Path::IsDirectory() const
 {
 	return m_path.empty() || m_path.back().back() == '/';
 }
 
-Path Magma::Framework::Files::Path::GetDirectory() const
+Path Magma::Framework::File::Path::GetDirectory() const
 {
 	std::string str = "/";
 	for (auto it = m_path.begin(); it != m_path.end() - 1; ++it)
@@ -133,7 +133,7 @@ Path Magma::Framework::Files::Path::GetDirectory() const
 	return str;
 }
 
-std::string Magma::Framework::Files::Path::ToString() const
+std::string Magma::Framework::File::Path::ToString() const
 {
 	std::stringstream ss;
 	ss << "/";
@@ -142,7 +142,7 @@ std::string Magma::Framework::Files::Path::ToString() const
 	return ss.str();
 }
 
-void Magma::Framework::Files::Path::Parse(const std::string& str)
+void Magma::Framework::File::Path::Parse(const std::string& str)
 {
 	if (str.empty())
 	{

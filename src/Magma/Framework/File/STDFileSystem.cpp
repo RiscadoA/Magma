@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <cstring>
 
-void * Magma::Framework::Files::STDFileSystem::OpenFile(FileMode mode, const Path & path)
+void * Magma::Framework::File::STDFileSystem::OpenFile(FileMode mode, const Path & path)
 {
 	FILE* file = nullptr;
 	errno_t err;
@@ -43,7 +43,7 @@ void * Magma::Framework::Files::STDFileSystem::OpenFile(FileMode mode, const Pat
 	return file;
 }
 
-void Magma::Framework::Files::STDFileSystem::CloseFile(void * file)
+void Magma::Framework::File::STDFileSystem::CloseFile(void * file)
 {
 	if (file == nullptr)
 	{
@@ -62,7 +62,7 @@ void Magma::Framework::Files::STDFileSystem::CloseFile(void * file)
 	}
 }
 
-size_t Magma::Framework::Files::STDFileSystem::GetPosition(void* file)
+size_t Magma::Framework::File::STDFileSystem::GetPosition(void* file)
 {
 	if (file == nullptr)
 	{
@@ -75,7 +75,7 @@ size_t Magma::Framework::Files::STDFileSystem::GetPosition(void* file)
 	return ftell((FILE*)file);
 }
 
-void Magma::Framework::Files::STDFileSystem::Seek(void* file, size_t position)
+void Magma::Framework::File::STDFileSystem::Seek(void* file, size_t position)
 {
 	if (file == nullptr)
 	{
@@ -97,7 +97,7 @@ void Magma::Framework::Files::STDFileSystem::Seek(void* file, size_t position)
 	}
 }
 
-void Magma::Framework::Files::STDFileSystem::Skip(void* file, size_t amount)
+void Magma::Framework::File::STDFileSystem::Skip(void* file, size_t amount)
 {
 	if (file == nullptr)
 	{
@@ -119,7 +119,7 @@ void Magma::Framework::Files::STDFileSystem::Skip(void* file, size_t amount)
 	}
 }
 
-void Magma::Framework::Files::STDFileSystem::Read(void * file, void * buffer, size_t size)
+void Magma::Framework::File::STDFileSystem::Read(void * file, void * buffer, size_t size)
 {
 	if (file == nullptr)
 	{
@@ -163,7 +163,7 @@ void Magma::Framework::Files::STDFileSystem::Read(void * file, void * buffer, si
 	}
 }
 
-void Magma::Framework::Files::STDFileSystem::Write(void * file, void * buffer, size_t size)
+void Magma::Framework::File::STDFileSystem::Write(void * file, void * buffer, size_t size)
 {
 	if (size == 0)
 		return;
@@ -196,7 +196,7 @@ void Magma::Framework::Files::STDFileSystem::Write(void * file, void * buffer, s
 	}
 }
 
-void Magma::Framework::Files::STDFileSystem::Create(const Path & path)
+void Magma::Framework::File::STDFileSystem::Create(const Path & path)
 {
 	if (path.IsDirectory())
 	{
@@ -230,7 +230,7 @@ void Magma::Framework::Files::STDFileSystem::Create(const Path & path)
 	}
 }
 
-void Magma::Framework::Files::STDFileSystem::Delete(const Path & path)
+void Magma::Framework::File::STDFileSystem::Delete(const Path & path)
 {
 	if (path.IsRoot())
 	{
@@ -249,7 +249,7 @@ void Magma::Framework::Files::STDFileSystem::Delete(const Path & path)
 	}
 }
 
-void Magma::Framework::Files::STDFileSystem::GetDirectoryContents(const Path & path, std::vector<Path>& out)
+void Magma::Framework::File::STDFileSystem::GetDirectoryContents(const Path & path, std::vector<Path>& out)
 {
 	if (!path.IsDirectory())
 	{
@@ -274,12 +274,12 @@ void Magma::Framework::Files::STDFileSystem::GetDirectoryContents(const Path & p
 	}
 }
 
-bool Magma::Framework::Files::STDFileSystem::Exists(const Path & path)
+bool Magma::Framework::File::STDFileSystem::Exists(const Path & path)
 {
 	return std::experimental::filesystem::exists(this->GetRoot() + path.ToString());;
 }
 
-size_t Magma::Framework::Files::STDFileSystem::GetSize(void * file)
+size_t Magma::Framework::File::STDFileSystem::GetSize(void * file)
 {
 	errno = 0;
 

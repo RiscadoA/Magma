@@ -30,7 +30,7 @@ void Magma::Resources::ShaderImporter::Import(Resource * resource)
 	{
 		// Read shader source from file
 		auto fs = this->GetManager()->GetFileSystem();
-		auto file = fs->OpenFile(Framework::Files::FileMode::Read, path);
+		auto file = fs->OpenFile(Framework::File::FileMode::Read, path);
 		auto size = fs->GetSize(file);
 		char* src = new char[size + 1];
 		fs->Read(file, src, size);

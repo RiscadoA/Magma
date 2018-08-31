@@ -72,7 +72,7 @@ Magma::Resources::Resource & Magma::Resources::ResourceView::Get() const
 	return *m_resource;
 }
 
-Magma::Resources::Resource::Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath)
+Magma::Resources::Resource::Resource(const std::string& name, const std::string& type, const Framework::File::Path& dataPath)
 	: m_name(name), m_type(type), m_dataPath(dataPath)
 {
 	m_mode = ResourceMode::Invalid;

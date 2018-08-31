@@ -6,7 +6,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Files
+		namespace File
 		{
 			/// <summary>
 			///		Implements the FileSystem class with the standard library.

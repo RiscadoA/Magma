@@ -1,5 +1,5 @@
 #include <Magma/Framework/Entry.h>
-#include <Magma/Framework/Files/Archive.h>
+#include <Magma/Framework/File/Archive.h>
 #include <Magma/Framework/String/Stream.h>
 #include <Magma/Framework/String/StringStream.h>
 

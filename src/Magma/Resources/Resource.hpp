@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include <Magma/Framework/Files/Path.hpp>
+#include <Magma/Framework/File/Path.hpp>
 
 /*
 RESOURCE TYPES:
@@ -99,7 +99,7 @@ namespace Magma
 		class Resource final
 		{
 		public:
-			Resource(const std::string& name, const std::string& type, const Framework::Files::Path& dataPath);
+			Resource(const std::string& name, const std::string& type, const Framework::File::Path& dataPath);
 			~Resource();
 
 			/// <summary>
@@ -152,7 +152,7 @@ namespace Magma
 			///		Gets this resource's data path.
 			/// </summary>
 			/// <returns>This resource's data path</returns>
-			inline const Framework::Files::Path& GetDataPath() const { return m_dataPath; }
+			inline const Framework::File::Path& GetDataPath() const { return m_dataPath; }
 
 			/// <summary>
 			///		Sets this resource's storage mode.
@@ -206,7 +206,7 @@ namespace Magma
 			std::map<std::string, std::string> m_params;
 			std::string m_name;
 			std::string m_type;
-			Framework::Files::Path m_dataPath;
+			Framework::File::Path m_dataPath;
 			ResourceMode m_mode;
 		};
 

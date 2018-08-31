@@ -9,7 +9,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Files
+		namespace File
 		{
 			/// <summary>
 			///		Represents a file/directory path.
@@ -28,14 +28,14 @@ namespace Magma
 				///		Creates a new path
 				/// </summary>
 				/// <param name="path">Absolute path (must start with '/')</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the path is invalid</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the path is invalid</exception>
 				Path(const std::string& path);
 
 				/// <summary>
 				///		Creates a new path
 				/// </summary>
 				/// <param name="path">Absolute path (must start with '/')</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the path is invalid</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the path is invalid</exception>
 				inline Path(const char*path) : Path(std::string(path)) {}
 
 				/// <summary>
@@ -55,7 +55,7 @@ namespace Magma
 				/// </summary>
 				/// <param name="relative">Path which this path is relative to</param>
 				/// <param name="path">Relative path</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the path is invalid olr if the relative path is not a directory</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the path is invalid olr if the relative path is not a directory</exception>
 				Path(const Path& relative, const std::string& path);
 
 				/// <summary>
@@ -70,21 +70,21 @@ namespace Magma
 				/// </summary>
 				/// <param name="path">New path value</param>
 				/// <returns>Reference to path</returns>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the path is invalid</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the path is invalid</exception>
 				Path& operator=(const std::string& path);
 
 				/// <summary>
 				///		Gets the extension of this path, if it points to a file.
 				/// </summary>
 				/// <returns>The extension of this file</returns>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if path does not point to a file or if the path is invalid</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if path does not point to a file or if the path is invalid</exception>
 				std::string GetExtension() const;
 
 				/// <summary>
 				///		Returns the name of the file or direcvtory which this path points to.
 				/// </summary>
 				/// <returns>File/directory name</returns>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the path is invalid</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the path is invalid</exception>
 				std::string GetName() const;
 
 				/// <summary>

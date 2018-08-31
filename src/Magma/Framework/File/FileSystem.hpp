@@ -6,7 +6,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Files
+		namespace File
 		{
 			/// <summary>
 			///		File open modes
@@ -40,7 +40,7 @@ namespace Magma
 				/// </summary>
 				/// <param name="mode">The mode in which the file will be opened</param>
 				/// <param name="path">The file path relative to this file system root</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the file couldn't be opened</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the file couldn't be opened</exception>
 				/// <returns>File handle</returns>
 				virtual void* OpenFile(FileMode mode, const Path& path) = 0;
 
@@ -48,7 +48,7 @@ namespace Magma
 				///		Closes a file that was opened by OpenFile.
 				/// </summary>
 				/// <param name="file">File handle</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the file wasn't open</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the file wasn't open</exception>
 				virtual void CloseFile(void* file) = 0;
 
 				/// <summary>
@@ -78,7 +78,7 @@ namespace Magma
 				/// <param name="file">File handle</param>
 				/// <param name="buffer">Buffer where data will be written to</param>
 				/// <param name="size">Buffer size (how much data to read)</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the file wasn't open</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the file wasn't open</exception>
 				virtual void Read(void* file, void* buffer, size_t size) = 0;
 
 				/// <summary>
@@ -87,7 +87,7 @@ namespace Magma
 				/// <param name="file">File handle</param>
 				/// <param name="buffer">Buffer where data will be read from</param>
 				/// <param name="size">Buffer size</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the file wasn't open</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the file wasn't open</exception>
 				virtual void Write(void* file, void* buffer, size_t size) = 0;
 
 				/// <summary>
@@ -100,15 +100,15 @@ namespace Magma
 				///		Deletes a file/directory.
 				/// </summary>
 				/// <param name="path">File/directory path</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the file/directory doesn't exist</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the file/directory doesn't exist</exception>
 				virtual void Delete(const Path& path) = 0;
 
 				/// <summary>
 				///		Gets the files and directories' paths inside a directory
 				/// </summary>
 				/// <param name="path">Directory path</param>
-				/// <param name="out">Files and directories' paths</param>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the directory doesn't exist</exception>
+				/// <param name="out">File and directories' paths</param>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the directory doesn't exist</exception>
 				virtual void GetDirectoryContents(const Path& path, std::vector<Path>& out) = 0;
 
 				/// <summary>
@@ -123,7 +123,7 @@ namespace Magma
 				/// </summary>
 				/// <param name="file">File handle</param>
 				/// <returns>File size</returns>
-				/// <exception cref="Magma::Framework::Files::FileError">Thrown if the file wasn't open</exception>
+				/// <exception cref="Magma::Framework::File::FileError">Thrown if the file wasn't open</exception>
 				virtual size_t GetSize(void* file) = 0;
 
 				/// <summary>

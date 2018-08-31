@@ -2,7 +2,7 @@
 #include "Config.h"
 
 #include "String/Stream.h"
-#include "Files/Archive.h"
+#include "File/Archive.h"
 #include "Input/Window.h"
 #include "Input/OGLWindow.h"
 #include "Input/D3DWindow.h"

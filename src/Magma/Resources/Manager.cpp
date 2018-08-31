@@ -1,6 +1,6 @@
 #include "Manager.hpp"
 
-#include <Magma/Framework/Files/STDFileSystem.hpp>
+#include <Magma/Framework/File/STDFileSystem.hpp>
 #include <Magma/Framework/String/MNIDocument.hpp>
 
 Magma::Resources::Manager* Magma::Resources::Manager::s_manager = nullptr;
@@ -125,7 +125,7 @@ void Magma::Resources::Manager::DestroyResource(const std::string & name)
 Magma::Resources::Manager::Manager(const ManagerSettings& settings)
 	: m_settings(settings)
 {
-	m_fileSystem = new Framework::Files::STDFileSystem(settings.rootPath);
+	m_fileSystem = new Framework::File::STDFileSystem(settings.rootPath);
 
 	this->LoadMetaData();
 }
@@ -139,9 +139,9 @@ Magma::Resources::Manager::~Manager()
 	delete m_fileSystem;
 }
 
-void Magma::Resources::Manager::LoadMetaData(const Framework::Files::Path& directory)
+void Magma::Resources::Manager::LoadMetaData(const Framework::File::Path& directory)
 {	
-	std::vector<Framework::Files::Path> contents;
+	std::vector<Framework::File::Path> contents;
 	m_fileSystem->GetDirectoryContents(directory, contents);
 
 	for (auto& p : contents)
@@ -150,7 +150,7 @@ void Magma::Resources::Manager::LoadMetaData(const Framework::Files::Path& direc
 			LoadMetaData(p);
 		else if (p.GetExtension() == "mni")
 		{
-			auto file = m_fileSystem->OpenFile(Framework::Files::FileMode::Read, p);
+			auto file = m_fileSystem->OpenFile(Framework::File::FileMode::Read, p);
 			auto srcSize = m_fileSystem->GetSize(file);
 			std::string src;
 			src.resize(srcSize);
