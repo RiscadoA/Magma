@@ -45,7 +45,11 @@ int main(int argc, const char** argv)
 		abort();
 
 	mffFile* file;
-	err = mffGetFile(&file, u8"/resources/Shaders/GUI/box.mni");
+	err = mffGetFile(&file, u8"/resources/test.txt");
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mffGetFile(&file, u8"/resources/Audio/audio.mni");
 	if (err != MF_ERROR_OKAY)
 		abort();
 

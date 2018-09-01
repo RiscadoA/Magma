@@ -199,7 +199,7 @@ mfError mffGetFileType(mffFile * file, mffEnum * outType)
 
 mfError mffGetFirstFile(mffFile ** outFile, mffDirectory * directory)
 {
-	if (outFile == NULL || directory == NULL)
+	if (outFile == NULL)
 		return MFF_ERROR_INVALID_ARGUMENTS;
 
 	return directory->archive->getFirstFile(directory->archive, outFile, directory);

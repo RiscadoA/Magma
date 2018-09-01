@@ -1,6 +1,0 @@
-# Set color output to the texture sampled value
-
-VARIN0,		xb02,
-VARIN1,		xb03,
-VAROUT,		xb01,
-SMPLE2D,

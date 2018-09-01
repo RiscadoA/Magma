@@ -1,11 +1,19 @@
 #include "FolderArchive.h"
 #include "Path.h"
+#include "Config.h"
 
 #include "../Memory/Allocator.h"
+#include "../String/StringStream.h"
 #include "../Thread/Mutex.h"
 
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+#include <Windows.h>
+#else
+#error MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM must be defined. File system library still only supports Windows.
+#endif
 
 typedef struct mffFolderFile mffFolderFile;
 
@@ -52,10 +60,31 @@ static mfError mffArchiveGetFile(mffArchive* archive, mffFile** outFile, const m
 		}
 
 		// Next file
-		if (currentFile->next == NULL)
-			currentFile = currentFile->parent;
+		if (currentFile->first != NULL)
+			currentFile = currentFile->first;
 		else
-			currentFile = currentFile->next;
+		{
+			if (currentFile->next == NULL)
+			{
+				if (currentFile->parent == NULL)
+					break;
+				mffFolderFile* nextParent = currentFile;
+				do
+				{
+					nextParent = nextParent->parent;
+					if (nextParent == NULL)
+						break;
+				} while (nextParent->next == NULL);
+				currentFile = nextParent->next;
+
+				/*if (currentFile->parent->next == NULL)
+					currentFile = currentFile->parent->parent->next;
+				else
+					currentFile = currentFile->parent->next;*/
+			}
+			else
+				currentFile = currentFile->next;
+		}
 	}
 
 	mftUnlockMutex(folderArchive->mutex);
@@ -72,7 +101,10 @@ static mfError mffArchiveGetFileType(mffArchive* archive, mffFile* file, mffEnum
 static mfError mffArchiveGetFirstFile(mffArchive* archive, mffFile** outFile, mffDirectory* directory)
 {
 	mffFolderFile* folderFile = directory;
-	*outFile = folderFile->first;
+	if (directory == NULL)
+		*outFile = ((mffFolderArchive*)archive)->firstFile;
+	else
+		*outFile = folderFile->first;
 	return MF_ERROR_OKAY;
 }
 
@@ -126,6 +158,143 @@ static mfError mffArchiveOpenFile(mffArchive* archive, mfsStream** outStream, mf
 	return MF_ERROR_OKAY;
 }
 
+static void mffDestroyFile(void* file)
+{
+	if (file == NULL)
+		abort();
+
+	mfError err;
+	mffFolderFile* folderFile = file;
+
+	err = mfmDestroyObject(&folderFile->base.object);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mfmDeallocate(((mffFolderArchive*)folderFile->base.archive)->allocator, folderFile);
+	if (err != MF_ERROR_OKAY)
+		abort();
+}
+
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+static mfError mffFillWindowsFiles(mffFolderArchive * archive, void* allocator, const mfsUTF8CodeUnit* path, const mfsUTF8CodeUnit* internalPath, mffFolderFile* parent, mffFolderFile** first)
+{
+	
+
+	mfError err;
+	WIN32_FIND_DATA data;
+	HANDLE hFind;
+
+	{
+		mfsUTF8CodeUnit searchPath[MFF_PATH_MAX_SIZE];
+
+		mfsStringStream ss;
+		err = mfsCreateLocalStringStream(&ss, searchPath, sizeof(searchPath));
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPrintFormat(&ss, u8"%s/*.*", path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfsDestroyLocalStringStream(&ss);
+
+		hFind = FindFirstFile(searchPath, &data);
+	}
+
+
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		// Iterate over files in directory
+		do
+		{
+			if (strcmp(data.cFileName, u8".") == 0 ||
+				strcmp(data.cFileName, u8"..") == 0)
+				continue;
+
+			// If is directory
+			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				mffFolderFile* file;
+
+				err = mfmAllocate(allocator, &file, sizeof(mffFolderFile));
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				err = mfmInitObject(&file->base.object);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				file->base.object.destructorFunc = &mffDestroyFile;
+				file->base.archive = archive;
+				file->first = NULL;
+				file->next = NULL;
+				file->parent = parent;
+				file->type = MFF_DIRECTORY;
+
+				mfsStringStream ss;
+				
+				// Get internal path
+				err = mfsCreateLocalStringStream(&ss, file->path, sizeof(file->path));
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfsPrintFormat(&ss, u8"%s/%s", internalPath, data.cFileName);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfsDestroyLocalStringStream(&ss);
+
+				// Get real path
+				mfsUTF8CodeUnit realPath[MFF_MAX_FILE_PATH_SIZE];
+				err = mfsCreateLocalStringStream(&ss, realPath, sizeof(realPath));
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfsPrintFormat(&ss, u8"%s/%s", path, data.cFileName);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfsDestroyLocalStringStream(&ss);
+
+				*first = file;
+				first = &(*first)->next;
+
+				err = mffFillWindowsFiles(archive, allocator, realPath, file->path, file, &file->first);
+				if (err != MF_ERROR_OKAY)
+					return err;
+			}
+			// If is file
+			else
+			{
+				mffFolderFile* file;
+
+				err = mfmAllocate(allocator, &file, sizeof(mffFolderFile));
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				err = mfmInitObject(&file->base.object);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				file->base.object.destructorFunc = &mffDestroyFile;
+				file->base.archive = archive;
+				file->first = NULL;
+				file->next = NULL;
+				file->parent = parent;
+				file->type = MFF_FILE;
+
+				mfsStringStream ss;
+				err = mfsCreateLocalStringStream(&ss, file->path, sizeof(file->path));
+				if (err != MF_ERROR_OKAY)
+					return err;
+				err = mfsPrintFormat(&ss, u8"%s/%s", internalPath, data.cFileName);
+				if (err != MF_ERROR_OKAY)
+					return err;
+				mfsDestroyLocalStringStream(&ss);
+
+				*first = file;
+				first = &(*first)->next;
+			}
+		}
+		while (FindNextFile(hFind, &data));
+	}
+}
+#endif
+
 mfError mffCreateFolderArchive(mffArchive ** outArchive, void* allocator, const mfsUTF8CodeUnit* path)
 {
 	mfError err;
@@ -162,7 +331,11 @@ mfError mffCreateFolderArchive(mffArchive ** outArchive, void* allocator, const 
 		return err;
 
 	// Get files in folder
-
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+	err = mffFillWindowsFiles(folderArchive, allocator, path, u8"", NULL, &folderArchive->firstFile);
+	if (err != MF_ERROR_OKAY)
+		return err;
+#endif
 
 	*outArchive = folderArchive;
 	return MF_ERROR_OKAY;
@@ -176,7 +349,7 @@ void mffDestroyFolderArchive(void * archive)
 	mfError err;
 	mffFolderArchive* folderArchive = archive;
 
-	err = mftDestroyMutex(&folderArchive->mutex);
+	err = mftDestroyMutex(folderArchive->mutex);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
@@ -187,6 +360,4 @@ void mffDestroyFolderArchive(void * archive)
 	err = mfmDeallocate(folderArchive->allocator, folderArchive);
 	if (err != MF_ERROR_OKAY)
 		abort();
-
-	return MF_ERROR_OKAY;
 }
