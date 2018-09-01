@@ -27,6 +27,7 @@ extern "C"
 	typedef struct mffArchive mffArchive;
 
 	typedef mfError(*mffArchiveGetFileFunc)(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* path);
+	typedef mfError(*mffArchiveGetFileTypeFunc)(mffArchive* archive, mffFile* file, mffEnum* outType);
 	typedef mfError(*mffArchiveGetFirstFileFunc)(mffArchive* archive, mffFile** outFile, mffDirectory* directory);
 	typedef mfError(*mffArchiveGetNextFileFunc)(mffArchive* archive, mffFile** outFile, mffFile* file);
 	typedef mfError(*mffArchiveGetParentFunc)(mffArchive* archive, mffDirectory** outParent, mffFile* file);
@@ -48,6 +49,7 @@ extern "C"
 		mfsUTF8CodeUnit name[MFF_MAX_ARCHIVE_NAME_SIZE];
 
 		mffArchiveGetFileFunc getFile;
+		mffArchiveGetFileTypeFunc getFileType;
 		mffArchiveGetFirstFileFunc getFirstFile;
 		mffArchiveGetNextFileFunc getNextFile;
 		mffArchiveGetParentFunc getParent;
@@ -67,6 +69,8 @@ extern "C"
 	mfError mffUnregisterArchive(mffArchive* archive);
 
 	mfError mffGetFile(mffFile** outFile, const mfsUTF8CodeUnit* path);
+	
+	mfError mffGetFileType(mffFile* file, mffEnum* outType);
 
 	mfError mffGetFirstFile(mffFile** outFile, mffDirectory* directory);
 

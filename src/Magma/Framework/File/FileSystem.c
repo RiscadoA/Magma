@@ -186,6 +186,14 @@ mfError mffGetFile(mffFile ** outFile, const mfsUTF8CodeUnit * path)
 	return archive->getFile(archive, outFile, mffGoDownPath(path));
 }
 
+mfError mffGetFileType(mffFile * file, mffEnum * outType)
+{
+	if (file == NULL || outType == NULL)
+		return MFF_ERROR_INVALID_ARGUMENTS;
+
+	return file->archive->getFileType(file->archive, file, outType);
+}
+
 mfError mffGetFirstFile(mffFile ** outFile, mffDirectory * directory)
 {
 	if (outFile == NULL || directory == NULL)
