@@ -36,14 +36,10 @@ typedef struct
 	mftMutex* mutex;
 } mffFolderArchive;
 
-static mfError mffArchiveGetFile(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* path)
+static mfError mffArchiveGetFileUnsafe(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* path)
 {
 	mffFolderArchive* folderArchive = archive;
 	mfError err;
-
-	err = mftLockMutex(folderArchive->mutex, 0);
-	if (err != MF_ERROR_OKAY)
-		return err;
 
 	mffFolderFile* currentFile = folderArchive->firstFile;
 	while (currentFile != NULL)
@@ -51,11 +47,6 @@ static mfError mffArchiveGetFile(mffArchive* archive, mffFile** outFile, const m
 		if (strcmp(currentFile->path, path) == 0)
 		{
 			*outFile = currentFile;
-
-			err = mftUnlockMutex(folderArchive->mutex);
-			if (err != MF_ERROR_OKAY)
-				return err;
-
 			return MF_ERROR_OKAY;
 		}
 
@@ -76,19 +67,36 @@ static mfError mffArchiveGetFile(mffArchive* archive, mffFile** outFile, const m
 						break;
 				} while (nextParent->next == NULL);
 				currentFile = nextParent->next;
-
-				/*if (currentFile->parent->next == NULL)
-					currentFile = currentFile->parent->parent->next;
-				else
-					currentFile = currentFile->parent->next;*/
 			}
 			else
 				currentFile = currentFile->next;
 		}
 	}
 
-	mftUnlockMutex(folderArchive->mutex);
 	return MFF_ERROR_FILE_NOT_FOUND;
+}
+
+static mfError mffArchiveGetFile(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* path)
+{
+	mffFolderArchive* folderArchive = archive;
+	mfError err;
+
+	err = mftLockMutex(folderArchive->mutex, 0);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mffArchiveGetFileUnsafe(archive, outFile, path);
+	if (err != MF_ERROR_OKAY)
+	{
+		mftUnlockMutex(folderArchive->mutex);
+		return err;
+	}
+
+	err = mftUnlockMutex(folderArchive->mutex);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
 }
 
 static mfError mffArchiveGetFileType(mffArchive* archive, mffFile* file, mffEnum* outType)
@@ -134,9 +142,67 @@ static mfError mffArchiveDeleteDirectory(mffArchive* archive, mffDirectory* dir)
 	return MF_ERROR_OKAY;
 }
 
+static mfError mffArchiveCreateFileUnsafe(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* path)
+{
+	mfError err;
+	mffFolderArchive* folderArchive = archive;
+
+	// Get parent path
+	// Example: /test.txt -> / ; /Test/test.txt -> /Test/
+
+	// Get last '/'
+	const mfsUTF8CodeUnit* lastSep = path;
+	const mfsUTF8CodeUnit* it = path;
+	while (*it != '\0')
+	{
+		if (*it == '/')
+			lastSep = it;
+		++it;
+	}
+
+	// Get separator offset
+	mfmU64 lastSepOff = lastSep - path;
+	if (lastSepOff >= MFF_MAX_FILE_PATH_SIZE - 1)
+		return MFF_ERROR_PATH_TOO_BIG;
+
+	// Get parent file
+	mffFolderFile* parentFile;
+	{
+		mfsUTF8CodeUnit parentPath[MFF_MAX_FILE_PATH_SIZE];
+		memcpy(parentPath, path, lastSepOff + 1);
+		parentPath[lastSepOff + 1] = '\0';
+
+		err = mffArchiveGetFileUnsafe(archive, &parentFile, parentPath);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	// Add new file to parent file
+
+	// TO DO
+	return MF_ERROR_OKAY;
+}
+
 static mfError mffArchiveCreateFile(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* path)
 {
-	// TO DO
+	mffFolderArchive* folderArchive = archive;
+	mfError err;
+
+	err = mftLockMutex(folderArchive->mutex, 0);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mffArchiveCreateFileUnsafe(archive, outFile, path);
+	if (err != MF_ERROR_OKAY)
+	{
+		mftUnlockMutex(folderArchive->mutex);
+		return err;
+	}
+
+	err = mftUnlockMutex(folderArchive->mutex);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
