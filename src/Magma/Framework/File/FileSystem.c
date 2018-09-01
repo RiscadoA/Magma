@@ -1,5 +1,6 @@
 #include "FileSystem.h"
 #include "Path.h"
+#include "Config.h"
 
 #include "../Thread/Mutex.h"
 
@@ -154,6 +155,8 @@ static mfError mffGetPathArchive(mffArchive** outArchive, const mfsUTF8CodeUnit 
 
 	for (mfmU64 i = 0; i < MFF_MAX_ARCHIVE_COUNT; ++i)
 	{
+		if (mffFileSystem.archives[i] == NULL)
+			continue;
 		if (strcmp(archiveName, mffFileSystem.archives[i]->name) != 0)
 			continue;
 
@@ -243,7 +246,7 @@ mfError mffDeleteDirectory(mffDirectory * dir)
 
 mfError mffCreateFile(mffFile ** outFile, const mfsUTF8CodeUnit * path)
 {
-	if (outFile == NULL || path == NULL)
+	if (path == NULL)
 		return MFF_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;

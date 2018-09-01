@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-const mfsUTF8CodeUnit* mffMagmaRootDirectory = MAGMA_ROOT_DIRECTORY u8"/";
+const mfsUTF8CodeUnit* mffMagmaRootDirectory = MAGMA_ROOT_DIRECTORY;
 
 const mfsUTF8CodeUnit * mffGoDownPath(const mfsUTF8CodeUnit * path)
 {

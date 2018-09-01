@@ -7,7 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct
+typedef struct mffFolderFile mffFolderFile;
+
+struct mffFolderFile
 {
 	mffFile base;
 	mfsUTF8CodeUnit path[MFF_MAX_FILE_PATH_SIZE];
@@ -15,7 +17,7 @@ typedef struct
 	mffFolderFile* next;
 	mffFolderFile* first;
 	mffEnum type;
-} mffFolderFile;
+};
 
 typedef struct
 {

@@ -1,5 +1,7 @@
 #include <Magma/Framework/Entry.h>
-#include <Magma/Framework/File/Archive.h>
+#include <Magma/Framework/File/FileSystem.h>
+#include <Magma/Framework/File/Path.h>
+#include <Magma/Framework/File/FolderArchive.h>
 #include <Magma/Framework/String/Stream.h>
 #include <Magma/Framework/String/StringStream.h>
 
@@ -22,28 +24,36 @@ int main(int argc, const char** argv)
 		err = mfsPutString(&ss, mffMagmaRootDirectory);
 		if (err != MF_ERROR_OKAY)
 			abort();
-		err = mfsPutString(&ss, "resources/");
+		err = mfsPutString(&ss, "/resources");
 		if (err != MF_ERROR_OKAY)
 			abort();
 		mfsDestroyLocalStringStream(&ss);
 	}
 
 	mffArchive* archive;
-	err = mffCreateArchive(&archive, archivePath, NULL);
+	
+	err = mffCreateFolderArchive(&archive, NULL, archivePath);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mffCreateFile(archive, NULL, u8"test.txt");
+	err = mffRegisterArchive(archive);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mffCreateFile(NULL, u8"/resources/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	mffFile* file;
-	err = mffGetFile(archive, &file, u8"Shaders/GUI/box.mni");
+	err = mffGetFile(&file, u8"/resources/Shaders/GUI/box.mni");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	mffDestroyArchive(archive);
+	err = mffUnregisterArchive(archive);
+	if (err != MF_ERROR_OKAY)
+		abort();
 
+	mffDestroyFolderArchive(archive);
 	mfTerminate();
 	return 0;
 }
