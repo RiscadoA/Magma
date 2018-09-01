@@ -24,52 +24,96 @@ typedef struct
 {
 	mfsStream base;
 	void* allocator;
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+	HANDLE handle;
+#endif
 } mffDefaultFileStream;
 
-static void mffDefaultArchiveDestroyFile(void* file)
+static void mffDefaultArchiveReadFileStream(void* stream)
 {
+	if (stream == NULL)
+		abort();
 
-}
-
-static mfError mffDefaultArchiveOpenFile(mfsStream** stream, mffFile* file, mfmU32 mode)
-{
-	if (stream == NULL || file == NULL || (mode != MFF_READ && mode != MFF_WRITE))
-		return MFF_ERROR_INVALID_ARGUMENTS;
-
-	/* /test/text.txt */
-
-	/*mffDefaultArchive* arc = archive;
 	mfError err;
-	mffDefaultFileStream* fs;
+	mffDefaultFileStream* f = stream;
 
-	mfsUTF8CodeUnit absPath[MFF_PATH_MAX_SIZE];
-	strcpy(absPath, arc->base.path);
-	const mfsUTF8CodeUnit* it = path;
-	while (*it != '\0')
-	{
-	if (*it == '/')
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+	CloseHandle(f->handle);
+#endif
 
-	++it;
-	}
-
-	err = mfmAllocate(arc->base.base.allocator, &fs, sizeof(mffDefaultFileStream));
+	err = mfmDestroyObject(&f->base.object);
 	if (err != MF_ERROR_OKAY)
-	return err;
+		return err;
 
-	err = mfmInitObject(&fs->base.object);
+	err = mfmDeallocate(f->allocator, f);
 	if (err != MF_ERROR_OKAY)
-	return err;
-
-	fs->allocator = arc->base.base.allocator;
-	fs->base.buffer = NULL;
-	fs->base.bufferSize = 0;
-	fs->base.object;*/
-
-	// TO DO
+		return err;
 
 	return MF_ERROR_OKAY;
 }
 
+static void mffDefaultArchiveCloseFileStream(void* stream)
+{
+	if (stream == NULL)
+		abort();
+
+	mfError err;
+	mffDefaultFileStream* f = stream;
+
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+	CloseHandle(f->handle);
+#endif
+
+	err = mfmDestroyObject(&f->base.object);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfmDeallocate(f->allocator, f);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffDefaultArchiveOpenFileStream(mfsStream** stream, mffFile* file, mfmU32 mode)
+{
+	if (stream == NULL || file == NULL || (mode != MFF_READ && mode != MFF_WRITE))
+		return MFF_ERROR_INVALID_ARGUMENTS;
+
+	mfError err;
+	mffDefaultFileStream* f;
+	err = mfmAllocate(file->allocator, &f, sizeof(mffDefaultFileStream));
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfmInitObject(&f->base.object);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	f->base.object.destructorFunc = &mffDefaultArchiveCloseFileStream;
+
+	f->allocator = arc->base.base.allocator;
+
+	f->allocator = file->allocator;
+
+	return MF_ERROR_OKAY;
+}
+
+static void mffDefaultArchiveDestroyFile(void* file)
+{
+	if (file == NULL)
+		abort();
+
+	mffDefaultFile* f = file;
+	mfError err;
+
+	err = mfmDestroyObject(&f->base.object);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mfmDeallocate(f->base.allocator, f);
+	if (err != MF_ERROR_OKAY)
+		abort();
+}
 
 static mfError mffDefaultArchiveCreateFile(mffArchive* archive, mffFile** outFile, const mfsUTF8CodeUnit* name)
 {
@@ -105,31 +149,31 @@ static mfError mffDefaultArchiveCreateFile(mffArchive* archive, mffFile** outFil
 	}
 #endif
 
-	mffFile* file;
+	mffDefaultFile* file;
 
 	// Create archive file
-	err = mfmAllocate(arc->base.base.allocator, &file, sizeof(mffFile));
+	err = mfmAllocate(arc->base.base.allocator, &file, sizeof(mffDefaultFile));
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	err = mfmInitObject(&file->object);
+	err = mfmInitObject(&file->base.object);
 	if (err != MF_ERROR_OKAY)
 		return err;
-	file->object.destructorFunc = &mffDefaultArchiveDestroyFile;
+	file->base.object.destructorFunc = &mffDefaultArchiveDestroyFile;
 
-	file->allocator = arc->base.base.allocator;
-	file->archive = arc;
+	file->base.allocator = arc->base.base.allocator;
+	file->base.archive = arc;
 
 	if (strlen(name) >= MFF_FILE_NAME_MAX_SIZE)
 	{
-		memcpy(file->name, name, MFF_FILE_NAME_MAX_SIZE - 1);
-		file->name[MFF_FILE_NAME_MAX_SIZE - 1] = '\0';
+		memcpy(file->base.name, name, MFF_FILE_NAME_MAX_SIZE - 1);
+		file->base.name[MFF_FILE_NAME_MAX_SIZE - 1] = '\0';
 	}
 	else
-		strcpy(file->name, name);
+		strcpy(file->base.name, name);
 
-	file->nextFile = NULL;
-	file->type = MFF_FILE;
+	file->base.nextFile = NULL;
+	file->base.type = MFF_FILE;
 
 	// Add new file to archive
 	if (arc->base.firstFile == NULL)
@@ -210,7 +254,7 @@ mfError mffCreateDefaultArchive(mffArchive ** archive, const mfsUTF8CodeUnit * p
 
 	arc->base.base.nextFile = NULL;
 	arc->base.firstFile = NULL;
-	arc->base.openFile = &mffDefaultArchiveOpenFile;
+	arc->base.openFile = &mffDefaultArchiveOpenFileStream;
 	arc->base.createFile = &mffDefaultArchiveCreateFile;
 	arc->base.base.type = MFF_ARCHIVE;
 

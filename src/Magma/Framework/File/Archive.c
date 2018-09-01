@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "FileSystem.h"
 
 struct
 {
@@ -135,13 +136,6 @@ mfError mffOpenFile(mfsStream ** stream, mffFile * file, mfmU32 mode)
 	return file->archive->openFile(stream, file, mode);
 }
 
-mfError mffCloseFile(mfsStream * stream)
-{
-	if (stream == NULL)
-		return MFF_ERROR_INVALID_ARGUMENTS;
-	stream->object.destructorFunc(stream);
-	return MF_ERROR_OKAY;
-}
 
 mfError mffCreateFile(mffArchive * archive, mffFile ** file, const mfsUTF8CodeUnit * name)
 {

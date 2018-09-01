@@ -6,27 +6,6 @@
 #include "../Memory/Object.h"
 #include "../String/Stream.h"
 
-/*
-	/ (root archive)
-		user/
-			config.ini
-			saves/
-				save_001.usr
-				save_002.usr
-		assets.zip/
-			audio/
-				effects/
-					boom_001.wav
-
-	Each path directory represents an archive.
-
-	/assets.zip/audio/music.wav
-
-	'assets.zip' is an archive.
-	'audio' is an archive.
-	'music.wav' is a file that belongs to 'audio'
-*/
-
 #ifdef __cplusplus
 extern "C"
 {
