@@ -12,8 +12,8 @@ extern "C"
 	///		Gets a string that describes an error code.
 	/// </summary>
 	/// <param name="err">Error code</param>
-	/// <returns>String pointer (NULL if the error code isn't part of the magma framework files library</returns>
-	const mfsUTF8CodeUnit* mffErrorToString(mfError err);
+	/// <returns>String pointer (NULL if the error code isn't part of the magma framework memory library</returns>
+	const mfsUTF8CodeUnit* mfmErrorToString(mfError err);
 
 #ifdef __cplusplus
 }
