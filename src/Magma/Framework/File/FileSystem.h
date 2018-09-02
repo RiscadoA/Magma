@@ -64,7 +64,7 @@ extern "C"
 
 	mfError mffTerminateFileSystem(void);
 
-	mfError mffRegisterArchive(mffArchive* archive);
+	mfError mffRegisterArchive(mffArchive* archive, const mfsUTF8CodeUnit* name);
 
 	mfError mffUnregisterArchive(mffArchive* archive);
 

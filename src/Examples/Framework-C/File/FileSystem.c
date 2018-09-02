@@ -36,21 +36,21 @@ int main(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mffRegisterArchive(archive);
+	err = mffRegisterArchive(archive, u8"temp");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	mffFile* dir;
-	err = mffCreateDirectory(&dir, u8"/FileSystem-Example/testFolder");
+	err = mffCreateDirectory(&dir, u8"/temp/testFolder");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mffCreateFile(NULL, u8"/FileSystem-Example/testFolder/test.txt");
+	err = mffCreateFile(NULL, u8"/temp/testFolder/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	mffFile* file;
-	err = mffGetFile(&file, u8"/FileSystem-Example/testFolder/test.txt");
+	err = mffGetFile(&file, u8"/temp/testFolder/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 

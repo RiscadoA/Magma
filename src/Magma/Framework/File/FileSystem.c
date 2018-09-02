@@ -9,6 +9,7 @@
 struct
 {
 	mffArchive* archives[MFF_MAX_ARCHIVE_COUNT];
+	mfsUTF8CodeUnit archiveNames[MFF_MAX_ARCHIVE_COUNT][MFF_MAX_ARCHIVE_NAME_SIZE];
 	mftMutex* mutex;
 } mffFileSystem;
 
@@ -61,7 +62,7 @@ mfError mffTerminateFileSystem(void)
 	return MF_ERROR_OKAY;
 }
 
-mfError mffRegisterArchive(mffArchive * archive)
+mfError mffRegisterArchive(mffArchive * archive, const mfsUTF8CodeUnit* name)
 {
 	mfError err;
 	
@@ -73,6 +74,8 @@ mfError mffRegisterArchive(mffArchive * archive)
 	{
 		if (mffFileSystem.archives[i] != NULL)
 			continue;
+
+		strcpy(mffFileSystem.archiveNames[i], name);
 
 		mffFileSystem.archives[i] = archive;
 		err = mfmIncObjectRef(&mffFileSystem.archives[i]->object);
@@ -157,7 +160,7 @@ static mfError mffGetPathArchive(mffArchive** outArchive, const mfsUTF8CodeUnit 
 	{
 		if (mffFileSystem.archives[i] == NULL)
 			continue;
-		if (strcmp(archiveName, mffFileSystem.archives[i]->name) != 0)
+		if (strcmp(archiveName, mffFileSystem.archiveNames[i]) != 0)
 			continue;
 
 		// Found archive
