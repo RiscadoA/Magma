@@ -18,6 +18,46 @@ void Magma::Framework::File::UnregisterArchive(Archive archive)
 		throw FileSystemError(mfErrorToString(err));
 }
 
+Magma::Framework::File::FileType Magma::Framework::File::File::GetType()
+{
+	mfError err;
+	mffEnum type;
+	err = mffGetFileType((mffFile*)&this->Get(), &type);
+	if (err != MF_ERROR_OKAY)
+		throw FileSystemError(mfErrorToString(err));
+	return static_cast<FileType>(type);
+}
+
+Magma::Framework::File::File Magma::Framework::File::File::GetFirst()
+{
+	mfError err;
+	mffFile* file;
+	err = mffGetFirstFile(&file, (mffFile*)&this->Get());
+	if (err != MF_ERROR_OKAY)
+		throw FileSystemError(mfErrorToString(err));
+	return file;
+}
+
+Magma::Framework::File::File Magma::Framework::File::File::GetNext()
+{
+	mfError err;
+	mffFile* file;
+	err = mffGetNextFile(&file, (mffFile*)&this->Get());
+	if (err != MF_ERROR_OKAY)
+		throw FileSystemError(mfErrorToString(err));
+	return file;
+}
+
+Magma::Framework::File::File Magma::Framework::File::File::GetParent()
+{
+	mfError err;
+	mffFile* file;
+	err = mffGetParent(&file, (mffFile*)&this->Get());
+	if (err != MF_ERROR_OKAY)
+		throw FileSystemError(mfErrorToString(err));
+	return file;
+}
+
 Magma::Framework::File::File Magma::Framework::File::GetFile(const mfsUTF8CodeUnit * path)
 {
 	mfError err;
