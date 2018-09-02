@@ -17,6 +17,8 @@ extern "C"
 #define MFF_ERROR_EXTENSION_TOO_BIG		0x0708
 #define MFF_ERROR_ARCHIVE_NOT_FOUND		0x0709
 #define MFF_ERROR_NOT_A_FILE			0x070A
+#define MFF_ERROR_NOT_A_DIRECTORY		0x070B
+#define MFF_ERROR_MUST_BE_EMPTY			0x070C
 
 #ifdef __cplusplus
 }

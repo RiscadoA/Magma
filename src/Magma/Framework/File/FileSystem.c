@@ -223,7 +223,7 @@ mfError mffGetParent(mffDirectory ** outParent, mffFile * file)
 
 mfError mffCreateDirectory(mffDirectory ** outDir, const mfsUTF8CodeUnit * path)
 {
-	if (outDir == NULL || path == NULL)
+	if (path == NULL)
 		return MFF_ERROR_INVALID_ARGUMENTS;
 
 	mfError err;

@@ -40,16 +40,25 @@ int main(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mffCreateFile(NULL, u8"/FileSystem-Example/testFolder/test4/test2/test.txt");
+	mffFile* dir;
+	err = mffCreateDirectory(&dir, u8"/FileSystem-Example/testFolder");
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mffCreateFile(NULL, u8"/FileSystem-Example/testFolder/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	mffFile* file;
-	err = mffGetFile(&file, u8"/FileSystem-Example/testFolder/test4/test2/test.txt");
+	err = mffGetFile(&file, u8"/FileSystem-Example/testFolder/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	err = mffDeleteFile(file);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mffDeleteDirectory(dir);
 	if (err != MF_ERROR_OKAY)
 		abort();
 

@@ -156,15 +156,238 @@ static mfError mffArchiveGetParent(mffArchive* archive, mffDirectory** outParent
 	return MF_ERROR_OKAY;
 }
 
+static mfError mffArchiveCreateDirectoryUnsafe(mffArchive* archive, mffDirectory** outDir, const mfsUTF8CodeUnit* path)
+{
+	mfError err;
+	mffFolderArchive* folderArchive = archive;
+
+	// Get parent path
+	// Example: /test.txt -> / ; /Test/test.txt -> /Test/
+
+	// Get last '/'
+	const mfsUTF8CodeUnit* lastSep = path;
+	const mfsUTF8CodeUnit* it = path;
+	while (*it != '\0')
+	{
+		if (*it == '/')
+			lastSep = it;
+		++it;
+	}
+
+	// Get separator offset
+	mfmU64 lastSepOff = lastSep - path;
+	if (lastSepOff >= MFF_MAX_FILE_PATH_SIZE - 1)
+		return MFF_ERROR_PATH_TOO_BIG;
+
+	// Get parent file
+	mffFolderFile* parentFile;
+	{
+		mfsUTF8CodeUnit parentPath[MFF_MAX_FILE_PATH_SIZE];
+		memcpy(parentPath, path, lastSepOff);
+		parentPath[lastSepOff] = '\0';
+
+		if (lastSepOff == 0)
+			parentFile = NULL;
+		else
+		{
+			err = mffArchiveGetFileUnsafe(archive, &parentFile, parentPath);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+	}
+
+	mffFolderFile* file;
+
+	// Create real file
+	{
+		mfsUTF8CodeUnit realPath[256];
+		{
+			mfsStringStream ss;
+			err = mfsCreateLocalStringStream(&ss, realPath, sizeof(realPath));
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfsPutString(&ss, folderArchive->path);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			err = mfsPutString(&ss, path);
+			if (err != MF_ERROR_OKAY)
+				return err;
+			mfsDestroyLocalStringStream(&ss);
+		}
+	
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+		if (!CreateDirectory(realPath, NULL))
+			return MFF_ERROR_INTERNAL_ERROR;
+#endif
+	}
+
+	// Create file
+	{
+		err = mfmAllocate(folderArchive->allocator, &file, sizeof(mffFolderFile));
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		err = mfmInitObject(&file->base.object);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		file->base.object.destructorFunc = &mffDestroyFile;
+		file->base.archive = archive;
+		file->first = NULL;
+		file->next = NULL;
+		file->parent = parentFile;
+		file->type = MFF_DIRECTORY;
+
+		mfsStringStream ss;
+		err = mfsCreateLocalStringStream(&ss, file->path, sizeof(file->path));
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPrintFormat(&ss, u8"%s", path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfsDestroyLocalStringStream(&ss);
+	}
+
+	// Add new file to parent file
+	if (parentFile == NULL)
+	{
+		if (folderArchive->firstFile == NULL)
+			folderArchive->firstFile = file;
+		else
+		{
+			mffFolderFile* prevFile = folderArchive->firstFile;
+			while (prevFile->next != NULL)
+				prevFile = prevFile->next;
+			prevFile->next = file;
+		}
+	}
+	else
+	{
+		if (parentFile->first == NULL)
+			parentFile->first = file;
+		else
+		{
+			mffFolderFile* prevFile = parentFile->first;
+			while (prevFile->next != NULL)
+				prevFile = prevFile->next;
+			prevFile->next = file;
+		}
+	}
+
+	if (outDir != NULL)
+		*outDir = file;
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mffArchiveCreateDirectory(mffArchive* archive, mffDirectory** outDir, const mfsUTF8CodeUnit* path)
 {
-	// TO DO
+	mffFolderArchive* folderArchive = archive;
+	mfError err;
+
+	err = mftLockMutex(folderArchive->mutex, 0);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mffArchiveCreateDirectoryUnsafe(archive, outDir, path);
+	if (err != MF_ERROR_OKAY)
+	{
+		mftUnlockMutex(folderArchive->mutex);
+		return err;
+	}
+
+	err = mftUnlockMutex(folderArchive->mutex);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffArchiveDeleteDirectoryUnsafe(mffArchive* archive, mffDirectory* dir)
+{
+	mfError err;
+	mffFolderArchive* folderArchive = archive;
+	mffFolderFile* folderFile = dir;
+
+	if (folderFile->type != MFF_DIRECTORY)
+		return MFF_ERROR_NOT_A_DIRECTORY;
+
+	if (folderFile->first != NULL)
+		return MFF_ERROR_MUST_BE_EMPTY;
+
+	// Delete file
+	mfsUTF8CodeUnit realPath[256];
+	{
+		mfsStringStream ss;
+		err = mfsCreateLocalStringStream(&ss, realPath, sizeof(realPath));
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPutString(&ss, folderArchive->path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPutString(&ss, folderFile->path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfsDestroyLocalStringStream(&ss);
+	}
+
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+	if (!RemoveDirectory(realPath))
+		return MFF_ERROR_INTERNAL_ERROR;
+#endif
+
+	// Remove file from tree
+	if (folderFile->parent == NULL)
+	{
+		mffFolderFile* prev = folderArchive->firstFile;
+		if (prev == folderFile)
+			folderArchive->firstFile = folderFile->next;
+		else
+		{
+			while (prev->next != folderFile)
+				prev = prev->next;
+			prev->next = folderFile->next;
+		}
+	}
+	else
+	{
+		mffFolderFile* prev = folderFile->parent->first;
+		if (prev == folderFile)
+			folderFile->parent->first = folderFile->next;
+		else
+		{
+			while (prev->next != folderFile)
+				prev = prev->next;
+			prev->next = folderFile->next;
+		}
+	}
+
+	// Call file destructor
+	folderFile->base.object.destructorFunc(folderFile);
+
 	return MF_ERROR_OKAY;
 }
 
 static mfError mffArchiveDeleteDirectory(mffArchive* archive, mffDirectory* dir)
 {
-	// TO DO
+	mffFolderArchive* folderArchive = archive;
+	mfError err;
+
+	err = mftLockMutex(folderArchive->mutex, 0);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mffArchiveDeleteDirectoryUnsafe(archive, dir);
+	if (err != MF_ERROR_OKAY)
+	{
+		mftUnlockMutex(folderArchive->mutex);
+		return err;
+	}
+
+	err = mftUnlockMutex(folderArchive->mutex);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -227,11 +450,13 @@ static mfError mffArchiveCreateFileUnsafe(mffArchive* archive, mffFile** outFile
 			mfsDestroyLocalStringStream(&ss);
 		}
 
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 		HANDLE f = CreateFile(realPath, 0, 0, NULL, CREATE_NEW, 0, NULL);
 		if (f == INVALID_HANDLE_VALUE)
 			return MFF_ERROR_INTERNAL_ERROR;
 		GetLastError();
 		CloseHandle(f);
+#endif
 	}
 
 	// Create file
@@ -287,6 +512,9 @@ static mfError mffArchiveCreateFileUnsafe(mffArchive* archive, mffFile** outFile
 		}
 	}
 
+	if (outFile != NULL)
+		*outFile = file;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -338,8 +566,10 @@ static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
 		mfsDestroyLocalStringStream(&ss);
 	}
 
+#if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 	if (!DeleteFile(realPath))
 		return MFF_ERROR_INTERNAL_ERROR;
+#endif
 
 	// Remove file from tree
 	if (folderFile->parent == NULL)
@@ -366,6 +596,9 @@ static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
 			prev->next = folderFile->next;
 		}
 	}
+
+	// Call file destructor
+	folderFile->base.object.destructorFunc(folderFile);
 
 	return MF_ERROR_OKAY;
 }
