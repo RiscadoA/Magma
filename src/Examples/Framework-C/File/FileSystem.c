@@ -24,7 +24,7 @@ int main(int argc, const char** argv)
 		err = mfsPutString(&ss, mffMagmaRootDirectory);
 		if (err != MF_ERROR_OKAY)
 			abort();
-		err = mfsPutString(&ss, "/resources");
+		err = mfsPutString(&ss, "/resources/FileSystem-Example");
 		if (err != MF_ERROR_OKAY)
 			abort();
 		mfsDestroyLocalStringStream(&ss);
@@ -40,16 +40,16 @@ int main(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mffCreateFile(NULL, u8"/resources/testFolder/test4/test2/test.txt");
+	err = mffCreateFile(NULL, u8"/FileSystem-Example/testFolder/test4/test2/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	mffFile* file;
-	err = mffGetFile(&file, u8"/resources/testFolder/test4/test2/test.txt");
+	err = mffGetFile(&file, u8"/FileSystem-Example/testFolder/test4/test2/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mffGetFile(&file, u8"/resources/Audio/audio.mni");
+	err = mffDeleteFile(file);
 	if (err != MF_ERROR_OKAY)
 		abort();
 

@@ -313,9 +313,83 @@ static mfError mffArchiveCreateFile(mffArchive* archive, mffFile** outFile, cons
 	return MF_ERROR_OKAY;
 }
 
+static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
+{
+	mfError err;
+	mffFolderArchive* folderArchive = archive;
+	mffFolderFile* folderFile = file;
+
+	if (folderFile->type != MFF_FILE)
+		return MFF_ERROR_NOT_A_FILE;
+
+	// Delete file
+	mfsUTF8CodeUnit realPath[256];
+	{
+		mfsStringStream ss;
+		err = mfsCreateLocalStringStream(&ss, realPath, sizeof(realPath));
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPutString(&ss, folderArchive->path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPutString(&ss, folderFile->path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfsDestroyLocalStringStream(&ss);
+	}
+
+	if (!DeleteFile(realPath))
+		return MFF_ERROR_INTERNAL_ERROR;
+
+	// Remove file from tree
+	if (folderFile->parent == NULL)
+	{
+		mffFolderFile* prev = folderArchive->firstFile;
+		if (prev == folderFile)
+			folderArchive->firstFile = folderFile->next;
+		else
+		{
+			while (prev->next != folderFile)
+				prev = prev->next;
+			prev->next = folderFile->next;
+		}
+	}
+	else
+	{
+		mffFolderFile* prev = folderFile->parent->first;
+		if (prev == folderFile)
+			folderFile->parent->first = folderFile->next;
+		else
+		{
+			while (prev->next != folderFile)
+				prev = prev->next;
+			prev->next = folderFile->next;
+		}
+	}
+
+	return MF_ERROR_OKAY;
+}
+
 static mfError mffArchiveDeleteFile(mffArchive* archive, mffFile* file)
 {
-	// TO DO
+	mffFolderArchive* folderArchive = archive;
+	mfError err;
+
+	err = mftLockMutex(folderArchive->mutex, 0);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mffArchiveDeleteFileUnsafe(archive, file);
+	if (err != MF_ERROR_OKAY)
+	{
+		mftUnlockMutex(folderArchive->mutex);
+		return err;
+	}
+
+	err = mftUnlockMutex(folderArchive->mutex);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
