@@ -21,9 +21,17 @@ int main(int argc, const char** argv)
 	}
 
 	// Create directory
-	File::File dir = File::CreateDirectory(u8"temp/dir");
+	File::File dir = File::CreateDirectory(u8"/temp/dir");
 
-	File::DeleteDirectory(dir);
+	File::File file = File::CreateFile(u8"/temp/dir/test.txt");
+	
+	String::Stream stream = File::OpenFile(file, File::FileMode::Write);
+	stream.PutString(u8"test\n");
+	stream.Release();
+	dir.Release();
+	file.Release();
+
+	//File::DeleteDirectory(dir);
 
 	// Unregister archive
 	File::UnregisterArchive(archive);

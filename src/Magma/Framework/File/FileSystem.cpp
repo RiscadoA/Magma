@@ -35,7 +35,7 @@ Magma::Framework::File::File Magma::Framework::File::CreateDirectory(const mfsUT
 	mfError err;
 	mffDirectory* dir;
 	err = mffCreateDirectory(&dir, path);
-	if (err != MF_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY && err != MFF_ERROR_ALREADY_EXISTS)
 		throw FileSystemError(mfErrorToString(err));
 	return dir;
 }
@@ -44,14 +44,38 @@ void Magma::Framework::File::DeleteDirectory(File & dir)
 {
 	mfError err;
 	mffDirectory* d = (mffDirectory*)dir.GetNoChecks();
-	err = mfmIncObjectRef((mfmObject*)d);
-	if (err != MF_ERROR_OKAY)
-		throw FileSystemError(mfErrorToString(err));
 	dir.Release();
-	err = mfmDecObjectRef((mfmObject*)d);
-	if (err != MF_ERROR_OKAY)
-		throw FileSystemError(mfErrorToString(err));
 	err = mffDeleteDirectory(d);
 	if (err != MF_ERROR_OKAY)
 		throw FileSystemError(mfErrorToString(err));
+}
+
+Magma::Framework::File::File Magma::Framework::File::CreateFile(const mfsUTF8CodeUnit * path)
+{
+	mfError err;
+	mffFile* f;
+	err = mffCreateFile(&f, path);
+	if (err != MF_ERROR_OKAY && err != MFF_ERROR_ALREADY_EXISTS)
+		throw FileSystemError(mfErrorToString(err));
+	return f;
+}
+
+void Magma::Framework::File::DeleteFile(File & file)
+{
+	mfError err;
+	mffFile* f = (mffFile*)file.GetNoChecks();
+	file.Release();
+	err = mffDeleteFile(f);
+	if (err != MF_ERROR_OKAY)
+		throw FileSystemError(mfErrorToString(err));
+}
+
+Magma::Framework::String::Stream Magma::Framework::File::OpenFile(File file, FileMode mode)
+{
+	mfError err;
+	mfsStream* stream;
+	err = mffOpenFile(&stream, (mffFile*)&file.Get(), static_cast<mffEnum>(mode));
+	if (err != MF_ERROR_OKAY)
+		throw FileSystemError(mfErrorToString(err));
+	return stream;
 }

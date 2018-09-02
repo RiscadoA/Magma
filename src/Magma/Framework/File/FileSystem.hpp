@@ -2,6 +2,7 @@
 
 #include "../Memory/Object.hpp"
 #include "../String/UTF8.hpp"
+#include "../String/Stream.hpp"
 
 #include "FileSystem.h"
 #include "Path.h"
@@ -15,10 +16,19 @@ namespace Magma
 			/// <summary>
 			///		Represents a file type.
 			/// </summary>
-			enum class FileType
+			enum class FileType : mffEnum
 			{
 				File		= MFF_FILE,
 				Directory	= MFF_DIRECTORY,
+			};
+
+			/// <summary>
+			///		Represents a file stream mode.
+			/// </summary>
+			enum class FileMode : mffEnum
+			{
+				Write		= MFF_FILE_WRITE,
+				Read		= MFF_FILE_READ,		
 			};
 
 			/// <summary>
@@ -102,7 +112,25 @@ namespace Magma
 			/// <param name="dir">Directory handle</param>
 			void DeleteDirectory(File& dir);
 
+			/// <summary>
+			///		Creates a new file in the file system.
+			/// </summary>
+			/// <param name="path">File path</param>
+			/// <returns>File handle</returns>
+			File CreateFile(const mfsUTF8CodeUnit* path);
 
+			/// <summary>
+			///		Deletes a file in the file system.
+			/// </summary>
+			/// <param name="file">File handle</param>
+			void DeleteFile(File& file);
+
+			/// <summary>
+			///		Opens a file stream.
+			/// </summary>
+			/// <param name="file">File handle</param>
+			/// <returns>File stream handle</returns>
+			String::Stream OpenFile(File file, FileMode mode);
 		}
 	}
 }
