@@ -40,12 +40,12 @@ int main(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mffCreateFile(NULL, u8"/resources/test.txt");
+	err = mffCreateFile(NULL, u8"/resources/testFolder/test4/test2/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	mffFile* file;
-	err = mffGetFile(&file, u8"/resources/test.txt");
+	err = mffGetFile(&file, u8"/resources/testFolder/test4/test2/test.txt");
 	if (err != MF_ERROR_OKAY)
 		abort();
 
