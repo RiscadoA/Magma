@@ -18,6 +18,18 @@ const mfsUTF8CodeUnit * mffErrorToString(mfError err)
 			return u8"[MFF_ERROR_NO_REGISTER_ENTRIES] No register entries available";
 		case MFF_ERROR_TYPE_NOT_REGISTERED:
 			return u8"[MFF_ERROR_TYPE_NOT_REGISTERED] Type not registered";
+		case MFF_ERROR_PATH_TOO_BIG:
+			return u8"[MFF_ERROR_PATH_TOO_BIG] Path too big";
+		case MFF_ERROR_ARCHIVE_NOT_FOUND:
+			return u8"[MFF_ERROR_ARCHIVE_NOT_FOUND] Archive not found";
+		case MFF_ERROR_NOT_A_FILE:
+			return u8"[MFF_ERROR_NOT_A_FILE] Path doesn't point to a file";
+		case MFF_ERROR_NOT_A_DIRECTORY:
+			return u8"[MFF_ERROR_NOT_A_DIRECTORY] Path doesn't point to a directory";
+		case MFF_ERROR_MUST_BE_EMPTY:
+			return u8"[MFF_ERROR_MUST_BE_EMPTY] Directory must be empty";
+		case MFF_ERROR_INVALID_MODE:
+			return u8"[MFF_ERROR_INVALID_MODE] Invalid file open mode";
 		default:
 			return NULL;
 	}
