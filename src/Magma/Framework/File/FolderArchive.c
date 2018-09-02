@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 #include <Windows.h>
@@ -626,15 +627,201 @@ static mfError mffArchiveDeleteFile(mffArchive* archive, mffFile* file)
 	return MF_ERROR_OKAY;
 }
 
+typedef struct
+{
+	mfsStream base;
+	mffFolderArchive* archive;
+	mffFolderFile* file;
+	FILE* handle;
+} mffFolderFileStream;
+
+static void mffArchiveCloseFileUnsafe(mffFolderFileStream* stream)
+{
+	mfError err;
+
+	err = mfmDestroyObject(&stream->base.object);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mfmDecObjectRef(&stream->file->base.object);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	fclose(stream->handle);
+
+	err = mfmDeallocate(stream->archive->allocator, stream);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffFileStreamWrite(void* stream, const mfmU8* memory, mfmU64 memorySize, mfmU64* writtenSize)
+{
+	mffFolderFileStream* folderStream = stream;
+
+	mfmU64 size = fwrite(memory, sizeof(mfmU8), memorySize, folderStream->handle);
+	if (writtenSize != NULL)
+		*writtenSize = size;
+
+	errno_t e = errno;
+	if (e != 0)
+		return MFS_ERROR_INTERNAL;
+
+	return MF_ERROR_OKAY;
+}
+
+
+static mfError mffFileStreamRead(void* stream, mfmU8* memory, mfmU64 memorySize, mfmU64* readSize)
+{
+	mffFolderFileStream* folderStream = stream;
+
+	mfmU64 size = fread(memory, sizeof(mfmU8), memorySize, folderStream->handle);
+	if (readSize != NULL)
+		*readSize = size;
+
+	errno_t e = errno;
+	if (e != 0)
+		return MFS_ERROR_INTERNAL;
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffFileStreamFlush(void* stream)
+{
+	mffFolderFileStream* folderStream = stream;
+	int ret = fflush(folderStream->handle);
+	if (ret == EOF)
+		return MFS_ERROR_EOF;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffFileStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
+{
+	mffFolderFileStream* folderStream = stream;
+
+	if (buffer != NULL)
+	{
+		int ret = setvbuf(folderStream->handle, buffer, _IOFBF, bufferSize);
+		if (ret != 0)
+			return MFS_ERROR_INTERNAL;
+	}
+	else
+	{
+		int ret = setvbuf(folderStream->handle, NULL, _IONBF, 0);
+		if (ret != 0)
+			return MFS_ERROR_INTERNAL;
+	}
+
+	return MF_ERROR_OKAY;
+}
+
 static void mffArchiveCloseFile(void* stream)
 {
-	// TO DO
+	mffFolderFileStream* folderStream = stream;
+	mffFolderArchive* archive = folderStream->archive;
+	mfError err;
+
+	err = mftLockMutex(archive->mutex, 0);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	mffArchiveCloseFileUnsafe(folderStream);
+
+	err = mftUnlockMutex(archive->mutex);
+	if (err != MF_ERROR_OKAY)
+		abort();
+}
+
+static mfError mffArchiveOpenFileUnsafe(mffArchive* archive, mfsStream** outStream, mffFile* file, mffEnum mode)
+{
+	mfError err;
+
+	mffFolderArchive* folderArchive = archive;
+	mffFolderFile* folderFile = file;
+	mffFolderFileStream* stream;
+
+	mfsUTF8CodeUnit realPath[256];
+	{
+		mfsStringStream ss;
+		err = mfsCreateLocalStringStream(&ss, realPath, sizeof(realPath));
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPutString(&ss, folderArchive->path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfsPutString(&ss, folderFile->path);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfsDestroyLocalStringStream(&ss);
+	}
+
+
+	FILE* handle = NULL;
+	if (mode == MFF_FILE_READ)
+	{
+		errno_t e = fopen_s(&handle, realPath, u8"rb");
+		if (e != 0)
+			return MFF_ERROR_INTERNAL_ERROR;
+	}
+	else if (mode == MFF_FILE_WRITE)
+	{
+		errno_t e = fopen_s(&handle, realPath, u8"wb");
+		if (e != 0)
+			return MFF_ERROR_INTERNAL_ERROR;
+	}
+	else
+		return MFF_ERROR_INVALID_MODE;
+
+	err = mfmAllocate(folderArchive->allocator, &stream, sizeof(mffFolderFileStream));
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mfmInitObject(&stream->base.object);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	stream->base.object.destructorFunc = &mffArchiveCloseFile;
+
+	err = mfmIncObjectRef(file);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	stream->archive = archive;
+	stream->file = file;
+	stream->handle = handle;
+
+	stream->base.read = &mffFileStreamRead;
+	stream->base.write = &mffFileStreamWrite;
+	stream->base.flush = &mffFileStreamFlush;
+	stream->base.setBuffer = &mffFileStreamSetBuffer;
+	stream->base.buffer = NULL;
+	stream->base.bufferSize = 0;
+
+	*outStream = stream;
+
 	return MF_ERROR_OKAY;
 }
 
 static mfError mffArchiveOpenFile(mffArchive* archive, mfsStream** outStream, mffFile* file, mffEnum mode)
 {
-	// TO DO
+	mffFolderArchive* folderArchive = archive;
+	mfError err;
+
+	err = mftLockMutex(folderArchive->mutex, 0);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	err = mffArchiveOpenFileUnsafe(archive, outStream, file, mode);
+	if (err != MF_ERROR_OKAY)
+	{
+		mftUnlockMutex(folderArchive->mutex);
+		return err;
+	}
+
+	err = mftUnlockMutex(folderArchive->mutex);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 

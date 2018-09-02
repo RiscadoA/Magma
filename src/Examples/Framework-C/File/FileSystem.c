@@ -54,6 +54,19 @@ int main(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
+	mfsStream* stream;
+	err = mffOpenFile(&stream, file, MFF_FILE_WRITE);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mfsPutString(stream, u8"test\n");
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mffCloseFile(stream);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
 	err = mffDeleteFile(file);
 	if (err != MF_ERROR_OKAY)
 		abort();

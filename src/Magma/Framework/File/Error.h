@@ -19,6 +19,7 @@ extern "C"
 #define MFF_ERROR_NOT_A_FILE			0x070A
 #define MFF_ERROR_NOT_A_DIRECTORY		0x070B
 #define MFF_ERROR_MUST_BE_EMPTY			0x070C
+#define MFF_ERROR_INVALID_MODE			0x070D
 
 #ifdef __cplusplus
 }
