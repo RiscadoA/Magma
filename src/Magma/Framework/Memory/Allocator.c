@@ -38,3 +38,31 @@ mfError mfmDeallocate(void * allocator, void * memory)
 		return err;
 	}
 }
+
+mfError mfmAllocateAligned(void * allocator, void ** memory, mfmU64 size, mfmU64 alignment)
+{
+	if (memory == NULL || size == 0 || alignment == 0)
+		return MFM_ERROR_INVALID_ARGUMENTS;
+
+	mfmU64 realSize = size + alignment;
+	void* realMemory;
+
+	mfError err = mfmAllocate(allocator, &realMemory, realSize);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	mfmU64 remainder = ((mfmU64)realMemory) % alignment;
+	mfmU64 offset = alignment - remainder;
+
+	*memory = (mfmU8*)realMemory + offset;
+	((mfmU8*)*memory)[-1] = offset;
+
+	return MF_ERROR_OKAY;
+}
+
+mfError mfmDeallocateAligned(void * allocator, void * memory)
+{
+	mfmU64 offset = ((mfmU8*)memory)[-1];
+	void* realMemory = (mfmU8*)memory - offset;
+	return mfmDeallocate(allocator, realMemory);
+}
