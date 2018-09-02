@@ -208,35 +208,6 @@ mfError mfsSetBuffer(mfsStream * stream, mfmU8 * buffer, mfmU64 bufferSize)
 		return stream->setBuffer(stream, buffer, bufferSize);
 }
 
-mfError mfsOpenFile(mfsStream ** stream, mfmU32 mode, const mfsUTF8CodeUnit * path)
-{
-	if (stream == NULL || path == NULL)
-		return MFS_ERROR_INVALID_ARGUMENTS;
-
-	FILE* file;
-	errno_t err;
-	if (mode == MFS_FILE_READ)
-		err = fopen_s(&file, path, "rb");
-	else if (mode == MFS_FILE_WRITE)
-		err = fopen_s(&file, path, "wb");
-	else
-		return MFS_ERROR_INVALID_ARGUMENTS;
-
-	if (err != 0)
-		return MFS_ERROR_INTERNAL;
-
-	*stream = mfsCreateFileStream(file, NULL, 0);
-	(*stream)->object.destructorFunc = &mfsCloseFile;
-
-	return MF_ERROR_OKAY;
-}
-
-void mfsCloseFile(mfsStream * stream)
-{
-	fclose(((mfsFileStream*)stream)->file);
-	mfsDestroyFileStream(stream);
-}
-
 mfError mfsGetByte(mfsStream * stream, mfmU8 * byte)
 {
 	if (stream == NULL)
@@ -292,7 +263,7 @@ mfError mfsPutString(mfsStream * stream, const mfsUTF8CodeUnit * str)
 	return MF_ERROR_OKAY;
 }
 
-mfError mfsPrintFormatUTF8(mfsStream * stream, const mfsUTF8CodeUnit * format, ...)
+mfError mfsPrintFormat(mfsStream * stream, const mfsUTF8CodeUnit * format, ...)
 {
 	va_list args;
 	va_start(args, format);

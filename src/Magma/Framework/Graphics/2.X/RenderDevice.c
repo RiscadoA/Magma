@@ -8,7 +8,7 @@ struct
 	mfsUTF8CodeUnit type[16];
 } mfgRenderDeviceCreatorRegisterEntries[MFG_MAX_RENDER_DEVICE_CREATOR_REGISTER_ENTRIES];
 
-mfError mfgV2XInitRenderDevices()
+mfError mfgV2XInitRenderDevices(void)
 {
 	// Init all entries
 
@@ -21,7 +21,7 @@ mfError mfgV2XInitRenderDevices()
 	return MF_ERROR_OKAY;
 }
 
-void mfgV2XTerminateRenderDevices()
+void mfgV2XTerminateRenderDevices(void)
 {
 	// Reset all entries
 

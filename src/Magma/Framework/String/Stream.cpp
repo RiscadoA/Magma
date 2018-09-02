@@ -131,12 +131,3 @@ mfmU64 Magma::Framework::String::Stream::Read(void * data, mfmU64 size)
 		return readSize;
 	throw StreamError(ErrorToString(err));
 }
-
-Magma::Framework::String::Stream Magma::Framework::String::OpenFile(const mfsUTF8CodeUnit * path, FileMode mode)
-{
-	mfsStream* stream;
-	mfError err = mfsOpenFile(&stream, static_cast<mfmU32>(mode), path);
-	if (err != MF_ERROR_OKAY)
-		throw StreamError(ErrorToString(err));
-	return stream;
-}

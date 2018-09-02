@@ -138,7 +138,7 @@ mfiEnum mfiGetGLWindowMode(void* window)
 
 void mfiGLFWErrorCallback(int err, const char* errMsg)
 {
-	if (mfsPrintFormatUTF8(mfsErrStream, u8"mfiGLWindow GLFW error caught : \n%s\n", errMsg) != MF_ERROR_OKAY)
+	if (mfsPrintFormat(mfsErrStream, u8"mfiGLWindow GLFW error caught : \n%s\n", errMsg) != MF_ERROR_OKAY)
 		abort();
 }
 

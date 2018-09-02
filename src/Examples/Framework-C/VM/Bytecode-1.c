@@ -13,7 +13,7 @@ mfError PrintU8(mfvVirtualMachine* vm)
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	err = mfsPrintFormatUTF8(mfsOutStream, u8"(PrintU8): %d\n", val);
+	err = mfsPrintFormat(mfsOutStream, u8"(PrintU8): %d\n", val);
 	return err;
 }
 

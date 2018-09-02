@@ -3,7 +3,7 @@
 #include "Importer.hpp"
 #include "Exception.hpp"
 
-#include <Magma/Framework/Files/FileSystem.hpp>
+#include <Magma/Framework/File/FileSystem.hpp>
 
 #include <sstream>
 #include <string>
@@ -73,7 +73,7 @@ namespace Magma
 			/// <summary>
 			///		Gets the manager's file system
 			/// </summary>
-			inline Framework::Files::FileSystem* GetFileSystem() { return m_fileSystem; }
+			inline Framework::File::FileSystem* GetFileSystem() { return m_fileSystem; }
 
 		private:
 			static Manager* s_manager;
@@ -81,14 +81,14 @@ namespace Magma
 			Manager(const ManagerSettings& settings);
 			~Manager();
 
-			void LoadMetaData(const Framework::Files::Path& directory = "/");
+			void LoadMetaData(const Framework::File::Path& directory = "/");
 			void CreateResources(const std::string& metaData);
 			void Import(Resource* resource);
 			void Destroy(Resource* resource);
 			void Update();
 
 			ManagerSettings m_settings;
-			Framework::Files::FileSystem* m_fileSystem;
+			Framework::File::FileSystem* m_fileSystem;
 
 			std::vector<Importer*> m_importers;
 			std::vector<Resource*> m_resources;

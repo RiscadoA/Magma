@@ -8,32 +8,9 @@ int main(int argc, const char** argv)
 	if (mfInit(argc, argv) != MF_ERROR_OKAY)
 		abort();
 
-	mfsUTF8CodeUnit data[] =
-	{
-		't',
-		'e',
-		's',
-		't',
-	};
-
 	mfError err;
 
-	mfsStream* file;
-	err = mfsOpenFile(&file, MFS_FILE_WRITE, u8"test.txt");
-	if (err != MF_ERROR_OKAY)
-		abort();
-
-	err = mfsWrite(file, data, sizeof(data), NULL);
-	if (err != MF_ERROR_OKAY)
-		abort();
-
-	err = mfsFlush(file);
-	if (err != MF_ERROR_OKAY)
-		abort();
-
-	mfsCloseFile(file);
-
-	err = mfsPrintFormatUTF8(mfsOutStream, u8"Hello World!\n%d + %d = %f", 2, 3, 2.0f + 3.0f);
+	err = mfsPrintFormat(mfsOutStream, u8"Hello World!\n%d + %d = %f", 2, 3, 2.0f + 3.0f);
 	if (err != MF_ERROR_OKAY)
 		abort();
 

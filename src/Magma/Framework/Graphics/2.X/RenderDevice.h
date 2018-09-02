@@ -1591,12 +1591,12 @@ extern "C"
 	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
-	mfError mfgV2XInitRenderDevices();
+	mfError mfgV2XInitRenderDevices(void);
 
 	/// <summary>
 	///		Terminates the render devices library.
 	/// </summary>
-	void mfgV2XTerminateRenderDevices();
+	void mfgV2XTerminateRenderDevices(void);
 
 	/// <summary>
 	///		Registers a new render device creator.

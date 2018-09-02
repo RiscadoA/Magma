@@ -162,7 +162,7 @@ void Magma::Resources::AudioStreamImporter::Import(Resource * resource)
 	{
 		// Read WAV file
 		auto fs = this->GetManager()->GetFileSystem();
-		data->m_file = fs->OpenFile(Framework::Files::FileMode::Read, path);
+		data->m_file = fs->OpenFile(Framework::File::FileMode::Read, path);
 
 		// Get header
 		char* memData = new char[256];

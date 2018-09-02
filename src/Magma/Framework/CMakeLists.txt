@@ -44,13 +44,13 @@ else()
 	message(STATUS "Magma-Framework Debug deactivated")
 endif()
 
-option (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM "Will the framework enable the use of standard library for the file system class?" ON)
-if (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM)
-	set (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM 1)
-	message(STATUS "Magma-Framework with STD FileSystem enabled")
+option (MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM "Will the framework enable the use of Windows API for the file system functions?" ON)
+if (MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
+	set (MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM 1)
+	message(STATUS "Magma-Framework with Windows FileSystem enabled")
 else()
-	set (MAGMA_FRAMEWORK_USE_STD_FILESYSTEM 0)
-	message(STATUS "Magma-Framework with STD FileSystem disabled")
+	set (MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM 0)
+	message(STATUS "Magma-Framework with Windows FileSystem disabled")
 endif()
 
 option (MAGMA_FRAMEWORK_USE_WINDOWS_THREADS "Will the framework use the Windows API for multi-threading support?" ON)
@@ -61,6 +61,8 @@ else()
 	set (MAGMA_FRAMEWORK_USE_WINDOWS_THREADS 0)
 	message(STATUS "Magma-Framework with windows threads disabled")
 endif()
+
+set (MAGMA_ROOT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 configure_file(Config.h.in Config.h)
 

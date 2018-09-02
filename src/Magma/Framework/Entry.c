@@ -2,6 +2,7 @@
 #include "Config.h"
 
 #include "String/Stream.h"
+#include "File/FileSystem.h"
 #include "Input/Window.h"
 #include "Input/OGLWindow.h"
 #include "Input/D3DWindow.h"
@@ -20,6 +21,11 @@ mfError mfInit(int argc, const char** argv)
 
 	// Init stream library
 	err = mfsInitStream();
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Init file system library
+	err = mffInitFileSystem();
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -67,6 +73,11 @@ void mfTerminate()
 
 	// Terminate windows library
 	mfiTerminateWindows();
+
+	// Terminate file system library
+	err = mffTerminateFileSystem();
+	if (err != MF_ERROR_OKAY)
+		abort();
 
 	// Terminate stream library
 	err = mfsTerminateStream();
