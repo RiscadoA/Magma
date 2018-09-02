@@ -10,7 +10,7 @@ const mfsUTF8CodeUnit * mffErrorToString(mfError err)
 			return u8"[MFF_ERROR_INVALID_ARGUMENTS] Invalid arguments";
 		case MFF_ERROR_FILE_NOT_FOUND:
 			return u8"[MFF_ERROR_FILE_NOT_FOUND] File not found";
-		case MFF_ERROR_INTERNAL_ERROR:
+		case MFF_ERROR_INTERNAL:
 			return u8"[MFF_ERROR_INTERNAL_ERROR] Internal error";
 		case MFF_ERROR_NOT_SUPPORTED:
 			return u8"[MFF_ERROR_NOT_SUPPORTED] Unsupported feature";
@@ -30,6 +30,8 @@ const mfsUTF8CodeUnit * mffErrorToString(mfError err)
 			return u8"[MFF_ERROR_MUST_BE_EMPTY] Directory must be empty";
 		case MFF_ERROR_INVALID_MODE:
 			return u8"[MFF_ERROR_INVALID_MODE] Invalid file open mode";
+		case MFF_ERROR_ALREADY_EXISTS:
+			return u8"[MFF_ERROR_ALREADY_EXISTS] File/directory already exists";
 		default:
 			return NULL;
 	}

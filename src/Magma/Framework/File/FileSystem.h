@@ -60,34 +60,116 @@ extern "C"
 		mffArchiveOpenFileFunc openFile;
 	};
 
+	/// <summary>
+	///		Inits the file system library.
+	/// </summary>
+	/// <returns>Error code</returns>
 	mfError mffInitFileSystem(void);
 
+	/// <summary>
+	///		Terminates the file system library.
+	/// </summary>
+	/// <returns>Error code</returns>
 	mfError mffTerminateFileSystem(void);
 
+	/// <summary>
+	///		Registers an archive in the file system.
+	/// </summary>
+	/// <param name="archive">Archive to register</param>
+	/// <param name="name">Archive name</param>
+	/// <returns>Error code</returns>
 	mfError mffRegisterArchive(mffArchive* archive, const mfsUTF8CodeUnit* name);
 
+	/// <summary>
+	///		Unregisters an archive from the file system.
+	/// </summary>
+	/// <param name="archive">Archive to unregister</param>
+	/// <returns>Error code</returns>
 	mfError mffUnregisterArchive(mffArchive* archive);
 
+	/// <summary>
+	///		Gets a file from the file system.
+	/// </summary>
+	/// <param name="outFile">Out file handle</param>
+	/// <param name="path">File path</param>
+	/// <returns>Error code</returns>
 	mfError mffGetFile(mffFile** outFile, const mfsUTF8CodeUnit* path);
 	
+	/// <summary>
+	///		Gets the type of a file handle.
+	/// </summary>
+	/// <param name="file">File handle</param>
+	/// <param name="outType">Out file type</param>
+	/// <returns>Error code</returns>
 	mfError mffGetFileType(mffFile* file, mffEnum* outType);
 
+	/// <summary>
+	///		Gets the first file in a directory.
+	/// </summary>
+	/// <param name="outFile">Out file handle</param>
+	/// <param name="directory">Directory handle</param>
+	/// <returns>Error code</returns>
 	mfError mffGetFirstFile(mffFile** outFile, mffDirectory* directory);
 
+	/// <summary>
+	///		Gets the next file in a directory.
+	/// </summary>
+	/// <param name="outFile">Out file handle</param>
+	/// <param name="file">Previous file in directory</param>
+	/// <returns>Error code</returns>
 	mfError mffGetNextFile(mffFile** outFile, mffFile* file);
 
+	/// <summary>
+	///		Gets the parent directory of a file handle.
+	/// </summary>
+	/// <param name="outParent">Out parent directory handle</param>
+	/// <param name="file">File handle</param> 
+	/// <returns>Error code</returns>
 	mfError mffGetParent(mffDirectory** outParent, mffFile* file);
 
+	/// <summary>
+	///		Creates a new directory.
+	/// </summary>
+	/// <param name="outDir">Out directory handle</param>
+	/// <param name="path">Directory path</param>
+	/// <returns>Error code</returns>
 	mfError mffCreateDirectory(mffDirectory** outDir, const mfsUTF8CodeUnit* path);
 
+	/// <summary>
+	///		Deletes a directory (must be emptied first).
+	/// </summary>
+	/// <param name="dir">Directory handle</param>
+	/// <returns>Error code</returns>
 	mfError mffDeleteDirectory(mffDirectory* dir);
 
+	/// <summary>
+	///		Creates a new file.
+	/// </summary>
+	/// <param name="outFile">Out file handle</param>
+	/// <param name="path">File path</param>
+	/// <returns>Error code</returns>
 	mfError mffCreateFile(mffFile** outFile, const mfsUTF8CodeUnit* path);
 
+	/// <summary>
+	///		Deletes a file.
+	/// </summary>
+	/// <param name="file">File handle</param>
+	/// <returns>Error code</returns>
 	mfError mffDeleteFile(mffFile* file);
 
+	/// <summary>
+	///		Opens a file stream.
+	/// </summary>
+	/// <param name="outStream">Out file stream handle</param>
+	/// <param name="file">File handle</param>
+	/// <param name="mode">Open mode (MFF_FILE_WRITE or MFF_FILE_READ)</param>
 	mfError mffOpenFile(mfsStream** outStream, mffFile* file, mffEnum mode);
 
+	/// <summary>
+	///		Closes a file stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <returns>Error code</returns>
 	mfError mffCloseFile(mfsStream* stream);
 
 #ifdef __cplusplus

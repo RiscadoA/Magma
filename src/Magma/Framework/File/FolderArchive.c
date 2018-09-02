@@ -162,6 +162,12 @@ static mfError mffArchiveCreateDirectoryUnsafe(mffArchive* archive, mffDirectory
 	mfError err;
 	mffFolderArchive* folderArchive = archive;
 
+	err = mffArchiveGetFile(archive, outDir, path);
+	if (err == MF_ERROR_OKAY)
+		return MFF_ERROR_ALREADY_EXISTS;
+	else if (err != MFF_ERROR_FILE_NOT_FOUND)
+		return err;
+
 	// Get parent path
 	// Example: /test.txt -> / ; /Test/test.txt -> /Test/
 
@@ -218,7 +224,7 @@ static mfError mffArchiveCreateDirectoryUnsafe(mffArchive* archive, mffDirectory
 	
 #if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 		if (!CreateDirectory(realPath, NULL))
-			return MFF_ERROR_INTERNAL_ERROR;
+			return MFF_ERROR_INTERNAL;
 #endif
 	}
 
@@ -229,6 +235,10 @@ static mfError mffArchiveCreateDirectoryUnsafe(mffArchive* archive, mffDirectory
 			return err;
 
 		err = mfmInitObject(&file->base.object);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		err = mfmIncObjectRef(&file->base.object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 
@@ -316,6 +326,17 @@ static mfError mffArchiveDeleteDirectoryUnsafe(mffArchive* archive, mffDirectory
 	if (folderFile->first != NULL)
 		return MFF_ERROR_MUST_BE_EMPTY;
 
+	{
+		mfmI32 refCount;
+		mfmGetObjectRefCount(&dir->object, &refCount);
+
+		if (refCount != 1)return MFM_ERROR_STILL_HAS_REFERENCES;
+
+		err = mfmDecObjectRef(&dir->object);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
 	// Delete file
 	mfsUTF8CodeUnit realPath[256];
 	{
@@ -334,7 +355,7 @@ static mfError mffArchiveDeleteDirectoryUnsafe(mffArchive* archive, mffDirectory
 
 #if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 	if (!RemoveDirectory(realPath))
-		return MFF_ERROR_INTERNAL_ERROR;
+		return MFF_ERROR_INTERNAL;
 #endif
 
 	// Remove file from tree
@@ -397,6 +418,12 @@ static mfError mffArchiveCreateFileUnsafe(mffArchive* archive, mffFile** outFile
 	mfError err;
 	mffFolderArchive* folderArchive = archive;
 
+	err = mffArchiveGetFile(archive, outFile, path);
+	if (err == MF_ERROR_OKAY)
+		return MFF_ERROR_ALREADY_EXISTS;
+	else if (err != MFF_ERROR_FILE_NOT_FOUND)
+		return err;
+
 	// Get parent path
 	// Example: /test.txt -> / ; /Test/test.txt -> /Test/
 
@@ -454,7 +481,7 @@ static mfError mffArchiveCreateFileUnsafe(mffArchive* archive, mffFile** outFile
 #if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 		HANDLE f = CreateFile(realPath, 0, 0, NULL, CREATE_NEW, 0, NULL);
 		if (f == INVALID_HANDLE_VALUE)
-			return MFF_ERROR_INTERNAL_ERROR;
+			return MFF_ERROR_INTERNAL;
 		GetLastError();
 		CloseHandle(f);
 #endif
@@ -467,6 +494,10 @@ static mfError mffArchiveCreateFileUnsafe(mffArchive* archive, mffFile** outFile
 			return err;
 
 		err = mfmInitObject(&file->base.object);
+		if (err != MF_ERROR_OKAY)
+			return err;
+
+		err = mfmIncObjectRef(&file->base.object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 
@@ -551,6 +582,17 @@ static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
 	if (folderFile->type != MFF_FILE)
 		return MFF_ERROR_NOT_A_FILE;
 
+	{
+		mfmI32 refCount;
+		mfmGetObjectRefCount(&file->object, &refCount);
+
+		if (refCount != 1)return MFM_ERROR_STILL_HAS_REFERENCES;
+
+		err = mfmDecObjectRef(&file->object);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
 	// Delete file
 	mfsUTF8CodeUnit realPath[256];
 	{
@@ -569,7 +611,7 @@ static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
 
 #if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 	if (!DeleteFile(realPath))
-		return MFF_ERROR_INTERNAL_ERROR;
+		return MFF_ERROR_INTERNAL;
 #endif
 
 	// Remove file from tree
@@ -762,13 +804,13 @@ static mfError mffArchiveOpenFileUnsafe(mffArchive* archive, mfsStream** outStre
 	{
 		errno_t e = fopen_s(&handle, realPath, u8"rb");
 		if (e != 0)
-			return MFF_ERROR_INTERNAL_ERROR;
+			return MFF_ERROR_INTERNAL;
 	}
 	else if (mode == MFF_FILE_WRITE)
 	{
 		errno_t e = fopen_s(&handle, realPath, u8"wb");
 		if (e != 0)
-			return MFF_ERROR_INTERNAL_ERROR;
+			return MFF_ERROR_INTERNAL;
 	}
 	else
 		return MFF_ERROR_INVALID_MODE;
@@ -872,6 +914,10 @@ static mfError mffFillWindowsFiles(mffFolderArchive * archive, void* allocator, 
 				if (err != MF_ERROR_OKAY)
 					return err;
 
+				err = mfmIncObjectRef(&file->base.object);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
 				file->base.object.destructorFunc = &mffDestroyFile;
 				file->base.archive = archive;
 				file->first = NULL;
@@ -917,6 +963,10 @@ static mfError mffFillWindowsFiles(mffFolderArchive * archive, void* allocator, 
 					return err;
 
 				err = mfmInitObject(&file->base.object);
+				if (err != MF_ERROR_OKAY)
+					return err;
+
+				err = mfmIncObjectRef(&file->base.object);
 				if (err != MF_ERROR_OKAY)
 					return err;
 

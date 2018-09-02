@@ -15,18 +15,15 @@
 	/audio/audio.wav
 */
 
-const mfsUTF8CodeUnit* mffMagmaRootDirectory;
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+	extern const mfsUTF8CodeUnit* mffMagmaRootDirectory;
+
 #define MFF_FILE_NAME_MAX_SIZE						16
 #define MFF_PATH_MAX_SIZE							256
-
-#define MFF_FILE		0x01
-#define MFF_ARCHIVE		0x02
 
 	typedef mfmU32 mffEnum;
 
@@ -35,8 +32,6 @@ extern "C"
 	const mfsUTF8CodeUnit * mffGetPathName(const mfsUTF8CodeUnit* path);
 
 	const mfsUTF8CodeUnit * mffGetPathExtension(const mfsUTF8CodeUnit* path);
-	
-	mffEnum mffGetPathType(const mfsUTF8CodeUnit* path);
 
 #ifdef __cplusplus
 }

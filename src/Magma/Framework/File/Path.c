@@ -61,17 +61,3 @@ const mfsUTF8CodeUnit * mffGetPathExtension(const mfsUTF8CodeUnit * path)
 
 	return extStart;
 }
-
-mffEnum mffGetPathType(const mfsUTF8CodeUnit * path)
-{
-	const mfsUTF8CodeUnit* it = path;
-
-	while (*it != '\0')
-	{
-		if (*it == '/' && *(it + 1) == '\0')
-			return MFF_ARCHIVE;
-		++it;
-	}
-
-	return MFF_FILE;
-}
