@@ -125,8 +125,7 @@ namespace Magma
 				/// <param name="callback">New callback (can be set to NULL)</param>
 				void SetOnKeyDownCallback(mfiOnKeyDownCallback callback);
 			};
-		
-
+			
 			/// <summary>
 			///		Creates a new window.
 			/// </summary>
