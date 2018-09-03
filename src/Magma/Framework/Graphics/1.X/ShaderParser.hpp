@@ -9,7 +9,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace Graphics
+		namespace Graphics::V1X
 		{
 			namespace Version_1_X
 			{

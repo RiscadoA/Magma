@@ -5,7 +5,9 @@
 
 #include "Keyboard.h"
 #include "Mouse.h"
-#include "../Entry.h"
+#include "Error.h"
+
+#include "../String/UTF8.h"
 
 /*
 	Abstract C window type.
@@ -19,14 +21,13 @@ extern "C"
 #define MFI_WINDOWED		0x01
 #define MFI_FULLSCREEN		0x02
 
-#define MFI_D3DWINDOW		0x03
-#define MFI_OGLWINDOW		0x04
+#define MFI_MAX_WINDOW_CREATOR_REGISTER_ENTRIES 16
 
-	typedef mfmU32 mfiWindowMode;
+	typedef mfmU32 mfiEnum;
 
 	typedef mfmU32(*mfiGetWindowWidthFunc)(void*);
 	typedef mfmU32(*mfiGetWindowHeightFunc)(void*);
-	typedef mfiWindowMode(*mfiGetWindowModeFunc)(void*);
+	typedef mfiEnum(*mfiGetWindowModeFunc)(void*);
 
 	typedef void(*mfiWindowPollEventsFunc)(void*);
 	typedef void(*mfiWindowWaitForEventsFunc)(void*);
@@ -45,7 +46,7 @@ extern "C"
 	{
 		mfmObject object;
 
-		mfmU32 type;
+		const mfsUTF8CodeUnit* type;
 
 		// Reserved for the user to use
 		mfmU64 userAttribute;
@@ -70,6 +71,54 @@ extern "C"
 		mfiOnMouseUpCallback onMouseUp;
 		mfiOnMouseDownCallback onMouseDown;
 	} mfiWindow;
+
+	typedef mfError(*mfiWindowCreatorFunction)(mfiWindow** window, mfmU32 width, mfmU32 height, mfiEnum mode, const mfsUTF8CodeUnit* title);
+
+	/// <summary>
+	///		Inits the windows library.
+	/// </summary>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns an error code.
+	/// </returns>
+	mfError mfiInitWindows();
+
+	/// <summary>
+	///		Terminates the windows library.
+	/// </summary>
+	void mfiTerminateWindows();
+
+	/// <summary>
+	///		Registers a new window creator.
+	/// </summary>
+	/// <param name="type">Window type name (with a maximum size of 16 bytes)</param>
+	/// <param name="func">Window creator function</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFI_ERROR_NO_REGISTER_ENTRIES if there are no more creator slots in the register.
+	/// </returns>
+	mfError mfiRegisterWindowCreator(const mfsUTF8CodeUnit* type, mfiWindowCreatorFunction func);
+
+	/// <summary>
+	///		Creates a new window.
+	/// </summary>
+	/// <param name="type">Window type name</param>
+	/// <param name="width">Window width</param>
+	/// <param name="height">Window height</param>
+	/// <param name="mode">Window mode</param>
+	/// <param name="title">Window title</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFI_ERROR_TYPE_NOT_REGISTERED if there isn't a creator with the type registered.
+	///		Otherwise returns a window creation error code.
+	/// </returns>
+	mfError mfiCreateWindow(const mfsUTF8CodeUnit* type, mfiWindow** window, mfmU32 width, mfmU32 height, mfiEnum mode, const mfsUTF8CodeUnit* title);
+
+	/// <summary>
+	///		Destroys a window.
+	/// </summary>
+	/// <param name="window">Window handle</param>
+	void mfiDestroyWindow(void* window);
 
 #ifdef __cplusplus
 }

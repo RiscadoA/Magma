@@ -4,7 +4,7 @@ const mfsUTF8CodeUnit * Magma::Framework::Memory::ErrorToString(mfError err)
 {
 	switch (err)
 	{
-		case MFM_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			return u8"No error";
 		case MFM_ERROR_ALLOCATION_FAILED:
 			return u8"Allocation failed";

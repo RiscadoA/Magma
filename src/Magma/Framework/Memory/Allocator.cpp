@@ -7,7 +7,7 @@ void * Magma::Framework::Memory::Allocator::Allocate(mfmU64 size)
 {
 	void* mem;
 	mfError err = mfmAllocate(this->GetNoChecks(), &mem, size);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		throw AllocatorError(ErrorToString(err));
 	return mem;
 }
@@ -15,6 +15,6 @@ void * Magma::Framework::Memory::Allocator::Allocate(mfmU64 size)
 void Magma::Framework::Memory::Allocator::Deallocate(void * memory)
 {
 	mfError err = mfmDeallocate(this->GetNoChecks(), memory);
-	if (err != MFM_ERROR_OKAY)
+	if (err != MF_ERROR_OKAY)
 		throw AllocatorError(ErrorToString(err));
 }

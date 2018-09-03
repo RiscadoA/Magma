@@ -1,7 +1,0 @@
-OPSCOPE, # scope
-OPSCOPE, # expression
-VARIN0, db8,
-VAROUT, db1,
-ASSIGN,
-CLSCOPE, # expression
-CLSCOPE, # scope

@@ -13,7 +13,7 @@ Magma::Framework::Memory::PoolAllocator::PoolAllocator(mfmU64 slotSize, mfmU64 s
 	auto err = ::mfmCreatePoolAllocator(&m_pool, &desc);
 	switch (err)
 	{
-		case MFM_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFM_ERROR_ALLOCATION_FAILED:
 		{
@@ -51,7 +51,7 @@ void * Magma::Framework::Memory::PoolAllocator::Allocate(mfmU64 size)
 	auto err = ::mfmPoolAllocate(m_pool, &memory, size);
 	switch (err)
 	{
-		case MFM_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFM_ERROR_ALLOCATOR_OVERFLOW:
 		{
@@ -93,7 +93,7 @@ void Magma::Framework::Memory::PoolAllocator::Deallocate(void * ptr)
 	auto err = ::mfmPoolDeallocate(m_pool, ptr);
 	switch (err)
 	{
-		case MFM_ERROR_OKAY:
+		case MF_ERROR_OKAY:
 			break;
 		case MFM_ERROR_OUT_OF_BOUNDS:
 		{

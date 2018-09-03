@@ -6,9 +6,10 @@
 
 const int MinorVersion = 2;
 
-using namespace Magma::Framework;
 using namespace Magma::Framework::Graphics;
-using namespace Magma::Framework::Graphics::Version_1_X;
+using namespace Magma::Framework;
+using namespace Magma::Framework::Graphics::V1X;
+using namespace Magma::Framework::Graphics::V1X::Version_1_X;
 
 std::string ShaderVariableTypeToBC(ShaderVariableType type)
 {
@@ -784,7 +785,7 @@ void GenerateMD(std::string& outMD, ShaderCompilerData& data)
 	outMD = ss.str();
 }
 
-void Magma::Framework::Graphics::Version_1_X::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
+void Magma::Framework::Graphics::V1X::Version_1_X::ShaderGenerator::Run(const ShaderSTNode * in, std::string& outBC, std::string& outMD, ShaderCompilerData& data)
 {
 	if (data.minorVersion > MinorVersion)
 	{

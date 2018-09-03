@@ -24,7 +24,7 @@ mfmU64 Magma::Framework::String::Stream::Write(const void * data, mfmU64 size)
 {
 	mfmU64 writtenSize = 0;
 	mfError err = mfsWrite(reinterpret_cast<mfsStream*>(&this->Get()), static_cast<const mfmU8*>(data), size, &writtenSize);
-	if (err == MFS_ERROR_OKAY || err == MFS_ERROR_FAILED_TO_WRITE_ALL)
+	if (err == MF_ERROR_OKAY || err == MFS_ERROR_FAILED_TO_WRITE_ALL)
 		return writtenSize;
 	throw StreamError(ErrorToString(err));
 }
@@ -44,7 +44,7 @@ mfmU64 Magma::Framework::String::Stream::ReadUntil(mfsUTF8CodeUnit * data, mfmU6
 		return 1;
 	}
 
-	mfError err = MFS_ERROR_OKAY;
+	mfError err = MF_ERROR_OKAY;
 
 	mfmU64 size = 0;
 	mfmU64 terminatorIndex = 0;
@@ -55,7 +55,7 @@ mfmU64 Magma::Framework::String::Stream::ReadUntil(mfsUTF8CodeUnit * data, mfmU6
 
 		mfsUTF8CodeUnit chr;
 		err = mfsGetByte(reinterpret_cast<mfsStream*>(&this->Get()), reinterpret_cast<mfmU8*>(&chr));
-		if (err == MFS_ERROR_OKAY)
+		if (err == MF_ERROR_OKAY)
 		{		
 			if (chr == terminator[terminatorIndex])
 				++terminatorIndex;
@@ -90,7 +90,7 @@ mfmU64 Magma::Framework::String::Stream::ReadUntil(mfsUTF8CodeUnit * data, mfmU6
 bool Magma::Framework::String::Stream::GetByte(mfmU8 & byte)
 {
 	mfError err = mfsGetByte(reinterpret_cast<mfsStream*>(&this->Get()), &byte);
-	if (err == MFS_ERROR_OKAY)
+	if (err == MF_ERROR_OKAY)
 		return true;
 	else if (err == MFS_ERROR_FAILED_TO_READ_ALL)
 		return false;
@@ -100,7 +100,7 @@ bool Magma::Framework::String::Stream::GetByte(mfmU8 & byte)
 void Magma::Framework::String::Stream::Flush()
 {
 	mfError err = mfsFlush(reinterpret_cast<mfsStream*>(&this->Get()));
-	if (err == MFS_ERROR_OKAY)
+	if (err == MF_ERROR_OKAY)
 		return;
 	throw StreamError(ErrorToString(err));
 }
@@ -108,7 +108,7 @@ void Magma::Framework::String::Stream::Flush()
 bool Magma::Framework::String::Stream::PutByte(mfmU8 byte)
 {
 	mfError err = mfsPutByte(reinterpret_cast<mfsStream*>(&this->Get()), byte);
-	if (err == MFS_ERROR_OKAY)
+	if (err == MF_ERROR_OKAY)
 		return true;
 	else if (err == MFS_ERROR_FAILED_TO_WRITE_ALL)
 		return false;
@@ -118,7 +118,7 @@ bool Magma::Framework::String::Stream::PutByte(mfmU8 byte)
 void Magma::Framework::String::Stream::PutString(const mfsUTF8CodeUnit * str)
 {
 	mfError err = mfsPutString(reinterpret_cast<mfsStream*>(&this->Get()), str);
-	if (err == MFS_ERROR_OKAY)
+	if (err == MF_ERROR_OKAY)
 		return;
 	throw StreamError(ErrorToString(err));
 }
@@ -127,16 +127,7 @@ mfmU64 Magma::Framework::String::Stream::Read(void * data, mfmU64 size)
 {
 	mfmU64 readSize = 0;
 	mfError err = mfsRead(reinterpret_cast<mfsStream*>(&this->Get()), static_cast<mfmU8*>(data), size, &readSize);
-	if (err == MFS_ERROR_OKAY || err == MFS_ERROR_FAILED_TO_READ_ALL)
+	if (err == MF_ERROR_OKAY || err == MFS_ERROR_FAILED_TO_READ_ALL)
 		return readSize;
 	throw StreamError(ErrorToString(err));
-}
-
-Magma::Framework::String::Stream Magma::Framework::String::OpenFile(const mfsUTF8CodeUnit * path, FileMode mode)
-{
-	mfsStream* stream;
-	mfError err = mfsOpenFile(&stream, static_cast<mfmU32>(mode), path);
-	if (err != MFS_ERROR_OKAY)
-		throw StreamError(ErrorToString(err));
-	return stream;
 }

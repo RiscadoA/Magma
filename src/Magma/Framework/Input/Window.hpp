@@ -1,11 +1,7 @@
 #pragma once
 
-#include <string>
-
-#include "Event.hpp"
-#include "Keyboard.hpp"
-#include "Mouse.hpp"
-
+#include "../Memory/Object.hpp"
+#include "../String/UTF8.hpp"
 #include "Window.h"
 
 namespace Magma
@@ -14,110 +10,133 @@ namespace Magma
 	{
 		namespace Input
 		{
+			enum class WindowMode : mfiEnum
+			{
+				Windowed = MFI_WINDOWED,
+				Fullscreen = MFI_FULLSCREEN,
+			};
+
 			/// <summary>
-			///		Abstract class that handles window creations and events.
+			///		Used as a window handle.
+			///		Destroys the window automatically when there are no more references to it.
 			/// </summary>
-			class Window
+			class Window : public Memory::Object
 			{
 			public:
-				/// <summary>
-				///		Window modes.
-				/// </summary>
-				enum class Mode
-				{
-					Windowed = MFI_WINDOWED,
-					Fullscreen = MFI_FULLSCREEN,
-				};
-				
-				/// <summary>
-				///		Opens a window.
-				/// </summary>
-				Window() = default;
-
-				/// <summary>
-				///		Closes a window.
-				/// </summary>
-				virtual ~Window() = default;
+				using Object::Object;
+				using Object::operator=;
+				inline Window(const Memory::Object& object) : Memory::Object(object) {}
 
 				/// <summary>
 				///		Polls events from this window.
 				/// </summary>
-				virtual void PollEvents() = 0;
+				void PollEvents();
 
 				/// <summary>
 				///		Waits for an event and handles it.
 				/// </summary>
-				virtual void WaitForEvents() = 0;
-
-				/// <summary>
-				///		Fired when the user tries to close the window.
-				/// </summary>
-				Event<> OnClose;
-
-				/// <summary>
-				///		Fired when the mouse enters the window.
-				/// </summary>
-				Event<> OnMouseEnter;
-
-				/// <summary>
-				///		Fired when the mouse leaves the window.
-				/// </summary>
-				Event<> OnMouseLeave;
-
-				/// <summary>
-				///		Fired when the mouse moves.
-				///		Params: { mouse position X; mouse position Y; }
-				/// </summary>
-				Event<float, float> OnMouseMove;
-
-				/// <summary>
-				///		Fired when the mouse wheel is scrolled.
-				///		Params: { mouse scroll delta; }
-				/// </summary>
-				Event<float> OnMouseScroll;
-
-				/// <summary>
-				///		Fired when a key goes up.
-				///		Params: { key code; key modifiers; }
-				/// </summary>
-				Event<Keyboard, KeyModifiers> OnKeyUp;
-
-				/// <summary>
-				///		Fired when a key goes down.
-				///		Params: { key code; key modifiers; }
-				/// </summary>
-				Event<Keyboard, KeyModifiers> OnKeyDown;
-
-				/// <summary>
-				///		Fired when a mouse button goes up.
-				///		Params: { mouse button; }
-				/// </summary>
-				Event<Mouse> OnMouseUp;
-
-				/// <summary>
-				///		Fired when a mouse button goes down.
-				///		Params: { mouse button; }
-				/// </summary>
-				Event<Mouse> OnMouseDown;
+				void WaitForEvents();
 
 				/// <summary>
 				///		Gets the width of the window.
 				/// </summary>
 				/// <returns>Window width</returns>
-				virtual mfmU32 GetWidth() = 0;
-
+				mfmU32 GetWidth();
+				
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
 				/// <returns>Window height</returns>
-				virtual mfmU32 GetHeight() = 0;
+				mfmU32 GetHeight();
 
 				/// <summary>
 				///		Gets the window mode
 				/// </summary>
 				/// <returns>Window mode</returns>
-				virtual Window::Mode GetMode() = 0;
+				WindowMode GetMode();
+
+				/// <summary>
+				///		Sets the callback that is called when the window is closed.
+				///		Parameter 1: Window handle;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnCloseCallback(mfiOnCloseCallback callback);
+
+				/// <summary>
+				///		Sets the callback that is called when mouse enters the window.
+				///		Parameter 1: Window handle;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnMouseEnterCallback(mfiOnMouseEnterCallback callback);
+
+				/// <summary>
+				///		Sets the callback that is called when the mouse leaves the window.
+				///		Parameter 1: Window handle;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnMouseLeaveCallback(mfiOnMouseLeaveCallback callback);
+
+				/// <summary>
+				///		Sets the callback that is called when the mouse moves.
+				///		Parameter 1: Window handle;
+				///		Parameter 2: Mouse new X coordinate;
+				///		Parameter 3: Mouse new Y coordinate;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnMouseMoveCallback(mfiOnMouseMoveCallback callback);
+
+				/// <summary>
+				///		Sets the callback that is called when the mouse wheel is scrolled.
+				///		Parameter 1: Window handle;
+				///		Parameter 2: Mouse wheel scroll delta;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnMouseScrollCallback(mfiOnMouseScrollCallback callback);
+				
+				/// <summary>
+				///		Sets the callback that is called when a mouse button goes up.
+				///		Parameter 1: Window handle;
+				///		Parameter 2: Mouse button code;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnMouseUpCallback(mfiOnMouseUpCallback callback);
+
+				/// <summary>
+				///		Sets the callback that is called when a mouse button goes down.
+				///		Parameter 1: Window handle;
+				///		Parameter 2: Mouse button code;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnMouseDownCallback(mfiOnMouseDownCallback callback);
+
+				/// <summary>
+				///		Sets the callback that is called when a key goes up.
+				///		Parameter 1: Window handle;
+				///		Parameter 2: Key code;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnKeyUpCallback(mfiOnKeyUpCallback callback);
+
+				/// <summary>
+				///		Sets the callback that is called when a key goes down.
+				///		Parameter 1: Window handle;
+				///		Parameter 2: Key code;
+				/// </summary>
+				/// <param name="callback">New callback (can be set to NULL)</param>
+				void SetOnKeyDownCallback(mfiOnKeyDownCallback callback);
 			};
+		
+
+			/// <summary>
+			///		Creates a new window.
+			/// </summary>
+			/// <param name="type">Window type name</param>
+			/// <param name="width">Window width</param>
+			/// <param name="height">Window height</param>
+			/// <param name="mode">Window mode</param>
+			/// <param name="title">Window title</param>
+			/// <returns>Window handle</returns>
+			Window CreateWindow(const mfsUTF8CodeUnit* type, mfmU32 width, mfmU32 height, WindowMode mode, const mfsUTF8CodeUnit* title);
 		}
 	}
 }
