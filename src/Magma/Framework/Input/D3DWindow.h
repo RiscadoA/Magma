@@ -5,7 +5,7 @@
 #include "../String/UTF8.h"
 
 /*
-	Implementation of the abstract window type on Window.h using the Windows API.
+	Implementation of the abstract window type on WindowHandle.h using the Windows API.
 */
 
 #define MFI_D3DWINDOW_TYPE_NAME u8"d3d"
@@ -18,8 +18,8 @@ extern "C"
 	///		Creates a new window to use with Direct3D.
 	/// </summary>
 	/// <param name="window">Out window pointer</param>
-	/// <param name="width">Window width</param>
-	/// <param name="height">Window height</param>
+	/// <param name="width">WindowHandle width</param>
+	/// <param name="height">WindowHandle height</param>
 	/// <param name="title">Pointer to window title string (UTF-8)</param>
 	/// <returns>
 	///		Returns MF_ERROR_OKAY if there were no errors.
@@ -32,14 +32,14 @@ extern "C"
 	/// <summary>
 	///		Destroys a window previously created with mfiCreateD3DWindow.
 	/// </summary>
-	/// <param name="window">Window pointer</param>
+	/// <param name="window">WindowHandle pointer</param>
 	void mfiDestroyD3DWindow(void* window);
 
 	/// <summary>
 	///		Gets the underlying window HWND.
 	/// </summary>
-	/// <param name="window">Window to get the HWND from</param>
-	/// <returns>Window HWND</returns>
+	/// <param name="window">WindowHandle to get the HWND from</param>
+	/// <returns>WindowHandle HWND</returns>
 	void* mfiGetD3DWindowHandle(void* window);
 
 #ifdef __cplusplus

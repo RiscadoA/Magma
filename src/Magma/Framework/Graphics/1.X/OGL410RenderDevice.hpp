@@ -16,7 +16,7 @@ namespace Magma
 			{
 			private:
 				// Inherited via RenderDevice
-				virtual void Init(Input::Window * window, const RenderDeviceSettings & settings) override;
+				virtual void Init(Input::WindowHandle * window, const RenderDeviceSettings & settings) override;
 				virtual void Terminate() override;
 				virtual VertexShader * CreateVertexShader(const ShaderData& shaderData) override;
 				virtual void DestroyVertexShader(VertexShader * vertexShader) override;

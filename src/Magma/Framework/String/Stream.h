@@ -6,7 +6,7 @@
 #include "Error.h"
 
 /*
-	Stream and function declarations.
+	StreamHandle and function declarations.
 */
 
 #ifdef __cplusplus
@@ -48,7 +48,7 @@ extern "C"
 	/// <summary>
 	///		Writes raw data into a stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <param name="data">Pointer to data</param>
 	/// <param name="dataSize">Data size</param>
 	/// <param name="outSize">Size of the data that was written (optional, can be NULL)</param>
@@ -62,7 +62,7 @@ extern "C"
 	/// <summary>
 	///		Reads raw data from a stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <param name="data">Pointer to data</param>
 	/// <param name="dataSize">Max data size to read</param>
 	/// <param name="outSize">Size of the data that was read (optional, can be NULL)</param>
@@ -76,7 +76,7 @@ extern "C"
 	/// <summary>
 	///		Flushes a stream if the stream is buffered.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
 	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
@@ -87,7 +87,7 @@ extern "C"
 	/// <summary>
 	///		Sets the buffer that is used for internal stream operations.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <param name="buffer">New buffer (if NULL, the stream becomes unbuffered)</param>
 	/// <param name="bufferSize">New buffer size</param>
 	/// <returns>
@@ -100,7 +100,7 @@ extern "C"
 	/// <summary>
 	///		Reads a byte from a stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <param name="byte">Pointer to byte( (set to NULL to ignore)</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
@@ -114,7 +114,7 @@ extern "C"
 	/// <summary>
 	///		Writes a byte to a stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <param name="byte">Byte to write</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
@@ -127,7 +127,7 @@ extern "C"
 	/// <summary>
 	///		Prints a UTF-8 string to a stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <param name="str">Format UTF-8 string</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
@@ -139,7 +139,7 @@ extern "C"
 	/// <summary>
 	///		Prints a formatted UTF-8 string to a stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <param name="format">Format UTF-8 string</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.

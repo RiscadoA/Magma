@@ -22,7 +22,7 @@ void Magma::Framework::Graphics::V2X::RenderDevice::SwapBuffers()
 #endif
 }
 
-Magma::Framework::Graphics::V2X::RenderDevice Magma::Framework::Graphics::V2X::CreateRenderDevice(const mfsUTF8CodeUnit * type, Input::Window window, const RenderDeviceDesc * desc, Memory::Allocator allocator)
+Magma::Framework::Graphics::V2X::RenderDevice Magma::Framework::Graphics::V2X::CreateRenderDevice(const mfsUTF8CodeUnit * type, Input::WindowHandle window, const RenderDeviceDesc * desc, Memory::AllocatorHandle allocator)
 {
 	if (desc == NULL)
 		throw RenderDeviceError("Failed to create render device:\nThe render device description pointer is NULL");

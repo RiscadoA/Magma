@@ -18,7 +18,7 @@ extern "C"
 	///		Creates a new mutex lock.
 	/// </summary>
 	/// <param name="mutex">Out mutex handle</param>
-	/// <param name="allocator">Allocator where the mutex lock will be allocated</param>
+	/// <param name="allocator">AllocatorHandle where the mutex lock will be allocated</param>
 	/// <returns>
 	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.

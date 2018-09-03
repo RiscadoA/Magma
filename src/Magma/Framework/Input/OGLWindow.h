@@ -5,7 +5,7 @@
 #include "../String/UTF8.h"
 
 /*
-	Implementation of the abstract window type on Window.h using GLFW.
+	Implementation of the abstract window type on WindowHandle.h using GLFW.
 */
 
 #define MFI_OGLWINDOW_TYPE_NAME u8"ogl"
@@ -18,8 +18,8 @@ extern "C"
 	///		Creates a new window to use with OpenGL.
 	/// </summary>
 	/// <param name="window">Out window pointer</param>
-	/// <param name="width">Window width</param>
-	/// <param name="height">Window height</param>
+	/// <param name="width">WindowHandle width</param>
+	/// <param name="height">WindowHandle height</param>
 	/// <param name="title">Pointer to window title string (UTF-8)</param>
 	/// <returns>
 	///		Returns MF_ERROR_OKAY if there were no errors.
@@ -32,13 +32,13 @@ extern "C"
 	/// <summary>
 	///		Destroys a window previously created with mfiCreateOGLWindow.
 	/// </summary>
-	/// <param name="window">Window pointer</param>
+	/// <param name="window">WindowHandle pointer</param>
 	void mfiDestroyGLWindow(void* window);
 
 	/// <summary>
 	///		Gets the underlying window GLFW handle.
 	/// </summary>
-	/// <param name="window">Window to get the handle from</param>
+	/// <param name="window">WindowHandle to get the handle from</param>
 	/// <returns>GLFW window handle</returns>
 	void* mfiGetGLWindowGLFWHandle(void* window);
 

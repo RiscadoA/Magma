@@ -1227,9 +1227,9 @@ namespace Magma
 				/// <summary>
 				///		Inits the render device
 				/// </summary>
-				/// <param name="window">Window to render to</param>
+				/// <param name="window">WindowHandle to render to</param>
 				/// <param name="settings">Render device settings</param>
-				virtual void Init(Input::Window* window, const RenderDeviceSettings& settings) = 0;
+				virtual void Init(Input::WindowHandle* window, const RenderDeviceSettings& settings) = 0;
 
 				/// <summary>
 				///		Terminates the render device

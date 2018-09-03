@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object.hpp"
+#include "Handle.hpp"
 #include "Allocator.h"
 
 namespace Magma
@@ -13,12 +13,12 @@ namespace Magma
 			///		Used as an allocator handle.
 			///		Destroys the allocator automatically when there are no more references to it.
 			/// </summary>
-			class Allocator : public Object
+			class AllocatorHandle : public Handle
 			{
 			public:
-				using Object::Object;
-				using Object::operator=;
-				inline Allocator(const Memory::Object& object) : Memory::Object(object) {}
+				using Handle::Handle;
+				using Handle::operator=;
+				inline AllocatorHandle(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Allocates data on this allocator.
@@ -34,7 +34,7 @@ namespace Magma
 				void Deallocate(void* memory);
 			};
 
-			extern Allocator StandardAllocator;
+			extern AllocatorHandle StandardAllocator;
 		}
 	}
 }

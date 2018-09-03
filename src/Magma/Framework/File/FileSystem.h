@@ -75,15 +75,15 @@ extern "C"
 	/// <summary>
 	///		Registers an archive in the file system.
 	/// </summary>
-	/// <param name="archive">Archive to register</param>
-	/// <param name="name">Archive name</param>
+	/// <param name="archive">ArchiveHandle to register</param>
+	/// <param name="name">ArchiveHandle name</param>
 	/// <returns>Error code</returns>
 	mfError mffRegisterArchive(mffArchive* archive, const mfsUTF8CodeUnit* name);
 
 	/// <summary>
 	///		Unregisters an archive from the file system.
 	/// </summary>
-	/// <param name="archive">Archive to unregister</param>
+	/// <param name="archive">ArchiveHandle to unregister</param>
 	/// <returns>Error code</returns>
 	mfError mffUnregisterArchive(mffArchive* archive);
 
@@ -91,14 +91,14 @@ extern "C"
 	///		Gets a file from the file system.
 	/// </summary>
 	/// <param name="outFile">Out file handle</param>
-	/// <param name="path">File path</param>
+	/// <param name="path">FileHandle path</param>
 	/// <returns>Error code</returns>
 	mfError mffGetFile(mffFile** outFile, const mfsUTF8CodeUnit* path);
 	
 	/// <summary>
 	///		Gets the type of a file handle.
 	/// </summary>
-	/// <param name="file">File handle</param>
+	/// <param name="file">FileHandle handle</param>
 	/// <param name="outType">Out file type</param>
 	/// <returns>Error code</returns>
 	mfError mffGetFileType(mffFile* file, mffEnum* outType);
@@ -123,7 +123,7 @@ extern "C"
 	///		Gets the parent directory of a file handle.
 	/// </summary>
 	/// <param name="outParent">Out parent directory handle</param>
-	/// <param name="file">File handle</param> 
+	/// <param name="file">FileHandle handle</param> 
 	/// <returns>Error code</returns>
 	mfError mffGetParent(mffDirectory** outParent, mffFile* file);
 
@@ -146,14 +146,14 @@ extern "C"
 	///		Creates a new file.
 	/// </summary>
 	/// <param name="outFile">Out file handle</param>
-	/// <param name="path">File path</param>
+	/// <param name="path">FileHandle path</param>
 	/// <returns>Error code</returns>
 	mfError mffCreateFile(mffFile** outFile, const mfsUTF8CodeUnit* path);
 
 	/// <summary>
 	///		Deletes a file.
 	/// </summary>
-	/// <param name="file">File handle</param>
+	/// <param name="file">FileHandle handle</param>
 	/// <returns>Error code</returns>
 	mfError mffDeleteFile(mffFile* file);
 
@@ -161,14 +161,14 @@ extern "C"
 	///		Opens a file stream.
 	/// </summary>
 	/// <param name="outStream">Out file stream handle</param>
-	/// <param name="file">File handle</param>
+	/// <param name="file">FileHandle handle</param>
 	/// <param name="mode">Open mode (MFF_FILE_WRITE or MFF_FILE_READ)</param>
 	mfError mffOpenFile(mfsStream** outStream, mffFile* file, mffEnum mode);
 
 	/// <summary>
 	///		Closes a file stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <returns>Error code</returns>
 	mfError mffCloseFile(mfsStream* stream);
 
