@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Memory/Object.hpp"
+#include "../../Memory/Handle.hpp"
 #include "../../Memory/Allocator.hpp"
 #include "../../Input/Window.hpp"
 
@@ -624,12 +624,12 @@ namespace Magma
 				///		Used as a vertex shader handle.
 				///		Destroys the vertex shader automatically when there are no more references to it.
 				/// </summary>
-				class VertexShader : public Memory::Object
+				class VertexShader : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline VertexShader(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline VertexShader(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
@@ -638,12 +638,12 @@ namespace Magma
 				///		Used as a pixel shader handle.
 				///		Destroys the pixel shader automatically when there are no more references to it.
 				/// </summary>
-				class PixelShader : public Memory::Object
+				class PixelShader : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline PixelShader(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline PixelShader(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
@@ -652,24 +652,24 @@ namespace Magma
 				///		Used as a pipeline handle.
 				///		Destroys the pipeline automatically when there are no more references to it.
 				/// </summary>
-				class Pipeline : public Memory::Object
+				class Pipeline : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline Pipeline(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline Pipeline(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a constant buffer handle.
 				///		Destroys the constant buffer automatically when there are no more references to it.
 				/// </summary>
-				class ConstantBuffer : public Memory::Object
+				class ConstantBuffer : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline ConstantBuffer(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline ConstantBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void* Map();
 
@@ -680,12 +680,12 @@ namespace Magma
 				///		Used as a texture 1D handle.
 				///		Destroys the texture 1D automatically when there are no more references to it.
 				/// </summary>
-				class Texture1D : public Memory::Object
+				class Texture1D : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline Texture1D(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline Texture1D(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void Update(mfmU32 dstX, mfmU32 width, const void* data);
 				};
@@ -694,12 +694,12 @@ namespace Magma
 				///		Used as a texture 2D handle.
 				///		Destroys the texture 2D automatically when there are no more references to it.
 				/// </summary>
-				class Texture2D : public Memory::Object
+				class Texture2D : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline Texture2D(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline Texture2D(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void* data);
 				};
@@ -708,12 +708,12 @@ namespace Magma
 				///		Used as a texture 3D handle.
 				///		Destroys the texture 3D automatically when there are no more references to it.
 				/// </summary>
-				class Texture3D : public Memory::Object
+				class Texture3D : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline Texture3D(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline Texture3D(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void* data);
 				};
@@ -722,24 +722,24 @@ namespace Magma
 				///		Used as a sampler handle.
 				///		Destroys the sampler automatically when there are no more references to it.
 				/// </summary>
-				class Sampler : public Memory::Object
+				class Sampler : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline Sampler(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline Sampler(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a vertex buffer handle.
 				///		Destroys the vertex buffer automatically when there are no more references to it.
 				/// </summary>
-				class VertexBuffer : public Memory::Object
+				class VertexBuffer : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline VertexBuffer(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline VertexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void* Map();
 
@@ -750,36 +750,36 @@ namespace Magma
 				///		Used as a vertex layout handle.
 				///		Destroys the vertex layout automatically when there are no more references to it.
 				/// </summary>
-				class VertexLayout : public Memory::Object
+				class VertexLayout : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline VertexLayout(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline VertexLayout(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a vertex array handle.
 				///		Destroys the vertex array automatically when there are no more references to it.
 				/// </summary>
-				class VertexArray : public Memory::Object
+				class VertexArray : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline VertexArray(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline VertexArray(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a index buffer handle.
 				///		Destroys the index buffer automatically when there are no more references to it.
 				/// </summary>
-				class IndexBuffer : public Memory::Object
+				class IndexBuffer : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline IndexBuffer(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline IndexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					void* Map();
 
@@ -790,84 +790,84 @@ namespace Magma
 				///		Used as a rasterizer state handle.
 				///		Destroys the state automatically when there are no more references to it.
 				/// </summary>
-				class RasterState : public Memory::Object
+				class RasterState : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline RasterState(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline RasterState(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a depth stencil state handle.
 				///		Destroys the state automatically when there are no more references to it.
 				/// </summary>
-				class DepthStencilState : public Memory::Object
+				class DepthStencilState : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline DepthStencilState(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline DepthStencilState(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a blend state handle.
 				///		Destroys the state automatically when there are no more references to it.
 				/// </summary>
-				class BlendState : public Memory::Object
+				class BlendState : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline BlendState(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline BlendState(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a render texture handle.
 				///		Destroys the texture automatically when there are no more references to it.
 				/// </summary>
-				class RenderTexture : public Memory::Object
+				class RenderTexture : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline RenderTexture(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline RenderTexture(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a depth stencil texture handle.
 				///		Destroys the texture automatically when there are no more references to it.
 				/// </summary>
-				class DepthStencilTexture : public Memory::Object
+				class DepthStencilTexture : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline DepthStencilTexture(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline DepthStencilTexture(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a framebuffer handle.
 				///		Destroys the framebuffer automatically when there are no more references to it.
 				/// </summary>
-				class Framebuffer : public Memory::Object
+				class Framebuffer : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline Framebuffer(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline Framebuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a render device handle.
 				///		Destroys the render device automatically when there are no more references to it.
 				/// </summary>
-				class RenderDevice : public Memory::Object
+				class RenderDevice : public Memory::Handle
 				{
 				public:
-					using Object::Object;
-					using Object::operator=;
-					explicit inline RenderDevice(const Memory::Object& object) : Memory::Object(object) {}
+					using Handle::Handle;
+					using Handle::operator=;
+					explicit inline RenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					// TO DO: ADD FUNCTIONS
 					
@@ -894,7 +894,7 @@ namespace Magma
 				/// <param name="desc">Render device description</param>
 				/// <param name="allocator">Render device allocator</param>
 				/// <returns>Render device handle</returns>
-				RenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Input::Window window, const RenderDeviceDesc* desc, Memory::Allocator allocator);
+				RenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Input::WindowHandle window, const RenderDeviceDesc* desc, Memory::AllocatorHandle allocator);
 			}
 		}
 	}

@@ -9,7 +9,7 @@ void Magma::Framework::String::StringStream::Clear()
 	throw StreamError(ErrorToString(err));
 }
 
-Magma::Framework::String::StringStream Magma::Framework::String::CreateStringStream(void * buffer, mfmU64 size, Memory::Allocator allocator)
+Magma::Framework::String::StringStream Magma::Framework::String::CreateStringStream(void * buffer, mfmU64 size, Memory::AllocatorHandle allocator)
 {
 	mfsStream* stream;
 	mfError err = mfsCreateStringStream(&stream, static_cast<mfmU8*>(buffer), size, allocator.GetNoChecks());

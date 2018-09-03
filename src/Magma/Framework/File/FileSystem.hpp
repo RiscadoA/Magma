@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Memory/Object.hpp"
+#include "../Memory/Handle.hpp"
 #include "../String/UTF8.hpp"
 #include "../String/Stream.hpp"
 
@@ -11,14 +11,14 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace File
+		namespace FileHandle
 		{
 			/// <summary>
 			///		Represents a file type.
 			/// </summary>
 			enum class FileType : mffEnum
 			{
-				File		= MFF_FILE,
+				FileHandle		= MFF_FILE,
 				Directory	= MFF_DIRECTORY,
 			};
 
@@ -35,102 +35,102 @@ namespace Magma
 			///		Used as an handle to an archive in the file system.
 			///		Automatically disposes of the archive if there are no more references to it.
 			/// </summary>
-			class Archive : public Memory::Object
+			class ArchiveHandle : public Memory::Handle
 			{
 			public:
-				using Object::Object;
-				using Object::operator=;
-				inline Archive(const Memory::Object& object) : Memory::Object(object) {}
+				using Handle::Handle;
+				using Handle::operator=;
+				inline ArchiveHandle(const Memory::Handle& object) : Memory::Handle(object) {}
 			};
 
 			/// <summary>
 			///		Used as an handle to a file in the file system.
 			///		Prevents the file from being deleted while there are still references to it.
 			/// </summary>
-			class File : public Memory::Object
+			class FileHandle : public Memory::Handle
 			{
 			public:
-				using Object::Object;
-				using Object::operator=;
-				inline File(const Memory::Object& object) : Memory::Object(object) {}
+				using Handle::Handle;
+				using Handle::operator=;
+				inline FileHandle(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Gets the file's type.
 				/// </summary>
-				/// <returns>File's type</returns>
+				/// <returns>FileHandle's type</returns>
 				FileType GetType();
 
 				/// <summary>
 				///		Gets the first file in in this directory (if this file is a directory).
 				/// </summary>
 				/// <returns>First file in directory</returns>
-				File GetFirst();
+				FileHandle GetFirst();
 
 				/// <summary>
 				///		Gets the next file in the directory.
 				/// </summary>
 				/// <returns>Next file in directory</returns>
-				File GetNext();
+				FileHandle GetNext();
 
 				/// <summary>
 				///		Gets this file's parent directory.
 				/// </summary>
-				/// <returns>File's parent directory</returns>
-				File GetParent();
+				/// <returns>FileHandle's parent directory</returns>
+				FileHandle GetParent();
 			};
 
 			/// <summary>
 			///		Registers an archive on the file system.
 			/// </summary>
-			/// <param name="archive">Archive handle</param>
-			/// <param name="name">Archive name</param>
-			void RegisterArchive(Archive archive, const mfsUTF8CodeUnit* name);
+			/// <param name="archive">ArchiveHandle handle</param>
+			/// <param name="name">ArchiveHandle name</param>
+			void RegisterArchive(ArchiveHandle archive, const mfsUTF8CodeUnit* name);
 
 			/// <summary>
 			///		Unregisters an archive from the file system.
 			/// </summary>
-			/// <param name="archive">Archive handle</param>
-			void UnregisterArchive(Archive archive);
+			/// <param name="archive">ArchiveHandle handle</param>
+			void UnregisterArchive(ArchiveHandle archive);
 
 			/// <summary>
 			///		Gets a file from the file system.
 			/// </summary>
-			/// <param name="path">File path</param>
-			/// <returns>File handle (NULL if no file was found)</returns>
-			File GetFile(const mfsUTF8CodeUnit* path);
+			/// <param name="path">FileHandle path</param>
+			/// <returns>FileHandle handle (NULL if no file was found)</returns>
+			FileHandle GetFile(const mfsUTF8CodeUnit* path);
 
 			/// <summary>
 			///		Creates a new directory in the file system.
 			/// </summary>
 			/// <param name="path">Directory path</param>
 			/// <returns>Directory handle</returns>
-			File CreateDirectory(const mfsUTF8CodeUnit* path);
+			FileHandle CreateDirectory(const mfsUTF8CodeUnit* path);
 
 			/// <summary>
 			///		Deletes a directory in the file system.
 			/// </summary>
 			/// <param name="dir">Directory handle</param>
-			void DeleteDirectory(File& dir);
+			void DeleteDirectory(FileHandle& dir);
 
 			/// <summary>
 			///		Creates a new file in the file system.
 			/// </summary>
-			/// <param name="path">File path</param>
-			/// <returns>File handle</returns>
-			File CreateFile(const mfsUTF8CodeUnit* path);
+			/// <param name="path">FileHandle path</param>
+			/// <returns>FileHandle handle</returns>
+			FileHandle CreateFile(const mfsUTF8CodeUnit* path);
 
 			/// <summary>
 			///		Deletes a file in the file system.
 			/// </summary>
-			/// <param name="file">File handle</param>
-			void DeleteFile(File& file);
+			/// <param name="file">FileHandle handle</param>
+			void DeleteFile(FileHandle& file);
 
 			/// <summary>
 			///		Opens a file stream.
 			/// </summary>
-			/// <param name="file">File handle</param>
-			/// <returns>File stream handle</returns>
-			String::Stream OpenFile(File file, FileMode mode);
+			/// <param name="file">FileHandle handle</param>
+			/// <returns>FileHandle stream handle</returns>
+			String::StreamHandle OpenFile(FileHandle file, FileMode mode);
 		}
 	}
 }

@@ -91,8 +91,8 @@ extern "C"
 	/// <summary>
 	///		Registers a new window creator.
 	/// </summary>
-	/// <param name="type">Window type name (with a maximum size of 16 bytes)</param>
-	/// <param name="func">Window creator function</param>
+	/// <param name="type">WindowHandle type name (with a maximum size of 16 bytes)</param>
+	/// <param name="func">WindowHandle creator function</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
 	///		MFI_ERROR_NO_REGISTER_ENTRIES if there are no more creator slots in the register.
@@ -102,11 +102,11 @@ extern "C"
 	/// <summary>
 	///		Creates a new window.
 	/// </summary>
-	/// <param name="type">Window type name</param>
-	/// <param name="width">Window width</param>
-	/// <param name="height">Window height</param>
-	/// <param name="mode">Window mode</param>
-	/// <param name="title">Window title</param>
+	/// <param name="type">WindowHandle type name</param>
+	/// <param name="width">WindowHandle width</param>
+	/// <param name="height">WindowHandle height</param>
+	/// <param name="mode">WindowHandle mode</param>
+	/// <param name="title">WindowHandle title</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
 	///		MFI_ERROR_TYPE_NOT_REGISTERED if there isn't a creator with the type registered.
@@ -117,7 +117,7 @@ extern "C"
 	/// <summary>
 	///		Destroys a window.
 	/// </summary>
-	/// <param name="window">Window handle</param>
+	/// <param name="window">WindowHandle handle</param>
 	void mfiDestroyWindow(void* window);
 
 #ifdef __cplusplus

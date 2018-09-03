@@ -8,15 +8,15 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace File
+		namespace FileHandle
 		{
 			/// <summary>
 			///		Creates a folder archive.
 			/// </summary>
 			/// <param name="path">Folder archive path</param>
-			/// <param name="allocator">Allocator used for internal allocations</param>
+			/// <param name="allocator">AllocatorHandle used for internal allocations</param>
 			/// <returns>Folder archive handle</returns>
-			Archive CreateFolderArchive(const mfsUTF8CodeUnit* path, Memory::Allocator allocator = Memory::StandardAllocator);
+			ArchiveHandle CreateFolderArchive(const mfsUTF8CodeUnit* path, Memory::AllocatorHandle allocator = Memory::StandardAllocator);
 		}
 	}
 }

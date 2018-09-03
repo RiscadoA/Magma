@@ -17,11 +17,11 @@ namespace Magma
 			/// <summary>
 			///		Abstract class that handles window creations and events.
 			/// </summary>
-			class Window
+			class WindowHandle
 			{
 			public:
 				/// <summary>
-				///		Window modes.
+				///		WindowHandle modes.
 				/// </summary>
 				enum class Mode
 				{
@@ -32,12 +32,12 @@ namespace Magma
 				/// <summary>
 				///		Opens a window.
 				/// </summary>
-				Window() = default;
+				WindowHandle() = default;
 
 				/// <summary>
 				///		Closes a window.
 				/// </summary>
-				virtual ~Window() = default;
+				virtual ~WindowHandle() = default;
 
 				/// <summary>
 				///		Polls events from this window.
@@ -103,20 +103,20 @@ namespace Magma
 				/// <summary>
 				///		Gets the width of the window.
 				/// </summary>
-				/// <returns>Window width</returns>
+				/// <returns>WindowHandle width</returns>
 				virtual mfmU32 GetWidth() = 0;
 
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
-				/// <returns>Window height</returns>
+				/// <returns>WindowHandle height</returns>
 				virtual mfmU32 GetHeight() = 0;
 
 				/// <summary>
 				///		Gets the window mode
 				/// </summary>
-				/// <returns>Window mode</returns>
-				virtual Window::Mode GetMode() = 0;
+				/// <returns>WindowHandle mode</returns>
+				virtual WindowHandle::Mode GetMode() = 0;
 			};
 		}
 	}

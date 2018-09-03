@@ -32,7 +32,7 @@ extern "C"
 	/// <summary>
 	///		Destroys a string stream created by mfsCreateStringStream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	void mfsDestroyStringStream(mfsStream* stream);
 
 	/// <summary>
@@ -47,13 +47,13 @@ extern "C"
 	/// <summary>
 	///		Destroys a string stream created by mfsCreateLocalStringStream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	void mfsDestroyLocalStringStream(mfsStringStream* stream);
 
 	/// <summary>
 	///		Clears all data in a string stream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	/// <returns>The error code (MF_ERROR_OKAY if there no errors).</returns>
 	mfError mfsClearStringStream(mfsStream* stream);
 

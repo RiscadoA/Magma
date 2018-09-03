@@ -15,9 +15,9 @@ extern "C"
 	///		Creates a new Direct3D 11 render device.
 	/// </summary>
 	/// <param name="renderDevice">Pointer to render device handle</param>
-	/// <param name="window">Window handle</param>
+	/// <param name="window">WindowHandle handle</param>
 	/// <param name="desc">Render device description</param>
-	/// <param name="allocator">Allocator to use on allocations</param>
+	/// <param name="allocator">AllocatorHandle to use on allocations</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.

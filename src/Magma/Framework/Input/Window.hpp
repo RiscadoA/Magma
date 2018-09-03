@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Memory/Object.hpp"
+#include "../Memory/Handle.hpp"
 #include "../String/UTF8.hpp"
 #include "Window.h"
 
@@ -20,12 +20,12 @@ namespace Magma
 			///		Used as a window handle.
 			///		Destroys the window automatically when there are no more references to it.
 			/// </summary>
-			class Window : public Memory::Object
+			class WindowHandle : public Memory::Handle
 			{
 			public:
-				using Object::Object;
-				using Object::operator=;
-				inline Window(const Memory::Object& object) : Memory::Object(object) {}
+				using Handle::Handle;
+				using Handle::operator=;
+				inline WindowHandle(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Polls events from this window.
@@ -40,45 +40,45 @@ namespace Magma
 				/// <summary>
 				///		Gets the width of the window.
 				/// </summary>
-				/// <returns>Window width</returns>
+				/// <returns>WindowHandle width</returns>
 				mfmU32 GetWidth();
 				
 				/// <summary>
 				///		Gets the height of the window.
 				/// </summary>
-				/// <returns>Window height</returns>
+				/// <returns>WindowHandle height</returns>
 				mfmU32 GetHeight();
 
 				/// <summary>
 				///		Gets the window mode
 				/// </summary>
-				/// <returns>Window mode</returns>
+				/// <returns>WindowHandle mode</returns>
 				WindowMode GetMode();
 
 				/// <summary>
 				///		Sets the callback that is called when the window is closed.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
 				void SetOnCloseCallback(mfiOnCloseCallback callback);
 
 				/// <summary>
 				///		Sets the callback that is called when mouse enters the window.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
 				void SetOnMouseEnterCallback(mfiOnMouseEnterCallback callback);
 
 				/// <summary>
 				///		Sets the callback that is called when the mouse leaves the window.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
 				void SetOnMouseLeaveCallback(mfiOnMouseLeaveCallback callback);
 
 				/// <summary>
 				///		Sets the callback that is called when the mouse moves.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				///		Parameter 2: Mouse new X coordinate;
 				///		Parameter 3: Mouse new Y coordinate;
 				/// </summary>
@@ -87,7 +87,7 @@ namespace Magma
 
 				/// <summary>
 				///		Sets the callback that is called when the mouse wheel is scrolled.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				///		Parameter 2: Mouse wheel scroll delta;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
@@ -95,7 +95,7 @@ namespace Magma
 				
 				/// <summary>
 				///		Sets the callback that is called when a mouse button goes up.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				///		Parameter 2: Mouse button code;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
@@ -103,7 +103,7 @@ namespace Magma
 
 				/// <summary>
 				///		Sets the callback that is called when a mouse button goes down.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				///		Parameter 2: Mouse button code;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
@@ -111,7 +111,7 @@ namespace Magma
 
 				/// <summary>
 				///		Sets the callback that is called when a key goes up.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				///		Parameter 2: Key code;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
@@ -119,7 +119,7 @@ namespace Magma
 
 				/// <summary>
 				///		Sets the callback that is called when a key goes down.
-				///		Parameter 1: Window handle;
+				///		Parameter 1: WindowHandle handle;
 				///		Parameter 2: Key code;
 				/// </summary>
 				/// <param name="callback">New callback (can be set to NULL)</param>
@@ -130,13 +130,13 @@ namespace Magma
 			/// <summary>
 			///		Creates a new window.
 			/// </summary>
-			/// <param name="type">Window type name</param>
-			/// <param name="width">Window width</param>
-			/// <param name="height">Window height</param>
-			/// <param name="mode">Window mode</param>
-			/// <param name="title">Window title</param>
-			/// <returns>Window handle</returns>
-			Window CreateWindow(const mfsUTF8CodeUnit* type, mfmU32 width, mfmU32 height, WindowMode mode, const mfsUTF8CodeUnit* title);
+			/// <param name="type">WindowHandle type name</param>
+			/// <param name="width">WindowHandle width</param>
+			/// <param name="height">WindowHandle height</param>
+			/// <param name="mode">WindowHandle mode</param>
+			/// <param name="title">WindowHandle title</param>
+			/// <returns>WindowHandle handle</returns>
+			WindowHandle CreateWindow(const mfsUTF8CodeUnit* type, mfmU32 width, mfmU32 height, WindowMode mode, const mfsUTF8CodeUnit* title);
 		}
 	}
 }

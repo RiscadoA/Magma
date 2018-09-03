@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Memory/Object.hpp"
+#include "../Memory/Handle.hpp"
 #include "Stream.h"
 
 namespace Magma
@@ -13,12 +13,12 @@ namespace Magma
 			///		Used as a stream handle.
 			///		Destroys the stream automatically when there are no more references to it.
 			/// </summary>
-			class Stream : public Memory::Object
+			class StreamHandle : public Memory::Handle
 			{
 			public:
-				using Object::Object;
-				using Object::operator=;
-				inline Stream(const Memory::Object& object) : Memory::Object(object) {}
+				using Handle::Handle;
+				using Handle::operator=;
+				inline StreamHandle(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Writes raw data into a stream.
@@ -72,9 +72,9 @@ namespace Magma
 				void Flush();
 			};
 
-			extern Stream OutStream;
-			extern Stream ErrStream;
-			extern Stream InStream;
+			extern StreamHandle OutStream;
+			extern StreamHandle ErrStream;
+			extern StreamHandle InStream;
 
 			void InitStreams();
 			void TerminateStreams();
