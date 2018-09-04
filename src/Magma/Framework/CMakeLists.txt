@@ -78,10 +78,13 @@ include_directories(../../)
 
 # Include external libraries
 include_directories(../../../extern/freetype/include/)
+include_directories(../../../extern/zlib/)
+include_directories(${CMAKE_BINARY_DIR}/extern/zlib/)
 include_directories(../../../extern/glm/)
 
 # External libraries
 target_link_libraries(Magma-Framework freetype)
+target_link_libraries(Magma-Framework zlibstatic)
 
 if(MAGMA_FRAMEWORK_USE_OPENGL)
 	include_directories(../../../extern/glew/include/)
