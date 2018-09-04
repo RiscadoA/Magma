@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Memory/Type.h"
+#include "Error.h"
 
 /*
 	Magma framework library C entry point.
@@ -15,7 +16,7 @@ extern "C"
 #define MF_ERROR_ALREADY_INITIALIZED	0x01
 #define MF_ERROR_NOT_INITIALIZED		0x02
 
-	typedef mfmU32 mfError;
+	typedef mfmU32 mfEnum;
 
 	/// <summary>
 	///		Inits the magma framework library.
