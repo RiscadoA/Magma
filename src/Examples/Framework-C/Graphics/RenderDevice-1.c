@@ -115,7 +115,7 @@ int main(int argc, const char** argv)
 
 		{
 			mfgV2XMVLCompilerInfo info;
-			if (mfgV2XRunMVLCompiler(src, bytecode, sizeof(bytecode), metaDataB, sizeof(metaDataB), MFG_VERTEX_SHADER, &info) != MF_ERROR_OKAY)
+			if (mfgV2XRunMSLCompiler(src, bytecode, sizeof(bytecode), metaDataB, sizeof(metaDataB), MFG_VERTEX_SHADER, &info) != MF_ERROR_OKAY)
 			{
 				mfsPutString(mfsErrStream, info.errorMsg);
 				abort();
