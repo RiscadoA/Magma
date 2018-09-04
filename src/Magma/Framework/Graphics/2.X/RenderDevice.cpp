@@ -2,10 +2,21 @@
 #include "Config.h"
 
 #include "../Exception.hpp"
+#include "../../String/StringStream.hpp"
 #include "../../ErrorString.h"
 
 #ifdef MAGMA_FRAMEWORK_DEBUG
-#define CHECK_ERROR(err) do { if (err != MF_ERROR_OKAY) throw RenderDeviceError(mfErrorToString(err)); } while(false)
+#define CHECK_ERROR(rd, err) do { if (err != MF_ERROR_OKAY) { mfsStringStream ss;\
+	mfsUTF8CodeUnit msg[256];\
+	mfError e = mfsCreateLocalStringStream(&ss, (mfmU8*)msg, sizeof(msg));\
+	if (e != MF_ERROR_OKAY)\
+		throw Magma::Framework::Graphics::RenderDeviceError(mfErrorToString(err));\
+	mfsUTF8CodeUnit internalErrorMsg[256] = { '\0' };\
+	mfgV2XGetErrorString(rd, internalErrorMsg, sizeof(internalErrorMsg));\
+	e = mfsPrintFormat((mfsStream*)&ss, u8"Error on function " __FUNCTION__ ": %s\n%s\n", mfErrorToString(err), internalErrorMsg);\
+	mfsDestroyLocalStringStream(&ss);\
+\
+ } } while(false)
 #else
 #define CHECK_ERROR(err) do {} while(false)
 #endif
@@ -35,7 +46,7 @@ void * Magma::Framework::Graphics::V2X::ConstantBuffer::Map()
 	auto cb = (mfgV2XConstantBuffer*)&this->Get();
 	void* mem;
 	mfError err = mfgV2XMapConstantBuffer(cb->renderDevice, cb, &mem);
-	CHECK_ERROR(err);
+	CHECK_ERROR(cb->renderDevice, err);
 	return mem;
 }
 
@@ -43,49 +54,49 @@ void Magma::Framework::Graphics::V2X::ConstantBuffer::Unmap()
 {
 	auto cb = (mfgV2XConstantBuffer*)&this->Get();
 	mfError err = mfgV2XUnmapConstantBuffer(cb->renderDevice, cb);
-	CHECK_ERROR(err);
+	CHECK_ERROR(cb->renderDevice, err);
 }
 
 void Magma::Framework::Graphics::V2X::Texture1D::Update(mfmU32 dstX, mfmU32 width, const void * data)
 {
 	auto tex = (mfgV2XTexture1D*)&this->Get();
 	mfError err = mfgV2XUpdateTexture1D(tex->renderDevice, tex, dstX, width, data);
-	CHECK_ERROR(err);
+	CHECK_ERROR(tex->renderDevice, err);
 }
 
 void Magma::Framework::Graphics::V2X::Texture1D::GenerateMipmaps()
 {
 	auto tex = (mfgV2XTexture1D*)&this->Get();
 	mfError err = mfgV2XGenerateTexture1DMipmaps(tex->renderDevice, tex);
-	CHECK_ERROR(err);
+	CHECK_ERROR(tex->renderDevice, err);
 }
 
 void Magma::Framework::Graphics::V2X::Texture2D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void * data)
 {
 	auto tex = (mfgV2XTexture2D*)&this->Get();
 	mfError err = mfgV2XUpdateTexture2D(tex->renderDevice, tex, dstX, dstY, width, height, data);
-	CHECK_ERROR(err);
+	CHECK_ERROR(tex->renderDevice, err);
 }
 
 void Magma::Framework::Graphics::V2X::Texture2D::GenerateMipmaps()
 {
 	auto tex = (mfgV2XTexture2D*)&this->Get();
 	mfError err = mfgV2XGenerateTexture2DMipmaps(tex->renderDevice, tex);
-	CHECK_ERROR(err);
+	CHECK_ERROR(tex->renderDevice, err);
 }
 
 void Magma::Framework::Graphics::V2X::Texture3D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void * data)
 {
 	auto tex = (mfgV2XTexture3D*)&this->Get();
 	mfError err = mfgV2XUpdateTexture3D(tex->renderDevice, tex, dstX, dstY, dstZ, width, height, depth, data);
-	CHECK_ERROR(err);
+	CHECK_ERROR(tex->renderDevice, err);
 }
 
 void Magma::Framework::Graphics::V2X::Texture3D::GenerateMipmaps()
 {
 	auto tex = (mfgV2XTexture3D*)&this->Get();
 	mfError err = mfgV2XGenerateTexture3DMipmaps(tex->renderDevice, tex);
-	CHECK_ERROR(err);
+	CHECK_ERROR(tex->renderDevice, err);
 }
 
 void * Magma::Framework::Graphics::V2X::VertexBuffer::Map()
@@ -93,7 +104,7 @@ void * Magma::Framework::Graphics::V2X::VertexBuffer::Map()
 	auto vb = (mfgV2XVertexBuffer*)&this->Get();
 	void* mem;
 	mfError err = mfgV2XMapVertexBuffer(vb->renderDevice, vb, &mem);
-	CHECK_ERROR(err);
+	CHECK_ERROR(vb->renderDevice, err);
 	return mem;
 }
 
@@ -101,7 +112,7 @@ void Magma::Framework::Graphics::V2X::VertexBuffer::Unmap()
 {
 	auto vb = (mfgV2XVertexBuffer*)&this->Get();
 	mfError err = mfgV2XUnmapVertexBuffer(vb->renderDevice, vb);
-	CHECK_ERROR(err);
+	CHECK_ERROR(vb->renderDevice, err);
 }
 
 void * Magma::Framework::Graphics::V2X::IndexBuffer::Map()
@@ -109,7 +120,7 @@ void * Magma::Framework::Graphics::V2X::IndexBuffer::Map()
 	auto ib = (mfgV2XIndexBuffer*)&this->Get();
 	void* mem;
 	mfError err = mfgV2XMapIndexBuffer(ib->renderDevice, ib, &mem);
-	CHECK_ERROR(err);
+	CHECK_ERROR(ib->renderDevice, err);
 	return mem;
 }
 
@@ -117,7 +128,7 @@ void Magma::Framework::Graphics::V2X::IndexBuffer::Unmap()
 {
 	auto ib = (mfgV2XIndexBuffer*)&this->Get();
 	mfError err = mfgV2XUnmapIndexBuffer(ib->renderDevice, ib);
-	CHECK_ERROR(err);
+	CHECK_ERROR(ib->renderDevice, err);
 }
 
 void Magma::Framework::Graphics::V2X::RenderDevice::ClearColor(mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a)
