@@ -24,7 +24,7 @@ extern "C"
 	/// <param name="maxMetaDataSize">Meta data array size</param>
 	/// <param name="shaderType">Shader type</param>
 	/// <param name="info">Compiler info</param>
-	mfError mfgV2XRunMVLCompiler(const mfsUTF8CodeUnit* msl, mfmU8* bytecode, mfmU64 maxBytecodeSize, mfmU8* metaData, mfmU64 maxMetaDataSize, mfgV2XEnum shaderType, mfgV2XMVLCompilerInfo* info);
+	mfError mfgV2XRunMSLCompiler(const mfsUTF8CodeUnit* msl, mfmU8* bytecode, mfmU64 maxBytecodeSize, mfmU8* metaData, mfmU64 maxMetaDataSize, mfgV2XEnum shaderType, mfgV2XMVLCompilerInfo* info);
 
 #ifdef __cplusplus
 }

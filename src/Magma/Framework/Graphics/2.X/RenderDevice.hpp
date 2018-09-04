@@ -5,6 +5,7 @@
 #include "../../Input/Window.hpp"
 
 #include "RenderDevice.h"
+#include "Bytecode.hpp"
 
 namespace Magma
 {
@@ -945,7 +946,7 @@ namespace Magma
 					/// <param name="bytecode">Shader bytecode</param>
 					/// <param name="bytecodeSize">Shader bytecode size</param>
 					/// <returns>Shader handle</returns>
-					VertexShader CreateVertexShader(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
+					VertexShader CreateVertexShader(const mfmU8* bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData);
 
 					/// <summary>
 					///		Creates a new pixel shader.
@@ -953,7 +954,7 @@ namespace Magma
 					/// <param name="bytecode">Shader bytecode</param>
 					/// <param name="bytecodeSize">Shader bytecode size</param>
 					/// <returns>Shader handle</returns>
-					PixelShader CreatePixelShader(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
+					PixelShader CreatePixelShader(const mfmU8* bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData);
 
 					/// <summary>
 					///		Creates a new pipeline,

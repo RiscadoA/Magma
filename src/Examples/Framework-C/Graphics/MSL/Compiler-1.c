@@ -31,7 +31,7 @@ int main(int argc, const char** argv)
 	mfmU8 metaData[4096];
 	mfgV2XMVLCompilerInfo compilerInfo;
 	
-	if (mfgV2XRunMVLCompiler(src, bytecode, sizeof(bytecode), metaData, sizeof(metaData), MFG_VERTEX_SHADER, &compilerInfo) != MF_ERROR_OKAY)
+	if (mfgV2XRunMSLCompiler(src, bytecode, sizeof(bytecode), metaData, sizeof(metaData), MFG_VERTEX_SHADER, &compilerInfo) != MF_ERROR_OKAY)
 	{
 		mfsPutString(mfsErrStream, compilerInfo.errorMsg);
 		abort();

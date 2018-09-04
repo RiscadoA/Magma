@@ -32,6 +32,7 @@ typedef struct
 	GLint location;
 	GLboolean active;
 	mfgOGL4Shader* shader;
+	mfmObject* boundObject;
 } mfgOGL4BindingPoint;
 
 struct mfgOGL4Shader
@@ -46,6 +47,8 @@ typedef struct
 {
 	mfgV2XRenderDeviceObject base;
 	GLint pipeline;
+	mfgOGL4Shader* vs;
+	mfgOGL4Shader* ps;
 } mfgOGL4Pipeline;
 
 typedef struct
@@ -125,8 +128,9 @@ typedef struct
 typedef struct
 {
 	mfgV2XRenderDeviceObject base;
-
 	GLuint fbo;
+	mfgOGL4RenderTexture* textures[MFG_OGL4_SHADER_MAX_BP_COUNT];
+	mfgOGL4DepthStencilTexture* depthStencilTexture;
 } mfgOGL4Framebuffer;
 
 typedef struct
@@ -159,6 +163,8 @@ typedef struct
 {
 	mfgV2XRenderDeviceObject base;
 	GLint va;
+	mfgOGL4VertexBuffer* vb[16];
+	mfgOGL4VertexLayout* vl;
 } mfgOGL4VertexArray;
 
 typedef struct
@@ -246,7 +252,14 @@ typedef struct
 	mfgV2XDepthStencilState* defaultDepthStencilState;
 	mfgV2XBlendState* defaultBlendState;
 
+	mfgOGL4Pipeline* currentPipeline;
+	mfgOGL4Framebuffer* currentFramebuffer;
+	mfgOGL4VertexArray* currentVertexArray;
 	mfgOGL4IndexBuffer* currentIndexBuffer;
+
+	mfgV2XRasterState* currentRasterState;
+	mfgV2XDepthStencilState* currentDepthStencilState;
+	mfgV2XBlendState* currentBlendState;
 } mfgOGL4RenderDevice;
 
 #define MFG_RETURN_ERROR(code, msg) {\
@@ -273,6 +286,8 @@ void mfgOGL4DestroyVertexShader(void* vs)
 #endif
 	mfgOGL4Shader* oglVS = vs;
 	glDeleteProgram(oglVS->program);
+	if (mfmDecObjectRef(oglVS->md) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglVS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVS->base.renderDevice)->pool512, oglVS) != MF_ERROR_OKAY)
@@ -349,6 +364,7 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 	{
 		oglVS->bps[i].active = GL_FALSE;
 		oglVS->bps[i].shader = oglVS;
+		oglVS->bps[i].boundObject = NULL;
 	}
 
 	{
@@ -473,6 +489,10 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 		}
 	}
 
+	err = mfmIncObjectRef(metaData);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
+
 	*vs = oglVS;
 
 	MFG_CHECK_GL_ERROR();
@@ -506,6 +526,8 @@ void mfgOGL4DestroyPixelShader(void* ps)
 #endif
 	mfgOGL4Shader* oglPS = ps;
 	glDeleteProgram(oglPS->program);
+	if (mfmDecObjectRef(oglPS->md) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglPS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPS->base.renderDevice)->pool512, oglPS) != MF_ERROR_OKAY)
@@ -583,6 +605,7 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 	{
 		oglPS->bps[i].active = GL_FALSE;
 		oglPS->bps[i].shader = oglPS;
+		oglPS->bps[i].boundObject = NULL;
 	}
 
 	{
@@ -707,6 +730,10 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 		}
 	}
 
+	err = mfmIncObjectRef(metaData);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
+
 	*ps = oglPS;
 
 	MFG_CHECK_GL_ERROR();
@@ -741,10 +768,24 @@ mfError mfgOGL4BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4ConstantBuffer* oglCB = cb;
 
+	mfError err;
+	if (oglBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglBP->boundObject = oglCB;
+
 	if (oglCB == NULL)
 		glBindBufferBase(GL_UNIFORM_BUFFER, oglBP->location, 0);
 	else
+	{
+		err = mfmIncObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		glBindBufferBase(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb);
+	}
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -757,6 +798,18 @@ mfError mfgOGL4BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoin
 #endif
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4ConstantBuffer* oglCB = cb;
+
+	mfError err;
+	if (oglBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglBP->boundObject = oglCB;
+	err = mfmIncObjectRef(oglBP->boundObject);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	glBindBufferRange(GL_UNIFORM_BUFFER, oglBP->location, oglCB->cb, offset * 16, size * 16);
 
@@ -772,11 +825,25 @@ mfError mfgOGL4BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfg
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4Texture1D* oglT = tex;
 
+	mfError err;
+	if (oglBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglBP->boundObject = oglT;
+
 	glActiveTexture(GL_TEXTURE0 + oglBP->location);
 	if (oglT == NULL)
 		glBindTexture(GL_TEXTURE_1D, 0);
 	else
+	{
 		glBindTexture(GL_TEXTURE_1D, oglT->tex);
+		err = mfmIncObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
@@ -791,11 +858,25 @@ mfError mfgOGL4BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfg
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4Texture2D* oglT = tex;
 
+	mfError err;
+	if (oglBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglBP->boundObject = oglT;
+
 	glActiveTexture(GL_TEXTURE0 + oglBP->location);
 	if (oglT == NULL)
 		glBindTexture(GL_TEXTURE_2D, 0);
 	else
+	{
+		err = mfmIncObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		glBindTexture(GL_TEXTURE_2D, oglT->tex);
+	}
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
@@ -810,11 +891,25 @@ mfError mfgOGL4BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfg
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4Texture3D* oglT = tex;
 
+	mfError err;
+	if (oglBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglBP->boundObject = oglT;
+
 	glActiveTexture(GL_TEXTURE0 + oglBP->location);
 	if (oglT == NULL)
 		glBindTexture(GL_TEXTURE_3D, 0);
 	else
+	{
+		err = mfmIncObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		glBindTexture(GL_TEXTURE_3D, oglT->tex);
+	}
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
@@ -829,11 +924,26 @@ mfError mfgOGL4BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp,
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4RenderTexture* oglT = tex;
 
+	mfError err;
+	if (oglBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglBP->boundObject = oglT;
+
 	glActiveTexture(GL_TEXTURE0 + oglBP->location);
 	if (oglT == NULL)
 		glBindTexture(GL_TEXTURE_2D, 0);
 	else
+	{
 		glBindTexture(GL_TEXTURE_2D, oglT->tex);
+		err = mfmIncObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
 	glProgramUniform1i(oglBP->shader->program, oglBP->location, oglBP->location);
 
 	MFG_CHECK_GL_ERROR();
@@ -848,10 +958,24 @@ mfError mfgOGL4BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2
 	mfgOGL4BindingPoint* oglBP = bp;
 	mfgOGL4Sampler* oglS = sampler;
 
+	mfError err;
+	if (oglBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglBP->boundObject = oglS;
+	
 	if (oglS == NULL)
 		glBindSampler(oglBP->location, 0);
 	else
+	{
+		err = mfmIncObjectRef(oglBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		glBindSampler(oglBP->location, oglS->sampler);
+	}
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -864,6 +988,11 @@ void mfgOGL4DestroyPipeline(void* pp)
 #endif
 	mfgOGL4Pipeline* oglPP = pp;
 	glDeleteProgramPipelines(1, &oglPP->pipeline);
+
+	if (mfmDecObjectRef(oglPP->vs) != MF_ERROR_OKAY)
+		abort();
+	if (mfmDecObjectRef(oglPP->ps) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglPP->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool48, oglPP) != MF_ERROR_OKAY)
@@ -902,6 +1031,17 @@ mfError mfgOGL4CreatePipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline** pp, mfgV2
 	glUseProgramStages(oglPP->pipeline, GL_VERTEX_SHADER_BIT, ((mfgOGL4Shader*)vs)->program);
 	glUseProgramStages(oglPP->pipeline, GL_FRAGMENT_SHADER_BIT, ((mfgOGL4Shader*)ps)->program);
 
+	oglPP->vs = vs;
+	oglPP->ps = ps;
+	{
+		mfError err = mfmIncObjectRef(vs);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		err = mfmIncObjectRef(ps);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
 	*pp = oglPP;
 
 	MFG_CHECK_GL_ERROR();
@@ -916,12 +1056,26 @@ mfError mfgOGL4SetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pp)
 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
 
+	mfError err;
+	if (oglRD->currentPipeline != NULL)
+	{
+		err = mfmDecObjectRef(oglRD->currentPipeline);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglRD->currentPipeline = pp;
+
 	// Set pipeline
 	mfgOGL4Pipeline* oglPP = pp;
 	if (oglPP == NULL)
 		glBindProgramPipeline(0);
 	else
+	{
 		glBindProgramPipeline(oglPP->pipeline);
+		err = mfmIncObjectRef(pp);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1250,12 +1404,26 @@ mfError mfgOGL4SetIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
 
+	mfError err;
+	if (oglRD->currentIndexBuffer != NULL)
+	{
+		err = mfmDecObjectRef(oglRD->currentIndexBuffer);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglRD->currentIndexBuffer = ib;
+
 	// Set index buffer
 	mfgOGL4IndexBuffer* oglIB = ib;
 	if (oglIB == NULL)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	else
+	{
+		err = mfmIncObjectRef(oglRD->currentIndexBuffer);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oglIB->ib);
+	}
 
 	oglRD->currentIndexBuffer = oglIB;
 
@@ -1375,9 +1543,18 @@ void mfgOGL4DestroyVertexArray(void* va)
 #endif
 	mfgOGL4VertexArray* oglVA = va;
 	glDeleteVertexArrays(1, &oglVA->va);
+	if (mfmDecObjectRef(oglVA->vl) != MF_ERROR_OKAY)
+		abort();
+	for (mfmU64 i = 0; i < 16; ++i)
+	{
+		if (oglVA->vb[i] == NULL)
+			continue;
+		if (mfmDecObjectRef(oglVA->vb[i]) != MF_ERROR_OKAY)
+			abort();
+	}
 	if (mfmDestroyObject(&oglVA->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool48, oglVA) != MF_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool256, oglVA) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -1396,7 +1573,7 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 
 	// Allocate vertex array
 	mfgOGL4VertexArray* oglVA = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglVA, sizeof(mfgOGL4VertexArray)) != MF_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool256, &oglVA, sizeof(mfgOGL4VertexArray)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
 	mfgOGL4VertexLayout* oglVL = vl;
 
@@ -1413,9 +1590,23 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 	glGenVertexArrays(1, &oglVA->va);
 	glBindVertexArray(oglVA->va);
 
+	for (mfmU64 i = 0; i < 16; ++i)
+		oglVA->vb[i] = NULL;
+	oglVA->vl = vl;
+
+	mfError err;
+	err = mfmIncObjectRef(oglVA->vl);
+	if (err  != MF_ERROR_OKAY)
+		return err;
+
 	for (mfmU64 i = 0; i < bufferCount; ++i)
 	{
 		mfgOGL4VertexBuffer* buffer = buffers[i];
+
+		oglVA->vb[i] = buffer;
+		err = mfmIncObjectRef(oglVA->vb[i]);
+		if (err != MF_ERROR_OKAY)
+			return err;
 
 		glBindBuffer(GL_ARRAY_BUFFER, buffer->vb);
 
@@ -1440,14 +1631,31 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 mfError mfgOGL4SetVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray* va)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL || va == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
 	mfgOGL4RenderDevice* oglRD = (mfgOGL4RenderDevice*)rd;
 
+	mfError err;
+	if (oglRD->currentVertexArray != NULL)
+	{
+		err = mfmDecObjectRef(oglRD->currentVertexArray);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	oglRD->currentVertexArray = va;
+
 	// Set vertex array as active
-	mfgOGL4VertexArray* oglVA = va;
-	glBindVertexArray(oglVA->va);
+	if (va == NULL)
+		glBindVertexArray(0);
+	else
+	{
+		err = mfmIncObjectRef(oglRD->currentVertexArray);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		mfgOGL4VertexArray* oglVA = va;
+		glBindVertexArray(oglVA->va);
+	}
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -2171,9 +2379,16 @@ void mfgOGL4DestroyFramebuffer(void* fb)
 #endif
 	mfgOGL4Framebuffer* oglFB = fb;
 	glDeleteFramebuffers(1, &oglFB->fbo);
+	if (oglFB->depthStencilTexture != NULL)
+		if (mfmDecObjectRef(oglFB->depthStencilTexture) != MF_ERROR_OKAY)
+			abort();
+	for (mfmU64 i = 0; i < 8; ++i)
+		if (oglFB->textures[i] != NULL)
+			if (mfmDecObjectRef(oglFB->textures[i]) != MF_ERROR_OKAY)
+				abort();
 	if (mfmDestroyObject(&oglFB->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool48, oglFB) != MF_ERROR_OKAY)
+	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool64, oglFB) != MF_ERROR_OKAY)
 		abort();
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	GLenum err = glGetError();
@@ -2192,7 +2407,7 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 
 	// Allocate texture
 	mfgOGL4Framebuffer* oglFB = NULL;
-	if (mfmAllocate(oglRD->pool48, &oglFB, sizeof(mfgOGL4Framebuffer)) != MF_ERROR_OKAY)
+	if (mfmAllocate(oglRD->pool64, &oglFB, sizeof(mfgOGL4Framebuffer)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate framebuffer on pool");
 
 	// Init object
@@ -2215,11 +2430,21 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 	if (mfmAllocate(oglRD->stack, &drawBuffers, textureCount * sizeof(GLenum)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate draw buffers on stack");
 
+	for (mfmU64 i = 0; i < 8; ++i)
+		oglFB->textures[i] = NULL;
+
+	mfError err;
+
 	for (mfmU64 i = 0; i < textureCount; ++i)
 	{
 		if (((mfgOGL4RenderTexture*)textures[i])->width != width ||
 			((mfgOGL4RenderTexture*)textures[i])->height != height)
 			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "All textures must have the same size");
+
+		oglFB->textures[i] = textures[i];
+		err = mfmIncObjectRef(textures[i]);
+		if (err != MF_ERROR_OKAY)
+			return err;
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, ((mfgOGL4RenderTexture*)textures[i])->tex, 0);
 		drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
@@ -2231,6 +2456,11 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 
 	if (depthStencilTexture != NULL)
 	{
+		err = mfmIncObjectRef(depthStencilTexture);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		oglFB->depthStencilTexture = depthStencilTexture;
+
 		if (width != ((mfgOGL4DepthStencilTexture*)depthStencilTexture)->width ||
 			height != ((mfgOGL4DepthStencilTexture*)depthStencilTexture)->height)
 			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "The depth stencil texture must have the same size as the color textures");
@@ -2392,6 +2622,17 @@ mfError mfgOGL4SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
 	if (state == NULL)
 		return mfgOGL4SetRasterState(rd, ((mfgOGL4RenderDevice*)rd)->defaultRasterState);
 
+	mfError err;
+
+	if (((mfgOGL4RenderDevice*)rd)->currentRasterState != NULL)
+	{
+		err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentRasterState);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgOGL4RenderDevice*)rd)->currentRasterState = state;
+
 	mfgOGL4RasterState* oglRS = (mfgOGL4RasterState*)state;
 
 	if (oglRS->cullEnabled)
@@ -2401,6 +2642,10 @@ mfError mfgOGL4SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
 	glFrontFace(oglRS->frontFace);
 	glCullFace(oglRS->cullFace);
 	glPolygonMode(GL_FRONT_AND_BACK, oglRS->polygonMode);
+
+	err = mfmIncObjectRef(((mfgOGL4RenderDevice*)rd)->currentRasterState);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	MFG_CHECK_GL_ERROR();
 
@@ -2590,6 +2835,17 @@ mfError mfgOGL4SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilSt
 
 	mfgOGL4DepthStencilState* oglDSS = (mfgOGL4DepthStencilState*)state;
 
+	mfError err;
+
+	if (((mfgOGL4RenderDevice*)rd)->currentDepthStencilState != NULL)
+	{
+		err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentDepthStencilState);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgOGL4RenderDevice*)rd)->currentDepthStencilState = state;
+
 	if (oglDSS->depthEnabled)
 		glEnable(GL_DEPTH_TEST);
 	else
@@ -2611,6 +2867,10 @@ mfError mfgOGL4SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilSt
 	glStencilFuncSeparate(GL_BACK, oglDSS->backStencilFunc, oglDSS->stencilRef, oglDSS->stencilReadMask);
 	glStencilMaskSeparate(GL_BACK, oglDSS->stencilWriteMask);
 	glStencilOpSeparate(GL_BACK, oglDSS->backFaceStencilFail, oglDSS->backFaceDepthFail, oglDSS->backFaceStencilPass);
+
+	err = mfmIncObjectRef(((mfgOGL4RenderDevice*)rd)->currentDepthStencilState);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	MFG_CHECK_GL_ERROR();
 
@@ -2759,6 +3019,17 @@ mfError mfgOGL4SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
 	if (state == NULL)
 		return mfgOGL4SetBlendState(rd, ((mfgOGL4RenderDevice*)rd)->defaultBlendState);
 
+	mfError err;
+
+	if (((mfgOGL4RenderDevice*)rd)->currentBlendState != NULL)
+	{
+		err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentBlendState);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgOGL4RenderDevice*)rd)->currentBlendState = state;
+
 	mfgOGL4BlendState* oglBS = (mfgOGL4BlendState*)state;
 	
 	if (oglBS->blendEnabled)
@@ -2773,6 +3044,10 @@ mfError mfgOGL4SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
 
 	glBlendEquationSeparate(oglBS->blendOp,
 							oglBS->alphaBlendOp);
+
+	err = mfmIncObjectRef(((mfgOGL4RenderDevice*)rd)->currentBlendState);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	MFG_CHECK_GL_ERROR();
 
@@ -2945,6 +3220,12 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	memset(rd->errorString, '\0', sizeof(rd->errorString));
 	rd->errorStringSize = 0;
 
+	rd->currentBlendState = NULL;
+	rd->currentDepthStencilState = NULL;
+	rd->currentRasterState = NULL;
+	rd->currentFramebuffer = NULL;
+	rd->currentPipeline = NULL;
+	rd->currentVertexArray = NULL;
 	rd->currentIndexBuffer = NULL;
 
 	// Init context
@@ -3103,6 +3384,20 @@ void mfgV2XDestroyOGL4RenderDevice(void * renderDevice)
 	mfgOGL4RenderDevice* rd = (mfgOGL4RenderDevice*)renderDevice;
 
 	// Destroy default states
+	if (mfgV2XSetRasterState(rd, NULL) != MF_ERROR_OKAY)
+		abort();
+	if (mfgV2XSetDepthStencilState(rd, NULL) != MF_ERROR_OKAY)
+		abort();
+	if (mfgV2XSetBlendState(rd, NULL) != MF_ERROR_OKAY)
+		abort();
+
+	if (mfmDecObjectRef(rd->defaultRasterState) != MF_ERROR_OKAY)
+		abort();
+	if (mfmDecObjectRef(rd->defaultDepthStencilState) != MF_ERROR_OKAY)
+		abort();
+	if (mfmDecObjectRef(rd->defaultBlendState) != MF_ERROR_OKAY)
+		abort();
+
 	mfgV2XDestroyRasterState(rd->defaultRasterState);
 	mfgV2XDestroyDepthStencilState(rd->defaultDepthStencilState);
 	mfgV2XDestroyBlendState(rd->defaultBlendState);

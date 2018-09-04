@@ -40,6 +40,7 @@ typedef struct
 	UINT index;
 	BOOL active;
 	void* shader;
+	mfmObject* boundObject;
 } mfgD3D11BindingPoint;
 
 struct mfgD3D11VertexShader
@@ -137,6 +138,8 @@ typedef struct
 	UINT renderTargetCount;
 	ID3D11DepthStencilView* depthStencilView;
 	D3D11_VIEWPORT viewport;
+	mfgD3D11RenderTexture* textures[MFG_D3D11_SHADER_MAX_BP_COUNT];
+	mfgD3D11DepthStencilTexture* depthStencilTexture;
 } mfgD3D11Framebuffer;
 
 typedef struct
@@ -160,6 +163,7 @@ typedef struct
 	mfgV2XRenderDeviceObject base;
 	ID3D11Buffer* buffers[16];
 	UINT bufferCount;
+	mfgD3D11VertexBuffer* vb[16];
 	mfgD3D11VertexLayout* layout;
 } mfgD3D11VertexArray;
 
@@ -232,6 +236,15 @@ typedef struct
 	ID3D11DepthStencilView* defaultDepthStencilView;
 	ID3D11DepthStencilView* depthStencilView;
 
+	mfgD3D11Pipeline* currentPipeline;
+	mfgD3D11Framebuffer* currentFramebuffer;
+	mfgD3D11VertexArray* currentVertexArray;
+	mfgD3D11IndexBuffer* currentIndexBuffer;
+
+	mfgV2XRasterState* currentRasterState;
+	mfgV2XDepthStencilState* currentDepthStencilState;
+	mfgV2XBlendState* currentBlendState;
+
 	BOOL vsyncOn;
 
 } mfgD3D11RenderDevice;
@@ -262,6 +275,8 @@ void mfgD3D11DestroyVertexShader(void* vs)
 	mfgD3D11VertexShader* d3dVS = vs;
 	d3dVS->shader->lpVtbl->Release(d3dVS->shader);
 	
+	if (mfmDecObjectRef(d3dVS->md) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&d3dVS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVS->base.renderDevice)->pool512, d3dVS) != MF_ERROR_OKAY)
@@ -333,6 +348,7 @@ mfError mfgD3D11CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** 
 		d3dVS->bps[i].active = FALSE;
 		d3dVS->bps[i].shader = d3dVS;
 		d3dVS->bps[i].shaderType = MFG_VERTEX_SHADER;
+		d3dVS->bps[i].boundObject = NULL;
 	}
 
 	{
@@ -368,6 +384,10 @@ mfError mfgD3D11CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** 
 		}
 	}
 
+	err = mfmIncObjectRef(metaData);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
+
 	*vs = d3dVS;
 
 	return MF_ERROR_OKAY;
@@ -401,6 +421,8 @@ void mfgD3D11DestroyPixelShader(void* ps)
 
 	mfgD3D11PixelShader* d3dPS = ps;
 	d3dPS->shader->lpVtbl->Release(d3dPS->shader);
+	if (mfmDecObjectRef(d3dPS->md) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&d3dPS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPS->base.renderDevice)->pool512, d3dPS) != MF_ERROR_OKAY)
@@ -472,6 +494,7 @@ mfError mfgD3D11CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps
 		d3dPS->bps[i].active = FALSE;
 		d3dPS->bps[i].shader = d3dPS;
 		d3dPS->bps[i].shaderType = MFG_PIXEL_SHADER;
+		d3dPS->bps[i].boundObject = NULL;
 	}
 
 	{
@@ -506,6 +529,10 @@ mfError mfgD3D11CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps
 			bp = bp->next;
 		}
 	}
+
+	err = mfmIncObjectRef(metaData);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
 
 	*ps = d3dPS;
 
@@ -542,6 +569,15 @@ mfError mfgD3D11BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* b
 	mfgD3D11BindingPoint* d3dBP = bp;
 	mfgD3D11ConstantBuffer* d3dCB = cb;
 
+	mfError err;
+	if (d3dBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(d3dBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dBP->boundObject = d3dCB;
+
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (d3dCB == NULL)
@@ -550,7 +586,12 @@ mfError mfgD3D11BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* b
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &buf);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
+		}
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
@@ -560,7 +601,12 @@ mfError mfgD3D11BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* b
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &buf);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
+		}
 	}
 
 	return MF_ERROR_OKAY;
@@ -576,6 +622,15 @@ mfError mfgD3D11BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoi
 	mfgD3D11BindingPoint* d3dBP = bp;
 	mfgD3D11ConstantBuffer* d3dCB = cb;
 
+	mfError err;
+	if (d3dBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(d3dBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dBP->boundObject = d3dCB;
+
 	UINT d3dOffset = offset;
 	UINT d3dSize = size;
 
@@ -587,7 +642,12 @@ mfError mfgD3D11BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoi
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, &buf, NULL, NULL);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
+		}
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
@@ -597,7 +657,12 @@ mfError mfgD3D11BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoi
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, &buf, NULL, NULL);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
+		}
 	}
 
 	return MF_ERROR_OKAY;
@@ -613,6 +678,15 @@ mfError mfgD3D11BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 	mfgD3D11BindingPoint* d3dBP = bp;
 	mfgD3D11Texture1D* d3dTex = tex;
 
+	mfError err;
+	if (d3dBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(d3dBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dBP->boundObject = d3dTex;
+
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (tex == NULL)
@@ -621,7 +695,12 @@ mfError mfgD3D11BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
@@ -631,7 +710,12 @@ mfError mfgD3D11BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 
 	return MF_ERROR_OKAY;
@@ -647,6 +731,15 @@ mfError mfgD3D11BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 	mfgD3D11BindingPoint* d3dBP = bp;
 	mfgD3D11Texture2D* d3dTex = tex;
 	
+	mfError err;
+	if (d3dBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(d3dBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dBP->boundObject = d3dTex;
+
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (tex == NULL)
@@ -655,7 +748,12 @@ mfError mfgD3D11BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
@@ -665,7 +763,12 @@ mfError mfgD3D11BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 
 	return MF_ERROR_OKAY;
@@ -681,6 +784,15 @@ mfError mfgD3D11BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 	mfgD3D11BindingPoint* d3dBP = bp;
 	mfgD3D11Texture3D* d3dTex = tex;
 
+	mfError err;
+	if (d3dBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(d3dBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dBP->boundObject = d3dTex;
+
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (tex == NULL)
@@ -689,7 +801,12 @@ mfError mfgD3D11BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
@@ -699,7 +816,12 @@ mfError mfgD3D11BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 
 	return MF_ERROR_OKAY;
@@ -715,6 +837,15 @@ mfError mfgD3D11BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 	mfgD3D11BindingPoint* d3dBP = bp;
 	mfgD3D11RenderTexture* d3dTex = tex;
 
+	mfError err;
+	if (d3dBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(d3dBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dBP->boundObject = d3dTex;
+
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (tex == NULL)
@@ -723,7 +854,12 @@ mfError mfgD3D11BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
@@ -733,7 +869,12 @@ mfError mfgD3D11BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &view);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
+		}
 	}
 
 	return MF_ERROR_OKAY;
@@ -749,6 +890,15 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 	mfgD3D11BindingPoint* d3dBP = bp;
 	mfgD3D11Sampler* d3dSampler = sampler;
 
+	mfError err;
+	if (d3dBP->boundObject != NULL)
+	{
+		err = mfmDecObjectRef(d3dBP->boundObject);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dBP->boundObject = d3dSampler;
+
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
 		if (d3dSampler == NULL)
@@ -757,7 +907,12 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 			d3dRD->deviceContext->lpVtbl->VSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &smplr);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
+		}
 	}
 	else if (d3dBP->shaderType == MFG_PIXEL_SHADER)
 	{
@@ -767,7 +922,12 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 			d3dRD->deviceContext->lpVtbl->PSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &smplr);
 		}
 		else
+		{
+			err = mfmIncObjectRef(d3dBP->boundObject);
+			if (err != MF_ERROR_OKAY)
+				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
+		}
 	}
 
 	return MF_ERROR_OKAY;
@@ -841,6 +1001,15 @@ mfError mfgD3D11SetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pp)
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 	mfgD3D11Pipeline* d3dPP = pp;
 
+	mfError err;
+	if (d3dRD->currentPipeline != NULL)
+	{
+		err = mfmDecObjectRef(d3dRD->currentPipeline);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dRD->currentPipeline = pp;
+
 	if (d3dPP == NULL)
 	{
 		d3dRD->deviceContext->lpVtbl->VSSetShader(d3dRD->deviceContext, NULL, NULL, 0);
@@ -848,6 +1017,9 @@ mfError mfgD3D11SetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pp)
 	}
 	else
 	{
+		err = mfmIncObjectRef(pp);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		d3dRD->deviceContext->lpVtbl->VSSetShader(d3dRD->deviceContext, d3dPP->vertex->shader, NULL, 0);
 		d3dRD->deviceContext->lpVtbl->PSSetShader(d3dRD->deviceContext, d3dPP->pixel->shader, NULL, 0);
 	}
@@ -1200,7 +1372,25 @@ mfError mfgD3D11SetIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 	mfgD3D11IndexBuffer* d3dIB = ib;
-	d3dRD->deviceContext->lpVtbl->IASetIndexBuffer(d3dRD->deviceContext, d3dIB->buffer, d3dIB->format, 0);
+
+	mfError err;
+	if (d3dRD->currentIndexBuffer != NULL)
+	{
+		err = mfmDecObjectRef(d3dRD->currentIndexBuffer);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dRD->currentIndexBuffer = ib;
+
+	if (ib == NULL)
+		d3dRD->deviceContext->lpVtbl->IASetIndexBuffer(d3dRD->deviceContext, NULL, 0, 0);
+	else
+	{
+		err = mfmIncObjectRef(d3dRD->currentIndexBuffer);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		d3dRD->deviceContext->lpVtbl->IASetIndexBuffer(d3dRD->deviceContext, d3dIB->buffer, d3dIB->format, 0);
+	}
 
 	return MF_ERROR_OKAY;
 }
@@ -1213,6 +1403,7 @@ void mfgD3D11DestroyVertexLayout(void* vl)
 
 	mfgD3D11VertexLayout* d3dVL = vl;
 	d3dVL->inputLayout->lpVtbl->Release(d3dVL->inputLayout);
+
 	if (mfmDestroyObject(&d3dVL->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVL->base.renderDevice)->pool256, d3dVL) != MF_ERROR_OKAY)
@@ -1365,6 +1556,15 @@ void mfgD3D11DestroyVertexArray(void* va)
 #endif
 
 	mfgD3D11VertexArray* d3dVA = va;
+	if (mfmDecObjectRef(d3dVA->layout) != MF_ERROR_OKAY)
+		abort();
+	for (mfmU64 i = 0; i < 16; ++i)
+	{
+		if (d3dVA->vb[i] == NULL)
+			continue;
+		if (mfmDecObjectRef(d3dVA->vb[i]) != MF_ERROR_OKAY)
+			abort();
+	}
 	if (mfmDestroyObject(&d3dVA->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVA->base.renderDevice)->pool256, d3dVA) != MF_ERROR_OKAY)
@@ -1393,11 +1593,25 @@ mfError mfgD3D11CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va
 	d3dVA->base.object.destructorFunc = &mfgD3D11DestroyVertexArray;
 	d3dVA->base.renderDevice = rd;
 
+	mfError err;
+	err = mfmIncObjectRef(vl);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	for (mfmU64 i = 0; i < 16; ++i)
+		d3dVA->vb[i] = NULL;
+
 	if (bufferCount > 16)
 		MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"Vertex arrays can only have up to 16 vertex buffers");
 	d3dVA->bufferCount = bufferCount;
 	for (mfmU64 i = 0; i < bufferCount; ++i)
+	{
+		d3dVA->vb[i] = buffers[i];
+		err = mfmIncObjectRef(d3dVA->vb[i]);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		d3dVA->buffers[i] = ((mfgD3D11VertexBuffer*)buffers[i])->buffer;
+	}
 	d3dVA->layout = vl;
 
 	*va = d3dVA;
@@ -1408,14 +1622,34 @@ mfError mfgD3D11CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va
 mfError mfgD3D11SetVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray* va)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
-	{ if (rd == NULL || va == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
+	{ if (rd == NULL) return MFG_ERROR_INVALID_ARGUMENTS; }
 #endif
 
 	mfgD3D11RenderDevice* d3dRD = (mfgD3D11RenderDevice*)rd;
 	mfgD3D11VertexArray* d3dVA = va;
 
-	d3dRD->deviceContext->lpVtbl->IASetInputLayout(d3dRD->deviceContext, d3dVA->layout->inputLayout);
-	d3dRD->deviceContext->lpVtbl->IASetVertexBuffers(d3dRD->deviceContext, 0, d3dVA->bufferCount, d3dVA->buffers, d3dVA->layout->strides, d3dVA->layout->offsets);
+	mfError err;
+	if (d3dRD->currentVertexArray != NULL)
+	{
+		err = mfmDecObjectRef(d3dRD->currentVertexArray);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+	d3dRD->currentVertexArray = va;
+
+	if (va == NULL)
+	{
+		d3dRD->deviceContext->lpVtbl->IASetInputLayout(d3dRD->deviceContext, NULL);
+		d3dRD->deviceContext->lpVtbl->IASetVertexBuffers(d3dRD->deviceContext, 0, 0, NULL, NULL, NULL);
+	}
+	else
+	{
+		err = mfmIncObjectRef(d3dRD->currentVertexArray);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		d3dRD->deviceContext->lpVtbl->IASetInputLayout(d3dRD->deviceContext, d3dVA->layout->inputLayout);
+		d3dRD->deviceContext->lpVtbl->IASetVertexBuffers(d3dRD->deviceContext, 0, d3dVA->bufferCount, d3dVA->buffers, d3dVA->layout->strides, d3dVA->layout->offsets);
+	}
 
 	return MF_ERROR_OKAY;
 }
@@ -2260,6 +2494,13 @@ void mfgD3D11DestroyFramebuffer(void* fb)
 #endif
 
 	mfgD3D11Framebuffer* d3dFB = fb;
+	for (mfmU8 i = 0; i < 8; ++i)
+		if (d3dFB->textures[i] != NULL)
+			if (mfmDecObjectRef(d3dFB->textures[i]) != MF_ERROR_OKAY)
+				abort();
+	if (d3dFB->depthStencilTexture != NULL)
+		if (mfmDecObjectRef(d3dFB->depthStencilTexture) != MF_ERROR_OKAY)
+			abort();
 	if (mfmDestroyObject(&d3dFB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dFB->base.renderDevice)->pool256, d3dFB) != MF_ERROR_OKAY)
@@ -2295,6 +2536,11 @@ mfError mfgD3D11CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb
 	mfmF32 width = ((mfgD3D11RenderTexture*)textures[0])->width;
 	mfmF32 height = ((mfgD3D11RenderTexture*)textures[0])->height;
 
+	mfError err;
+
+	for (mfmU64 i = 0; i < 8; ++i)
+		d3dFB->textures[i] = NULL;
+
 	d3dFB->renderTargetCount = textureCount;
 	for (mfmU64 i = 0; i < textureCount; ++i)
 	{
@@ -2302,12 +2548,22 @@ mfError mfgD3D11CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb
 			height != ((mfgD3D11RenderTexture*)textures[i])->height)
 			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"All color textures attached to a framebuffer must have the same width and height");
 		d3dFB->renderTargets[i] = ((mfgD3D11RenderTexture*)textures[i])->target;
+		d3dFB->textures[i] = textures[i];
+		err = mfmIncObjectRef(textures[i]);
+		if (err != MF_ERROR_OKAY)
+			return err;
 	}
 
 	if (depthStencilTexture == NULL)
 		d3dFB->depthStencilView = NULL;
 	else
+	{
+		d3dFB->depthStencilTexture = depthStencilTexture;
+		err = mfmIncObjectRef(depthStencilTexture);
+		if (err != MF_ERROR_OKAY)
+			return err;
 		d3dFB->depthStencilView = ((mfgD3D11DepthStencilTexture*)depthStencilTexture)->view;
+	}
 
 	// Set viewport
 	d3dFB->viewport.TopLeftX = 0;
@@ -2510,6 +2766,21 @@ mfError mfgD3D11SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
 	else
 		d3dRD->deviceContext->lpVtbl->RSSetState(d3dRD->deviceContext, ((mfgD3D11RasterState*)state)->state);
 
+	mfError err;
+
+	if (((mfgD3D11RenderDevice*)rd)->currentRasterState != NULL)
+	{
+		err = mfmDecObjectRef(((mfgD3D11RenderDevice*)rd)->currentRasterState);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgD3D11RenderDevice*)rd)->currentRasterState = state;
+
+	err = mfmIncObjectRef(((mfgD3D11RenderDevice*)rd)->currentRasterState);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -2693,6 +2964,21 @@ mfError mfgD3D11SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilS
 	else
 		d3dRD->deviceContext->lpVtbl->OMSetDepthStencilState(d3dRD->deviceContext, ((mfgD3D11DepthStencilState*)state)->state, ((mfgD3D11DepthStencilState*)state)->stencilRef);
 
+	mfError err;
+
+	if (((mfgD3D11RenderDevice*)rd)->currentDepthStencilState != NULL)
+	{
+		err = mfmDecObjectRef(((mfgD3D11RenderDevice*)rd)->currentDepthStencilState);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgD3D11RenderDevice*)rd)->currentDepthStencilState = state;
+
+	err = mfmIncObjectRef(((mfgD3D11RenderDevice*)rd)->currentDepthStencilState);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	return MF_ERROR_OKAY;
 }
 
@@ -2844,6 +3130,21 @@ mfError mfgD3D11SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
 		FLOAT color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		d3dRD->deviceContext->lpVtbl->OMSetBlendState(d3dRD->deviceContext, ((mfgD3D11BlendState*)state)->state, color, 0xFFFFFFFF);
 	}
+
+	mfError err;
+
+	if (((mfgD3D11RenderDevice*)rd)->currentBlendState != NULL)
+	{
+		err = mfmDecObjectRef(((mfgD3D11RenderDevice*)rd)->currentBlendState);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgD3D11RenderDevice*)rd)->currentBlendState = state;
+
+	err = mfmIncObjectRef(((mfgD3D11RenderDevice*)rd)->currentBlendState);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	return MF_ERROR_OKAY;
 }
@@ -3015,6 +3316,14 @@ mfError mfgV2XCreateD3D11RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWin
 	memset(rd->errorString, '\0', sizeof(rd->errorString));
 	rd->errorStringSize = 0;
 	rd->vsyncOn = (desc->vsyncEnabled == MFM_TRUE) ? TRUE : FALSE;
+
+	rd->currentBlendState = NULL;
+	rd->currentDepthStencilState = NULL;
+	rd->currentRasterState = NULL;
+	rd->currentFramebuffer = NULL;
+	rd->currentPipeline = NULL;
+	rd->currentVertexArray = NULL;
+	rd->currentIndexBuffer = NULL;
 
 	// Init D3D11 stuff
 	{
@@ -3266,6 +3575,20 @@ void mfgV2XDestroyD3D11RenderDevice(void * renderDevice)
 	mfgD3D11RenderDevice* rd = (mfgD3D11RenderDevice*)renderDevice;
 
 	// Destroy default states
+	if (mfgV2XSetRasterState(rd, NULL) != MF_ERROR_OKAY)
+		abort();
+	if (mfgV2XSetDepthStencilState(rd, NULL) != MF_ERROR_OKAY)
+		abort();
+	if (mfgV2XSetBlendState(rd, NULL) != MF_ERROR_OKAY)
+		abort();
+
+	if (mfmDecObjectRef(rd->defaultRasterState) != MF_ERROR_OKAY)
+		abort();
+	if (mfmDecObjectRef(rd->defaultDepthStencilState) != MF_ERROR_OKAY)
+		abort();
+	if (mfmDecObjectRef(rd->defaultBlendState) != MF_ERROR_OKAY)
+		abort();
+
 	mfgV2XDestroyRasterState(rd->defaultRasterState);
 	mfgV2XDestroyDepthStencilState(rd->defaultDepthStencilState);
 	mfgV2XDestroyBlendState(rd->defaultBlendState);

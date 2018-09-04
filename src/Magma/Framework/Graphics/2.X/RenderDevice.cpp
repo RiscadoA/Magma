@@ -14,8 +14,10 @@
 	mfsUTF8CodeUnit internalErrorMsg[256] = { '\0' };\
 	mfgV2XGetErrorString(rd, internalErrorMsg, sizeof(internalErrorMsg));\
 	e = mfsPrintFormat((mfsStream*)&ss, u8"Error on function " __FUNCTION__ ": %s\n%s\n", mfErrorToString(err), internalErrorMsg);\
+	if (e != MF_ERROR_OKAY)\
+		throw Magma::Framework::Graphics::RenderDeviceError(mfErrorToString(err));\
 	mfsDestroyLocalStringStream(&ss);\
-\
+	throw Magma::Framework::Graphics::RenderDeviceError(msg);\
  } } while(false)
 #else
 #define CHECK_ERROR(err) do {} while(false)
@@ -131,20 +133,20 @@ void Magma::Framework::Graphics::V2X::IndexBuffer::Unmap()
 	CHECK_ERROR(ib->renderDevice, err);
 }
 
-Magma::Framework::Graphics::V2X::VertexShader Magma::Framework::Graphics::V2X::RenderDevice::CreateVertexShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, const mfgMetaData * metaData)
+Magma::Framework::Graphics::V2X::VertexShader Magma::Framework::Graphics::V2X::RenderDevice::CreateVertexShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XVertexShader* vs = NULL;
-	mfError err = mfgV2XCreateVertexShader(rd, &vs, bytecode, bytecodeSize, metaData);
+	mfError err = mfgV2XCreateVertexShader(rd, &vs, bytecode, bytecodeSize, (mfgMetaData*)&metaData.Get());
 	CHECK_ERROR(rd, err);
 	return vs;
 }
 
-Magma::Framework::Graphics::V2X::PixelShader Magma::Framework::Graphics::V2X::RenderDevice::CreatePixelShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, const mfgMetaData * metaData)
+Magma::Framework::Graphics::V2X::PixelShader Magma::Framework::Graphics::V2X::RenderDevice::CreatePixelShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XVertexShader* ps = NULL;
-	mfError err = mfgV2XCreatePixelShader(rd, &ps, bytecode, bytecodeSize, metaData);
+	mfError err = mfgV2XCreatePixelShader(rd, &ps, bytecode, bytecodeSize, (mfgMetaData*)&metaData.Get());
 	CHECK_ERROR(rd, err);
 	return ps;
 }
@@ -153,7 +155,7 @@ Magma::Framework::Graphics::V2X::Pipeline Magma::Framework::Graphics::V2X::Rende
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XPipeline* pp = NULL;
-	mfError err = mfgV2XCreatePipeline(rd, &pp, (mfgV2XVertexShader*)vs.GetNoChecks(), (mfgV2XPixelShader*)ps.GetNoChecks());
+	mfError err = mfgV2XCreatePipeline(rd, &pp, (mfgV2XVertexShader*)&vs.Get(), (mfgV2XPixelShader*)&ps.Get());
 	CHECK_ERROR(rd, err);
 	return pp;
 }
@@ -270,7 +272,7 @@ Magma::Framework::Graphics::V2X::VertexArray Magma::Framework::Graphics::V2X::Re
 void Magma::Framework::Graphics::V2X::RenderDevice::SetVertexArray(VertexArray va)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
-	mfError err = mfgV2XSetVertexArray(rd, (mfgV2XVertexArray*)&va.Get());
+	mfError err = mfgV2XSetVertexArray(rd, (mfgV2XVertexArray*)va.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
@@ -286,7 +288,7 @@ Magma::Framework::Graphics::V2X::IndexBuffer Magma::Framework::Graphics::V2X::Re
 void Magma::Framework::Graphics::V2X::RenderDevice::SetIndexBuffer(IndexBuffer ib)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
-	mfError err = mfgV2XSetIndexBuffer(rd, (mfgV2XIndexBuffer*)&ib.Get());
+	mfError err = mfgV2XSetIndexBuffer(rd, (mfgV2XIndexBuffer*)ib.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
