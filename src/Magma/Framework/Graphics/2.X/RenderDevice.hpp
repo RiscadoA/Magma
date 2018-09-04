@@ -631,6 +631,11 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline VertexShader(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Gets a binding point from this shader.
+					/// </summary>
+					/// <param name="name">Binding point name</param>
+					/// <returns>Binding point handle</returns>
 					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
 
@@ -645,6 +650,11 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline PixelShader(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Gets a binding point from this shader.
+					/// </summary>
+					/// <param name="name">Binding point name</param>
+					/// <returns>Binding point handle</returns>
 					void* GetBindingPoint(const mfsUTF8CodeUnit* name);
 				};
 
@@ -671,8 +681,15 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline ConstantBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Maps the constant buffer to a region in memory.
+					/// </summary>
+					/// <returns>Memory region pointer</returns>
 					void* Map();
-
+					
+					/// <summary>
+					///		Unmaps the constant buffer from a region in memory.
+					/// </summary>
 					void Unmap();
 				};
 
@@ -687,6 +704,12 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline Texture1D(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Updates a texture with new data.
+					/// </summary>
+					/// <param name="dstX">X destination</param>
+					/// <param name="width">New data width</param>
+					/// <param name="data">New data</param>
 					void Update(mfmU32 dstX, mfmU32 width, const void* data);
 				};
 
@@ -701,6 +724,14 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline Texture2D(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Updates a texture with new data.
+					/// </summary>
+					/// <param name="dstX">X destination</param>
+					/// <param name="dstY">Y destination</param>
+					/// <param name="width">New data width</param>
+					/// <param name="height">New data height</param>
+					/// <param name="data">New data</param>
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void* data);
 				};
 
@@ -715,6 +746,16 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline Texture3D(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Updates a texture with new data.
+					/// </summary>
+					/// <param name="dstX">X destination</param>
+					/// <param name="dstY">Y destination</param>
+					/// <param name="dstZ">Z destination</param>
+					/// <param name="width">New data width</param>
+					/// <param name="height">New data height</param>
+					/// <param name="depth">New data depth</param>
+					/// <param name="data">New data</param>
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void* data);
 				};
 
@@ -741,8 +782,15 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline VertexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Maps the vertex buffer to a region in memory.
+					/// </summary>
+					/// <returns>Memory region pointer</returns>
 					void* Map();
 
+					/// <summary>
+					///		Unmaps the vertex buffer from a region in memory.
+					/// </summary>
 					void Unmap();
 				};
 
@@ -781,8 +829,15 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline IndexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
+					/// <summary>
+					///		Maps the index buffer to a region in memory.
+					/// </summary>
+					/// <returns>Memory region pointer</returns>
 					void* Map();
 
+					/// <summary>
+					///		Unmaps the index buffer from a region in memory.
+					/// </summary>
 					void Unmap();
 				};
 
