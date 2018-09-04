@@ -53,6 +53,13 @@ void Magma::Framework::Graphics::V2X::Texture1D::Update(mfmU32 dstX, mfmU32 widt
 	CHECK_ERROR(err);
 }
 
+void Magma::Framework::Graphics::V2X::Texture1D::GenerateMipmaps()
+{
+	auto tex = (mfgV2XTexture1D*)&this->Get();
+	mfError err = mfgV2XGenerateTexture1DMipmaps(tex->renderDevice, tex);
+	CHECK_ERROR(err);
+}
+
 void Magma::Framework::Graphics::V2X::Texture2D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void * data)
 {
 	auto tex = (mfgV2XTexture2D*)&this->Get();
@@ -60,10 +67,24 @@ void Magma::Framework::Graphics::V2X::Texture2D::Update(mfmU32 dstX, mfmU32 dstY
 	CHECK_ERROR(err);
 }
 
+void Magma::Framework::Graphics::V2X::Texture2D::GenerateMipmaps()
+{
+	auto tex = (mfgV2XTexture2D*)&this->Get();
+	mfError err = mfgV2XGenerateTexture2DMipmaps(tex->renderDevice, tex);
+	CHECK_ERROR(err);
+}
+
 void Magma::Framework::Graphics::V2X::Texture3D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void * data)
 {
 	auto tex = (mfgV2XTexture3D*)&this->Get();
 	mfError err = mfgV2XUpdateTexture3D(tex->renderDevice, tex, dstX, dstY, dstZ, width, height, depth, data);
+	CHECK_ERROR(err);
+}
+
+void Magma::Framework::Graphics::V2X::Texture3D::GenerateMipmaps()
+{
+	auto tex = (mfgV2XTexture3D*)&this->Get();
+	mfError err = mfgV2XGenerateTexture3DMipmaps(tex->renderDevice, tex);
 	CHECK_ERROR(err);
 }
 

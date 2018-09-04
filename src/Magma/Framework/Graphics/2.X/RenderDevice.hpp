@@ -711,6 +711,11 @@ namespace Magma
 					/// <param name="width">New data width</param>
 					/// <param name="data">New data</param>
 					void Update(mfmU32 dstX, mfmU32 width, const void* data);
+
+					/// <summary>
+					///		Generates mipmaps on this texture.
+					/// </summary>
+					void GenerateMipmaps();
 				};
 
 				/// <summary>
@@ -733,6 +738,11 @@ namespace Magma
 					/// <param name="height">New data height</param>
 					/// <param name="data">New data</param>
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void* data);
+
+					/// <summary>
+					///		Generates mipmaps on this texture.
+					/// </summary>
+					void GenerateMipmaps();
 				};
 
 				/// <summary>
@@ -757,6 +767,11 @@ namespace Magma
 					/// <param name="depth">New data depth</param>
 					/// <param name="data">New data</param>
 					void Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void* data);
+				
+					/// <summary>
+					///		Generates mipmaps on this texture.
+					/// </summary>
+					void GenerateMipmaps();
 				};
 
 				/// <summary>
@@ -925,7 +940,258 @@ namespace Magma
 					explicit inline RenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					// TO DO: ADD FUNCTIONS
-					
+
+					/// <summary>
+					///		Creates a new vertex shader.
+					/// </summary>
+					/// <param name="bytecode">Shader bytecode</param>
+					/// <param name="bytecodeSize">Shader bytecode size</param>
+					/// <returns>Shader handle</returns>
+					VertexShader CreateVertexShader(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
+
+					/// <summary>
+					///		Creates a new pixel shader.
+					/// </summary>
+					/// <param name="bytecode">Shader bytecode</param>
+					/// <param name="bytecodeSize">Shader bytecode size</param>
+					/// <returns>Shader handle</returns>
+					PixelShader CreatePixelShader(const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData);
+
+					/// <summary>
+					///		Creates a new pipeline,
+					/// </summary>
+					/// <param name="vs">Vertex shader handle</param>
+					/// <param name="ps">Pixel shader handle</param>
+					/// <returns>Pipeline handle</returns>
+					Pipeline CreatePipeline(VertexShader vs, PixelShader ps);
+
+					/// <summary>
+					///		Sets the pipeline used for rendering.
+					/// </summary>
+					/// <param name="pipeline">Pipeline handle</param>
+					void SetPipeline(Pipeline pipeline);
+
+					/// <summary>
+					///		Binds a constant buffer to a binding point.
+					/// </summary>
+					/// <param name="bp">Binding point</param>
+					/// <param name="cb">Cosntant buffer handle</param>
+					void BindConstantBuffer(void* bp, ConstantBuffer cb);
+
+					/// <summary>
+					///		Binds a section of a constant buffer to a binding point.
+					/// </summary>
+					/// <param name="bp">Binding point</param>
+					/// <param name="cb">Cosntant buffer handle</param>
+					/// <param name="offset">Offset in the constant buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
+					/// <param name="size">Memory size in the constant buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
+					void BindConstantBufferRange(void* bp, ConstantBuffer cb, mfmU64 offset, mfmU64 size);
+
+					/// <summary>
+					///		Binds a 1D texture to a binding point.
+					/// </summary>
+					/// <param name="bp">Binding point</param>
+					/// <param name="tex">Texture handle</param>
+					void BindTexture1D(void* bp, Texture1D tex);
+
+					/// <summary>
+					///		Binds a 2D texture to a binding point.
+					/// </summary>
+					/// <param name="bp">Binding point</param>
+					/// <param name="tex">Texture handle</param>
+					void BindTexture2D(void* bp, Texture2D tex);
+
+					/// <summary>
+					///		Binds a 3D texture to a binding point.
+					/// </summary>
+					/// <param name="bp">Binding point</param>
+					/// <param name="tex">Texture handle</param>
+					void BindTexture3D(void* bp, Texture3D tex);
+
+					/// <summary>
+					///		Binds a render texture to a binding point.
+					/// </summary>
+					/// <param name="bp">Binding point</param>
+					/// <param name="tex">Render texture handle</param>
+					void BindRenderTexture(void* bp, RenderTexture tex);
+
+					/// <summary>
+					///		Binds a sampler to a binding point.
+					/// </summary>
+					/// <param name="bp">Binding point</param>
+					/// <param name="sampler">Sampler handle</param>
+					void BindSampler(void* bp, Sampler sampler);
+
+					/// <summary>
+					///		Creates a new constant buffer.
+					/// </summary>
+					/// <param name="size">Constant buffer size in bytes</param>
+					/// <param name="data">Constant buffer initial data (may be set to NULL if the buffer isn't static)</param>
+					/// <param name="usage">Buffer usage mode</param>
+					/// <returns>Buffer handle</returns>
+					ConstantBuffer CreateConstantBuffer(mfmU64 size, const void* data, Usage usage);
+
+					/// <summary>
+					///		Creates a new vertex buffer.
+					/// </summary>
+					/// <param name="size">Vertex buffer size in bytes</param>
+					/// <param name="data">Vertex buffer initial data (may be set to NULL if the buffer isn't static)</param>
+					/// <param name="usage">Buffer usage mode</param>
+					/// <returns>Buffer handle</returns>
+					VertexBuffer CreateVertexBuffer(mfmU64 size, const void* data, Usage usage);
+
+					/// <summary>
+					///		Creates a new vertex layout.
+					/// </summary>
+					/// <param name="elementCount">Vertex element count</param>
+					/// <param name="elements">Vertex elements</param>
+					/// <param name="vs">Vertex shader handle</param>
+					/// <returns>Vertex layout handle</returns>
+					VertexLayout CreateVertexLayout(mfmU64 elementCount, const VertexElement* elements, VertexShader vs);
+
+					/// <summary>
+					///		Creates a new vertex array.
+					/// </summary>
+					/// <param name="bufferCount">Vertex buffer count</param>
+					/// <param name="buffers">Vertex buffer handles</param>
+					/// <param name="layout">Vertex layout handle</param>
+					/// <returns>Vertex array handle</returns>
+					VertexArray CreateVertexArray(mfmU64 bufferCount, VertexBuffer* buffers, VertexLayout layout);
+
+					/// <summary>
+					///		Sets the currently active vertex array.
+					/// </summary>
+					/// <param name="ib">Vertex array handle</param>
+					void SetVertexArray(VertexArray va);
+
+					/// <summary>
+					///		Creates a new index buffer.
+					/// </summary>
+					/// <param name="size">Index buffer size in bytes</param>
+					/// <param name="data">Index buffer initial data (may be set to NULL if the buffer isn't static)</param>
+					/// <param name="type">Index data type (valid: Type::UShort; Type::UInt)</param>
+					/// <param name="usage">Buffer usage mode</param>
+					/// <returns>Buffer handle</returns>
+					IndexBuffer CreateIndexBuffer(mfmU64 size, const void* data, Type type, Usage usage);
+
+					/// <summary>
+					///		Sets the currently active index buffer.
+					/// </summary>
+					/// <param name="ib">Index buffer handle</param>
+					void SetIndexBuffer(IndexBuffer ib);
+
+					/// <summary>
+					///		Creates a new 1D texture.
+					/// </summary>
+					/// <param name="width">Texture width</param>
+					/// <param name="format">Texture data format</param>
+					/// <param name="data">Texture data</param>
+					/// <param name="usage">Texture usage mode</param>
+					/// <returns>Texture handle</returns>
+					Texture1D CreateTexture1D(mfmU64 width, Format format, const void* data, Usage usage);
+
+					/// <summary>
+					///		Creates a new 2D texture.
+					/// </summary>
+					/// <param name="width">Texture width</param>
+					/// <param name="height">Texture height</param>
+					/// <param name="format">Texture data format</param>
+					/// <param name="data">Texture data</param>
+					/// <param name="usage">Texture usage mode</param>
+					/// <returns>Texture handle</returns>
+					Texture2D CreateTexture2D(mfmU64 width, mfmU64 height, Format format, const void* data, Usage usage);
+
+					/// <summary>
+					///		Creates a new 3D texture.
+					/// </summary>
+					/// <param name="width">Texture width</param>
+					/// <param name="height">Texture height</param>
+					/// <param name="depth">Texture depth</param>
+					/// <param name="format">Texture data format</param>
+					/// <param name="data">Texture data</param>
+					/// <param name="usage">Texture usage mode</param>
+					/// <returns>Texture handle</returns>
+					Texture3D CreateTexture3D(mfmU64 width, mfmU64 height, mfmU64 depth, Format format, const void* data, Usage usage);
+
+					/// <summary>
+					///		Creates a new sampler.
+					/// </summary>
+					/// <param name="desc">Sampler description</param>
+					/// <returns>Sampler handle</returns>
+					Sampler CreateSampler(const SamplerDesc* desc);
+
+					/// <summary>
+					///		Creates a new rasterizer state.
+					/// </summary>
+					/// <param name="desc">Rasterizer state description</param>
+					/// <returns>Rasterizer state handle</returns>
+					RasterState CreateRasterState(const RasterStateDesc* desc);
+
+					/// <summary>
+					///		Creates a new depth stencil state.
+					/// </summary>
+					/// <param name="desc">Depth stencil state description</param>
+					/// <returns>Depth stencil state handle</returns>
+					DepthStencilState CreateDepthStencilState(const DepthStencilStateDesc* desc);
+
+					/// <summary>
+					///		Creates a new blend state.
+					/// </summary>
+					/// <param name="desc">Blend state description</param>
+					/// <returns>Blend state handle</returns>
+					BlendState CreateBlendState(const BlendStateDesc* desc);
+
+					/// <summary>
+					///		Sets the currently active rasterizer state.
+					/// </summary>
+					/// <param name="state">State handle</param>
+					void SetRasterState(RasterState state);
+
+					/// <summary>
+					///		Sets the currently active depth stencil state.
+					/// </summary>
+					/// <param name="state">State handle</param>
+					void SetDepthStencilState(DepthStencilState state);
+
+					/// <summary>
+					///		Sets the currently active blend state.
+					/// </summary>
+					/// <param name="state">State handle</param>
+					void SetBlendState(BlendState state);
+
+					/// <summary>
+					///		Creates a new render texture.
+					/// </summary>
+					/// <param name="width">Texture width</param>
+					/// <param name="height">Texture height</param>
+					/// <param name="format">Texture data format</param>
+					/// <returns>Texture handle</returns>
+					RenderTexture CreateRenderTexture(mfmU64 width, mfmU64 height, Format format);
+
+					/// <summary>
+					///		Creates a new depth stencil texture.
+					/// </summary>
+					/// <param name="width">Texture width</param>
+					/// <param name="height">Texture height</param>
+					/// <param name="format">Texture data format</param>
+					/// <returns>Texture handle</returns>
+					DepthStencilTexture CreateDepthStencilTexture(mfmU64 width, mfmU64 height, Format format);
+
+					/// <summary>
+					///		Creates a new framebuffer.
+					/// </summary>
+					/// <param name="textureCount">Render texture count</param>
+					/// <param name="textures">Render texture handles</param>
+					/// <param name="depthStencilTexture">Depth stencil texture handle (optional, may be NULL)</param>
+					/// <returns>Framebuffer handle</returns>
+					Framebuffer CreateFramebuffer(mfmU64 textureCount, RenderTexture* textures, DepthStencilTexture depthStencilTexture);
+
+					/// <summary>
+					///		Sets the currently active framebuffer.
+					/// </summary>
+					/// <param name="framebuffer">Framebuffer handle</param>
+					void SetFramebuffer(Framebuffer framebuffer);
+
 					/// <summary>
 					///		Clears the current framebuffer color textures.
 					/// </summary>
@@ -934,6 +1200,33 @@ namespace Magma
 					/// <param name="b">New blue component value</param>
 					/// <param name="a">New alpha component value</param>
 					void ClearColor(mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a);
+
+					/// <summary>
+					///		Clears the current framebuffer depth texture.
+					/// </summary>
+					/// <param name="depth">New depth value</param>
+					void ClearDepth(mfmF32 depth);
+
+					/// <summary>
+					///		Clears the current framebuffer stencil texture.
+					/// </summary>
+					/// <param name="stencil">New stencil value</param>
+					void ClearStencil(mfmI32 stencil);
+
+					/// <summary>
+					///		Draws the triangles stored in the currently active vertex array using the currently active pipeline.
+					/// </summary>
+					/// <param name="rd">Render device</param>
+					/// <param name="offset">First vertex offset</param>
+					/// <param name="count">Vertex count</param>
+					void DrawTriangles();
+
+					/// <summary>
+					///		Draws the triangles stored in the currently active vertex array using the currently active pipeline and index buffer.
+					/// </summary>
+					/// <param name="offset">First index offset</param>
+					/// <param name="count">Index count</param>
+					void DrawTrianglesIndexed();
 
 					/// <summary>
 					///		Swaps the front and back buffers.
