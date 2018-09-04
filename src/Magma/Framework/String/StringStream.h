@@ -47,7 +47,7 @@ extern "C"
 	/// <summary>
 	///		Destroys a string stream created by mfsCreateLocalStringStream.
 	/// </summary>
-	/// <param name="stream">Stream handle</param>
+	/// <param name="stream">StreamHandle handle</param>
 	void mfsDestroyLocalStringStream(mfsStringStream* stream);
 
 	/// <summary>

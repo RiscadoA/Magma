@@ -66,6 +66,8 @@ extern "C"
 	/// </summary>
 	typedef mfmU8 mfmBool;
 
+	typedef mfmU32 mfmEnum;
+
 #define MFM_FALSE 0
 #define MFM_TRUE 1
 

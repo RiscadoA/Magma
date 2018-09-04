@@ -11,12 +11,12 @@ namespace Magma
 		namespace Memory
 		{
 			/// <summary>
-			///		Encapsulates the magma framework C stack allocator declared on StackAllocator.h.
+			///		Encapsulates the magma framework C stack allocator declared on StackAllocatorHandle.h.
 			/// </summary>
-			class StackAllocator final : public Allocator
+			class StackAllocatorHandle final : public AllocatorHandle
 			{
 			public:
-				using Allocator::Allocator;
+				using AllocatorHandle::AllocatorHandle;
 			};
 
 			/// <summary>
@@ -24,7 +24,7 @@ namespace Magma
 			/// </summary>
 			/// <param name="size">Stack allocator size</param>
 			/// <returns>Stack allocator handle</returns>
-			StackAllocator CreateStackAllocator(mfmU64 size);
+			StackAllocatorHandle CreateStackAllocator(mfmU64 size);
 
 			/// <summary>
 			///		Creates a stack allocator on a predefined memory region.
@@ -34,7 +34,7 @@ namespace Magma
 			/// <param name="memory">Memory region</param>
 			/// <param name="memorySize">Memory region size</param>
 			/// <returns>Stack allocator handle</returns>
-			StackAllocator CreateStackAllocatorOnMemory(mfmU64 size, void* memory, mfmU64 memorySize);
+			StackAllocatorHandle CreateStackAllocatorOnMemory(mfmU64 size, void* memory, mfmU64 memorySize);
 		}
 	}
 }

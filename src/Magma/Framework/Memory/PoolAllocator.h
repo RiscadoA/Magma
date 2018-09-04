@@ -98,29 +98,29 @@ extern "C"
 	/// <summary>
 	///		Gets the number of slots in a pool allocator.
 	/// </summary>
-	/// <param name="allocator">Allocator pointer</param>
-	/// <returns>Allocator slot count</returns>
+	/// <param name="allocator">AllocatorHandle pointer</param>
+	/// <returns>AllocatorHandle slot count</returns>
 	mfmU64 mfmPoolGetSlotCount(mfmPoolAllocator* allocator);
 
 	/// <summary>
 	///		Gets the number of chunks in a pool allocator.
 	/// </summary>
-	/// <param name="allocator">Allocator pointer</param>
-	/// <returns>Allocator chunk count</returns>
+	/// <param name="allocator">AllocatorHandle pointer</param>
+	/// <returns>AllocatorHandle chunk count</returns>
 	mfmU64 mfmPoolGetChunkCount(mfmPoolAllocator* allocator);
 
 	/// <summary>
 	///		Gets the number of occupied slots in a pool allocator.
 	/// </summary>
-	/// <param name="allocator">Allocator pointer</param>
-	/// <returns>Allocator occupied slot count</returns>
+	/// <param name="allocator">AllocatorHandle pointer</param>
+	/// <returns>AllocatorHandle occupied slot count</returns>
 	mfmU64 mfmPoolGetOccupiedSlotCount(mfmPoolAllocator* allocator);
 
 	/// <summary>
 	///		Gets the number of occupied slots in a pool allocator.
 	/// </summary>
-	/// <param name="allocator">Allocator pointer</param>
-	/// <returns>Allocator free slot count</returns>
+	/// <param name="allocator">AllocatorHandle pointer</param>
+	/// <returns>AllocatorHandle free slot count</returns>
 	mfmU64 mfmPoolGetFreeSlotCount(mfmPoolAllocator* allocator);
 
 #ifdef __cplusplus

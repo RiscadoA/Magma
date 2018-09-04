@@ -20,7 +20,7 @@ extern "C"
 	/// <param name="thread">Out thread handle</param>
 	/// <param name="function">Thread function</param>
 	/// <param name="args">Thread arguments</param>
-	/// <param name="allocator">Allocator where the thread will be allocated</param>
+	/// <param name="allocator">AllocatorHandle where the thread will be allocated</param>
 	/// <returns>
 	///		Returns MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.

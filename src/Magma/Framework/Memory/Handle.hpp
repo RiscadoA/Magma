@@ -12,15 +12,15 @@ namespace Magma
 			///		Used as an object handle.
 			///		Destroys the object automatically when there are no more references to it.
 			/// </summary>
-			class Object
+			class Handle
 			{
 			public:
-				Object();
-				Object(mfmObject& obj);
-				Object(void* obj);
-				Object(const Object& rhs);
-				Object(Object&& rhs);
-				virtual ~Object();
+				Handle();
+				Handle(mfmObject& obj);
+				Handle(void* obj);
+				Handle(const Handle& rhs);
+				Handle(Handle&& rhs);
+				virtual ~Handle();
 
 				/// <summary>
 				///		Sets a new object to where this handle will point.
@@ -41,8 +41,8 @@ namespace Magma
 				/// <returns>Reference to the currently set object</returns>
 				mfmObject& Get() const;
 
-				Object& operator=(mfmObject& obj);
-				Object& operator=(Object obj);
+				Handle& operator=(mfmObject& obj);
+				Handle& operator=(Handle obj);
 				mfmObject* operator->() const;
 
 				/// <summary>

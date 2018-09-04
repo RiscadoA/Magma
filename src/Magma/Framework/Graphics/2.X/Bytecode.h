@@ -372,7 +372,7 @@ typedef struct
 /// <param name="metaData">Binary meta data</param>
 /// <param name="size">Binary meta data size</param>
 /// <param name="outData">Out shader meta data</param>
-/// <param name="allocator">Allocator to use</param>
+/// <param name="allocator">AllocatorHandle to use</param>
 /// <returns>
 ///		Returns MF_ERROR_OKAY if there were no errors.
 ///		Returns MFG_ERROR_INVALID_ARGUMENTS if metaData or outData are NULL.
