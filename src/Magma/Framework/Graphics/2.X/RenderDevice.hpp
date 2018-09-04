@@ -939,8 +939,6 @@ namespace Magma
 					using Handle::operator=;
 					explicit inline RenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
 
-					// TO DO: ADD FUNCTIONS
-
 					/// <summary>
 					///		Creates a new vertex shader.
 					/// </summary>
@@ -1118,28 +1116,28 @@ namespace Magma
 					/// </summary>
 					/// <param name="desc">Sampler description</param>
 					/// <returns>Sampler handle</returns>
-					Sampler CreateSampler(const SamplerDesc* desc);
+					Sampler CreateSampler(const SamplerDesc & desc);
 
 					/// <summary>
 					///		Creates a new rasterizer state.
 					/// </summary>
 					/// <param name="desc">Rasterizer state description</param>
 					/// <returns>Rasterizer state handle</returns>
-					RasterState CreateRasterState(const RasterStateDesc* desc);
+					RasterState CreateRasterState(const RasterStateDesc & desc);
 
 					/// <summary>
 					///		Creates a new depth stencil state.
 					/// </summary>
 					/// <param name="desc">Depth stencil state description</param>
 					/// <returns>Depth stencil state handle</returns>
-					DepthStencilState CreateDepthStencilState(const DepthStencilStateDesc* desc);
+					DepthStencilState CreateDepthStencilState(const DepthStencilStateDesc & desc);
 
 					/// <summary>
 					///		Creates a new blend state.
 					/// </summary>
 					/// <param name="desc">Blend state description</param>
 					/// <returns>Blend state handle</returns>
-					BlendState CreateBlendState(const BlendStateDesc* desc);
+					BlendState CreateBlendState(const BlendStateDesc & desc);
 
 					/// <summary>
 					///		Sets the currently active rasterizer state.
@@ -1216,17 +1214,16 @@ namespace Magma
 					/// <summary>
 					///		Draws the triangles stored in the currently active vertex array using the currently active pipeline.
 					/// </summary>
-					/// <param name="rd">Render device</param>
 					/// <param name="offset">First vertex offset</param>
 					/// <param name="count">Vertex count</param>
-					void DrawTriangles();
+					void DrawTriangles(mfmU64 offset, mfmU64 count);
 
 					/// <summary>
 					///		Draws the triangles stored in the currently active vertex array using the currently active pipeline and index buffer.
 					/// </summary>
 					/// <param name="offset">First index offset</param>
 					/// <param name="count">Index count</param>
-					void DrawTrianglesIndexed();
+					void DrawTrianglesIndexed(mfmU64 offset, mfmU64 count);
 
 					/// <summary>
 					///		Swaps the front and back buffers.
