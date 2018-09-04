@@ -30,7 +30,11 @@ int main(int argc, const char** argv)
 	catch (std::runtime_error& err)
 	{
 		String::ErrStream.PutString(err.what());
+		return 1;
 	}
+
+	Graphics::V2X::VertexArray va = NULL;
+	Graphics::V2X::Texture2D tex = NULL;
 
 	while (!winShouldClose)
 	{

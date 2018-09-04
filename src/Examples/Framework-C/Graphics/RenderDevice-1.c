@@ -45,7 +45,7 @@ void OnClose(void* window)
 	windowOpen = MFM_FALSE;
 }
 
-#define USE_GL
+//#define USE_GL
 
 int main(int argc, const char** argv)
 {
@@ -492,6 +492,15 @@ int main(int argc, const char** argv)
 		if (mfgV2XSwapBuffers(renderDevice) != MF_ERROR_OKAY)
 			abort();
 	}
+
+	if (mfgV2XBindConstantBuffer(renderDevice, cbBP, NULL) != MF_ERROR_OKAY)
+		abort();
+	if (mfgV2XSetVertexArray(renderDevice, NULL) != MF_ERROR_OKAY)
+		abort();
+	if (mfgV2XSetIndexBuffer(renderDevice, NULL) != MF_ERROR_OKAY)
+		abort();
+	if (mfgV2XSetPipeline(renderDevice, NULL) != MF_ERROR_OKAY)
+		abort();
 
 	mfgV2XDestroyFramebuffer(fb);
 	mfgV2XDestroyDepthStencilTexture(dst);
