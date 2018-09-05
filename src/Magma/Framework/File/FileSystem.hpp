@@ -11,14 +11,14 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace FileHandle
+		namespace File
 		{
 			/// <summary>
 			///		Represents a file type.
 			/// </summary>
 			enum class FileType : mffEnum
 			{
-				FileHandle		= MFF_FILE,
+				File		= MFF_FILE,
 				Directory	= MFF_DIRECTORY,
 			};
 

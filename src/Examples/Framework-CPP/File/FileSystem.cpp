@@ -8,7 +8,7 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	FileHandle::ArchiveHandle archive = NULL;
+	File::ArchiveHandle archive = NULL;
 
 	// Create archive and register it
 	{
@@ -16,16 +16,16 @@ int main(int argc, const char** argv)
 		String::StreamHandle ss = String::CreateStringStream(path, sizeof(path));
 		ss.PutString(mffMagmaRootDirectory);
 		ss.PutString(u8"/resources/FileSystem-Example");
-		archive = FileHandle::CreateFolderArchive(path);
-		FileHandle::RegisterArchive(archive, u8"temp");
+		archive = File::CreateFolderArchive(path);
+		File::RegisterArchive(archive, u8"temp");
 	}
 
 	// Create directory
-	FileHandle::FileHandle dir = FileHandle::CreateDirectory(u8"/temp/dir");
+	File::FileHandle dir = File::CreateDirectory(u8"/temp/dir");
 
-	FileHandle::FileHandle file = FileHandle::CreateFile(u8"/temp/dir/test.txt");
+	File::FileHandle file = File::CreateFile(u8"/temp/dir/test.txt");
 	
-	String::StreamHandle stream = FileHandle::OpenFile(file, FileHandle::FileMode::Write);
+	String::StreamHandle stream = File::OpenFile(file, File::FileMode::Write);
 	stream.PutString(u8"test\n");
 	stream.Release();
 	dir.Release();
@@ -34,7 +34,7 @@ int main(int argc, const char** argv)
 	//FileHandle::DeleteDirectory(dir);
 
 	// Unregister archive
-	FileHandle::UnregisterArchive(archive);
+	File::UnregisterArchive(archive);
 
 	Magma::Framework::Terminate();
 	return 0;

@@ -6,7 +6,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace FileHandle
+		namespace File
 		{
 			/// <summary>
 			///		Thrown when there is a file system related error.

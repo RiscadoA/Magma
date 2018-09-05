@@ -8,7 +8,7 @@ namespace Magma
 {
 	namespace Framework
 	{
-		namespace FileHandle
+		namespace File
 		{
 			/// <summary>
 			///		Creates a folder archive.
