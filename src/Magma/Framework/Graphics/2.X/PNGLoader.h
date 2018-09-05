@@ -5,11 +5,14 @@ extern "C"
 {
 #endif
 
+#include "RenderDevice.h"
+
 #include "../Error.h"
-#include "../../Memory/Type.h"
+#include "../../Memory/Object.h"
 
 	typedef struct
 	{
+		mfmObject object;
 		mfmU32 width;
 		mfmU32 height;
 		mfmU8* data;
@@ -26,17 +29,13 @@ extern "C"
 	///		Returns MFG_ERROR_OKAY if there were no errors.
 	///		Otherwise returns an error code.
 	/// </returns>
-	mfError mfgLoadPNG(void* stream, mfgPNGTextureData** textureData, void* allocator);
+	mfError mfgLoadPNG(void* stream, mfgPNGTextureData** textureData, mfgEnum format, void* allocator);
 
 	/// <summary>
 	///		Unloads a texture previously loaded by mfgLoadPNG.
 	/// </summary>
 	/// <param name="textureData">Texture data pointer</param>
-	/// <returns>
-	///		Returns MFG_ERROR_OKAY if there were no errors.
-	///		Otherwise returns an error code.
-	/// </returns>
-	mfError mfgUnloadPNG(mfgPNGTextureData* textureData);
+	void mfgUnloadPNG(void* textureData);
 
 #ifdef __cplusplus
 }

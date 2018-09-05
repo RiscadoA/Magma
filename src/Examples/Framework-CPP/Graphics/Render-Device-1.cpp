@@ -165,15 +165,22 @@ int run()
 
 		// Create texture
 		{
-			float data[] =
-			{
-				0.0f, 0.0f, 0.0f, 1.0f,		1.0f, 0.0f, 0.0f, 1.0f,
-				0.0f, 1.0f, 0.0f, 1.0f,		0.0f, 0.0f, 1.0f, 1.0f,
-			};
+			mfgPNGTextureData* texData;
 
-			tex = rd.CreateTexture2D(2, 2, Graphics::V2X::Format::RGBA32Float, data, Graphics::V2X::Usage::Static);
+			// Load texture data from file
+			{
+				auto file = File::GetFile(u8"/resources/Textures/test1.png");
+				auto stream = File::OpenFile(file, File::FileMode::Read);
+				mfError err = mfgLoadPNG(&stream.Get(), &texData, MFG_RGBA32FLOAT, NULL);
+				if (err != MF_ERROR_OKAY)
+					abort();
+			}
+
+			tex = rd.CreateTexture2D(texData->width, texData->height, Graphics::V2X::Format::RGBA32Float, texData->data, Graphics::V2X::Usage::Static);
 
 			texBP = ps.GetBindingPoint("texture");
+
+			mfgUnloadPNG(texData);
 		}
 
 		// Create sampler
@@ -184,7 +191,7 @@ int run()
 			sampler = rd.CreateSampler(desc);
 		}
 	}
-	catch (Graphics::RenderDeviceError& e)
+	catch (std::runtime_error& e)
 	{
 		String::OutStream.PutString(e.what());
 		abort();

@@ -105,6 +105,10 @@ mfError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, 
 	str->base.write = &mfsStringStreamWrite;
 	str->base.flush = &mfsStringStreamFlush;
 	str->base.setBuffer = &mfsStringStreamSetBuffer;
+	str->base.seekBegin = NULL;
+	str->base.seekEnd = NULL;
+	str->base.seekHead = NULL;
+	str->base.tell = NULL;
 
 	str->allocator = allocator;
 	if (str->allocator != NULL)
@@ -156,6 +160,10 @@ mfError mfsCreateLocalStringStream(mfsStringStream * stream, mfmU8 * buffer, mfm
 	stream->base.write = &mfsStringStreamWrite;
 	stream->base.flush = &mfsStringStreamFlush;
 	stream->base.setBuffer = &mfsStringStreamSetBuffer;
+	stream->base.seekBegin = NULL;
+	stream->base.seekEnd = NULL;
+	stream->base.seekHead = NULL;
+	stream->base.tell = NULL;
 
 	stream->allocator = NULL;
 	stream->writeHead = 0;
