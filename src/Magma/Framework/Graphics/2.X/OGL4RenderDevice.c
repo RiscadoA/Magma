@@ -286,6 +286,8 @@ void mfgOGL4DestroyVertexShader(void* vs)
 #endif
 	mfgOGL4Shader* oglVS = vs;
 	glDeleteProgram(oglVS->program);
+	if (mfmDecObjectRef(oglVS->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDecObjectRef(oglVS->md) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDestroyObject(&oglVS->base.object) != MF_ERROR_OKAY)
@@ -494,6 +496,9 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
 
 	*vs = oglVS;
+	err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -526,6 +531,8 @@ void mfgOGL4DestroyPixelShader(void* ps)
 #endif
 	mfgOGL4Shader* oglPS = ps;
 	glDeleteProgram(oglPS->program);
+	if (mfmDecObjectRef(oglPS->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDecObjectRef(oglPS->md) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDestroyObject(&oglPS->base.object) != MF_ERROR_OKAY)
@@ -538,7 +545,6 @@ void mfgOGL4DestroyPixelShader(void* ps)
 		abort();
 #endif
 }
-
 
 mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps, const mfmU8* bytecode, mfmU64 bytecodeSize, const mfgMetaData* metaData)
 {
@@ -735,6 +741,9 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
 
 	*ps = oglPS;
+	err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -993,6 +1002,8 @@ void mfgOGL4DestroyPipeline(void* pp)
 		abort();
 	if (mfmDecObjectRef(oglPP->ps) != MF_ERROR_OKAY)
 		abort();
+	if (mfmDecObjectRef(oglPP->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglPP->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglPP->base.renderDevice)->pool48, oglPP) != MF_ERROR_OKAY)
@@ -1043,6 +1054,9 @@ mfError mfgOGL4CreatePipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline** pp, mfgV2
 	}
 
 	*pp = oglPP;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1088,6 +1102,8 @@ void mfgOGL4DestroyConstantBuffer(void* buffer)
 #endif
 	mfgOGL4ConstantBuffer* oglCB = buffer;
 	glDeleteBuffers(1, &oglCB->cb);
+	if (mfmDecObjectRef(oglCB->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglCB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglCB->base.renderDevice)->pool48, oglCB) != MF_ERROR_OKAY)
@@ -1137,6 +1153,9 @@ mfError mfgOGL4CreateConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffer
 	glBufferData(GL_UNIFORM_BUFFER, size, data, gl_usage);
 
 	*cb = oglCB;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1186,6 +1205,8 @@ void mfgOGL4DestroyVertexBuffer(void* buffer)
 #endif
 	mfgOGL4VertexBuffer* oglVB = buffer;
 	glDeleteBuffers(1, &oglVB->vb);
+	if (mfmDecObjectRef(oglVB->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglVB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVB->base.renderDevice)->pool48, oglVB) != MF_ERROR_OKAY)
@@ -1237,6 +1258,9 @@ mfError mfgOGL4CreateVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer** v
 	glBufferData(GL_ARRAY_BUFFER, size, data, gl_usage);
 
 	*vb = oglVB;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1290,6 +1314,8 @@ void mfgOGL4DestroyIndexBuffer(void* buffer)
 #endif
 	mfgOGL4IndexBuffer* oglIB = buffer;
 	glDeleteBuffers(1, &oglIB->ib);
+	if (mfmDecObjectRef(oglIB->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglIB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglIB->base.renderDevice)->pool48, oglIB) != MF_ERROR_OKAY)
@@ -1348,6 +1374,9 @@ mfError mfgOGL4CreateIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer** ib,
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, gl_usage);
 
 	*ib = oglIB;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1437,6 +1466,8 @@ void mfgOGL4DestroyVertexLayout(void* vl)
 	if (vl == NULL) abort();
 #endif
 	mfgOGL4VertexLayout* oglVL = vl;
+	if (mfmDecObjectRef(oglVL->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglVL->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVL->base.renderDevice)->pool512, oglVL) != MF_ERROR_OKAY)
@@ -1531,6 +1562,9 @@ mfError mfgOGL4CreateVertexLayout(mfgV2XRenderDevice* rd, mfgV2XVertexLayout** v
 	}
 
 	*vl = oglVL;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1552,6 +1586,8 @@ void mfgOGL4DestroyVertexArray(void* va)
 		if (mfmDecObjectRef(oglVA->vb[i]) != MF_ERROR_OKAY)
 			abort();
 	}
+	if (mfmDecObjectRef(oglVA->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglVA->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglVA->base.renderDevice)->pool256, oglVA) != MF_ERROR_OKAY)
@@ -1578,12 +1614,12 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 	mfgOGL4VertexLayout* oglVL = vl;
 
 	// Init object
-	oglVA->base.object.destructorFunc = &mfgOGL4DestroyVertexArray;
 	{
 		mfError err = mfmInitObject(&oglVA->base.object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
+	oglVA->base.object.destructorFunc = &mfgOGL4DestroyVertexArray;
 	oglVA->base.renderDevice = rd;
 
 	// Create vertex array
@@ -1623,6 +1659,9 @@ mfError mfgOGL4CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va,
 	}
 
 	*va = oglVA;
+	err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1761,6 +1800,9 @@ mfError mfgOGL4CreateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D** tex, mf
 	oglTex->width = width;
 
 	*tex = oglTex;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1809,6 +1851,8 @@ void mfgOGL4DestroyTexture2D(void* tex)
 #endif
 	mfgOGL4Texture2D* oglTex = tex;
 	glDeleteTextures(1, &oglTex->tex);
+	if (mfmDecObjectRef(oglTex->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
@@ -1903,6 +1947,9 @@ mfError mfgOGL4CreateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D** tex, mf
 	oglTex->height = height;
 
 	*tex = oglTex;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -1951,6 +1998,8 @@ void mfgOGL4DestroyTexture3D(void* tex)
 #endif
 	mfgOGL4Texture3D* oglTex = tex;
 	glDeleteTextures(1, &oglTex->tex);
+	if (mfmDecObjectRef(oglTex->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
@@ -2043,6 +2092,9 @@ mfError mfgOGL4CreateTexture3D(mfgV2XRenderDevice* rd, mfgV2XTexture3D** tex, mf
 		glTexImage3D(GL_TEXTURE_3D, 0, oglTex->internalFormat, width, height, depth, 0, oglTex->format, oglTex->type, data);
 
 	*tex = oglTex;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	oglTex->width = width;
 	oglTex->height = height;
@@ -2095,6 +2147,8 @@ void mfgOGL4DestroySampler(void* sampler)
 #endif
 	mfgOGL4Sampler* oglS = sampler;
 	glDeleteSamplers(1, &oglS->sampler);
+	if (mfmDecObjectRef(oglS->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglS->base.renderDevice)->pool48, oglS) != MF_ERROR_OKAY)
@@ -2212,6 +2266,9 @@ mfError mfgOGL4CreateSampler(mfgV2XRenderDevice* rd, mfgV2XSampler** sampler, co
 	glSamplerParameterf(oglS->sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc->maxAnisotropy);
 
 	*sampler = oglS;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -2224,6 +2281,8 @@ void mfgOGL4DestroyRenderTexture(void* tex)
 #endif
 	mfgOGL4RenderTexture* oglTex = tex;
 	glDeleteTextures(1, &oglTex->tex);
+	if (mfmDecObjectRef(oglTex->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
@@ -2307,6 +2366,9 @@ mfError mfgOGL4CreateRenderTexture(mfgV2XRenderDevice* rd, mfgV2XRenderTexture**
 	oglTex->height = height;
 	
 	*tex = oglTex;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -2319,6 +2381,8 @@ void mfgOGL4DestroyDepthStencilTexture(void* tex)
 #endif
 	mfgOGL4DepthStencilTexture* oglTex = tex;
 	glDeleteRenderbuffers(1, &oglTex->rbo);
+	if (mfmDecObjectRef(oglTex->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglTex->base.renderDevice)->pool64, oglTex) != MF_ERROR_OKAY)
@@ -2367,6 +2431,9 @@ mfError mfgOGL4CreateDepthStencilTexture(mfgV2XRenderDevice* rd, mfgV2XDepthSten
 	oglTex->height = height;
 
 	*tex = oglTex;
+	mfError err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -2386,6 +2453,8 @@ void mfgOGL4DestroyFramebuffer(void* fb)
 		if (oglFB->textures[i] != NULL)
 			if (mfmDecObjectRef(oglFB->textures[i]) != MF_ERROR_OKAY)
 				abort();
+	if (mfmDecObjectRef(oglFB->base.renderDevice) != MF_ERROR_OKAY)
+		abort();
 	if (mfmDestroyObject(&oglFB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglFB->base.renderDevice)->pool64, oglFB) != MF_ERROR_OKAY)
@@ -2475,6 +2544,9 @@ mfError mfgOGL4CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb,
 	oglRD->stack;
 
 	*fb = oglFB;
+	err = mfmIncObjectRef(rd);
+	if (err != MF_ERROR_OKAY)
+		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -2547,6 +2619,9 @@ void mfgOGL4DestroyRasterState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4RasterState* oglState = state;
+	if (state != ((mfgOGL4RenderDevice*)oglState->base.renderDevice)->defaultRasterState)
+		if (mfmDecObjectRef(oglState->base.renderDevice) != MF_ERROR_OKAY)
+			abort();
 	if (mfmDestroyObject(&oglState->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MF_ERROR_OKAY)
@@ -2610,6 +2685,13 @@ mfError mfgOGL4CreateRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState** sta
 		default: MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, "Unsupported raster mode");
 	}
 
+	if (oglRD->defaultRasterState != NULL)
+	{
+		mfError err = mfmIncObjectRef(rd);
+		if (err != MF_ERROR_OKAY)
+			MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
+	}
+
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
 }
@@ -2624,15 +2706,6 @@ mfError mfgOGL4SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
 
 	mfError err;
 
-	if (((mfgOGL4RenderDevice*)rd)->currentRasterState != NULL)
-	{
-		err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentRasterState);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-
-	((mfgOGL4RenderDevice*)rd)->currentRasterState = state;
-
 	mfgOGL4RasterState* oglRS = (mfgOGL4RasterState*)state;
 
 	if (oglRS->cullEnabled)
@@ -2643,9 +2716,21 @@ mfError mfgOGL4SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
 	glCullFace(oglRS->cullFace);
 	glPolygonMode(GL_FRONT_AND_BACK, oglRS->polygonMode);
 
-	err = mfmIncObjectRef(((mfgOGL4RenderDevice*)rd)->currentRasterState);
-	if (err != MF_ERROR_OKAY)
-		return err;
+	if (oglRS != ((mfgOGL4RenderDevice*)rd)->defaultRasterState)
+	{
+		if (((mfgOGL4RenderDevice*)rd)->currentRasterState != NULL)
+		{
+			err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentRasterState);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+
+		err = mfmIncObjectRef(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgOGL4RenderDevice*)rd)->currentRasterState = state;
 
 	MFG_CHECK_GL_ERROR();
 
@@ -2658,6 +2743,9 @@ void mfgOGL4DestroyDepthStencilState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4DepthStencilState* oglState = state;
+	if (state != ((mfgOGL4RenderDevice*)oglState->base.renderDevice)->defaultDepthStencilState)
+		if (mfmDecObjectRef(oglState->base.renderDevice) != MF_ERROR_OKAY)
+			abort();
 	if (mfmDestroyObject(&oglState->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool256, oglState) != MF_ERROR_OKAY)
@@ -2820,6 +2908,12 @@ mfError mfgOGL4CreateDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStenci
 	}
 
 	*state = oglState;
+	if (oglRD->defaultDepthStencilState != NULL)
+	{
+		mfError err = mfmIncObjectRef(rd);
+		if (err != MF_ERROR_OKAY)
+			MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
+	}
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -2836,15 +2930,6 @@ mfError mfgOGL4SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilSt
 	mfgOGL4DepthStencilState* oglDSS = (mfgOGL4DepthStencilState*)state;
 
 	mfError err;
-
-	if (((mfgOGL4RenderDevice*)rd)->currentDepthStencilState != NULL)
-	{
-		err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentDepthStencilState);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-
-	((mfgOGL4RenderDevice*)rd)->currentDepthStencilState = state;
 
 	if (oglDSS->depthEnabled)
 		glEnable(GL_DEPTH_TEST);
@@ -2868,9 +2953,21 @@ mfError mfgOGL4SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilSt
 	glStencilMaskSeparate(GL_BACK, oglDSS->stencilWriteMask);
 	glStencilOpSeparate(GL_BACK, oglDSS->backFaceStencilFail, oglDSS->backFaceDepthFail, oglDSS->backFaceStencilPass);
 
-	err = mfmIncObjectRef(((mfgOGL4RenderDevice*)rd)->currentDepthStencilState);
-	if (err != MF_ERROR_OKAY)
-		return err;
+	if (oglDSS != ((mfgOGL4RenderDevice*)rd)->defaultDepthStencilState)
+	{
+		if (((mfgOGL4RenderDevice*)rd)->currentDepthStencilState != NULL)
+		{
+			err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentDepthStencilState);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+
+		err = mfmIncObjectRef(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgOGL4RenderDevice*)rd)->currentDepthStencilState = state;
 
 	MFG_CHECK_GL_ERROR();
 
@@ -2883,6 +2980,9 @@ void mfgOGL4DestroyBlendState(void* state)
 	if (state == NULL) abort();
 #endif
 	mfgOGL4BlendState* oglState = state;
+	if (state != ((mfgOGL4RenderDevice*)oglState->base.renderDevice)->defaultBlendState)
+		if (mfmDecObjectRef(oglState->base.renderDevice) != MF_ERROR_OKAY)
+			abort();
 	if (mfmDestroyObject(&oglState->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgOGL4RenderDevice*)oglState->base.renderDevice)->pool64, oglState) != MF_ERROR_OKAY)
@@ -3006,6 +3106,12 @@ mfError mfgOGL4CreateBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState** state
 	}
 
 	*state = oglState;
+	if (oglRD->defaultBlendState != NULL)
+	{
+		mfError err = mfmIncObjectRef(rd);
+		if (err != MF_ERROR_OKAY)
+			MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
+	}
 
 	MFG_CHECK_GL_ERROR();
 	return MF_ERROR_OKAY;
@@ -3020,15 +3126,6 @@ mfError mfgOGL4SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
 		return mfgOGL4SetBlendState(rd, ((mfgOGL4RenderDevice*)rd)->defaultBlendState);
 
 	mfError err;
-
-	if (((mfgOGL4RenderDevice*)rd)->currentBlendState != NULL)
-	{
-		err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentBlendState);
-		if (err != MF_ERROR_OKAY)
-			return err;
-	}
-
-	((mfgOGL4RenderDevice*)rd)->currentBlendState = state;
 
 	mfgOGL4BlendState* oglBS = (mfgOGL4BlendState*)state;
 	
@@ -3045,9 +3142,21 @@ mfError mfgOGL4SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
 	glBlendEquationSeparate(oglBS->blendOp,
 							oglBS->alphaBlendOp);
 
-	err = mfmIncObjectRef(((mfgOGL4RenderDevice*)rd)->currentBlendState);
-	if (err != MF_ERROR_OKAY)
-		return err;
+	if (oglBS != ((mfgOGL4RenderDevice*)rd)->defaultBlendState)
+	{
+		if (((mfgOGL4RenderDevice*)rd)->currentBlendState != NULL)
+		{
+			err = mfmDecObjectRef(((mfgOGL4RenderDevice*)rd)->currentBlendState);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
+
+		err = mfmIncObjectRef(state);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	((mfgOGL4RenderDevice*)rd)->currentBlendState = state;
 
 	MFG_CHECK_GL_ERROR();
 
@@ -3339,6 +3448,7 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	{
 		mfgV2XRasterStateDesc desc;
 		mfgV2XDefaultRasterStateDesc(&desc);
+		rd->defaultRasterState = NULL;
 		mfError err = mfgV2XCreateRasterState(rd, &rd->defaultRasterState, &desc);
 		if (err != MF_ERROR_OKAY)
 			return err;
@@ -3351,6 +3461,7 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	{
 		mfgV2XDepthStencilStateDesc desc;
 		mfgV2XDefaultDepthStencilStateDesc(&desc);
+		rd->defaultDepthStencilState = NULL;
 		mfError err = mfgV2XCreateDepthStencilState(rd, &rd->defaultDepthStencilState, &desc);
 		if (err != MF_ERROR_OKAY)
 			return err;
@@ -3363,6 +3474,7 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	{
 		mfgV2XBlendStateDesc desc;
 		mfgV2XDefaultBlendStateDesc(&desc);
+		rd->defaultBlendState = NULL;
 		mfError err = mfgV2XCreateBlendState(rd, &rd->defaultBlendState, &desc);
 		if (err != MF_ERROR_OKAY)
 			return err;
@@ -3370,6 +3482,16 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
+
+	if (mfmIncObjectRef(rd->window) != MF_ERROR_OKAY)
+		abort();
+
+	if (mfmIncObjectRef(rd->defaultRasterState) != MF_ERROR_OKAY)
+		abort();
+	if (mfmIncObjectRef(rd->defaultDepthStencilState) != MF_ERROR_OKAY)
+		abort();
+	if (mfmIncObjectRef(rd->defaultBlendState) != MF_ERROR_OKAY)
+		abort();
 
 	// Successfully inited render device
 	*renderDevice = rd;
@@ -3382,6 +3504,9 @@ void mfgV2XDestroyOGL4RenderDevice(void * renderDevice)
 		abort();
 
 	mfgOGL4RenderDevice* rd = (mfgOGL4RenderDevice*)renderDevice;
+
+	if (mfmDecObjectRef(rd->window) != MF_ERROR_OKAY)
+		abort();
 
 	// Destroy default states
 	if (mfgV2XSetRasterState(rd, NULL) != MF_ERROR_OKAY)
@@ -3397,10 +3522,6 @@ void mfgV2XDestroyOGL4RenderDevice(void * renderDevice)
 		abort();
 	if (mfmDecObjectRef(rd->defaultBlendState) != MF_ERROR_OKAY)
 		abort();
-
-	mfgV2XDestroyRasterState(rd->defaultRasterState);
-	mfgV2XDestroyDepthStencilState(rd->defaultDepthStencilState);
-	mfgV2XDestroyBlendState(rd->defaultBlendState);
 
 	// Destroy pools
 	mfmDestroyStackAllocator(rd->stack);

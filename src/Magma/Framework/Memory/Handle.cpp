@@ -41,7 +41,7 @@ Magma::Framework::Memory::Handle::Handle(const Handle & rhs)
 Magma::Framework::Memory::Handle::Handle(Handle && rhs)
 {
 	m_obj = rhs.m_obj;
-	rhs.m_obj = NULL;
+	rhs.m_obj = nullptr;
 }
 
 Magma::Framework::Memory::Handle::~Handle()
@@ -51,12 +51,6 @@ Magma::Framework::Memory::Handle::~Handle()
 		mfError err = mfmDecObjectRef(m_obj);
 		if (err != MF_ERROR_OKAY)
 			throw ObjectError("Failed to decrease object reference count");
-		mfmI32 refCount = 0;
-		err = mfmGetObjectRefCount(m_obj, &refCount);
-		if (err != MF_ERROR_OKAY)
-			throw ObjectError("Failed to get object reference count");
-		if (refCount == 0 && m_obj->destructorFunc != nullptr)
-			m_obj->destructorFunc(m_obj);
 	}
 }
 
@@ -67,12 +61,6 @@ void Magma::Framework::Memory::Handle::Set(mfmObject& obj)
 		mfError err = mfmDecObjectRef(m_obj);
 		if (err != MF_ERROR_OKAY)
 			throw ObjectError("Failed to decrease object reference count");
-		mfmI32 refCount = 0;
-		err = mfmGetObjectRefCount(m_obj, &refCount);
-		if (err != MF_ERROR_OKAY)
-			throw ObjectError("Failed to get object reference count");
-		if (refCount == 0 && m_obj->destructorFunc != nullptr)
-			m_obj->destructorFunc(m_obj);
 	}
 	m_obj = &obj;
 	if (m_obj != nullptr)
@@ -90,13 +78,7 @@ bool Magma::Framework::Memory::Handle::Release()
 	mfError err = mfmDecObjectRef(m_obj);
 	if (err != MF_ERROR_OKAY)
 		throw ObjectError("Failed to decrease object reference count");
-	mfmI32 refCount = 0;
-	err = mfmGetObjectRefCount(m_obj, &refCount);
-	if (err != MF_ERROR_OKAY)
-		throw ObjectError("Failed to get object reference count");
-	if (refCount == 0 && m_obj->destructorFunc != nullptr)
-		m_obj->destructorFunc(m_obj);
-	m_obj = NULL;
+	m_obj = nullptr;
 	return true;
 }
 

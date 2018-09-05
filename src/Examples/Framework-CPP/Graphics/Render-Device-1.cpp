@@ -47,127 +47,129 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	Input::WindowHandle win = Input::CreateWindow(NULL, 800, 600, Input::WindowMode::Windowed, u8"Window");
-	win.SetOnCloseCallback(OnWindowClose);
-
-	Graphics::V2X::RenderDevice rd = NULL;
-
-	try
 	{
-		Graphics::V2X::RenderDeviceDesc desc;
-		desc.vsyncEnabled = true;
-		rd = Graphics::V2X::CreateRenderDevice(NULL, win, &desc, Memory::StandardAllocator);
-	}
-	catch (std::runtime_error& err)
-	{
-		String::ErrStream.PutString(err.what());
-		return 1;
-	}
+		Input::WindowHandle win = Input::CreateWindow(NULL, 800, 600, Input::WindowMode::Windowed, u8"Window");
+		win.SetOnCloseCallback(OnWindowClose);
 
-	Graphics::V2X::Pipeline pipeline = NULL;
-	Graphics::V2X::VertexArray va = NULL;
+		Graphics::V2X::RenderDevice rd = NULL;
 
-	// Init render device objects
-	try
-	{
-		Graphics::V2X::VertexShader vs = NULL;
-		Graphics::V2X::PixelShader ps = NULL;
-
-		// Create pipeline
+		try
 		{
-			// Create vertex shader
-			{
-				mfmU8 bBc[512];
-				mfmU64 bBcSize;
-				mfmU8 bMd[512];
-				mfmU64 bMdSize;
-				Graphics::V2X::MetaDataHandle md = NULL;
-
-				Graphics::V2X::MSL::Compile(vsSource, bBc, sizeof(bBc), &bBcSize, bMd, sizeof(bMd), &bMdSize, Graphics::V2X::MSL::ShaderType::Vertex);
-				md = Graphics::V2X::LoadMetaData(bMd, bMdSize);
-				vs = rd.CreateVertexShader(bBc, bBcSize, md);
-			}
-
-			// Create pixel shader
-			{
-				mfmU8 bBc[512];
-				mfmU64 bBcSize;
-				mfmU8 bMd[512];
-				mfmU64 bMdSize;
-				Graphics::V2X::MetaDataHandle md = NULL;
-
-				Graphics::V2X::MSL::Compile(psSource, bBc, sizeof(bBc), &bBcSize, bMd, sizeof(bMd), &bMdSize, Graphics::V2X::MSL::ShaderType::Pixel);
-				md = Graphics::V2X::LoadMetaData(bMd, bMdSize);
-				ps = rd.CreatePixelShader(bBc, bBcSize, md);
-			}
-
-			pipeline = rd.CreatePipeline(vs, ps);
+			Graphics::V2X::RenderDeviceDesc desc;
+			desc.vsyncEnabled = true;
+			rd = Graphics::V2X::CreateRenderDevice(NULL, win, &desc, Memory::StandardAllocator);
+		}
+		catch (std::runtime_error& err)
+		{
+			String::ErrStream.PutString(err.what());
+			return 1;
 		}
 
-		// Create vertex array
-		{
-			Graphics::V2X::VertexBuffer buf = NULL;
-			Graphics::V2X::VertexLayout layout = NULL;
+		Graphics::V2X::Pipeline pipeline = NULL;
+		Graphics::V2X::VertexArray va = NULL;
 
-			// Create vertex buffer
+		// Init render device objects
+		try
+		{
+			Graphics::V2X::VertexShader vs = NULL;
+			Graphics::V2X::PixelShader ps = NULL;
+
+			// Create pipeline
 			{
-				float positions[] =
+				// Create vertex shader
 				{
-					0.0f, 0.0f, 0.0f,
-					1.0f, 0.0f, 0.0f,
-					1.0f, 1.0f, 0.0f,
+					mfmU8 bBc[512];
+					mfmU64 bBcSize;
+					mfmU8 bMd[512];
+					mfmU64 bMdSize;
+					Graphics::V2X::MetaDataHandle md = NULL;
 
-					0.0f, 0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f,
-					1.0f, 1.0f, 0.0f,
-				};
+					Graphics::V2X::MSL::Compile(vsSource, bBc, sizeof(bBc), &bBcSize, bMd, sizeof(bMd), &bMdSize, Graphics::V2X::MSL::ShaderType::Vertex);
+					md = Graphics::V2X::LoadMetaData(bMd, bMdSize);
+					vs = rd.CreateVertexShader(bBc, bBcSize, md);
+				}
 
-				buf = rd.CreateVertexBuffer(sizeof(positions), positions, Graphics::V2X::Usage::Static);
+				// Create pixel shader
+				{
+					mfmU8 bBc[512];
+					mfmU64 bBcSize;
+					mfmU8 bMd[512];
+					mfmU64 bMdSize;
+					Graphics::V2X::MetaDataHandle md = NULL;
+
+					Graphics::V2X::MSL::Compile(psSource, bBc, sizeof(bBc), &bBcSize, bMd, sizeof(bMd), &bMdSize, Graphics::V2X::MSL::ShaderType::Pixel);
+					md = Graphics::V2X::LoadMetaData(bMd, bMdSize);
+					ps = rd.CreatePixelShader(bBc, bBcSize, md);
+				}
+
+				pipeline = rd.CreatePipeline(vs, ps);
 			}
 
-			// Create vertex layout
+			// Create vertex array
 			{
-				Graphics::V2X::VertexElement elements[1];
-				elements[0].bufferIndex = 0;
-				strcpy(elements[0].name, u8"position");
-				elements[0].offset = 0;
-				elements[0].stride = sizeof(float) * 3;
-				elements[0].size = 3;
-				elements[0].type = Graphics::V2X::Type::Float;
+				Graphics::V2X::VertexBuffer buf = NULL;
+				Graphics::V2X::VertexLayout layout = NULL;
+
+				// Create vertex buffer
+				{
+					float positions[] =
+					{
+						0.0f, 0.0f, 0.0f,
+						1.0f, 0.0f, 0.0f,
+						1.0f, 1.0f, 0.0f,
+
+						0.0f, 0.0f, 0.0f,
+						0.0f, 1.0f, 0.0f,
+						1.0f, 1.0f, 0.0f,
+					};
+
+					buf = rd.CreateVertexBuffer(sizeof(positions), positions, Graphics::V2X::Usage::Static);
+				}
+
+				// Create vertex layout
+				{
+					Graphics::V2X::VertexElement elements[1];
+					elements[0].bufferIndex = 0;
+					strcpy(elements[0].name, u8"position");
+					elements[0].offset = 0;
+					elements[0].stride = sizeof(float) * 3;
+					elements[0].size = 3;
+					elements[0].type = Graphics::V2X::Type::Float;
 			
-				layout = rd.CreateVertexLayout(1, elements, vs);
+					layout = rd.CreateVertexLayout(1, elements, vs);
+				}
+
+				va = rd.CreateVertexArray(1, &buf, layout);
 			}
-
-			va = rd.CreateVertexArray(1, &buf, layout);
 		}
-	}
-	catch (Graphics::RenderDeviceError& e)
-	{
-		String::OutStream.PutString(e.what());
-		abort();
-	}
+		catch (Graphics::RenderDeviceError& e)
+		{
+			String::OutStream.PutString(e.what());
+			abort();
+		}
 
-	while (!winShouldClose)
-	{
-		win.PollEvents();
+		while (!winShouldClose)
+		{
+			win.PollEvents();
 		
-		rd.ClearColor(0.0f, 0.2f, 0.4f, 1.0f);
+			rd.ClearColor(0.0f, 0.2f, 0.4f, 1.0f);
 
-		rd.SetPipeline(pipeline);
-		rd.SetVertexArray(va);
-		rd.DrawTriangles(0, 6);
-		rd.SetVertexArray(nullptr);
-		rd.SetPipeline(nullptr);
+			rd.SetPipeline(pipeline);
+			rd.SetVertexArray(va);
+			rd.DrawTriangles(0, 6);
+			rd.SetVertexArray(nullptr);
+			rd.SetPipeline(nullptr);
 
-		rd.SwapBuffers();
+			rd.SwapBuffers();
+		}
+		
+		pipeline.Release();
+		va.Release();
+
+		rd.Release();
+
+		win.Release();
 	}
-
-	va.Release();
-	pipeline.Release();
-
-	rd.Release();
-
-	win.Release();
 
 	Magma::Framework::Terminate();
 	return 0;

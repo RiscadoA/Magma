@@ -16,6 +16,7 @@ extern "C"
 #define MFM_ERROR_STILL_HAS_REFERENCES	0x0107
 #define MFM_ERROR_INTERNAL				0x0108
 #define MFM_ERROR_BUFFER_FULL			0x0109
+#define MFM_ERROR_HAS_NO_REFERENCES		0x010A
 
 #ifdef __cplusplus
 }

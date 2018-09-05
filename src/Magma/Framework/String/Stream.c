@@ -136,7 +136,6 @@ mfError mfsTerminateStream()
 		err = mfmDecObjectRef(&mfsInStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
-		mfsInStream->object.destructorFunc(mfsInStream);
 	}
 
 	if (mfsOutStream != NULL)
@@ -144,7 +143,6 @@ mfError mfsTerminateStream()
 		err = mfmDecObjectRef(&mfsOutStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
-		mfsOutStream->object.destructorFunc(mfsOutStream);
 	}
 
 	if (mfsErrStream != NULL)
@@ -152,7 +150,6 @@ mfError mfsTerminateStream()
 		err = mfmDecObjectRef(&mfsErrStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
-		mfsErrStream->object.destructorFunc(mfsErrStream);
 	}
 
 	return err;

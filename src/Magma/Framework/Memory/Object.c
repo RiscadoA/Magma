@@ -40,9 +40,25 @@ mfError mfmDecObjectRef(mfmObject* obj)
 {
 	if (obj == NULL)
 		return MFM_ERROR_INVALID_ARGUMENTS;
-	mfError err = mftAtomic32Add(&obj->m_referenceCount, -1);
+
+	mfmI32 refCount;
+	mfError err = mftAtomic32Load(&obj->m_referenceCount, &refCount);
 	if (err != MF_ERROR_OKAY)
 		return err;
+	if (refCount == 0)
+		return MFM_ERROR_HAS_NO_REFERENCES;
+	err = mftAtomic32Add(&obj->m_referenceCount, -1);
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	if (refCount == 1)
+	{
+		err = mfmDestroyObject(obj);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		obj->destructorFunc(obj);
+	}
+
 	return MF_ERROR_OKAY;
 }
 
