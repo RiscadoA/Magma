@@ -191,28 +191,28 @@ void Magma::Framework::Graphics::V2X::RenderDevice::BindTexture1D(void * bp, Tex
 void Magma::Framework::Graphics::V2X::RenderDevice::BindTexture2D(void * bp, Texture2D tex)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
-	mfError err = mfgV2XBindTexture2D(rd, (mfgV2XBindingPoint*)bp, (mfgV2XTexture2D*)&tex.Get());
+	mfError err = mfgV2XBindTexture2D(rd, (mfgV2XBindingPoint*)bp, (mfgV2XTexture2D*)tex.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
 void Magma::Framework::Graphics::V2X::RenderDevice::BindTexture3D(void * bp, Texture3D tex)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
-	mfError err = mfgV2XBindTexture3D(rd, (mfgV2XBindingPoint*)bp, (mfgV2XTexture3D*)&tex.Get());
+	mfError err = mfgV2XBindTexture3D(rd, (mfgV2XBindingPoint*)bp, (mfgV2XTexture3D*)tex.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
 void Magma::Framework::Graphics::V2X::RenderDevice::BindRenderTexture(void * bp, RenderTexture tex)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
-	mfError err = mfgV2XBindRenderTexture(rd, (mfgV2XBindingPoint*)bp, (mfgV2XRenderTexture*)&tex.Get());
+	mfError err = mfgV2XBindRenderTexture(rd, (mfgV2XBindingPoint*)bp, (mfgV2XRenderTexture*)tex.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
 void Magma::Framework::Graphics::V2X::RenderDevice::BindSampler(void * bp, Sampler sampler)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
-	mfError err = mfgV2XBindSampler(rd, (mfgV2XBindingPoint*)bp, (mfgV2XSampler*)&sampler.Get());
+	mfError err = mfgV2XBindSampler(rd, (mfgV2XBindingPoint*)bp, (mfgV2XSampler*)sampler.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
