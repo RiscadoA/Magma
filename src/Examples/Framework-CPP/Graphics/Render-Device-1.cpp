@@ -128,13 +128,13 @@ int run()
 			{
 				float data[] =
 				{
-					0.0f, 0.0f, 0.0f,		0.0f, 0.0f,
-					1.0f, 0.0f, 0.0f,		1.0f, 0.0f,
-					1.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+					0.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+					1.0f, 0.0f, 0.0f,		1.0f, 1.0f,
+					1.0f, 1.0f, 0.0f,		1.0f, 0.0f,
 
-					0.0f, 0.0f, 0.0f,		0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f,		0.0f, 1.0f,
-					1.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+					0.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+					0.0f, 1.0f, 0.0f,		0.0f, 0.0f,
+					1.0f, 1.0f, 0.0f,		1.0f, 0.0f,
 				};
 
 				buf = rd.CreateVertexBuffer(sizeof(data), data, Graphics::V2X::Usage::Static);
@@ -187,8 +187,8 @@ int run()
 		// Create sampler
 		{
 			Graphics::V2X::SamplerDesc desc;
-			desc.minFilter = Graphics::V2X::TextureFilter::Nearest;
-			desc.magFilter = Graphics::V2X::TextureFilter::Nearest;
+			desc.minFilter = Graphics::V2X::TextureFilter::Linear;
+			desc.magFilter = Graphics::V2X::TextureFilter::Linear;
 			sampler = rd.CreateSampler(desc);
 		}
 	}
