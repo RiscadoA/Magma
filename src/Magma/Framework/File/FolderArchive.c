@@ -758,6 +758,54 @@ static mfError mffFileStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 buffer
 	return MF_ERROR_OKAY;
 }
 
+static mfError mffFileStreamSeekBegin(void* stream, mfmU64 offset)
+{
+	mffFolderFileStream* folderStream = stream;
+	int ret = fseek(folderStream->handle, offset, SEEK_SET);
+	if (ret != 0)
+		return MFS_ERROR_INTERNAL;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffFileStreamSeekEnd(void* stream, mfmU64 offset)
+{
+	mffFolderFileStream* folderStream = stream;
+	int ret = fseek(folderStream->handle, -(mfmI64)offset, SEEK_END);
+	if (ret != 0)
+		return MFS_ERROR_INTERNAL;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffFileStreamSeekHead(void* stream, mfmI64 offset)
+{
+	mffFolderFileStream* folderStream = stream;
+	int ret = fseek(folderStream->handle, offset, SEEK_CUR);
+	if (ret != 0)
+		return MFS_ERROR_INTERNAL;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffFileStreamTell(void* stream, mfmU64* position)
+{
+	mffFolderFileStream* folderStream = stream;
+	mfmI64 ret = ftell(folderStream->handle);
+	if (ret == -1)
+		return MFS_ERROR_INTERNAL;
+	*position = ret;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mffFileStreamEOF(void* stream, mfmBool* eof)
+{
+	mffFolderFileStream* folderStream = stream;
+	int ret = feof(folderStream->handle);
+	if (ret != 0)
+		*eof = MFM_TRUE;
+	else
+		*eof = MFM_FALSE;
+	return MF_ERROR_OKAY;
+}
+
 static void mffArchiveCloseFile(void* stream)
 {
 	mffFolderFileStream* folderStream = stream;
@@ -836,8 +884,13 @@ static mfError mffArchiveOpenFileUnsafe(mffArchive* archive, mfsStream** outStre
 	stream->base.write = &mffFileStreamWrite;
 	stream->base.flush = &mffFileStreamFlush;
 	stream->base.setBuffer = &mffFileStreamSetBuffer;
+	stream->base.seekBegin = &mffFileStreamSeekBegin;
+	stream->base.seekEnd = &mffFileStreamSeekEnd;
+	stream->base.seekHead = &mffFileStreamSeekHead;
+	stream->base.tell = &mffFileStreamTell;
 	stream->base.buffer = NULL;
 	stream->base.bufferSize = 0;
+	stream->base.eof = &mffFileStreamEOF;
 
 	*outStream = stream;
 

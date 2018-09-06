@@ -9,7 +9,32 @@ mfError mfmInternalStackAllocate(void* allocator, void** memory, mfmU64 size)
 
 mfError mfmInternalStackDeallocate(void* allocator, void* memory)
 {
-	return mfmStackSetHead(allocator, memory);
+	return MF_ERROR_OKAY;
+	// return mfmStackSetHead(allocator, memory);
+}
+
+mfError mfmInternalStackReallocate(void* allocator, void* memory, mfmU64 prevSize, mfmU64 size, void** newMemory)
+{
+	mfmStackAllocator* stackAllocator = allocator;
+
+	if (stackAllocator->stackHead - prevSize == memory)
+	{
+		if (size >= prevSize)
+		{
+			if (stackAllocator->stackHead - stackAllocator->stackBegin + (size - prevSize) > stackAllocator->stackSize)
+				return MFM_ERROR_ALLOCATOR_OVERFLOW;
+			stackAllocator->stackHead += size - prevSize;
+		}
+		else
+		{
+			if (stackAllocator->stackHead - (prevSize - size) < stackAllocator->stackBegin)
+				return MFM_ERROR_ALLOCATOR_UNDERFLOW;;
+			stackAllocator->stackHead -= prevSize - size;
+		}
+		*newMemory = stackAllocator->stackHead;
+		return MF_ERROR_OKAY;
+	}
+	else return mfmStackAllocate(allocator, newMemory, size);
 }
 
 mfError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size)
@@ -33,6 +58,7 @@ mfError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size
 	// Set functions
 	(*stackAllocator)->base.allocate = &mfmInternalStackAllocate;
 	(*stackAllocator)->base.deallocate = &mfmInternalStackDeallocate;
+	(*stackAllocator)->base.reallocate = &mfmInternalStackReallocate;
 
 	// Set destructor function
 	(*stackAllocator)->base.object.destructorFunc = &mfmDestroyStackAllocator;
@@ -57,6 +83,7 @@ mfError mfmCreateStackAllocatorOnMemory(mfmStackAllocator ** stackAllocator, mfm
 	// Set functions
 	(*stackAllocator)->base.allocate = &mfmInternalStackAllocate;
 	(*stackAllocator)->base.deallocate = &mfmInternalStackDeallocate;
+	(*stackAllocator)->base.reallocate = &mfmInternalStackReallocate;
 
 	// Set destructor function
 	(*stackAllocator)->base.object.destructorFunc = &mfmDestroyStackAllocator;

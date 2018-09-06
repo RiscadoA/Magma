@@ -115,6 +115,11 @@ mfError mfmCreateInflateStream(mfsStream ** outStream, mfmU8 * buffer, mfmU64 bu
 	stream->base.read = &mfmRead;
 	stream->base.write = &mfmWrite;
 	stream->base.setBuffer = &mfmSetBuffer;
+	stream->base.seekBegin = NULL;
+	stream->base.seekEnd = NULL;
+	stream->base.seekHead = NULL;
+	stream->base.tell = NULL;
+	stream->base.eof = NULL;
 
 	stream->stream.zalloc = &mfmInflateAllocate;
 	stream->stream.zfree = &mfmInflateDeallocate;

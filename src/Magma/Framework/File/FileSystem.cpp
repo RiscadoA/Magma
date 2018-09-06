@@ -2,7 +2,7 @@
 #include "Exception.hpp"
 #include "../ErrorString.h"
 
-void Magma::Framework::FileHandle::RegisterArchive(ArchiveHandle archive, const mfsUTF8CodeUnit* name)
+void Magma::Framework::File::RegisterArchive(ArchiveHandle archive, const mfsUTF8CodeUnit* name)
 {
 	mfError err;
 	err = mffRegisterArchive((mffArchive*)&archive.Get(), name);
@@ -10,7 +10,7 @@ void Magma::Framework::FileHandle::RegisterArchive(ArchiveHandle archive, const 
 		throw FileSystemError(mfErrorToString(err));
 }
 
-void Magma::Framework::FileHandle::UnregisterArchive(ArchiveHandle archive)
+void Magma::Framework::File::UnregisterArchive(ArchiveHandle archive)
 {
 	mfError err;
 	err = mffUnregisterArchive((mffArchive*)&archive.Get());
@@ -18,7 +18,7 @@ void Magma::Framework::FileHandle::UnregisterArchive(ArchiveHandle archive)
 		throw FileSystemError(mfErrorToString(err));
 }
 
-Magma::Framework::FileHandle::FileType Magma::Framework::FileHandle::FileHandle::GetType()
+Magma::Framework::File::FileType Magma::Framework::File::FileHandle::GetType()
 {
 	mfError err;
 	mffEnum type;
@@ -28,7 +28,7 @@ Magma::Framework::FileHandle::FileType Magma::Framework::FileHandle::FileHandle:
 	return static_cast<FileType>(type);
 }
 
-Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::FileHandle::GetFirst()
+Magma::Framework::File::FileHandle Magma::Framework::File::FileHandle::GetFirst()
 {
 	mfError err;
 	mffFile* file;
@@ -38,7 +38,7 @@ Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::FileHandl
 	return file;
 }
 
-Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::FileHandle::GetNext()
+Magma::Framework::File::FileHandle Magma::Framework::File::FileHandle::GetNext()
 {
 	mfError err;
 	mffFile* file;
@@ -48,7 +48,7 @@ Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::FileHandl
 	return file;
 }
 
-Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::FileHandle::GetParent()
+Magma::Framework::File::FileHandle Magma::Framework::File::FileHandle::GetParent()
 {
 	mfError err;
 	mffFile* file;
@@ -58,7 +58,7 @@ Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::FileHandl
 	return file;
 }
 
-Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::GetFile(const mfsUTF8CodeUnit * path)
+Magma::Framework::File::FileHandle Magma::Framework::File::GetFile(const mfsUTF8CodeUnit * path)
 {
 	mfError err;
 	mffFile* file;
@@ -70,7 +70,7 @@ Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::GetFile(c
 	return file;
 }
 
-Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::CreateDirectory(const mfsUTF8CodeUnit * path)
+Magma::Framework::File::FileHandle Magma::Framework::File::CreateDirectory(const mfsUTF8CodeUnit * path)
 {
 	mfError err;
 	mffDirectory* dir;
@@ -80,7 +80,7 @@ Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::CreateDir
 	return dir;
 }
 
-void Magma::Framework::FileHandle::DeleteDirectory(FileHandle & dir)
+void Magma::Framework::File::DeleteDirectory(FileHandle & dir)
 {
 	mfError err;
 	mffDirectory* d = (mffDirectory*)dir.GetNoChecks();
@@ -90,7 +90,7 @@ void Magma::Framework::FileHandle::DeleteDirectory(FileHandle & dir)
 		throw FileSystemError(mfErrorToString(err));
 }
 
-Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::CreateFile(const mfsUTF8CodeUnit * path)
+Magma::Framework::File::FileHandle Magma::Framework::File::CreateFile(const mfsUTF8CodeUnit * path)
 {
 	mfError err;
 	mffFile* f;
@@ -100,7 +100,7 @@ Magma::Framework::FileHandle::FileHandle Magma::Framework::FileHandle::CreateFil
 	return f;
 }
 
-void Magma::Framework::FileHandle::DeleteFile(FileHandle & file)
+void Magma::Framework::File::DeleteFile(FileHandle & file)
 {
 	mfError err;
 	mffFile* f = (mffFile*)file.GetNoChecks();
@@ -110,7 +110,7 @@ void Magma::Framework::FileHandle::DeleteFile(FileHandle & file)
 		throw FileSystemError(mfErrorToString(err));
 }
 
-Magma::Framework::String::StreamHandle Magma::Framework::FileHandle::OpenFile(FileHandle file, FileMode mode)
+Magma::Framework::String::StreamHandle Magma::Framework::File::OpenFile(FileHandle file, FileMode mode)
 {
 	mfError err;
 	mfsStream* stream;

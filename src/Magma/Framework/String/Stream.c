@@ -98,6 +98,11 @@ static mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSi
 	stream->base.write = &mfsFileWrite;
 	stream->base.flush = &mfsFileFlush;
 	stream->base.setBuffer = &mfsFileSetBuffer;
+	stream->base.seekBegin = NULL;
+	stream->base.seekEnd = NULL;
+	stream->base.seekHead = NULL;
+	stream->base.tell = NULL;
+	stream->base.eof = NULL;
 
 	return stream;
 }
@@ -161,6 +166,8 @@ mfError mfsWrite(mfsStream * stream, const mfmU8 * data, mfmU64 dataSize, mfmU64
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	if (dataSize == 0)
 		return MF_ERROR_OKAY;
+	if (stream->write == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
 	return stream->write(stream, data, dataSize, outSize);
 }
 
@@ -170,6 +177,8 @@ mfError mfsRead(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outS
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	if (dataSize == 0)
 		return MF_ERROR_OKAY;
+	if (stream->read == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
 	return stream->read(stream, data, dataSize, outSize);
 }
 
@@ -177,6 +186,8 @@ mfError mfsFlush(mfsStream * stream)
 {
 	if (stream == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->flush == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
 	return stream->flush(stream);
 }
 
@@ -184,31 +195,17 @@ mfError mfsSetBuffer(mfsStream * stream, mfmU8 * buffer, mfmU64 bufferSize)
 {
 	if (stream == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
-
 	if (stream->setBuffer == NULL)
-	{
-		if (stream->buffer != NULL)
-		{
-			if (bufferSize == 0)
-				return MFS_ERROR_INVALID_ARGUMENTS;
-
-			mfError err = stream->flush(stream);
-			if (err != MF_ERROR_OKAY)
-				return err;
-		}
-
-		stream->buffer = buffer;
-		stream->bufferSize = bufferSize;
-		return MF_ERROR_OKAY;
-	}
-	else
-		return stream->setBuffer(stream, buffer, bufferSize);
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
+	return stream->setBuffer(stream, buffer, bufferSize);
 }
 
 mfError mfsGetByte(mfsStream * stream, mfmU8 * byte)
 {
 	if (stream == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->read == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
 
 	if (byte == NULL)
 	{
@@ -237,6 +234,8 @@ mfError mfsPutByte(mfsStream * stream, mfmU8 byte)
 {
 	if (stream == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->write == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
 
 	mfmU64 writeSize = 0;
 	mfError err = stream->write(stream, &byte, sizeof(mfmU8), &writeSize);
@@ -383,5 +382,65 @@ mfError mfsPrintFormat(mfsStream * stream, const mfsUTF8CodeUnit * format, ...)
 	
 	va_end(args);
 
+	return MF_ERROR_OKAY;
+}
+
+mfError mfsSeekBegin(mfsStream * stream, mfmU64 offset)
+{
+	if (stream == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->seekBegin == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
+	mfError err = stream->seekBegin(stream, offset);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	return MF_ERROR_OKAY;
+}
+
+mfError mfsSeekEnd(mfsStream * stream, mfmU64 offset)
+{
+	if (stream == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->seekEnd == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
+	mfError err = stream->seekEnd(stream, offset);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	return MF_ERROR_OKAY;
+}
+
+mfError mfsSeekHead(mfsStream * stream, mfmI64 offset)
+{
+	if (stream == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->seekHead == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
+	mfError err = stream->seekHead(stream, offset);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	return MF_ERROR_OKAY;
+}
+
+mfError mfsTell(mfsStream * stream, mfmU64 * outPosition)
+{
+	if (stream == NULL || outPosition == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->seekHead == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
+	mfError err = stream->tell(stream, outPosition);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	return MF_ERROR_OKAY;
+}
+
+mfError mfsEOF(mfsStream * stream, mfmBool * eof)
+{
+	if (stream == NULL || eof == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->eof == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
+	mfError err = stream->eof(stream, eof);
+	if (err != MF_ERROR_OKAY)
+		return err;
 	return MF_ERROR_OKAY;
 }

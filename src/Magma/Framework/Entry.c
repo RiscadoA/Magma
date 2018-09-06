@@ -7,6 +7,8 @@
 #include "Input/OGLWindow.h"
 #include "Input/D3DWindow.h"
 
+
+
 #include "Graphics/2.X/RenderDevice.h"
 #include "Graphics/2.X/OGL4RenderDevice.h"
 #include "Graphics/2.X/D3D11RenderDevice.h"
@@ -47,6 +49,16 @@ mfError mfInit(int argc, const char** argv)
 		return err;
 #endif
 
+	// Init texture loader
+	err = mfgInitTextureLoader();
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Init render devices
+	err = mfgV2XInitRenderDevices();
+	if (err != MF_ERROR_OKAY)
+		return err;
+
 	// Register render device types
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	err = mfgV2XRegisterRenderDeviceCreator(MFG_OGL4RENDERDEVICE_TYPE_NAME, &mfgV2XCreateOGL4RenderDevice);
@@ -70,6 +82,14 @@ void mfTerminate()
 	if (mfInitialized == MFM_FALSE)
 		return;
 	mfError err;
+
+	// Terminate render devices
+	mfgV2XTerminateRenderDevices();
+
+	// Terminate texture loader
+	err = mfgTerminateTextureLoader();
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	// Terminate windows library
 	mfiTerminateWindows();
