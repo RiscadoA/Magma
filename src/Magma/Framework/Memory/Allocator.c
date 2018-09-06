@@ -39,10 +39,12 @@ mfError mfmDeallocate(void * allocator, void * memory)
 	}
 }
 
-mfError mfmReallocate(void * allocator, void * memory, mfmU64 size, void ** newMemory)
+mfError mfmReallocate(void * allocator, void * memory, mfmU64 prevSize, mfmU64 size, void ** newMemory)
 {
-	if (memory == NULL || newMemory  == NULL || size == 0)
+	if (newMemory  == NULL || size == 0)
 		return MFM_ERROR_INVALID_ARGUMENTS;
+	if (memory == NULL)
+		return mfmAllocate(allocator, newMemory, size);
 
 	if (allocator == NULL)
 	{
@@ -54,7 +56,7 @@ mfError mfmReallocate(void * allocator, void * memory, mfmU64 size, void ** newM
 	}
 	else
 	{
-		mfError err = ((mfmAllocator*)allocator)->reallocate(allocator, memory, size, newMemory);
+		mfError err = ((mfmAllocator*)allocator)->reallocate(allocator, memory, prevSize, size, newMemory);
 		return err;
 	}
 }

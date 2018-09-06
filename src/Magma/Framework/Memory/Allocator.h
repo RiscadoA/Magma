@@ -14,7 +14,7 @@ extern "C"
 #endif
 	typedef mfError (*mfmAllocateFunction)(void* allocator, void** memory, mfmU64 size);
 	typedef mfError(*mfmDeallocateFunction)(void* allocator, void* memory);
-	typedef mfError (*mfmReallocateFunction)(void* allocator, void* memory, mfmU64 size, void** newMemory);
+	typedef mfError (*mfmReallocateFunction)(void* allocator, void* memory, mfmU64 prevSize, mfmU64 size, void** newMemory);
 
 	typedef struct
 	{
@@ -56,6 +56,7 @@ extern "C"
 	/// </summary>
 	/// <param name="allocator">Magma framework memory allocator (set to NULL to use the default allocator)</param>
 	/// <param name="memory">Pointer to previously allocated memory pointer</param>
+	/// <param name="prevSize">Previous allocation size in bytes</param>
 	/// <param name="size">New memory allocation size in bytes</param>
 	/// <param name="newMemory">New memory adress</param>
 	/// <returns>
@@ -64,7 +65,7 @@ extern "C"
 	///		Returns MFM_ERROR_INVALID_ARGUMENTS if memory is NULL or size is 0.
 	///		Returns other errors specific to the allocator type.
 	/// </returns>
-	mfError mfmReallocate(void* allocator, void* memory, mfmU64 size, void** newMemory);
+	mfError mfmReallocate(void* allocator, void* memory, mfmU64 prevSize, mfmU64 size, void** newMemory);
 
 	/// <summary>
 	///		Allocates on a magma framework memory allocator using a specified alignment.

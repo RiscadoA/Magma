@@ -795,6 +795,17 @@ static mfError mffFileStreamTell(void* stream, mfmU64* position)
 	return MF_ERROR_OKAY;
 }
 
+static mfError mffFileStreamEOF(void* stream, mfmBool* eof)
+{
+	mffFolderFileStream* folderStream = stream;
+	int ret = feof(folderStream->handle);
+	if (ret != 0)
+		*eof = MFM_TRUE;
+	else
+		*eof = MFM_FALSE;
+	return MF_ERROR_OKAY;
+}
+
 static void mffArchiveCloseFile(void* stream)
 {
 	mffFolderFileStream* folderStream = stream;
@@ -879,6 +890,7 @@ static mfError mffArchiveOpenFileUnsafe(mffArchive* archive, mfsStream** outStre
 	stream->base.tell = &mffFileStreamTell;
 	stream->base.buffer = NULL;
 	stream->base.bufferSize = 0;
+	stream->base.eof = &mffFileStreamEOF;
 
 	*outStream = stream;
 

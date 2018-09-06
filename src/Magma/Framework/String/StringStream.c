@@ -4,6 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+static mfError mfsStringStreamEOF(void* stream, mfmBool* eof)
+{
+	if (stream == NULL || eof == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+	mfsStringStream* str = (mfsStringStream*)stream;
+	if (str->readHead >= str->base.bufferSize)
+		*eof = MFM_TRUE;
+	else
+		*eof = MFM_FALSE;
+	return MF_ERROR_OKAY;
+}
+
 mfError mfsStringStreamRead(void* stream, mfmU8* data, mfmU64 size, mfmU64* readSize)
 {
 	if (stream == NULL || data == NULL)
@@ -109,6 +121,7 @@ mfError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, 
 	str->base.seekEnd = NULL;
 	str->base.seekHead = NULL;
 	str->base.tell = NULL;
+	str->base.eof = &mfsStringStreamEOF;
 
 	str->allocator = allocator;
 	if (str->allocator != NULL)
@@ -164,6 +177,7 @@ mfError mfsCreateLocalStringStream(mfsStringStream * stream, mfmU8 * buffer, mfm
 	stream->base.seekEnd = NULL;
 	stream->base.seekHead = NULL;
 	stream->base.tell = NULL;
+	stream->base.eof = &mfsStringStreamEOF;
 
 	stream->allocator = NULL;
 	stream->writeHead = 0;

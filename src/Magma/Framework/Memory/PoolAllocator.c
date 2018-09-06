@@ -13,7 +13,7 @@ mfError mfmInternalPoolDeallocate(void* allocator, void* memory)
 	return mfmPoolDeallocate((mfmPoolAllocator*)allocator, memory);
 }
 
-mfError mfmInternalPoolReallocate(void* allocator, void* memory, mfmU64 size, void** newMemory)
+mfError mfmInternalPoolReallocate(void* allocator, void* memory, mfmU64 prevSize, mfmU64 size, void** newMemory)
 {
 	mfmPoolAllocator* poolAllocator = allocator;
 
@@ -22,6 +22,7 @@ mfError mfmInternalPoolReallocate(void* allocator, void* memory, mfmU64 size, vo
 		return MFM_ERROR_ALLOCATION_TOO_BIG;
 
 	*newMemory = memory;
+	return MF_ERROR_OKAY;
 }
 
 mfError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPoolAllocatorDesc* desc)

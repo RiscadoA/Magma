@@ -20,6 +20,8 @@ const mfsUTF8CodeUnit * mfmErrorToString(mfError err)
 			return u8"[MFM_ERROR_UNSUPPORTED_FUNCTION] Unsupported function";
 		case MFM_ERROR_STILL_HAS_REFERENCES:
 			return u8"[MFM_ERROR_STILL_HAS_REFERENCES] Object still has references to it";
+		case MFM_ERROR_ALLOCATOR_UNDERFLOW:
+			return u8"[MFM_ERROR_ALLOCATOR_UNDERFLOW] Allocator underflow";
 
 		default:
 			return NULL;

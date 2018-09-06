@@ -12,9 +12,28 @@ mfError mfmInternalLinearDeallocate(void* allocator, void* memory)
 	return MFM_ERROR_UNSUPPORTED_FUNCTION;
 }
 
-mfError mfmInternalLinearReallocate(void* allocator, void* memory, mfmU64 size, void** newMemory)
+mfError mfmInternalLinearReallocate(void* allocator, void* memory, mfmU64 prevSize, mfmU64 size, void** newMemory)
 {
-	return mfmLinearAllocate((mfmLinearAllocator*)allocator, newMemory, size);
+	mfmLinearAllocator* linearAllocator = allocator;
+
+	if (linearAllocator->head - prevSize == memory)
+	{
+		if (size >= prevSize)
+		{
+			if (linearAllocator->head - linearAllocator->begin + (size - prevSize) > linearAllocator->size)
+				return MFM_ERROR_ALLOCATOR_OVERFLOW;
+			linearAllocator->head += size - prevSize;
+		}
+		else
+		{
+			if (linearAllocator->head - (prevSize - size) < linearAllocator->begin)
+				return MFM_ERROR_ALLOCATOR_UNDERFLOW;;
+			linearAllocator->head -= prevSize - size;
+		}
+		*newMemory = linearAllocator->head;
+		return MF_ERROR_OKAY;
+	}
+	else return mfmLinearAllocate((mfmLinearAllocator*)allocator, newMemory, size);
 }
 
 mfError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 size)

@@ -2,9 +2,9 @@
 #include <Magma/Framework/Input/Window.hpp>
 #include <Magma/Framework/File/FileSystem.hpp>
 #include <Magma/Framework/File/FolderArchive.hpp>
+#include <Magma/Framework/Graphics/TextureLoader.h>
 #include <Magma/Framework/Graphics/2.X/RenderDevice.hpp>
 #include <Magma/Framework/Graphics/2.X/MSL/Compiler.hpp>
-#include <Magma/Framework/Graphics/2.X/PNGLoader.h>
 #include <Magma/Framework/Graphics/Exception.hpp>
 #include <Magma/Framework/String/Stream.hpp>
 #include <Magma/Framework/String/StringStream.hpp>
@@ -165,22 +165,23 @@ int run()
 
 		// Create texture
 		{
-			mfgPNGTextureData* texData;
+			mfgTextureData texData;
 
 			// Load texture data from file
 			{
 				auto file = File::GetFile(u8"/resources/Textures/test1.png");
 				auto stream = File::OpenFile(file, File::FileMode::Read);
-				mfError err = mfgLoadPNG(&stream.Get(), &texData, MFG_RGBA32FLOAT, NULL);
+				mfError err = mfgLoadTexture(&stream.Get(), &texData, MFG_RGBA8UNORM, NULL);
 				if (err != MF_ERROR_OKAY)
 					abort();
 			}
 
-			tex = rd.CreateTexture2D(texData->width, texData->height, Graphics::V2X::Format::RGBA32Float, texData->data, Graphics::V2X::Usage::Static);
+			tex = rd.CreateTexture2D(texData.width, texData.height, Graphics::V2X::Format::RGBA8UNorm, texData.data, Graphics::V2X::Usage::Static);
 
 			texBP = ps.GetBindingPoint("texture");
 
-			mfgUnloadPNG(texData);
+			if (mfmDeallocate(texData.allocator, texData.data) != MF_ERROR_OKAY)
+				abort();
 		}
 
 		// Create sampler

@@ -102,6 +102,7 @@ static mfsStream* mfsCreateFileStream(FILE* file, mfmU8* buffer, mfmU64 bufferSi
 	stream->base.seekEnd = NULL;
 	stream->base.seekHead = NULL;
 	stream->base.tell = NULL;
+	stream->base.eof = NULL;
 
 	return stream;
 }
@@ -427,6 +428,18 @@ mfError mfsTell(mfsStream * stream, mfmU64 * outPosition)
 	if (stream->seekHead == NULL)
 		return MFS_ERROR_UNSUPPORTED_FUNCTION;
 	mfError err = stream->tell(stream, outPosition);
+	if (err != MF_ERROR_OKAY)
+		return err;
+	return MF_ERROR_OKAY;
+}
+
+mfError mfsEOF(mfsStream * stream, mfmBool * eof)
+{
+	if (stream == NULL || eof == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+	if (stream->eof == NULL)
+		return MFS_ERROR_UNSUPPORTED_FUNCTION;
+	mfError err = stream->eof(stream, eof);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	return MF_ERROR_OKAY;

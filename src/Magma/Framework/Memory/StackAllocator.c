@@ -13,9 +13,28 @@ mfError mfmInternalStackDeallocate(void* allocator, void* memory)
 	// return mfmStackSetHead(allocator, memory);
 }
 
-mfError mfmInternalStackReallocate(void* allocator, void* memory, mfmU64 size, void** newMemory)
+mfError mfmInternalStackReallocate(void* allocator, void* memory, mfmU64 prevSize, mfmU64 size, void** newMemory)
 {
-	return mfmStackAllocate(allocator, newMemory, size);
+	mfmStackAllocator* stackAllocator = allocator;
+
+	if (stackAllocator->stackHead - prevSize == memory)
+	{
+		if (size >= prevSize)
+		{
+			if (stackAllocator->stackHead - stackAllocator->stackBegin + (size - prevSize) > stackAllocator->stackSize)
+				return MFM_ERROR_ALLOCATOR_OVERFLOW;
+			stackAllocator->stackHead += size - prevSize;
+		}
+		else
+		{
+			if (stackAllocator->stackHead - (prevSize - size) < stackAllocator->stackBegin)
+				return MFM_ERROR_ALLOCATOR_UNDERFLOW;;
+			stackAllocator->stackHead -= prevSize - size;
+		}
+		*newMemory = stackAllocator->stackHead;
+		return MF_ERROR_OKAY;
+	}
+	else return mfmStackAllocate(allocator, newMemory, size);
 }
 
 mfError mfmCreateStackAllocator(mfmStackAllocator ** stackAllocator, mfmU64 size)

@@ -22,6 +22,7 @@ extern "C"
 	typedef mfError(*mfsStreamSeekEndFunction)(void*, mfmU64 offset);
 	typedef mfError(*mfsStreamSeekHeadFunction)(void*, mfmI64 offset);
 	typedef mfError(*mfsStreamTellFunction)(void*, mfmU64* position);
+	typedef mfError(*mfsStreamEOFFunction)(void*, mfmBool* eof);
 	
 	typedef struct
 	{
@@ -34,6 +35,7 @@ extern "C"
 		mfsStreamSeekEndFunction seekEnd;
 		mfsStreamSeekHeadFunction seekHead;
 		mfsStreamTellFunction tell;
+		mfsStreamEOFFunction eof;
 
 		mfmU8* buffer;
 		mfmU64 bufferSize;
@@ -215,6 +217,19 @@ extern "C"
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
 	mfError mfsTell(mfsStream* stream, mfmU64* outPosition);
+
+	/// <summary>
+	///		Checks if a stream has reached EOF.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="eof">Out EOF (MFM_TRUE is has reached EOF, otherwise MFM_FALSE)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsEOF(mfsStream* stream, mfmBool* eof);
 
 #ifdef __cplusplus
 }
