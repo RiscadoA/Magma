@@ -13,6 +13,17 @@ mfError mfmInternalPoolDeallocate(void* allocator, void* memory)
 	return mfmPoolDeallocate((mfmPoolAllocator*)allocator, memory);
 }
 
+mfError mfmInternalPoolReallocate(void* allocator, void* memory, mfmU64 size, void** newMemory)
+{
+	mfmPoolAllocator* poolAllocator = allocator;
+
+	// Check if the arguments are valid
+	if (size > poolAllocator->desc.slotSize)
+		return MFM_ERROR_ALLOCATION_TOO_BIG;
+
+	*newMemory = memory;
+}
+
 mfError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPoolAllocatorDesc* desc)
 {
 	// Check if the arguments are valid
@@ -41,6 +52,7 @@ mfError mfmCreatePoolAllocator(mfmPoolAllocator ** poolAllocator, const mfmPoolA
 	// Set functions
 	(*poolAllocator)->base.allocate = &mfmInternalPoolAllocate;
 	(*poolAllocator)->base.deallocate = &mfmInternalPoolDeallocate;
+	(*poolAllocator)->base.reallocate = &mfmInternalPoolReallocate;
 
 	// Set destructor function
 	(*poolAllocator)->base.object.destructorFunc = &mfmDestroyPoolAllocator;
@@ -84,6 +96,7 @@ mfError mfmCreatePoolAllocatorOnMemory(mfmPoolAllocator ** poolAllocator, const 
 	// Set functions
 	(*poolAllocator)->base.allocate = &mfmInternalPoolAllocate;
 	(*poolAllocator)->base.deallocate = &mfmInternalPoolDeallocate;
+	(*poolAllocator)->base.reallocate = &mfmInternalPoolReallocate;
 
 	// Set destructor function
 	(*poolAllocator)->base.object.destructorFunc = &mfmDestroyPoolAllocator;

@@ -79,6 +79,7 @@ include_directories(../../)
 # Include external libraries
 include_directories(../../../extern/freetype/include/)
 include_directories(../../../extern/zlib/)
+include_directories(../../../extern/)
 include_directories(${CMAKE_BINARY_DIR}/extern/zlib/)
 include_directories(../../../extern/glm/)
 

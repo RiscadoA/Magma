@@ -12,6 +12,11 @@ mfError mfmInternalLinearDeallocate(void* allocator, void* memory)
 	return MFM_ERROR_UNSUPPORTED_FUNCTION;
 }
 
+mfError mfmInternalLinearReallocate(void* allocator, void* memory, mfmU64 size, void** newMemory)
+{
+	return mfmLinearAllocate((mfmLinearAllocator*)allocator, newMemory, size);
+}
+
 mfError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 size)
 {
 	// Check if the arguments are valid
@@ -33,6 +38,7 @@ mfError mfmCreateLinearAllocator(mfmLinearAllocator ** linearAllocator, mfmU64 s
 	// Set functions
 	(*linearAllocator)->base.allocate = &mfmInternalLinearAllocate;
 	(*linearAllocator)->base.deallocate = &mfmInternalLinearDeallocate;
+	(*linearAllocator)->base.reallocate = &mfmInternalLinearReallocate;
 
 	// Set destructor function
 	(*linearAllocator)->base.object.destructorFunc = &mfmDestroyLinearAllocator;
@@ -57,6 +63,7 @@ mfError mfmCreateLinearAllocatorOnMemory(mfmLinearAllocator ** linearAllocator, 
 	// Set functions
 	(*linearAllocator)->base.allocate = &mfmInternalLinearAllocate;
 	(*linearAllocator)->base.deallocate = &mfmInternalLinearDeallocate;
+	(*linearAllocator)->base.reallocate = &mfmInternalLinearReallocate;
 
 	// Set destructor function
 	(*linearAllocator)->base.object.destructorFunc = &mfmDestroyLinearAllocator;
