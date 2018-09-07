@@ -1610,7 +1610,7 @@ extern "C"
 	mfError mfgV2XRegisterRenderDeviceCreator(const mfsUTF8CodeUnit* type, mfgV2XRenderDeviceCreatorFunction func);
 
 	/// <summary>
-	///		Creates a new window.
+	///		Creates a new render device.
 	/// </summary>
 	/// <param name="type">Render device type name</param>
 	/// <param name="renderDevice">Out render device handle</param>
