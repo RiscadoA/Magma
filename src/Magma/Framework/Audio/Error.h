@@ -11,6 +11,7 @@ extern "C"
 #define MFA_ERROR_INTERNAL							0x0802
 #define MFA_ERROR_NO_REGISTER_ENTRIES				0x0803
 #define MFA_ERROR_TYPE_NOT_REGISTERED				0x0804
+#define MFA_ERROR_NOT_SUPPORTED						0x0805
 
 #ifdef __cplusplus
 }

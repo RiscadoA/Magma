@@ -17,6 +17,10 @@ extern "C"
 #define MFA_MONO16		0x03
 #define MFA_STEREO16	0x04
 
+#define MFA_MAX_BUFFERS			0X05
+#define MFA_MAX_SOURCES			0X06
+#define MFA_MAX_QUEUED_BUFFERS	0X07
+
 	typedef mfmU32 mfaEnum;
 
 	typedef struct mfaRenderDevice mfaRenderDevice;

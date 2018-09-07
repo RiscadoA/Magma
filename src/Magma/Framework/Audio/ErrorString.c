@@ -14,6 +14,8 @@ const mfsUTF8CodeUnit * mfaErrorToString(mfError err)
 			return u8"[MFA_ERROR_NO_REGISTER_ENTRIES] No register entries available";
 		case MFA_ERROR_TYPE_NOT_REGISTERED:
 			return u8"[MFA_ERROR_TYPE_NOT_REGISTERED] Type not registered";
+		case MFA_ERROR_NOT_SUPPORTED:
+			return u8"[MFA_ERROR_NOT_SUPPORTED] Unsupported feature";
 
 		default:
 			return NULL;

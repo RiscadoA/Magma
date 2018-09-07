@@ -3263,8 +3263,9 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	
 	// Allocate render device
 	mfgOGL4RenderDevice* rd;
-	if (mfmAllocate(allocator, &rd, sizeof(mfgOGL4RenderDevice)) != MF_ERROR_OKAY)
-		return MFG_ERROR_ALLOCATION_FAILED;
+	mfError err = mfmAllocate(allocator, &rd, sizeof(mfgOGL4RenderDevice));
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	// Create 32 bytes pool
 	{
@@ -3340,10 +3341,10 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	// Init context
 	glfwMakeContextCurrent((GLFWwindow*)mfiGetGLWindowGLFWHandle(((mfgOGL4RenderDevice*)rd)->window));
 	glewExperimental = GL_TRUE;
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
+	GLenum glErr = glewInit();
+	if (glErr != GLEW_OK)
 	{
-		mfsPrintFormat(mfsErrStream, u8"Failed to create OGL4RenderDevice:\nFailed to init GLEW:\n%s", (const mfsUTF8CodeUnit*)glewGetErrorString(err));
+		mfsPrintFormat(mfsErrStream, u8"Failed to create OGL4RenderDevice:\nFailed to init GLEW:\n%s", (const mfsUTF8CodeUnit*)glewGetErrorString(glErr));
 		return MFS_ERROR_INTERNAL;
 	}
 
