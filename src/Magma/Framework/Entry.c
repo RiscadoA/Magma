@@ -12,6 +12,7 @@
 #include "Graphics/2.X/D3D11RenderDevice.h"
 
 #include "Audio/RenderDevice.h"
+#include "Audio/OALRenderDevice.h"
 
 static mfmBool mfInitialized = MFM_FALSE;
 
@@ -76,6 +77,13 @@ mfError mfInit(int argc, const char** argv)
 	err = mfaInitRenderDevices();
 	if (err != MF_ERROR_OKAY)
 		return err;
+
+	// Register audio render device types
+#ifdef MAGMA_FRAMEWORK_USE_OPENAL
+	err = mfaRegisterRenderDeviceCreator(MFA_OALRENDERDEVICE_TYPE_NAME, &mfaCreateOALRenderDevice);
+	if (err != MF_ERROR_OKAY)
+		return err;
+#endif
 
 	mfInitialized = MFM_TRUE;
 
