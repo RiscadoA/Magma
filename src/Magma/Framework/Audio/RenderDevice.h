@@ -35,6 +35,34 @@ extern "C"
 	typedef void(*mfaRDDestroyBufferFunction)(void* buf);
 	typedef mfError(*mfaRDUpdateBufferFunction)(mfaRenderDevice* rd, mfaBuffer* buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency);
 
+	// Source functions
+	typedef mfError(*mfaRDCreateSourceFunction)(mfaRenderDevice* rd, mfaSource** source);
+	typedef void(*mfaRDDestroySourceFunction)(void* source);
+	typedef mfError(*mfaRDPlaySourceFunction)(mfaRenderDevice* rd, mfaSource* source);
+	typedef mfError(*mfaRDStopSourceFunction)(mfaRenderDevice* rd, mfaSource* source);
+	typedef mfError(*mfaRDRewindSourceFunction)(mfaRenderDevice* rd, mfaSource* source);
+	typedef mfError(*mfaRDPauseSourceFunction)(mfaRenderDevice* rd, mfaSource* source);
+	typedef mfError(*mfaRDIsSourcePlayingFunction)(mfaRenderDevice* rd, mfaSource* source, mfmBool* out);
+	typedef mfError(*mfaRDGetSourceProcessedBuffersFunction)(mfaRenderDevice* rd, mfaSource* source, mfmU64* out);
+	typedef mfError(*mfaRDSourceQueueBufferFunction)(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer);
+	typedef mfError(*mfaRDSourceUnqueueBufferFunction)(mfaRenderDevice* rd, mfaSource* source, mfaBuffer** buffer);
+	typedef mfError(*mfaRDSetSourcePositionFunction)(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z);
+	typedef mfError(*mfaRDSetSourceVelocityFunction)(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z);
+	typedef mfError(*mfaRDSetSourceDirectionFunction)(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z);
+	typedef mfError(*mfaRDSetSourcePitchFunction)(mfaRenderDevice* rd, mfaSource* source, mfmF32 pitch);
+	typedef mfError(*mfaRDSetSourceGainFunction)(mfaRenderDevice* rd, mfaSource* source, mfmF32 gain);
+	typedef mfError(*mfaRDSetSourceMaxDistanceFunction)(mfaRenderDevice* rd, mfaSource* source, mfmF32 maxDistance);
+	typedef mfError(*mfaRDSetSourceSecondsOffsetFunction)(mfaRenderDevice* rd, mfaSource* source, mfmF32 position);
+	typedef mfError(*mfaRDSetSourceSamplesOffsetFunction)(mfaRenderDevice* rd, mfaSource* source, mfmU64 position);
+	typedef mfError(*mfaRDSetSourceBytesOffsetFunction)(mfaRenderDevice* rd, mfaSource* source, mfmU64 position);
+	typedef mfError(*mfaRDSetSourceLoopingFunction)(mfaRenderDevice* rd, mfaSource* source, mfmBool looping);
+	typedef mfError(*mfaRDSetSourceBufferFunction)(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer);
+
+	// Listener functions
+	typedef mfError(*mfaRDSetListenerPositionFunction)(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z);
+	typedef mfError(*mfaRDSetListenerVelocityFunction)(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z);
+	typedef mfError(*mfaRDSetListenerOrientationFunction)(mfaRenderDevice* rd, mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ);
+
 	// Getter functions
 	typedef mfError(*mfaRDGetPropertyI)(mfaRenderDevice* rd, mfaEnum propID, mfmI32* value);
 	typedef mfError(*mfaRDGetPropertyF)(mfaRenderDevice* rd, mfaEnum propID, mfmF32* value);
@@ -46,13 +74,44 @@ extern "C"
 	{
 		mfmObject object;
 
+		// Buffer functions
 		mfaRDCreateBufferFunction createBuffer;
 		mfaRDDestroyBufferFunction destroyBuffer;
 		mfaRDUpdateBufferFunction updateBuffer;
 
+		// Source functions
+		mfaRDCreateSourceFunction createSource;
+		mfaRDDestroySourceFunction destroySource;
+		mfaRDPlaySourceFunction playSource;
+		mfaRDStopSourceFunction stopSource;
+		mfaRDRewindSourceFunction rewindSource;
+		mfaRDPauseSourceFunction pauseSource;
+		mfaRDIsSourcePlayingFunction isSourcePlaying;
+		mfaRDGetSourceProcessedBuffersFunction getSourceProcessedBuffers;
+		mfaRDSourceQueueBufferFunction sourceQueueBuffer;
+		mfaRDSourceUnqueueBufferFunction sourceUnqueueBuffer;
+		mfaRDSetSourcePositionFunction setSourcePosition;
+		mfaRDSetSourceVelocityFunction setSourceVelocity;
+		mfaRDSetSourceDirectionFunction setSourceDirection;
+		mfaRDSetSourcePitchFunction setSourcePitch;
+		mfaRDSetSourceGainFunction setSourceGain;
+		mfaRDSetSourceMaxDistanceFunction setSourceMaxDistance;
+		mfaRDSetSourceSecondsOffsetFunction setSourceSecondsOffset;
+		mfaRDSetSourceSamplesOffsetFunction setSourceSamplesOffset;
+		mfaRDSetSourceBytesOffsetFunction setSourceBytesOffset;
+		mfaRDSetSourceLoopingFunction setSourceLooping;
+		mfaRDSetSourceBufferFunction setSourceBuffer;
+
+		// Listener functions
+		mfaRDSetListenerPositionFunction setListenerPosition;
+		mfaRDSetListenerVelocityFunction setListenerVelocity;
+		mfaRDSetListenerOrientationFunction setListenerOrientation;
+
+		// Getter functions
 		mfaRDGetPropertyI getPropertyI;
 		mfaRDGetPropertyF getPropertyF;
 
+		// Error functions
 		mfaRDGetErrorString getErrorString;
 	};
 
@@ -78,16 +137,19 @@ extern "C"
 	void mfaDestroyBuffer(void* buf);
 
 	/// <summary>
-	///		Maps the constant buffer data to a accessible memory location.
+	///		Updates a buffer's data.
 	/// </summary>
 	/// <param name="rd">Render device</param>
-	/// <param name="cb">Constant buffer handle</param>
-	/// <param name="memory">Pointer to memory pointer</param>
+	/// <param name="buf">Buffer handle</param>
+	/// <param name="data">New data</param>
+	/// <param name="size">New data size in bytes</param>
+	/// <param name="format">New buffer audio format</param>
+	/// <param name="frequency">New buffer audio frequency</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
 	///		Otherwise returns the error code.
 	/// </returns>
-	mfError mfaUpdateBuffer(mfaRenderDevice* rd, mfaBuffer* cb, void** memory);
+	mfError mfaUpdateBuffer(mfaRenderDevice* rd, mfaBuffer* buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency);
 
 	/// <summary>
 	///		Creates a new source.
@@ -105,6 +167,278 @@ extern "C"
 	/// </summary>
 	/// <param name="source">Source handle</param>
 	void mfaDestroySource(void* source);
+
+	/// <summary>
+	///		Plays audio on a source.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaPlaySource(mfaRenderDevice* rd, mfaSource* source);
+
+	/// <summary>
+	///		Stops the audio playing on a source.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaStopSource(mfaRenderDevice* rd, mfaSource* source);
+
+	/// <summary>
+	///		Rewinds the audio playing on a source.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaRewindSource(mfaRenderDevice* rd, mfaSource* source);
+
+	/// <summary>
+	///		Pauses the audio playing on a source.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaPauseSource(mfaRenderDevice* rd, mfaSource* source);
+
+	/// <summary>
+	///		Stops the audio playing on a source.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="out">Out value</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaIsSourcePlaying(mfaRenderDevice* rd, mfaSource* source, mfmBool* out);
+
+	/// <summary>
+	///		Gets the number of buffers that were processed by a source.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="out">Out value</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaGetSourceProcessedBuffers(mfaRenderDevice* rd, mfaSource* source, mfmU64* out);
+
+	/// <summary>
+	///		Queues a buffer on a source.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="buf">Buffer handle</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSourceQueueBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buf);
+
+	/// <summary>
+	///		Unqueues a buffer on a source (first buffer to be processed).
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="buf">Out buffer handle</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSourceUnqueueBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer** buf);
+
+	/// <summary>
+	///		Sets a source's position.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="x">X position</param>
+	/// <param name="y">Y position</param>
+	/// <param name="z">Z position</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourcePosition(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z);
+
+	/// <summary>
+	///		Sets a source's velocity.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="x">X velocity</param>
+	/// <param name="y">Y velocity</param>
+	/// <param name="z">Z velocity</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceVelocity(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z);
+
+	/// <summary>
+	///		Sets a source's direction.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="x">X direction</param>
+	/// <param name="y">Y direction</param>
+	/// <param name="z">Z direction</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceDirection(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z);
+
+	/// <summary>
+	///		Sets a source's pitch.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="value">Pitch</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourcePitch(mfaRenderDevice* rd, mfaSource* source, mfmF32 value);
+
+	/// <summary>
+	///		Sets a source's gain.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="value">Gain</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceGain(mfaRenderDevice* rd, mfaSource* source, mfmF32 value);
+
+	/// <summary>
+	///		Sets a source's maximum distance.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="value">Maximum distance</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceMaxDistance(mfaRenderDevice* rd, mfaSource* source, mfmF32 value);
+
+	/// <summary>
+	///		Sets the source's playback position in seconds.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="position">Position in seconds</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceSecondsOffset(mfaRenderDevice* rd, mfaSource* source, mfmF32 position);
+
+	/// <summary>
+	///		Sets the source's playback position in samples.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="position">Position in samples</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceSamplesOffset(mfaRenderDevice* rd, mfaSource* source, mfmU64 position);
+
+	/// <summary>
+	///		Sets the source's playback position in bytes.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="position">Position in bytes</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceBytesOffset(mfaRenderDevice* rd, mfaSource* source, mfmU64 position);
+
+	/// <summary>
+	///		Sets a source's maximum distance.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="looping">If MFM_FALSE, sets source as non looping, otherwise as looping</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceLooping(mfaRenderDevice* rd, mfaSource* source, mfmBool looping);
+
+	/// <summary>
+	///		Sets a source's current buffer.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="source">Source handle</param>
+	/// <param name="buffer">New buffer handle</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetSourceBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer);
+
+	/// <summary>
+	///		Sets the listener's position.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="x">X position</param>
+	/// <param name="y">Y position</param>
+	/// <param name="z">Z position</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetListenerPosition(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z);
+
+	/// <summary>
+	///		Sets the listener's velocity.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="x">X velocity</param>
+	/// <param name="y">Y velocity</param>
+	/// <param name="z">Z velocity</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetListenerVelocity(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z);
+
+	/// <summary>
+	///		Sets the listener's orientation.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	///	<param name="atX">Forward X direction</param>
+	/// <param name="atY">Forward Y direction</param>
+	/// <param name="atZ">Forward Z direction</param>
+	/// <param name="upX">Up X directory</param>
+	/// <param name="upY">Up Y direction</param>
+	/// <param name="upZ">Up Z direction</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetListenerOrientation(mfaRenderDevice* rd, mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ);
 
 	/// <summary>
 	///		Gets a render device integer property.
