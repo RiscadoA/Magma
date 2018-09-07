@@ -34,7 +34,9 @@ typedef struct
 {
 	mfaRenderDeviceObject base;
 	ALuint id;
-	mfaOALBuffer* m_queueBuffers[MFA_OAL_MAX_QUEUED_BUFFERS];
+	mfaOALBuffer* queueBuffers[MFA_OAL_MAX_QUEUED_BUFFERS];
+	mfmU64 firstSlot;
+	mfmU64 nextSlot;
 } mfaOALSource;
 
 typedef struct
@@ -68,9 +70,371 @@ typedef struct
 #define MFA_CHECK_AL_ERROR(rd) do { ALenum err = alGetError();\
 if (err != AL_NO_ERROR) MFA_RETURN_ERROR(rd, MFA_ERROR_INTERNAL, u8"alGetError() returned non zero on " __FUNCTION__);\
 } while(0)
+#define MFA_CHECK_AL_ERROR_ABORT() do { ALenum err = alGetError();\
+if (err != AL_NO_ERROR) abort();\
+} while(0)
 #else
 #define MFA_CHECK_AL_ERROR(rd)
 #endif
+
+static void mfaOALDestroyBuffer(void* buf);
+
+static mfError mfaOALCreateBuffer(mfaRenderDevice* rd, mfaBuffer** buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (buf == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Out buffer handle pointer is NULL");
+#endif
+
+	mfaOALRenderDevice* oalRD = rd;
+	mfError err;
+
+	// Allocate buffer
+	mfaOALBuffer* oalBuf;
+	err = mfmAllocate(oalRD->bufferPool, &oalBuf, sizeof(mfaOALBuffer));
+	if (err != MF_ERROR_OKAY)
+		return err;
+	
+	// Init buffer
+	err = mfmInitObject(&oalBuf->base.object);
+	if (err != MF_ERROR_OKAY)
+	{
+		mfmDeallocate(oalRD->bufferPool, oalBuf);
+		return err;
+	}
+	oalBuf->base.object.destructorFunc = &mfaOALDestroyBuffer;
+	oalBuf->base.renderDevice = rd;
+
+	// Generate buffer
+	alGenBuffers(1, &oalBuf->id);
+
+	// If has initial data
+	if (data != NULL)
+	{
+		err = mfaOALUpdateBuffer(rd, oalBuf, data, size, format, frequency);
+		if (err != MF_ERROR_OKAY)
+		{
+			mfmDeallocate(oalRD->bufferPool, oalBuf);
+			return err;
+		}
+	}
+
+	*buf = oalBuf;
+	return MF_ERROR_OKAY;
+}
+
+static void mfaOALDestroyBuffer(void* buf)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (buf == NULL)
+		abort();
+#endif
+
+	mfaOALBuffer* oalBuf = buf;
+	mfError err;
+
+	// Deinit source
+	err = mfmDestroyObject(&oalBuf->base.object);
+	if (err != MF_ERROR_OKAY)
+		return abort();
+
+	// Delete buffer
+	alDeleteBuffers(1, &oalBuf);
+
+	// Deallocate buffer
+	err = mfmDeallocate(((mfaOALRenderDevice*)oalBuf->base.renderDevice)->bufferPool, oalBuf);
+	if (err != MF_ERROR_OKAY)
+		return abort();
+
+	MFA_CHECK_AL_ERROR_ABORT();
+}
+
+static mfError mfaOALUpdateBuffer(mfaRenderDevice* rd, mfaBuffer* buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (buf == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Buffer handle is NULL");
+	if (data == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Data is NULL");
+#endif
+
+	ALenum al_format;
+
+	switch (al_format)
+	{
+		case MFA_MONO8: al_format = AL_FORMAT_MONO8; break;
+		case MFA_STEREO8: al_format = AL_FORMAT_STEREO8; break;
+		case MFA_MONO16: al_format = AL_FORMAT_MONO16; break;
+		case MFA_STEREO16: al_format = AL_FORMAT_STEREO16; break;
+		default:
+			MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, "Invalid/unsupported audio format");
+			break;
+	}
+
+	alBufferData(((mfaOALBuffer*)buf)->id, al_format, data, size, frequency);
+
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
+}
+
+static void mfaOALDestroySource(void* source);
+
+static mfError mfaOALCreateSource(mfaRenderDevice* rd, mfaSource** source)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Out source handle pointer is NULL");
+#endif
+
+	mfaOALRenderDevice* oalRD = rd;
+	mfError err;
+
+	// Allocate source
+	mfaOALSource* oalSource;
+	err = mfmAllocate(oalRD->sourcePool, &oalSource, sizeof(mfaOALSource));
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Init buffer
+	err = mfmInitObject(&oalSource->base.object);
+	if (err != MF_ERROR_OKAY)
+	{
+		mfmDeallocate(oalRD->sourcePool, oalSource);
+		return err;
+	}
+	oalSource->base.object.destructorFunc = &mfaOALDestroySource;
+	oalSource->base.renderDevice = rd;
+
+	// Generate buffer
+	alGenSources(1, &oalSource->id);
+
+	// Init queue
+	oalSource->firstSlot = 0;
+	oalSource->nextSlot = 0;
+	for (mfmU64 i = 0; i < MFA_OAL_MAX_QUEUED_BUFFERS; ++i)
+		oalSource->queueBuffers[i] = NULL;
+
+	*source = oalSource;
+	return MF_ERROR_OKAY;
+}
+
+static void mfaOALDestroySource(void* source)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (source == NULL)
+		abort();
+#endif
+
+	mfaOALSource* oalSource = source;
+	mfError err;
+
+	for (mfmU32 i = 0; i < MFA_OAL_MAX_QUEUED_BUFFERS; ++i)
+		if (oalSource->queueBuffers[i] != NULL && mfmDecObjectRef(oalSource->queueBuffers[i]) != MF_ERROR_OKAY)
+			abort();
+
+	// Deinit source
+	err = mfmDestroyObject(&oalSource->base.object);
+	if (err != MF_ERROR_OKAY)
+		return abort();
+
+	// Delete source
+	alDeleteSources(1, &oalSource->id);
+
+	// Deallocate source
+	err = mfmDeallocate(((mfaOALRenderDevice*)oalSource->base.renderDevice)->sourcePool, oalSource);
+	if (err != MF_ERROR_OKAY)
+		return abort();
+
+	MFA_CHECK_AL_ERROR_ABORT();
+}
+
+static mfError mfaOALPlaySource(mfaRenderDevice* rd, mfaSource* source)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (source == NULL)
+		abort();
+#endif
+
+	mfaOALSource* oalSource = source;
+	
+	alSourcePlay(oalSource->id);
+
+	MFA_CHECK_AL_ERROR(rd);
+}
+
+static mfError mfaOALStopSource(mfaRenderDevice* rd, mfaSource* source)
+{
+
+}
+
+static mfError mfaOALRewindSource(mfaRenderDevice* rd, mfaSource* source)
+{
+
+}
+
+static mfError mfaOALPauseSource(mfaRenderDevice* rd, mfaSource* source)
+{
+
+}
+
+static mfError mfaOALIsSourcePlaying(mfaRenderDevice* rd, mfaSource* source, mfmBool* out)
+{
+
+}
+
+static mfError mfaOALGetSourceProcessedBuffers(mfaRenderDevice* rd, mfaSource* source, mfmU64* out)
+{
+
+}
+
+static mfError mfaOALSourceQueueBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer)
+{
+
+}
+
+static mfError mfaOALSourceUnqueueBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer** buffer)
+{
+
+}
+
+static mfError mfaOALSetSourcePosition(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
+{
+
+}
+
+static mfError mfaOALSetSourceVelocity(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
+{
+
+}
+
+static mfError mfaOALSetSourceDirection(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
+{
+
+}
+
+static mfError mfaOALSetSourcePitch(mfaRenderDevice* rd, mfaSource* source, mfmF32 pitch)
+{
+
+}
+
+static mfError mfaOALSetSourceGain(mfaRenderDevice* rd, mfaSource* source, mfmF32 gain)
+{
+
+}
+
+static mfError mfaOALSetSourceMaxDistance(mfaRenderDevice* rd, mfaSource* source, mfmF32 maxDistance)
+{
+
+}
+
+static mfError mfaOALSetSourceSecondsOffset(mfaRenderDevice* rd, mfaSource* source, mfmF32 position)
+{
+
+}
+
+static mfError mfaOALSetSourceSamplesOffset(mfaRenderDevice* rd, mfaSource* source, mfmU64 position)
+{
+
+}
+
+static mfError mfaOALSetSourceBytesOffset(mfaRenderDevice* rd, mfaSource* source, mfmU64 position)
+{
+
+}
+
+static mfError mfaOALSetSourceLooping(mfaRenderDevice* rd, mfaSource* source, mfmBool looping)
+{
+
+}
+
+static mfError mfaOALSetSourceBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer)
+{
+
+}
+
+static mfError mfaOALSetListenerPosition(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
+{
+
+}
+
+static mfError mfaOALSetListenerVelocity(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
+{
+
+}
+
+static mfError mfaOALSetListenerOrientation(mfaRenderDevice* rd, mfaSource* source, mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ)
+{
+
+}
+
+static mfError mfaOALGetPropertyI(mfaRenderDevice* rd, mfaEnum id, mfmI32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFA_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	if (id == MFA_MAX_BUFFERS)
+		*value = MFA_OAL_MAX_BUFFERS;
+	else if (id == MFA_MAX_SOURCES)
+		*value = MFA_OAL_MAX_SOURCES;
+	else if (id == MFA_MAX_QUEUED_BUFFERS)
+		*value = MFA_OAL_MAX_QUEUED_BUFFERS;
+	else
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfaOALGetPropertyF(mfaRenderDevice* rd, mfaEnum id, mfmF32* value)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL || value == NULL) return MFA_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	if (id == MFA_MAX_BUFFERS)
+		*value = MFA_OAL_MAX_BUFFERS;
+	else if (id == MFA_MAX_SOURCES)
+		*value = MFA_OAL_MAX_SOURCES;
+	else if (id == MFA_MAX_QUEUED_BUFFERS)
+		*value = MFA_OAL_MAX_QUEUED_BUFFERS;
+	else
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Unsupported property ID");
+
+	return MF_ERROR_OKAY;
+}
+
+static mfmBool mfaOALGetErrorString(mfaRenderDevice* rd, mfsUTF8CodeUnit* str, mfmU64 maxSize)
+{
+	if (rd == NULL || str == NULL || maxSize == 0)
+		abort();
+
+	mfaOALRenderDevice* oalRD = (mfaRenderDevice*)rd;
+
+	if (oalRD->errorStringSize == 0)
+	{
+		str[0] = '\0';
+		return MFM_FALSE;
+	}
+
+	if (maxSize >= oalRD->errorStringSize)
+	{
+		memcpy(str, oalRD->errorString, oalRD->errorStringSize);
+		str[oalRD->errorStringSize] = '\0';
+	}
+	else
+	{
+		memcpy(str, oalRD->errorString, maxSize - 1);
+		str[maxSize] = '\0';
+	}
+
+	return MFM_TRUE;
+}
 
 mfError mfaCreateOALRenderDevice(mfaRenderDevice ** renderDevice, void * allocator)
 {
@@ -145,6 +509,47 @@ mfError mfaCreateOALRenderDevice(mfaRenderDevice ** renderDevice, void * allocat
 		}
 	}
 	
+	// Set render device functions
+	// Buffer functions
+	rd->base.createBuffer = &mfaOALCreateBuffer;
+	rd->base.destroyBuffer = &mfaOALDestroyBuffer;
+	rd->base.updateBuffer = &mfaOALUpdateBuffer;
+
+	// Source functions
+	rd->base.createSource = &mfaOALCreateSource;
+	rd->base.destroySource = &mfaOALDestroySource;
+	rd->base.playSource = &mfaOALPlaySource;
+	rd->base.stopSource = &mfaOALStopSource;
+	rd->base.rewindSource = &mfaOALRewindSource;
+	rd->base.pauseSource = &mfaOALPauseSource;
+	rd->base.isSourcePlaying = &mfaOALIsSourcePlaying;
+	rd->base.getSourceProcessedBuffers = &mfaOALGetSourceProcessedBuffers;
+	rd->base.sourceQueueBuffer = &mfaOALSourceQueueBuffer;
+	rd->base.sourceUnqueueBuffer = &mfaOALSourceUnqueueBuffer;
+	rd->base.setSourcePosition = &mfaOALSetSourcePosition;
+	rd->base.setSourceVelocity = &mfaOALSetSourceVelocity;
+	rd->base.setSourceDirection = &mfaOALSetSourceDirection;
+	rd->base.setSourcePitch = &mfaOALSetSourcePitch;
+	rd->base.setSourceGain = &mfaOALSetSourceGain;
+	rd->base.setSourceMaxDistance = &mfaOALSetSourceMaxDistance;
+	rd->base.setSourceSecondsOffset = &mfaOALSetSourceSecondsOffset;
+	rd->base.setSourceSamplesOffset = &mfaOALSetSourceSamplesOffset;
+	rd->base.setSourceBytesOffset = &mfaOALSetSourceBytesOffset;
+	rd->base.setSourceLooping = &mfaOALSetSourceLooping;
+	rd->base.setSourceBuffer = &mfaOALSetSourceBuffer;
+
+	// Listener functions
+	rd->base.setListenerPosition = &mfaOALSetListenerPosition;
+	rd->base.setListenerVelocity = &mfaOALSetListenerVelocity;
+	rd->base.setListenerOrientation = &mfaOALSetListenerOrientation;
+
+	// Getter functions
+	rd->base.getPropertyI = &mfaOALGetPropertyI;
+	rd->base.getPropertyF = &mfaOALGetPropertyF;
+
+	// Error functions
+	rd->base.getErrorString = &mfaOALGetErrorString;
+
 	*renderDevice = rd;
 
 	return MF_ERROR_OKAY;

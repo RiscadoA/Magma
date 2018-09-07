@@ -542,6 +542,7 @@ void Magma::Framework::Audio::OALRenderDevice::DestroySource(Source * source)
 	throw RenderDeviceError("Failed to call function on OALRenderDevice:\nMAGMA_FRAMEWORK_USE_OPENAL must be defined");
 #endif
 }
+
 Magma::Framework::Audio::Buffer * Magma::Framework::Audio::OALRenderDevice::CreateBuffer()
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENAL)
