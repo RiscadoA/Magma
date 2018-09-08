@@ -257,50 +257,156 @@ static void mfaOALDestroySource(void* source)
 static mfError mfaOALPlaySource(mfaRenderDevice* rd, mfaSource* source)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
 	if (source == NULL)
-		abort();
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
 #endif
 
 	mfaOALSource* oalSource = source;
-	
 	alSourcePlay(oalSource->id);
-
 	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALStopSource(mfaRenderDevice* rd, mfaSource* source)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourceStop(oalSource->id);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALRewindSource(mfaRenderDevice* rd, mfaSource* source)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourceRewind(oalSource->id);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALPauseSource(mfaRenderDevice* rd, mfaSource* source)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcePause(oalSource->id);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALIsSourcePlaying(mfaRenderDevice* rd, mfaSource* source, mfmBool* out)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+	if (out == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Out is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	ALint ret;
+	alGetSourcei(oalSource->id, AL_SOURCE_STATE, &ret);
+	MFA_CHECK_AL_ERROR(rd);
+
+	*out = (ret == AL_PLAYING) ? MFM_TRUE : MFM_FALSE;
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALGetSourceProcessedBuffers(mfaRenderDevice* rd, mfaSource* source, mfmU64* out)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+	if (out == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Out is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	ALint ret;
+	alGetSourcei(oalSource->id, AL_BUFFERS_PROCESSED, &ret);
+	MFA_CHECK_AL_ERROR(rd);
+
+	*out = ret;
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSourceQueueBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+	if (buffer == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Buffer is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	mfaOALBuffer* oalBuffer = buffer;
+	ALint ret;
+	if (oalSource->queueBuffers[oalSource->nextSlot] != NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_TOO_MANY_QUEUED_BUFFERS, u8"Queued buffer limit reached");
+	alSourceQueueBuffers(oalSource->id, 1, &oalBuffer->id);
+	oalSource->queueBuffers[oalSource->nextSlot] = buffer;
+	++oalSource->nextSlot;
+	if (oalSource->nextSlot >= MFA_OAL_MAX_QUEUED_BUFFERS)
+		oalSource->nextSlot = 0;
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSourceUnqueueBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer** buffer)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+	if (buffer == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Out buffer is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	ALuint bufId;
+	alSourceUnqueueBuffers(oalSource->id, 1, &bufId);
+
+	if (oalSource->queueBuffers[oalSource->firstSlot] == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_NO_QUEUED_BUFFERS, u8"No buffers queued");
+	*buffer = oalSource->queueBuffers[oalSource->firstSlot];
+	oalSource->queueBuffers[oalSource->firstSlot] = NULL;
+	++oalSource->firstSlot;
+	if (oalSource->firstSlot >= MFA_MAX_QUEUED_BUFFERS)
+		oalSource->firstSlot = 0;
+
+	if (bufId != ((mfaOALBuffer*)*buffer)->id)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INTERNAL, u8"Unqueued buffer ID doesn't match to buffer stored on queue");
+
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourcePosition(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)

@@ -33,6 +33,7 @@ typedef struct
 	GLboolean active;
 	mfgOGL4Shader* shader;
 	mfmObject* boundObject;
+	mfmObject* boundSampler;
 } mfgOGL4BindingPoint;
 
 struct mfgOGL4Shader
@@ -367,6 +368,7 @@ mfError mfgOGL4CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** v
 		oglVS->bps[i].active = GL_FALSE;
 		oglVS->bps[i].shader = oglVS;
 		oglVS->bps[i].boundObject = NULL;
+		oglVS->bps[i].boundSampler = NULL;
 	}
 
 	{
@@ -612,6 +614,7 @@ mfError mfgOGL4CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps,
 		oglPS->bps[i].active = GL_FALSE;
 		oglPS->bps[i].shader = oglPS;
 		oglPS->bps[i].boundObject = NULL;
+		oglPS->bps[i].boundSampler = NULL;
 	}
 
 	{
@@ -968,19 +971,19 @@ mfError mfgOGL4BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV2
 	mfgOGL4Sampler* oglS = sampler;
 
 	mfError err;
-	if (oglBP->boundObject != NULL)
+	if (oglBP->boundSampler != NULL)
 	{
-		err = mfmDecObjectRef(oglBP->boundObject);
+		err = mfmDecObjectRef(oglBP->boundSampler);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
-	oglBP->boundObject = oglS;
+	oglBP->boundSampler = oglS;
 	
 	if (oglS == NULL)
 		glBindSampler(oglBP->location, 0);
 	else
 	{
-		err = mfmIncObjectRef(oglBP->boundObject);
+		err = mfmIncObjectRef(oglBP->boundSampler);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		glBindSampler(oglBP->location, oglS->sampler);
@@ -3267,12 +3270,12 @@ mfError mfgV2XCreateOGL4RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWind
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	// Create 32 bytes pool
+	// Create 48 bytes pool
 	{
 		mfmPoolAllocatorDesc desc;
 		desc.expandable = MFM_FALSE;
 		desc.slotCount = MFG_POOL_48_ELEMENT_COUNT;
-		desc.slotSize = 32;
+		desc.slotSize = 48;
 		mfError err = mfmCreatePoolAllocatorOnMemory(&rd->pool48, &desc, rd->pool48Memory, sizeof(rd->pool48Memory));
 		if (err != MF_ERROR_OKAY)
 			return MFG_ERROR_ALLOCATION_FAILED;

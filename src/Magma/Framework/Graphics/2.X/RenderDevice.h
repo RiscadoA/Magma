@@ -133,7 +133,7 @@ extern "C"
 	typedef mfgV2XRenderDeviceObject mfgV2XVertexShader;
 	typedef mfgV2XRenderDeviceObject mfgV2XPixelShader;
 	typedef mfgV2XRenderDeviceObject mfgV2XPipeline;
-	typedef mfgV2XRenderDeviceObject mfgV2XBindingPoint;
+	typedef void mfgV2XBindingPoint;
 	typedef mfgV2XRenderDeviceObject mfgV2XConstantBuffer;
 	typedef mfgV2XRenderDeviceObject mfgV2XTexture1D;
 	typedef mfgV2XRenderDeviceObject mfgV2XTexture2D;
