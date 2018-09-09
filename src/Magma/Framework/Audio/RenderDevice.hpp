@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Memory/Handle.hpp"
+#include "../Memory/Allocator.hpp"
 #include "Exception.hpp"
 #include "RenderDevice.h"
 
@@ -231,6 +232,14 @@ namespace Magma
 				/// <param name="z">Up Z axis</param>
 				void SetListenerOrientation(mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ);
 			};
+
+			/// <summary>
+			///		Creates a new render device.
+			/// </summary>
+			/// <param name="type">Render device type name</param>
+			/// <param name="allocator">Render device allocator</param>
+			/// <returns>Render device handle</returns>
+			RenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Memory::AllocatorHandle allocator);
 		}
 	}
 }

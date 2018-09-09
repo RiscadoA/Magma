@@ -206,3 +206,19 @@ void Magma::Framework::Audio::RenderDevice::SetListenerOrientation(mfmF32 atX, m
 	mfError err = mfaSetListenerOrientation((mfaRenderDevice*)&this->Get(), atX, atY, atZ, upX, upY, upZ);
 	CHECK_ERROR((mfaRenderDevice*)&this->Get(), err);
 }
+
+Magma::Framework::Audio::RenderDevice Magma::Framework::Audio::CreateRenderDevice(const mfsUTF8CodeUnit * type, Memory::AllocatorHandle allocator)
+{
+	if (type == NULL)
+	{
+#if defined(MAGMA_FRAMEWORK_USE_OPENAL)
+		type = u8"oal";
+#endif
+	}
+
+	mfaRenderDevice* rd = NULL;
+	mfError err = mfaCreateRenderDevice(type, &rd, allocator.GetNoChecks());
+	if (err != MF_ERROR_OKAY)
+		throw RenderDeviceError(mfErrorToString(err));
+	return rd;
+}

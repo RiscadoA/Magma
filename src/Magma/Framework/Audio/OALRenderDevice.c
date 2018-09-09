@@ -165,7 +165,7 @@ static mfError mfaOALUpdateBuffer(mfaRenderDevice* rd, mfaBuffer* buf, const voi
 
 	ALenum al_format;
 
-	switch (al_format)
+	switch (format)
 	{
 		case MFA_MONO8: al_format = AL_FORMAT_MONO8; break;
 		case MFA_STEREO8: al_format = AL_FORMAT_STEREO8; break;
