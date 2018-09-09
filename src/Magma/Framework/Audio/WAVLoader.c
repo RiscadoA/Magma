@@ -49,6 +49,13 @@ mfError mfaLoadWAV(void * stream, mfaWAVData * data, void * allocator)
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
+		// Skip unknown chunk
+		else
+		{
+			err = mfsSeekHead(stream, header.size);
+			if (err != MF_ERROR_OKAY)
+				return err;
+		}
 
 		// Get position
 		err = mfsTell(stream, &currentPos);
@@ -106,7 +113,7 @@ mfError mfaLoadWAVChunkHeader(void * stream, mfaWAVChunkHeader * out)
 	mfmU64 readSize = 0;
 
 	// Get chunk name
-	err = mfsRead(stream, &out->name, 4, &readSize);
+	err = mfsRead(stream, out->name, 4, &readSize);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	if (readSize < 4)
@@ -154,6 +161,11 @@ mfError mfaLoadWAVFormatChunkNoHeader(void * stream, mfaWAVFormatChunk * out)
 
 	mfError err;
 	mfmU64 readSize = 0;
+
+	mfmU64 oldPos = 0;
+	err = mfsTell(stream, &oldPos);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	// Check format type
 	{
@@ -216,6 +228,11 @@ mfError mfaLoadWAVFormatChunkNoHeader(void * stream, mfaWAVFormatChunk * out)
 		out->format = MFA_STEREO16;
 	else
 		return MFA_ERROR_NOT_SUPPORTED;
+
+	// Skip to end of chunk
+	err = mfsSeekBegin(stream, oldPos + out->header.size);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	return MF_ERROR_OKAY;
 }

@@ -23,7 +23,7 @@ int run()
 
 		// Load PCM from WAV file
 		{
-			auto file = File::GetFile(u8"/resources/Audio/test-audio-0.wav");
+			auto file = File::GetFile(u8"/resources/Audio/test-music-0.wav");
 			auto stream = File::OpenFile(file, File::FileMode::Read);
 
 			mfError err = mfaLoadWAV(&stream.Get(), &data, NULL);
