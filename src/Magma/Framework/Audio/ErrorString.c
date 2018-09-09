@@ -20,6 +20,8 @@ const mfsUTF8CodeUnit * mfaErrorToString(mfError err)
 			return u8"[MFA_ERROR_TOO_MANY_QUEUED_BUFFERS] Too many queued buffers";
 		case MFA_ERROR_NO_QUEUED_BUFFERS:
 			return u8"[MFA_ERROR_NO_QUEUED_BUFFERS] No queued buffers";
+		case MFA_ERROR_INVALID_DATA:
+			return u8"[MFA_ERROR_INVALID_DATA] Invalid data";
 		default:
 			return NULL;
 	}

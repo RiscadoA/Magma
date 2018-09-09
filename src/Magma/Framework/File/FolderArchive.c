@@ -846,7 +846,6 @@ static mfError mffArchiveOpenFileUnsafe(mffArchive* archive, mfsStream** outStre
 		mfsDestroyLocalStringStream(&ss);
 	}
 
-
 	FILE* handle = NULL;
 	if (mode == MFF_FILE_READ)
 	{

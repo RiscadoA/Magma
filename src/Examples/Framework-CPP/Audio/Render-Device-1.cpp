@@ -1,9 +1,12 @@
 ﻿#include <Magma/Framework/Entry.hpp>
 #include <Magma/Framework/Audio/RenderDevice.hpp>
+#include <Magma/Framework/Audio/WAVLoader.h>
 #include <Magma/Framework/File/FileSystem.hpp>
 #include <Magma/Framework/File/FolderArchive.hpp>
 #include <Magma/Framework/String/Stream.hpp>
 #include <Magma/Framework/String/StringStream.hpp>
+
+#include <errno.h>
 
 using namespace Magma::Framework;
 
@@ -11,11 +14,25 @@ int run()
 {
 	auto rd = Audio::CreateRenderDevice(NULL, Memory::StandardAllocator);
 
-	mfmU16 bufData[65536];
-	for (mfmU64 i = 0; i < 65536; ++i)
-		bufData[i] = i;
-	auto buf = rd.CreateBuffer(bufData, sizeof(bufData), Audio::Format::Mono16, 60000);
-	auto src = rd.CreateSource();
+	Audio::Buffer buf = NULL;
+	Audio::Source src = rd.CreateSource();
+
+	// Create audio buffer
+	{
+		mfaWAVData data;
+
+		// Load PCM from WAV file
+		{
+			auto file = File::GetFile(u8"/resources/Audio/test-audio-0.wav");
+			auto stream = File::OpenFile(file, File::FileMode::Read);
+
+			mfError err = mfaLoadWAV(&stream.Get(), &data, NULL);
+			if (err != MF_ERROR_OKAY)
+				abort();
+		}
+
+		buf = rd.CreateBuffer(data.dataChunk.pcmData, data.dataChunk.header.size, (Audio::Format)data.formatChunk.format, data.formatChunk.sampleRate);
+	}
 
 	src.Bind(buf);
 	src.SetLooping(true);

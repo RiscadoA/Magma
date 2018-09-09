@@ -14,6 +14,7 @@ extern "C"
 #define MFA_ERROR_NOT_SUPPORTED						0x0805
 #define MFA_ERROR_TOO_MANY_QUEUED_BUFFERS			0x0806
 #define MFA_ERROR_NO_QUEUED_BUFFERS					0x0807
+#define MFA_ERROR_INVALID_DATA						0x0808
 
 #ifdef __cplusplus
 }

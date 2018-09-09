@@ -1,6 +1,8 @@
 #include "OALRenderDevice.h"
 #include "Config.h"
 
+#include <errno.h>
+
 #ifndef MFA_OAL_MAX_BUFFERS
 #define MFA_OAL_MAX_BUFFERS	4096
 #endif
@@ -773,8 +775,9 @@ mfError mfaCreateOALRenderDevice(mfaRenderDevice ** renderDevice, void * allocat
 
 	// Init context
 	rd->device = alcOpenDevice(NULL);
+	errno = 0; // Necessary because this function sets errno to ENOENT
 	rd->context = alcCreateContext(rd->device, NULL);
-	
+
 	// Check if context was created successfully
 	{
 		if (!alcMakeContextCurrent(rd->context))
