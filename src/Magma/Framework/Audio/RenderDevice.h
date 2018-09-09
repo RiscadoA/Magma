@@ -63,6 +63,7 @@ extern "C"
 	typedef mfError(*mfaRDSetSourceBufferFunction)(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer);
 
 	// Listener functions
+	typedef mfError(*mfaRDSetListenerGainFunction)(mfaRenderDevice* rd, mfmF32 gain);
 	typedef mfError(*mfaRDSetListenerPositionFunction)(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z);
 	typedef mfError(*mfaRDSetListenerVelocityFunction)(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z);
 	typedef mfError(*mfaRDSetListenerOrientationFunction)(mfaRenderDevice* rd, mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ);
@@ -107,6 +108,7 @@ extern "C"
 		mfaRDSetSourceBufferFunction setSourceBuffer;
 
 		// Listener functions
+		mfaRDSetListenerGainFunction setListenerGain;
 		mfaRDSetListenerPositionFunction setListenerPosition;
 		mfaRDSetListenerVelocityFunction setListenerVelocity;
 		mfaRDSetListenerOrientationFunction setListenerOrientation;
@@ -401,6 +403,17 @@ extern "C"
 	///		Otherwise returns the error code.
 	/// </returns>
 	mfError mfaSetSourceBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer);
+
+	/// <summary>
+	///		Sets the listener's gain.
+	/// </summary>
+	/// <param name="rd">Render device</param>
+	/// <param name="gain">Gain (must be positive)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns the error code.
+	/// </returns>
+	mfError mfaSetListenerGain(mfaRenderDevice* rd, mfmF32 gain);
 
 	/// <summary>
 	///		Sets the listener's position.

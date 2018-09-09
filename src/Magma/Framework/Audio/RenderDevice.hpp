@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../Memory/Handle.hpp"
 #include "Exception.hpp"
+#include "RenderDevice.h"
 
 namespace Magma
 {
@@ -9,261 +11,217 @@ namespace Magma
 		namespace Audio
 		{
 			/// <summary>
-			///		Describes an audio format
+			///		Describes an audio format.
 			/// </summary>
-			enum class Format
+			enum class Format : mfaEnum
 			{
-				Invalid = -1,
-
-				Mono8,
-				Stereo8,
+				Mono8 = MFA_MONO8,
+				Stereo8 = MFA_STEREO8,
 				
-				Mono16,
-				Stereo16,
-
-				Count
+				Mono16 = MFA_MONO16,
+				Stereo16 = MFA_STEREO16,
 			};
 
 			/// <summary>
-			///		Encapsulates an audio buffer
+			///		Used as a buffer handle.
+			///		Destroys the buffer automatically when there are no more references to it.
 			/// </summary>
-			class Buffer
+			class Buffer : public Memory::Handle
 			{
 			public:
-				virtual ~Buffer() = default;
+				using Handle::Handle;
+				using Handle::operator=;
+				explicit inline Buffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
-				///		Updates the audio buffer contents (raw PCM data)
+				///		Updates a buffer's data.
 				/// </summary>
 				/// <param name="data">Buffer data pointer</param>
 				/// <param name="size">Buffer data size</param>
 				/// <param name="format">Buffer data format</param>
 				/// <param name="frequency">Buffer data frequency</param>
-				virtual void Update(void* data, size_t size, Format format, size_t frequency) = 0;
-
-			protected:
-				/// <summary>
-				///		Used to ensure that these are never created directly
-				/// </summary>
-				Buffer() = default;
+				void Update(const void* data, mfmU64 size, Format format, mfmU64 frequency);
 			};
 
 			/// <summary>
-			///		Encapsulates an audio source
+			///		Used as a source handle.
+			///		Destroys the source automatically when there are no more references to it.
 			/// </summary>
-			class Source
+			class Source : public Memory::Handle
 			{
 			public:
-				virtual ~Source() = default;
+				using Handle::Handle;
+				using Handle::operator=;
+				explicit inline Source(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
-				///		Plays this audio source (asynchronously)
+				///		Plays audio on this source (asynchronously).
 				/// </summary>
-				virtual void Play() = 0;
+				void Play();
 
 				/// <summary>
-				///		Stops the audio playing on this source
+				///		Stops the audio playing on this source.
 				/// </summary>
-				virtual void Stop() = 0;
+				void Stop();
 
 				/// <summary>
-				///		Rewinds the audio playing on this source back to the beginning
+				///		Rewinds the audio playing on this source back to the beginning.
 				/// </summary>
-				virtual void Rewind() = 0;
+				void Rewind();
 
 				/// <summary>
-				///		Pauses the audio playing on this source
+				///		Pauses the audio playing on this source.
 				/// </summary>
-				virtual void Pause() = 0;
+				void Pause();
 
 				/// <summary>
 				///		Checks if this source is playing audio.
 				/// </summary>
 				/// <returns>Returns true if playing, otherwise false</returns>
-				virtual bool IsPlaying() = 0;
+				bool IsPlaying();
 
 				/// <summary>
-				///		Gets the number of buffers that were processed since the last time this function was called
+				///		Gets the number of buffers that were processed since the last time this function was called.
 				/// </summary>
 				/// <returns>Number of buffers processed</returns>
-				virtual size_t GetProcessedBuffers() = 0;
+				mfmU64 GetProcessedBuffers();
 
 				/// <summary>
-				///		Queues an audio buffer to later play on this source
+				///		Queues an audio buffer to later play on this source.
 				/// </summary>
 				/// <param name="buffer">Buffer handle</param>
-				virtual void QueueBuffer(Buffer* buffer) = 0;
+				void QueueBuffer(Buffer buffer);
 
 				/// <summary>
-				///		Unqueues an audio buffer that was played by this source
+				///		Unqueues an audio buffer that was played by this source.
 				/// </summary>
 				/// <returns>Buffer handle</returns>
-				virtual Buffer* UnqueueBuffer() = 0;
+				Buffer UnqueueBuffer();
 
 				/// <summary>
-				///		Sets the source position
+				///		Sets the source position.
 				/// </summary>
 				/// <param name="x">X coordinate</param>
 				/// <param name="y">Y coordinate</param>
 				/// <param name="z">Z coordinate</param>
-				virtual void SetPosition(float x, float y, float z) = 0;
+				void SetPosition(mfmF32 x, mfmF32 y, mfmF32 z);
 
 				/// <summary>
-				///		Sets the source velocity
+				///		Sets the source velocity.
 				/// </summary>
 				/// <param name="x">X coordinate</param>
 				/// <param name="y">Y coordinate</param>
 				/// <param name="z">Z coordinate</param>
-				virtual void SetVelocity(float x, float y, float z) = 0;
+				void SetVelocity(mfmF32 x, mfmF32 y, mfmF32 z);
 
 				/// <summary>
-				///		Sets the source direction
+				///		Sets the source direction.
 				/// </summary>
 				/// <param name="x">X coordinate</param>
 				/// <param name="y">Y coordinate</param>
 				/// <param name="z">Z coordinate</param>
-				virtual void SetDirection(float x, float y, float z) = 0;
+				void SetDirection(mfmF32 x, mfmF32 y, mfmF32 z);
 
 				/// <summary>
-				///		Sets the source pitch multiplier
+				///		Sets the source pitch multiplier.
 				/// </summary>
 				/// <param name="pitch">Source pitch multiplier</param>
-				virtual void SetPitch(float pitch) = 0;
+				void SetPitch(mfmF32 pitch);
 
 				/// <summary>
-				///		Sets the source gain
+				///		Sets the source gain.
 				/// </summary>
 				/// <param name="gain">Source gain</param>
-				virtual void SetGain(float gain) = 0;
+				void SetGain(mfmF32 gain);
 
 				/// <summary>
-				///		Sets the source maximum distance
+				///		Sets the source maximum distance.
 				/// </summary>
 				/// <param name="pitch">Source maximum distance</param>
-				virtual void SetMaxDistance(float maxDistance) = 0;
+				void SetMaxDistance(mfmF32 maxDistance);
 
 				/// <summary>
-				///		Sets the source playback position in seconds
+				///		Sets the source playback position in seconds.
 				/// </summary>
 				/// <param name="position">Source playback position in seconds</param>
-				virtual void SetSecondsOffset(float position) = 0;
+				void SetSecondsOffset(mfmF32 position);
 
 				/// <summary>
-				///		Sets the source playback position in samples
+				///		Sets the source playback position in samples.
 				/// </summary>
 				/// <param name="position">Source playback position in samples</param>
-				virtual void SetSamplesOffset(float position) = 0;
+				void SetSamplesOffset(mfmU64 position);
 
 				/// <summary>
-				///		Sets the source playback position in bytes
+				///		Sets the source playback position in bytes.
 				/// </summary>
 				/// <param name="position">Source playback position in bytes</param>
-				virtual void SetBytesOffset(float position) = 0;
+				void SetBytesOffset(mfmU64 position);
 
 				/// <summary>
-				///		Turns looping on or off
+				///		Turns looping on or off.
 				/// </summary>
 				/// <param name="looping">If true, turns on looping, otherwise turns it off</param>
-				virtual void SetLooping(bool looping) = 0;
+				void SetLooping(bool looping);
 
 				/// <summary>
-				///		Binds an audio buffer to this source
+				///		Binds a buffer to this source.
 				/// </summary>
-				/// <param name="buffer">Audio buffer pointer (set to nullptr to unbind the current buffer)</param>
-				virtual void Bind(Buffer* buffer) = 0;
-
-			protected:
-				/// <summary>
-				///		Used to ensure that these are never created directly
-				/// </summary>
-				Source() = default;
+				/// <param name="buffer">Buffer handle (set to NULL to unbind the current buffer)</param>
+				void Bind(Buffer buffer);
 			};
 
 			/// <summary>
-			///		Render device initialization settings
+			///		Used as a render device handle.
+			///		Destroys the render device automatically when there are no more references to it.
 			/// </summary>
-			struct RenderDeviceSettings
-			{
-
-			};
-
-			/// <summary>
-			///		Abstract class that encapsulates the low level API specific audio rendering calls
-			/// </summary>
-			class RenderDevice
+			class RenderDevice : public Memory::Handle
 			{
 			public:
-				virtual ~RenderDevice() = default;
+				using Handle::Handle;
+				using Handle::operator=;
+				explicit inline RenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
-				///		Inits the render device
+				///		Creates a new source object.
 				/// </summary>
-				/// <param name="settings">Render device settings</param>
-				virtual void Init(const RenderDeviceSettings& settings) = 0;
+				/// <returns>New source object handle</returns>
+				Source CreateSource();
 
 				/// <summary>
-				///		Terminates the render device
-				/// </summary>
-				virtual void Terminate() = 0;
-
-				/// <summary>
-				///		Creates a new audio source object
-				/// </summary>
-				/// <returns>New audio source object handle</returns>
-				virtual Source* CreateSource() = 0;
-
-				/// <summary>
-				///		Destroys an audio source object
-				/// </summary>
-				/// <param name="source">Audio source object handle</param>
-				virtual void DestroySource(Source* source) = 0;
-
-				/// <summary>
-				///		Creates a new audio buffer object
-				/// </summary>
-				/// <returns>New audio buffer object handle</returns>
-				virtual Buffer* CreateBuffer() = 0;
-
-				/// <summary>
-				///		Creates a new audio buffer object
+				///		Creates a new buffer object.
 				/// </summary>
 				/// <param name="data">Buffer data pointer</param>
 				/// <param name="size">Buffer data size</param>
 				/// <param name="format">Buffer data format</param>
 				/// <param name="frequency">Buffer data frequency</param>
-				/// <returns>New audio buffer object handle</returns>
-				virtual Buffer* CreateBuffer(void* data, size_t size, Format format, size_t frequency) = 0;
+				/// <returns>New buffer object handle</returns>
+				Buffer CreateBuffer(const void* data, mfmU64 size, Format format, mfmU64 frequency);
 
 				/// <summary>
-				///		Destroys an audio buffer object
-				/// </summary>
-				/// <param name="buffer">Audio buffer object handle</param>
-				virtual void DestroyBuffer(Buffer* buffer) = 0;
-
-				/// <summary>
-				///		Sets the listener gain
+				///		Sets the listener gain.
 				/// </summary>
 				/// <param name="gain">Gain value (must be positive)</param>
-				virtual void SetListenerGain(float gain) = 0;
+				void SetListenerGain(mfmF32 gain);
 
 				/// <summary>
-				///		Sets the listener position
+				///		Sets the listener position.
 				/// </summary>
 				/// <param name="x">Position X axis</param>
 				/// <param name="y">Position Y axis</param>
 				/// <param name="z">Position Z axis</param>
-				virtual void SetListenerPosition(float x, float y, float z) = 0;
+				void SetListenerPosition(mfmF32 x, mfmF32 y, mfmF32 z);
 
 				/// <summary>
-				///		Sets the listener velocity
+				///		Sets the listener velocity.
 				/// </summary>
 				/// <param name="x">Velocity X axis</param>
 				/// <param name="y">Velocity Y axis</param>
 				/// <param name="z">Velocity Z axis</param>
-				virtual void SetListenerVelocity(float x, float y, float z) = 0;
+				void SetListenerVelocity(mfmF32 x, mfmF32 y, mfmF32 z);
 
 				/// <summary>
-				///		Sets the listener orientation
+				///		Sets the listener orientation.
 				/// </summary>
 				/// <param name="x">At X axis</param>
 				/// <param name="y">At Y axis</param>
@@ -271,7 +229,7 @@ namespace Magma
 				/// <param name="x">Up X axis</param>
 				/// <param name="y">Up Y axis</param>
 				/// <param name="z">Up Z axis</param>
-				virtual void SetListenerOrientation(float atX, float atY, float atZ, float upX, float upY, float upZ) = 0;
+				void SetListenerOrientation(mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ);
 			};
 		}
 	}

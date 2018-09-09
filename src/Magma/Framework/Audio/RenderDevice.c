@@ -235,6 +235,13 @@ mfError mfaSetSourceBuffer(mfaRenderDevice * rd, mfaSource * source, mfaBuffer *
 	return rd->setSourceBuffer(rd, source, buffer);
 }
 
+mfError mfaSetListenerGain(mfaRenderDevice * rd, mfmF32 gain)
+{
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	return rd->setListenerGain(rd, gain);
+}
+
 mfError mfaSetListenerPosition(mfaRenderDevice * rd, mfmF32 x, mfmF32 y, mfmF32 z)
 {
 	if (rd == NULL)

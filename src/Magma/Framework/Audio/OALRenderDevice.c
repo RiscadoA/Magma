@@ -602,6 +602,18 @@ static mfError mfaOALSetSourceBuffer(mfaRenderDevice* rd, mfaSource* source, mfa
 	return MF_ERROR_OKAY;
 }
 
+static mfError mfaOALSetListenerGain(mfaRenderDevice* rd, mfmF32 gain)
+{
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+#endif
+
+	alListenerf(AL_GAIN, gain);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
+}
+
 static mfError mfaOALSetListenerPosition(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
@@ -809,6 +821,7 @@ mfError mfaCreateOALRenderDevice(mfaRenderDevice ** renderDevice, void * allocat
 	rd->base.setSourceBuffer = &mfaOALSetSourceBuffer;
 
 	// Listener functions
+	rd->base.setListenerGain = &mfaOALSetListenerGain;
 	rd->base.setListenerPosition = &mfaOALSetListenerPosition;
 	rd->base.setListenerVelocity = &mfaOALSetListenerVelocity;
 	rd->base.setListenerOrientation = &mfaOALSetListenerOrientation;
