@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "..\..\..\VM\Compiler\V1X\Generator.h"
 
 typedef struct
 {
@@ -3651,3 +3652,4 @@ mfError mfgV2XRunMVLGenerator(const mfgV2XNode * root, mfmU8 * bytecode, mfmU64 
 
 	return MF_ERROR_OKAY;
 }
+

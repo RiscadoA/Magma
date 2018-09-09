@@ -89,7 +89,7 @@ void mfvDestroyVirtualMachine(void * vm)
 	{
 		mfError err = mfmDecObjectRef((mfmObject*)v->allocator);
 		if (err != MF_ERROR_OKAY)
-			return err;
+			abort();
 	}
 	if (mfmDestroyObject(&v->object) != MF_ERROR_OKAY)
 		abort();

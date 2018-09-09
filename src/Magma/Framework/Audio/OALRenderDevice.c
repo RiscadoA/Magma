@@ -37,6 +37,7 @@ typedef struct
 	mfaOALBuffer* queueBuffers[MFA_OAL_MAX_QUEUED_BUFFERS];
 	mfmU64 firstSlot;
 	mfmU64 nextSlot;
+	mfaOALBuffer* boundBuffer;
 } mfaOALSource;
 
 typedef struct
@@ -210,6 +211,7 @@ static mfError mfaOALCreateSource(mfaRenderDevice* rd, mfaSource** source)
 	}
 	oalSource->base.object.destructorFunc = &mfaOALDestroySource;
 	oalSource->base.renderDevice = rd;
+	oalSource->boundBuffer = NULL;
 
 	// Generate buffer
 	alGenSources(1, &oalSource->id);
@@ -236,6 +238,10 @@ static void mfaOALDestroySource(void* source)
 
 	for (mfmU32 i = 0; i < MFA_OAL_MAX_QUEUED_BUFFERS; ++i)
 		if (oalSource->queueBuffers[i] != NULL && mfmDecObjectRef(oalSource->queueBuffers[i]) != MF_ERROR_OKAY)
+			abort();
+
+	if (oalSource->boundBuffer != NULL)
+		if (mfmDecObjectRef(oalSource->boundBuffer) != MF_ERROR_OKAY)
 			abort();
 
 	// Deinit source
@@ -411,72 +417,230 @@ static mfError mfaOALSourceUnqueueBuffer(mfaRenderDevice* rd, mfaSource* source,
 
 static mfError mfaOALSetSourcePosition(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSource3f(oalSource->id, AL_POSITION, x, y, z);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceVelocity(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSource3f(oalSource->id, AL_VELOCITY, x, y, z);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceDirection(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSource3f(oalSource->id, AL_DIRECTION, x, y, z);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourcePitch(mfaRenderDevice* rd, mfaSource* source, mfmF32 pitch)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcef(oalSource->id, AL_PITCH, pitch);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceGain(mfaRenderDevice* rd, mfaSource* source, mfmF32 gain)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcef(oalSource->id, AL_GAIN, gain);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceMaxDistance(mfaRenderDevice* rd, mfaSource* source, mfmF32 maxDistance)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcef(oalSource->id, AL_MAX_DISTANCE, maxDistance);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceSecondsOffset(mfaRenderDevice* rd, mfaSource* source, mfmF32 position)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcef(oalSource->id, AL_SEC_OFFSET, position);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceSamplesOffset(mfaRenderDevice* rd, mfaSource* source, mfmU64 position)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcei(oalSource->id, AL_SAMPLE_OFFSET, position);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceBytesOffset(mfaRenderDevice* rd, mfaSource* source, mfmU64 position)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcei(oalSource->id, AL_BYTE_OFFSET, position);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceLooping(mfaRenderDevice* rd, mfaSource* source, mfmBool looping)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Handle is NULL");
+#endif
 
+	mfaOALSource* oalSource = source;
+	alSourcei(oalSource->id, AL_LOOPING, (looping == MFM_FALSE) ? AL_FALSE : AL_TRUE);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALSetSourceBuffer(mfaRenderDevice* rd, mfaSource* source, mfaBuffer* buffer)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+	if (source == NULL)
+		MFA_RETURN_ERROR(rd, MFA_ERROR_INVALID_ARGUMENTS, u8"Source handle is NULL");
+#endif
 
+	mfError err;
+	mfaOALSource* oalSource = source;
+	mfaOALBuffer* oalBuffer = buffer;
+
+	if (oalSource->boundBuffer != NULL)
+	{
+		err = mfmDecObjectRef(oalSource->boundBuffer);
+		if (err != MF_ERROR_OKAY)
+			return err;
+	}
+
+	if (oalBuffer == NULL)
+	{
+		oalSource->boundBuffer = NULL;
+		alSourcei(oalSource->id, AL_BUFFER, 0);
+	}
+	else
+	{
+		oalSource->boundBuffer = oalBuffer;
+		err = mfmIncObjectRef(oalSource->boundBuffer);
+		if (err != MF_ERROR_OKAY)
+			return err;
+		alSourcei(oalSource->id, AL_BUFFER, oalBuffer->id);
+	}
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
-static mfError mfaOALSetListenerPosition(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
+static mfError mfaOALSetListenerPosition(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+#endif
 
+	alListener3f(AL_POSITION, x, y, z);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
-static mfError mfaOALSetListenerVelocity(mfaRenderDevice* rd, mfaSource* source, mfmF32 x, mfmF32 y, mfmF32 z)
+static mfError mfaOALSetListenerVelocity(mfaRenderDevice* rd, mfmF32 x, mfmF32 y, mfmF32 z)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+#endif
 
+	alListener3f(AL_VELOCITY, x, y, z);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
-static mfError mfaOALSetListenerOrientation(mfaRenderDevice* rd, mfaSource* source, mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ)
+static mfError mfaOALSetListenerOrientation(mfaRenderDevice* rd, mfmF32 atX, mfmF32 atY, mfmF32 atZ, mfmF32 upX, mfmF32 upY, mfmF32 upZ)
 {
+#ifdef MAGMA_FRAMEWORK_DEBUG
+	if (rd == NULL)
+		return MFA_ERROR_INVALID_ARGUMENTS;
+#endif
 
+	float params[] =
+	{
+		atX, atY, atZ,
+		upX, upY, upZ,
+	};
+	alListenerfv(AL_ORIENTATION, params);
+	MFA_CHECK_AL_ERROR(rd);
+	return MF_ERROR_OKAY;
 }
 
 static mfError mfaOALGetPropertyI(mfaRenderDevice* rd, mfaEnum id, mfmI32* value)
