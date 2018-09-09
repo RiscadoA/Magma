@@ -59,7 +59,7 @@ const mfsUTF8CodeUnit* psSource = u8R"(
 
 int run()
 {
-	Input::WindowHandle win = Input::CreateWindow(NULL, 800, 600, Input::WindowMode::Windowed, u8"Window");
+	Input::WindowHandle win = Input::CreateWindow("ogl", 800, 600, Input::WindowMode::Windowed, u8"Window");
 	win.SetOnCloseCallback(OnWindowClose);
 
 	Graphics::V2X::RenderDevice rd = NULL;
@@ -68,7 +68,7 @@ int run()
 	{
 		Graphics::V2X::RenderDeviceDesc desc;
 		desc.vsyncEnabled = true;
-		rd = Graphics::V2X::CreateRenderDevice(NULL, win, &desc, Memory::StandardAllocator);
+		rd = Graphics::V2X::CreateRenderDevice("ogl4", win, &desc, Memory::StandardAllocator);
 	}
 	catch (std::runtime_error& err)
 	{

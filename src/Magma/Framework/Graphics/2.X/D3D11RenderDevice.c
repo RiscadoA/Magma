@@ -41,6 +41,7 @@ typedef struct
 	BOOL active;
 	void* shader;
 	mfmObject* boundObject;
+	mfmObject* boundSampler;
 } mfgD3D11BindingPoint;
 
 struct mfgD3D11VertexShader
@@ -351,6 +352,7 @@ mfError mfgD3D11CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** 
 		d3dVS->bps[i].shader = d3dVS;
 		d3dVS->bps[i].shaderType = MFG_VERTEX_SHADER;
 		d3dVS->bps[i].boundObject = NULL;
+		d3dVS->bps[i].boundSampler = NULL;
 	}
 
 	{
@@ -502,6 +504,7 @@ mfError mfgD3D11CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps
 		d3dPS->bps[i].shader = d3dPS;
 		d3dPS->bps[i].shaderType = MFG_PIXEL_SHADER;
 		d3dPS->bps[i].boundObject = NULL;
+		d3dPS->bps[i].boundSampler = NULL;
 	}
 
 	{
@@ -901,13 +904,13 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 	mfgD3D11Sampler* d3dSampler = sampler;
 
 	mfError err;
-	if (d3dBP->boundObject != NULL)
+	if (d3dBP->boundSampler != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundObject);
+		err = mfmDecObjectRef(d3dBP->boundSampler);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
-	d3dBP->boundObject = d3dSampler;
+	d3dBP->boundSampler = d3dSampler;
 
 	if (d3dBP->shaderType == MFG_VERTEX_SHADER)
 	{
@@ -918,7 +921,7 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmIncObjectRef(d3dBP->boundSampler);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
@@ -933,7 +936,7 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmIncObjectRef(d3dBP->boundSampler);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
@@ -1607,7 +1610,7 @@ void mfgD3D11DestroyVertexArray(void* va)
 		abort();
 	if (mfmDestroyObject(&d3dVA->base.object) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVA->base.renderDevice)->pool256, d3dVA) != MF_ERROR_OKAY)
+	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVA->base.renderDevice)->pool512, d3dVA) != MF_ERROR_OKAY)
 		abort();
 }
 
@@ -1621,7 +1624,7 @@ mfError mfgD3D11CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va
 
 	// Allocate vertex array
 	mfgD3D11VertexArray* d3dVA = NULL;
-	if (mfmAllocate(d3dRD->pool256, &d3dVA, sizeof(mfgD3D11VertexArray)) != MF_ERROR_OKAY)
+	if (mfmAllocate(d3dRD->pool512, &d3dVA, sizeof(mfgD3D11VertexArray)) != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(MFG_ERROR_ALLOCATION_FAILED, u8"Failed to allocate vertex array on pool");
 
 	// Init object

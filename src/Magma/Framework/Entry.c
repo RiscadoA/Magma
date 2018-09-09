@@ -7,11 +7,12 @@
 #include "Input/OGLWindow.h"
 #include "Input/D3DWindow.h"
 
-
-
 #include "Graphics/2.X/RenderDevice.h"
 #include "Graphics/2.X/OGL4RenderDevice.h"
 #include "Graphics/2.X/D3D11RenderDevice.h"
+
+#include "Audio/RenderDevice.h"
+#include "Audio/OALRenderDevice.h"
 
 static mfmBool mfInitialized = MFM_FALSE;
 
@@ -54,12 +55,12 @@ mfError mfInit(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	// Init render devices
+	// Init graphics render devices
 	err = mfgV2XInitRenderDevices();
 	if (err != MF_ERROR_OKAY)
 		return err;
 
-	// Register render device types
+	// Register graphics render device types
 #ifdef MAGMA_FRAMEWORK_USE_OPENGL
 	err = mfgV2XRegisterRenderDeviceCreator(MFG_OGL4RENDERDEVICE_TYPE_NAME, &mfgV2XCreateOGL4RenderDevice);
 	if (err != MF_ERROR_OKAY)
@@ -68,6 +69,18 @@ mfError mfInit(int argc, const char** argv)
 
 #ifdef MAGMA_FRAMEWORK_USE_DIRECTX
 	err = mfgV2XRegisterRenderDeviceCreator(MFG_D3D11RENDERDEVICE_TYPE_NAME, &mfgV2XCreateD3D11RenderDevice);
+	if (err != MF_ERROR_OKAY)
+		return err;
+#endif
+
+	// Init audio render devices
+	err = mfaInitRenderDevices();
+	if (err != MF_ERROR_OKAY)
+		return err;
+
+	// Register audio render device types
+#ifdef MAGMA_FRAMEWORK_USE_OPENAL
+	err = mfaRegisterRenderDeviceCreator(MFA_OALRENDERDEVICE_TYPE_NAME, &mfaCreateOALRenderDevice);
 	if (err != MF_ERROR_OKAY)
 		return err;
 #endif
@@ -82,8 +95,11 @@ void mfTerminate()
 	if (mfInitialized == MFM_FALSE)
 		return;
 	mfError err;
+	
+	// Terminate audio render devices
+	mfaTerminateRenderDevices();
 
-	// Terminate render devices
+	// Terminate graphics render devices
 	mfgV2XTerminateRenderDevices();
 
 	// Terminate texture loader

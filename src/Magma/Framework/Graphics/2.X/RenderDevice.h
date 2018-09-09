@@ -133,7 +133,7 @@ extern "C"
 	typedef mfgV2XRenderDeviceObject mfgV2XVertexShader;
 	typedef mfgV2XRenderDeviceObject mfgV2XPixelShader;
 	typedef mfgV2XRenderDeviceObject mfgV2XPipeline;
-	typedef mfgV2XRenderDeviceObject mfgV2XBindingPoint;
+	typedef void mfgV2XBindingPoint;
 	typedef mfgV2XRenderDeviceObject mfgV2XConstantBuffer;
 	typedef mfgV2XRenderDeviceObject mfgV2XTexture1D;
 	typedef mfgV2XRenderDeviceObject mfgV2XTexture2D;
@@ -1610,7 +1610,7 @@ extern "C"
 	mfError mfgV2XRegisterRenderDeviceCreator(const mfsUTF8CodeUnit* type, mfgV2XRenderDeviceCreatorFunction func);
 
 	/// <summary>
-	///		Creates a new window.
+	///		Creates a new render device.
 	/// </summary>
 	/// <param name="type">Render device type name</param>
 	/// <param name="renderDevice">Out render device handle</param>

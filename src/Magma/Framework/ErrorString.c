@@ -1,5 +1,6 @@
 #include "ErrorString.h"
 
+#include "Audio/ErrorString.h"
 #include "File/ErrorString.h"
 #include "Graphics/ErrorString.h"
 #include "Input/ErrorString.h"
@@ -11,6 +12,10 @@
 const mfsUTF8CodeUnit * mfErrorToString(mfError err)
 {
 	const mfsUTF8CodeUnit* errStr = NULL;
+
+	errStr = mfaErrorToString(err);
+	if (errStr != NULL)
+		return errStr;
 
 	errStr = mffErrorToString(err);
 	if (errStr != NULL)

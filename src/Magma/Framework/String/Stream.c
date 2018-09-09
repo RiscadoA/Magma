@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <errno.h>
 
 mfsStream* mfsInStream = NULL;
 mfsStream* mfsOutStream = NULL;

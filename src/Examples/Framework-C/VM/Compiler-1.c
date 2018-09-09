@@ -2,6 +2,7 @@
 #include <Magma/Framework/String/Stream.h>
 #include <Magma/Framework/VM/Compiler/V1X/Lexer.h>
 #include <Magma/Framework/VM/Compiler/V1X/Parser.h>
+#include <Magma/Framework/VM/Compiler/V1X/Generator.h>
 
 #include <stdlib.h>
 
