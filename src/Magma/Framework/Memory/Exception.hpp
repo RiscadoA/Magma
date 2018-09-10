@@ -37,13 +37,6 @@ namespace Magma
 			public:
 				using std::runtime_error::runtime_error;
 			};
-
-			/// <summary>
-			///		Gets a string that describes an error code.
-			/// </summary>
-			/// <param name="err">Error code</param>
-			/// <returns>String pointer</returns>
-			const mfsUTF8CodeUnit* ErrorToString(mfError err);
 		}
 	}
 }

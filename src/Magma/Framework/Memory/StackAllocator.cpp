@@ -1,11 +1,12 @@
 #include "StackAllocator.hpp"
+#include "../ErrorString.h"
 
 Magma::Framework::Memory::StackAllocatorHandle Magma::Framework::Memory::CreateStackAllocator(mfmU64 size)
 {
 	mfmStackAllocator* alloc;
 	mfError err = mfmCreateStackAllocator(&alloc, size);
 	if (err != MF_ERROR_OKAY)
-		throw AllocatorError(ErrorToString(err));
+		throw AllocatorError(mfErrorToString(err));
 	return alloc;
 }
 
@@ -14,6 +15,6 @@ Magma::Framework::Memory::StackAllocatorHandle Magma::Framework::Memory::CreateS
 	mfmStackAllocator* alloc;
 	mfError err = mfmCreateStackAllocatorOnMemory(&alloc, size, memory, memorySize);
 	if (err != MF_ERROR_OKAY)
-		throw AllocatorError(ErrorToString(err));
+		throw AllocatorError(mfErrorToString(err));
 	return alloc;
 }
