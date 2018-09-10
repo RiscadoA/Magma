@@ -2,7 +2,8 @@
 
 #include "../Memory/Handle.hpp"
 #include "../Memory/Allocator.hpp"
-#include "Mutex.h"
+#include "../Memory/Functor.hpp"
+#include "Thread.h"
 
 namespace Magma
 {
@@ -32,8 +33,9 @@ namespace Magma
 			///		Creates a thread.
 			/// </summary>
 			/// <param name="allocator">Allocator used to allocate the thread object</param>
+			/// <param name="param">Thread param</param>
 			/// <returns>Thread handle</returns>
-			HThread CreateThread(Memory::HAllocator allocator = Memory::StandardAllocator);
+			HThread CreateThread(Memory::Functor<void(void*)> func, void* param, Memory::HAllocator allocator = Memory::StandardAllocator);
 		}
 	}
 }
