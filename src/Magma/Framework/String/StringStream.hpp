@@ -26,6 +26,21 @@ namespace Magma
 			};
 
 			/// <summary>
+			///		String stream object.
+			/// </summary>
+			class StringStream final
+			{
+			public:
+				StringStream(void* buffer, mfmU64 size);
+				~StringStream();
+
+				HStringStream Get();
+
+			private:
+				mfsStringStream m_ss;
+			};
+
+			/// <summary>
 			///		Creates a new string stream.
 			/// </summary>
 			/// <param name="path">FileHandle path</param>

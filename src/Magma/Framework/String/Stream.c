@@ -183,6 +183,73 @@ mfError mfsRead(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outS
 	return stream->read(stream, data, dataSize, outSize);
 }
 
+mfError mfsReadUntil(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize, const mfsUTF8CodeUnit * terminator)
+{
+	if (stream == NULL || terminator == NULL)
+		return MFS_ERROR_INVALID_ARGUMENTS;
+
+	if (data != NULL)
+	{
+		if (dataSize == 0)
+			return 0;
+		else if (dataSize == 1)
+		{
+			data[0] = '\0';
+			return 1;
+		}
+	}
+
+	mfError err = MF_ERROR_OKAY;
+
+	mfmU64 size = 0;
+	mfmU64 terminatorIndex = 0;
+	while (size < dataSize - 1)
+	{
+		if (terminator[terminatorIndex] == '\0')
+			break;
+
+		mfsUTF8CodeUnit chr;
+		err = mfsGetByte(stream, &chr);
+		if (err == MF_ERROR_OKAY)
+		{
+			if (chr == terminator[terminatorIndex])
+				++terminatorIndex;
+			else
+			{
+				for (mfmU64 i = 0; i < terminatorIndex; ++i)
+					if (data != NULL)
+					{
+						data[size++] = terminator[i];
+						if (size >= dataSize - 1)
+							break;
+					}
+
+				terminatorIndex = 0;
+
+				if (chr == terminator[terminatorIndex])
+					++terminatorIndex;
+				else if (data != NULL)
+				{
+					if (size >= dataSize - 1)
+						break;
+					else
+						data[size++] = chr;
+				}
+			}
+		}
+		else if (err == MFS_ERROR_EOF)
+			break;
+		else
+			return err;
+	}
+
+	if (data != NULL)
+		data[size] = '\0';
+	if (outSize != NULL)
+		*outSize = size;
+	return MF_ERROR_OKAY;
+}
+
 mfError mfsFlush(mfsStream * stream)
 {
 	if (stream == NULL)

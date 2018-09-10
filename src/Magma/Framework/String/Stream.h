@@ -86,6 +86,22 @@ extern "C"
 	mfError mfsRead(mfsStream* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize);
 
 	/// <summary>
+	///		Reads raw data from a stream until a certain character sequence is found or the buffer is filled.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="data">Pointer to data</param>
+	/// <param name="dataSize">Max data size to read</param>
+	/// <param name="outSize">Size of the data that was read (optional, can be NULL)</param>
+	/// <param name="terminator">Terminating character sequence</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL or data is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsReadUntil(mfsStream* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize, const mfsUTF8CodeUnit * terminator);
+
+	/// <summary>
 	///		Flushes a stream if the stream is buffered.
 	/// </summary>
 	/// <param name="stream">Stream handle</param>

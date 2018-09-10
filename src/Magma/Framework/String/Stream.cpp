@@ -73,60 +73,11 @@ mfmU64 Magma::Framework::String::HStream::Write(const void * data, mfmU64 size)
 
 mfmU64 Magma::Framework::String::HStream::ReadUntil(mfsUTF8CodeUnit * data, mfmU64 maxSize, const mfsUTF8CodeUnit * terminator)
 {
-#ifdef MAGMA_FRAMEWORK_DEBUG
-	if (data == nullptr || terminator == nullptr)
-		throw StreamError("Failed to read until terminator from stream, NULL arguments");
-#endif
-
-	if (maxSize == 0)
-		return 0;
-	else if (maxSize == 1)
-	{
-		data[0] = '\0';
-		return 1;
-	}
-
-	mfError err = MF_ERROR_OKAY;
-
-	mfmU64 size = 0;
-	mfmU64 terminatorIndex = 0;
-	while (size < maxSize - 1)
-	{
-		if (terminator[terminatorIndex] == '\0')
-			break;
-
-		mfsUTF8CodeUnit chr;
-		err = mfsGetByte(reinterpret_cast<mfsStream*>(&this->Get()), reinterpret_cast<mfmU8*>(&chr));
-		if (err == MF_ERROR_OKAY)
-		{		
-			if (chr == terminator[terminatorIndex])
-				++terminatorIndex;
-			else
-			{
-				for (mfmU64 i = 0; i < terminatorIndex; ++i)
-				{
-					data[size++] = terminator[i];
-					if (size >= maxSize - 1)
-						break;
-				}
-
-				terminatorIndex = 0;
-
-				if (size >= maxSize - 1)
-					break;
-				else
-					data[size++] = chr;
-			}
-		}
-		else if (err == MFS_ERROR_EOF)
-			break;
-		else
-			throw StreamError(ErrorToString(err));
-	}
-
-	data[size] = '\0';
-
-	return size;
+	mfmU64 readSize = 0;
+	mfError err = mfsReadUntil(reinterpret_cast<mfsStream*>(&this->Get()), (mfmU8*)data, maxSize, &readSize, terminator);
+	if (err == MF_ERROR_OKAY || err == MFS_ERROR_FAILED_TO_READ_ALL)
+		return readSize;
+	throw StreamError(ErrorToString(err));
 }
 
 bool Magma::Framework::String::HStream::GetByte(mfmU8 & byte)
