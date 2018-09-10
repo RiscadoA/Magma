@@ -9,90 +9,140 @@ static mfError mfsStringStreamEOF(void* stream, mfmBool* eof)
 	if (stream == NULL || eof == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	mfsStringStream* str = (mfsStringStream*)stream;
-	if (str->readHead >= str->base.bufferSize)
+	if (str->head >= str->base.bufferSize)
 		*eof = MFM_TRUE;
 	else
 		*eof = MFM_FALSE;
 	return MF_ERROR_OKAY;
 }
 
-mfError mfsStringStreamRead(void* stream, mfmU8* data, mfmU64 size, mfmU64* readSize)
+static mfError mfsStringStreamRead(void* stream, mfmU8* data, mfmU64 size, mfmU64* readSize)
 {
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	mfsStringStream* str = (mfsStringStream*)stream;
 	
-	if (str->readHead >= str->base.bufferSize)
+	if (str->head >= str->base.bufferSize)
 	{
-		str->readHead = str->base.bufferSize;
+		str->head = str->base.bufferSize;
 		if (readSize != NULL)
 			*readSize = 0;
 		return MFS_ERROR_EOF;
 	}
-	else if (str->readHead + size > str->base.bufferSize)
+	else if (str->head + size > str->base.bufferSize)
 	{
-		memcpy(data, str->base.buffer + str->readHead, str->base.bufferSize - str->readHead);
+		memcpy(data, str->base.buffer + str->head, str->base.bufferSize - str->head);
 		if (readSize != NULL)
-			*readSize = str->base.bufferSize - str->readHead;
-		str->readHead = str->base.bufferSize;
+			*readSize = str->base.bufferSize - str->head;
+		str->head = str->base.bufferSize;
 		return MFS_ERROR_EOF;
 	}
 	else
 	{
-		memcpy(data, str->base.buffer + str->readHead, size);
+		memcpy(data, str->base.buffer + str->head, size);
 		if (readSize != NULL)
 			*readSize = size;
-		str->readHead += size;
+		str->head += size;
 		return MF_ERROR_OKAY;
 	}
 }
 
-mfError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU64* writeSize)
+static mfError mfsStringStreamWrite(void* stream, const mfmU8* data, mfmU64 size, mfmU64* writeSize)
 {
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	mfsStringStream* str = (mfsStringStream*)stream;
 
-	if (str->writeHead >= str->base.bufferSize)
+	if (str->head >= str->base.bufferSize)
 	{
-		str->writeHead = str->base.bufferSize;
+		str->head = str->base.bufferSize;
 		if (writeSize != NULL)
 			*writeSize = 0;
 		return MFS_ERROR_EOF;
 	}
-	else if (str->writeHead + size > str->base.bufferSize)
+	else if (str->head + size > str->base.bufferSize)
 	{
-		memcpy(str->base.buffer + str->writeHead, data, str->base.bufferSize - str->writeHead);
+		memcpy(str->base.buffer + str->head, data, str->base.bufferSize - str->head);
 		if (writeSize != NULL)
-			*writeSize = str->base.bufferSize - str->writeHead;
-		str->writeHead = str->base.bufferSize;
+			*writeSize = str->base.bufferSize - str->head;
+		str->head = str->base.bufferSize;
 		return MFS_ERROR_EOF;
 	}
 	else
 	{
-		memcpy(str->base.buffer + str->writeHead, data, size);
+		memcpy(str->base.buffer + str->head, data, size);
 		if (writeSize != NULL)
 			*writeSize = size;
-		str->writeHead += size;
+		str->head += size;
 		return MF_ERROR_OKAY;
 	}
 }
 
-mfError mfsStringStreamFlush(void* stream)
+static mfError mfsStringStreamFlush(void* stream)
 {
 	// Do nothing
 	return MF_ERROR_OKAY;
 }
 
-mfError mfsStringStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 size)
+static mfError mfsStringStreamSetBuffer(void* stream, mfmU8* buffer, mfmU64 size)
 {
 	mfsStringStream* str = (mfsStringStream*)stream;
-	str->readHead = 0;
-	str->writeHead = 0;
+	str->head = 0;
 	str->base.buffer = buffer;
 	str->base.bufferSize = size;
 	memset(buffer, 0, size);
 
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfsStringStreamSeekBegin(void* stream, mfmU64 position)
+{
+	mfsStringStream* str = (mfsStringStream*)stream;
+	if (position > str->base.bufferSize)
+	{
+		str->head = str->base.bufferSize;
+		return MFS_ERROR_EOF;
+	}
+	
+	str->head = position;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfsStringStreamSeekEnd(void* stream, mfmU64 position)
+{
+	mfsStringStream* str = (mfsStringStream*)stream;
+	if (position > str->base.bufferSize - 1)
+	{
+		str->head = 0;
+		return MFS_ERROR_EOF;
+	}
+
+	str->head = str->base.bufferSize - position - 1;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfsStringStreamSeekHead(void* stream, mfmI64 offset)
+{
+	mfsStringStream* str = (mfsStringStream*)stream;
+	if (offset >= 0 && str->head + offset > str->base.bufferSize)
+	{
+		str->head = str->base.bufferSize;
+		return MFS_ERROR_EOF;
+	}
+	else if (offset < 0 && -offset > str->head)
+	{
+		str->head = 0;
+		return MFS_ERROR_EOF;
+	}
+
+	str->head += offset;
+	return MF_ERROR_OKAY;
+}
+
+static mfError mfsStringStreamTell(void* stream, mfmU64* out)
+{
+	mfsStringStream* str = (mfsStringStream*)stream;
+	*out =  str->head;
 	return MF_ERROR_OKAY;
 }
 
@@ -117,10 +167,10 @@ mfError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, 
 	str->base.write = &mfsStringStreamWrite;
 	str->base.flush = &mfsStringStreamFlush;
 	str->base.setBuffer = &mfsStringStreamSetBuffer;
-	str->base.seekBegin = NULL;
-	str->base.seekEnd = NULL;
-	str->base.seekHead = NULL;
-	str->base.tell = NULL;
+	str->base.seekBegin = &mfsStringStreamSeekBegin;
+	str->base.seekEnd = &mfsStringStreamSeekEnd;
+	str->base.seekHead = &mfsStringStreamSeekHead;
+	str->base.tell = &mfsStringStreamTell;
 	str->base.eof = &mfsStringStreamEOF;
 
 	str->allocator = allocator;
@@ -130,8 +180,7 @@ mfError mfsCreateStringStream(mfsStream ** stream, mfmU8 * buffer, mfmU64 size, 
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
-	str->writeHead = 0;
-	str->readHead = 0;
+	str->head = 0;
 
 	*stream = str;
 
@@ -173,15 +222,14 @@ mfError mfsCreateLocalStringStream(mfsStringStream * stream, mfmU8 * buffer, mfm
 	stream->base.write = &mfsStringStreamWrite;
 	stream->base.flush = &mfsStringStreamFlush;
 	stream->base.setBuffer = &mfsStringStreamSetBuffer;
-	stream->base.seekBegin = NULL;
-	stream->base.seekEnd = NULL;
-	stream->base.seekHead = NULL;
-	stream->base.tell = NULL;
+	stream->base.seekBegin = &mfsStringStreamSeekBegin;
+	stream->base.seekEnd = &mfsStringStreamSeekEnd;
+	stream->base.seekHead = &mfsStringStreamSeekHead;
+	stream->base.tell = &mfsStringStreamTell;
 	stream->base.eof = &mfsStringStreamEOF;
 
 	stream->allocator = NULL;
-	stream->writeHead = 0;
-	stream->readHead = 0;
+	stream->head = 0;
 
 	return MF_ERROR_OKAY;
 }
@@ -199,7 +247,6 @@ mfError mfsClearStringStream(mfsStream * stream)
 	if (stream == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 	mfsStringStream* str = (mfsStringStream*)stream;
-	str->writeHead = 0;
-	str->readHead = 0;
+	str->head = 0;
 	return MF_ERROR_OKAY;
 }
