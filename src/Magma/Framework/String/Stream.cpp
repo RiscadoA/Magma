@@ -20,6 +20,48 @@ void Magma::Framework::String::TerminateStreams()
 	OutStream.Release();
 }
 
+void Magma::Framework::String::StreamHandle::SeekBegin(mfmU64 position)
+{
+	mfError err = mfsSeekBegin(reinterpret_cast<mfsStream*>(&this->Get()), position);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::StreamHandle::SeekEnd(mfmU64 position)
+{
+	mfError err = mfsSeekEnd(reinterpret_cast<mfsStream*>(&this->Get()), position);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::StreamHandle::SeekHead(mfmI64 offset)
+{
+	mfError err = mfsSeekHead(reinterpret_cast<mfsStream*>(&this->Get()), offset);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+mfmU64 Magma::Framework::String::StreamHandle::Tell()
+{
+	mfmU64 pos = MFM_FALSE;
+	mfError err = mfsTell(reinterpret_cast<mfsStream*>(&this->Get()), &pos);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return pos;
+}
+
+bool Magma::Framework::String::StreamHandle::IsEOF()
+{
+	mfmBool eof = MFM_FALSE;
+	mfError err = mfsEOF(reinterpret_cast<mfsStream*>(&this->Get()), &eof);
+	if (err != MF_ERROR_OKAY)	
+		throw StreamError(ErrorToString(err));
+	return eof != MFM_FALSE;
+}
+
 mfmU64 Magma::Framework::String::StreamHandle::Write(const void * data, mfmU64 size)
 {
 	mfmU64 writtenSize = 0;

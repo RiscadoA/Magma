@@ -21,6 +21,36 @@ namespace Magma
 				inline StreamHandle(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
+				///		Seeks a position on the stream relative to its beginning.
+				/// </summary>
+				/// <param name="position">New position</param>
+				void SeekBegin(mfmU64 position);
+
+				/// <summary>
+				///		Seeks a position on the stream relative to its end (new position = stream size - position - 1).
+				/// </summary>
+				/// <param name="position">New position</param>
+				void SeekEnd(mfmU64 position);
+
+				/// <summary>
+				///		Seeks a position on the stream relative to the current position.
+				/// </summary>
+				/// <param name="offset">Offset relative to the current position</param>
+				void SeekHead(mfmI64 offset);
+
+				/// <summary>
+				///		Gets the current position in the stream.
+				/// </summary>
+				/// <returns>The current position in the stream</returns>
+				mfmU64 Tell();
+
+				/// <summary>
+				///		Checks if the stream has reached EOF.
+				/// </summary>
+				/// <returns>True if EOF, otherwise false</returns>
+				bool IsEOF();
+
+				/// <summary>
 				///		Writes raw data into a stream.
 				/// </summary>
 				/// <param name="data">Data pointer</param>
