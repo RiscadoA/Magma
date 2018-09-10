@@ -13,7 +13,7 @@ namespace Magma
 			/// <summary>
 			///		WindowHandle class implementation for OpenGL (uses GLFW)
 			/// </summary>
-			class OGLWindow : public WindowHandle
+			class OGLWindow : public HWindow
 			{
 			public:
 				/// <summary>
@@ -23,7 +23,7 @@ namespace Magma
 				/// <param name="height">WindowHandle height</param>
 				/// <param name="title">WindowHandle title</param>
 				/// <param name="mode">WindowHandle mode</param>
-				OGLWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, WindowHandle::Mode mode = WindowHandle::Mode::Windowed);
+				OGLWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, HWindow::Mode mode = HWindow::Mode::Windowed);
 
 				/// <summary>
 				///		Closes a window.
@@ -56,7 +56,7 @@ namespace Magma
 				///		Gets the window mode
 				/// </summary>
 				/// <returns>WindowHandle mode</returns>
-				inline virtual WindowHandle::Mode GetMode() final { return (WindowHandle::Mode)m_window->getMode(m_window); }
+				inline virtual HWindow::Mode GetMode() final { return (HWindow::Mode)m_window->getMode(m_window); }
 
 				/// <summary>
 				///		Returns a pointer to the underlying C window

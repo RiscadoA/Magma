@@ -16,7 +16,7 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	Input::WindowHandle win = Input::CreateWindow(NULL, 800, 600, Input::WindowMode::Windowed, u8"Window");
+	Input::HWindow win = Input::CreateWindow(NULL, 800, 600, Input::WindowMode::Windowed, u8"Window");
 	win.SetOnCloseCallback(OnWindowClose);
 
 	while (!winShouldClose)

@@ -13,7 +13,7 @@ void Magma::Framework::Graphics::V2X::MSL::Compile(const mfsUTF8CodeUnit * src, 
 	if (err != MF_ERROR_OKAY)
 	{
 		mfsUTF8CodeUnit msg[512];
-		String::StringStream ss = String::CreateStringStream(msg, sizeof(msg));
+		String::HStringStream ss = String::CreateStringStream(msg, sizeof(msg));
 		ss.PutString(mfErrorToString(err));
 		ss.PutString(":\n");
 		ss.PutString(info.errorMsg);

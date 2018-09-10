@@ -625,12 +625,12 @@ namespace Magma
 				///		Used as a vertex shader handle.
 				///		Destroys the vertex shader automatically when there are no more references to it.
 				/// </summary>
-				class VertexShader : public Memory::Handle
+				class HVertexShader : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline VertexShader(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HVertexShader(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Gets a binding point from this shader.
@@ -644,12 +644,12 @@ namespace Magma
 				///		Used as a pixel shader handle.
 				///		Destroys the pixel shader automatically when there are no more references to it.
 				/// </summary>
-				class PixelShader : public Memory::Handle
+				class HPixelShader : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline PixelShader(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HPixelShader(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Gets a binding point from this shader.
@@ -663,24 +663,24 @@ namespace Magma
 				///		Used as a pipeline handle.
 				///		Destroys the pipeline automatically when there are no more references to it.
 				/// </summary>
-				class Pipeline : public Memory::Handle
+				class HPipeline : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline Pipeline(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HPipeline(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a constant buffer handle.
 				///		Destroys the constant buffer automatically when there are no more references to it.
 				/// </summary>
-				class ConstantBuffer : public Memory::Handle
+				class HConstantBuffer : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline ConstantBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HConstantBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Maps the constant buffer to a region in memory.
@@ -698,12 +698,12 @@ namespace Magma
 				///		Used as a texture 1D handle.
 				///		Destroys the texture 1D automatically when there are no more references to it.
 				/// </summary>
-				class Texture1D : public Memory::Handle
+				class HTexture1D : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline Texture1D(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HTexture1D(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Updates a texture with new data.
@@ -723,12 +723,12 @@ namespace Magma
 				///		Used as a texture 2D handle.
 				///		Destroys the texture 2D automatically when there are no more references to it.
 				/// </summary>
-				class Texture2D : public Memory::Handle
+				class HTexture2D : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline Texture2D(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HTexture2D(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Updates a texture with new data.
@@ -750,12 +750,12 @@ namespace Magma
 				///		Used as a texture 3D handle.
 				///		Destroys the texture 3D automatically when there are no more references to it.
 				/// </summary>
-				class Texture3D : public Memory::Handle
+				class HTexture3D : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline Texture3D(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HTexture3D(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Updates a texture with new data.
@@ -779,24 +779,24 @@ namespace Magma
 				///		Used as a sampler handle.
 				///		Destroys the sampler automatically when there are no more references to it.
 				/// </summary>
-				class Sampler : public Memory::Handle
+				class HSampler : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline Sampler(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HSampler(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a vertex buffer handle.
 				///		Destroys the vertex buffer automatically when there are no more references to it.
 				/// </summary>
-				class VertexBuffer : public Memory::Handle
+				class HVertexBuffer : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline VertexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HVertexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Maps the vertex buffer to a region in memory.
@@ -814,36 +814,36 @@ namespace Magma
 				///		Used as a vertex layout handle.
 				///		Destroys the vertex layout automatically when there are no more references to it.
 				/// </summary>
-				class VertexLayout : public Memory::Handle
+				class HVertexLayout : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline VertexLayout(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HVertexLayout(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a vertex array handle.
 				///		Destroys the vertex array automatically when there are no more references to it.
 				/// </summary>
-				class VertexArray : public Memory::Handle
+				class HVertexArray : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline VertexArray(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HVertexArray(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a index buffer handle.
 				///		Destroys the index buffer automatically when there are no more references to it.
 				/// </summary>
-				class IndexBuffer : public Memory::Handle
+				class HIndexBuffer : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline IndexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HIndexBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Maps the index buffer to a region in memory.
@@ -861,84 +861,84 @@ namespace Magma
 				///		Used as a rasterizer state handle.
 				///		Destroys the state automatically when there are no more references to it.
 				/// </summary>
-				class RasterState : public Memory::Handle
+				class HRasterState : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline RasterState(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HRasterState(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a depth stencil state handle.
 				///		Destroys the state automatically when there are no more references to it.
 				/// </summary>
-				class DepthStencilState : public Memory::Handle
+				class HDepthStencilState : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline DepthStencilState(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HDepthStencilState(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a blend state handle.
 				///		Destroys the state automatically when there are no more references to it.
 				/// </summary>
-				class BlendState : public Memory::Handle
+				class HBlendState : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline BlendState(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HBlendState(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a render texture handle.
 				///		Destroys the texture automatically when there are no more references to it.
 				/// </summary>
-				class RenderTexture : public Memory::Handle
+				class HRenderTexture : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline RenderTexture(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HRenderTexture(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a depth stencil texture handle.
 				///		Destroys the texture automatically when there are no more references to it.
 				/// </summary>
-				class DepthStencilTexture : public Memory::Handle
+				class HDepthStencilTexture : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline DepthStencilTexture(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HDepthStencilTexture(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a framebuffer handle.
 				///		Destroys the framebuffer automatically when there are no more references to it.
 				/// </summary>
-				class Framebuffer : public Memory::Handle
+				class HFramebuffer : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline Framebuffer(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HFramebuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
 				///		Used as a render device handle.
 				///		Destroys the render device automatically when there are no more references to it.
 				/// </summary>
-				class RenderDevice : public Memory::Handle
+				class HRenderDevice : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline RenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HRenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
 
 					/// <summary>
 					///		Creates a new vertex shader.
@@ -946,7 +946,7 @@ namespace Magma
 					/// <param name="bytecode">Shader bytecode</param>
 					/// <param name="bytecodeSize">Shader bytecode size</param>
 					/// <returns>Shader handle</returns>
-					VertexShader CreateVertexShader(const mfmU8* bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData);
+					HVertexShader CreateVertexShader(const mfmU8* bytecode, mfmU64 bytecodeSize, HMetaData metaData);
 
 					/// <summary>
 					///		Creates a new pixel shader.
@@ -954,7 +954,7 @@ namespace Magma
 					/// <param name="bytecode">Shader bytecode</param>
 					/// <param name="bytecodeSize">Shader bytecode size</param>
 					/// <returns>Shader handle</returns>
-					PixelShader CreatePixelShader(const mfmU8* bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData);
+					HPixelShader CreatePixelShader(const mfmU8* bytecode, mfmU64 bytecodeSize, HMetaData metaData);
 
 					/// <summary>
 					///		Creates a new pipeline,
@@ -962,20 +962,20 @@ namespace Magma
 					/// <param name="vs">Vertex shader handle</param>
 					/// <param name="ps">Pixel shader handle</param>
 					/// <returns>Pipeline handle</returns>
-					Pipeline CreatePipeline(VertexShader vs, PixelShader ps);
+					HPipeline CreatePipeline(HVertexShader vs, HPixelShader ps);
 
 					/// <summary>
 					///		Sets the pipeline used for rendering.
 					/// </summary>
 					/// <param name="pipeline">Pipeline handle</param>
-					void SetPipeline(Pipeline pipeline);
+					void SetPipeline(HPipeline pipeline);
 
 					/// <summary>
 					///		Binds a constant buffer to a binding point.
 					/// </summary>
 					/// <param name="bp">Binding point</param>
 					/// <param name="cb">Cosntant buffer handle</param>
-					void BindConstantBuffer(void* bp, ConstantBuffer cb);
+					void BindConstantBuffer(void* bp, HConstantBuffer cb);
 
 					/// <summary>
 					///		Binds a section of a constant buffer to a binding point.
@@ -984,42 +984,42 @@ namespace Magma
 					/// <param name="cb">Cosntant buffer handle</param>
 					/// <param name="offset">Offset in the constant buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
 					/// <param name="size">Memory size in the constant buffer (in shader constants, one shader constant = 16 bytes, the number of constants must be a multiple of MFG_CONSTANT_ALIGN)</param>
-					void BindConstantBufferRange(void* bp, ConstantBuffer cb, mfmU64 offset, mfmU64 size);
+					void BindConstantBufferRange(void* bp, HConstantBuffer cb, mfmU64 offset, mfmU64 size);
 
 					/// <summary>
 					///		Binds a 1D texture to a binding point.
 					/// </summary>
 					/// <param name="bp">Binding point</param>
 					/// <param name="tex">Texture handle</param>
-					void BindTexture1D(void* bp, Texture1D tex);
+					void BindTexture1D(void* bp, HTexture1D tex);
 
 					/// <summary>
 					///		Binds a 2D texture to a binding point.
 					/// </summary>
 					/// <param name="bp">Binding point</param>
 					/// <param name="tex">Texture handle</param>
-					void BindTexture2D(void* bp, Texture2D tex);
+					void BindTexture2D(void* bp, HTexture2D tex);
 
 					/// <summary>
 					///		Binds a 3D texture to a binding point.
 					/// </summary>
 					/// <param name="bp">Binding point</param>
 					/// <param name="tex">Texture handle</param>
-					void BindTexture3D(void* bp, Texture3D tex);
+					void BindTexture3D(void* bp, HTexture3D tex);
 
 					/// <summary>
 					///		Binds a render texture to a binding point.
 					/// </summary>
 					/// <param name="bp">Binding point</param>
 					/// <param name="tex">Render texture handle</param>
-					void BindRenderTexture(void* bp, RenderTexture tex);
+					void BindRenderTexture(void* bp, HRenderTexture tex);
 
 					/// <summary>
 					///		Binds a sampler to a binding point.
 					/// </summary>
 					/// <param name="bp">Binding point</param>
 					/// <param name="sampler">Sampler handle</param>
-					void BindSampler(void* bp, Sampler sampler);
+					void BindSampler(void* bp, HSampler sampler);
 
 					/// <summary>
 					///		Creates a new constant buffer.
@@ -1028,7 +1028,7 @@ namespace Magma
 					/// <param name="data">Constant buffer initial data (may be set to NULL if the buffer isn't static)</param>
 					/// <param name="usage">Buffer usage mode</param>
 					/// <returns>Buffer handle</returns>
-					ConstantBuffer CreateConstantBuffer(mfmU64 size, const void* data, Usage usage);
+					HConstantBuffer CreateConstantBuffer(mfmU64 size, const void* data, Usage usage);
 
 					/// <summary>
 					///		Creates a new vertex buffer.
@@ -1037,7 +1037,7 @@ namespace Magma
 					/// <param name="data">Vertex buffer initial data (may be set to NULL if the buffer isn't static)</param>
 					/// <param name="usage">Buffer usage mode</param>
 					/// <returns>Buffer handle</returns>
-					VertexBuffer CreateVertexBuffer(mfmU64 size, const void* data, Usage usage);
+					HVertexBuffer CreateVertexBuffer(mfmU64 size, const void* data, Usage usage);
 
 					/// <summary>
 					///		Creates a new vertex layout.
@@ -1046,7 +1046,7 @@ namespace Magma
 					/// <param name="elements">Vertex elements</param>
 					/// <param name="vs">Vertex shader handle</param>
 					/// <returns>Vertex layout handle</returns>
-					VertexLayout CreateVertexLayout(mfmU64 elementCount, const VertexElement* elements, VertexShader vs);
+					HVertexLayout CreateVertexLayout(mfmU64 elementCount, const VertexElement* elements, HVertexShader vs);
 
 					/// <summary>
 					///		Creates a new vertex array.
@@ -1055,13 +1055,13 @@ namespace Magma
 					/// <param name="buffers">Vertex buffer handles</param>
 					/// <param name="layout">Vertex layout handle</param>
 					/// <returns>Vertex array handle</returns>
-					VertexArray CreateVertexArray(mfmU64 bufferCount, VertexBuffer* buffers, VertexLayout layout);
+					HVertexArray CreateVertexArray(mfmU64 bufferCount, HVertexBuffer* buffers, HVertexLayout layout);
 
 					/// <summary>
 					///		Sets the currently active vertex array.
 					/// </summary>
 					/// <param name="ib">Vertex array handle</param>
-					void SetVertexArray(VertexArray va);
+					void SetVertexArray(HVertexArray va);
 
 					/// <summary>
 					///		Creates a new index buffer.
@@ -1071,13 +1071,13 @@ namespace Magma
 					/// <param name="type">Index data type (valid: Type::UShort; Type::UInt)</param>
 					/// <param name="usage">Buffer usage mode</param>
 					/// <returns>Buffer handle</returns>
-					IndexBuffer CreateIndexBuffer(mfmU64 size, const void* data, Type type, Usage usage);
+					HIndexBuffer CreateIndexBuffer(mfmU64 size, const void* data, Type type, Usage usage);
 
 					/// <summary>
 					///		Sets the currently active index buffer.
 					/// </summary>
 					/// <param name="ib">Index buffer handle</param>
-					void SetIndexBuffer(IndexBuffer ib);
+					void SetIndexBuffer(HIndexBuffer ib);
 
 					/// <summary>
 					///		Creates a new 1D texture.
@@ -1087,7 +1087,7 @@ namespace Magma
 					/// <param name="data">Texture data</param>
 					/// <param name="usage">Texture usage mode</param>
 					/// <returns>Texture handle</returns>
-					Texture1D CreateTexture1D(mfmU64 width, Format format, const void* data, Usage usage);
+					HTexture1D CreateTexture1D(mfmU64 width, Format format, const void* data, Usage usage);
 
 					/// <summary>
 					///		Creates a new 2D texture.
@@ -1098,7 +1098,7 @@ namespace Magma
 					/// <param name="data">Texture data</param>
 					/// <param name="usage">Texture usage mode</param>
 					/// <returns>Texture handle</returns>
-					Texture2D CreateTexture2D(mfmU64 width, mfmU64 height, Format format, const void* data, Usage usage);
+					HTexture2D CreateTexture2D(mfmU64 width, mfmU64 height, Format format, const void* data, Usage usage);
 
 					/// <summary>
 					///		Creates a new 3D texture.
@@ -1110,53 +1110,53 @@ namespace Magma
 					/// <param name="data">Texture data</param>
 					/// <param name="usage">Texture usage mode</param>
 					/// <returns>Texture handle</returns>
-					Texture3D CreateTexture3D(mfmU64 width, mfmU64 height, mfmU64 depth, Format format, const void* data, Usage usage);
+					HTexture3D CreateTexture3D(mfmU64 width, mfmU64 height, mfmU64 depth, Format format, const void* data, Usage usage);
 
 					/// <summary>
 					///		Creates a new sampler.
 					/// </summary>
 					/// <param name="desc">Sampler description</param>
 					/// <returns>Sampler handle</returns>
-					Sampler CreateSampler(const SamplerDesc & desc);
+					HSampler CreateSampler(const SamplerDesc & desc);
 
 					/// <summary>
 					///		Creates a new rasterizer state.
 					/// </summary>
 					/// <param name="desc">Rasterizer state description</param>
 					/// <returns>Rasterizer state handle</returns>
-					RasterState CreateRasterState(const RasterStateDesc & desc);
+					HRasterState CreateRasterState(const RasterStateDesc & desc);
 
 					/// <summary>
 					///		Creates a new depth stencil state.
 					/// </summary>
 					/// <param name="desc">Depth stencil state description</param>
 					/// <returns>Depth stencil state handle</returns>
-					DepthStencilState CreateDepthStencilState(const DepthStencilStateDesc & desc);
+					HDepthStencilState CreateDepthStencilState(const DepthStencilStateDesc & desc);
 
 					/// <summary>
 					///		Creates a new blend state.
 					/// </summary>
 					/// <param name="desc">Blend state description</param>
 					/// <returns>Blend state handle</returns>
-					BlendState CreateBlendState(const BlendStateDesc & desc);
+					HBlendState CreateBlendState(const BlendStateDesc & desc);
 
 					/// <summary>
 					///		Sets the currently active rasterizer state.
 					/// </summary>
 					/// <param name="state">State handle</param>
-					void SetRasterState(RasterState state);
+					void SetRasterState(HRasterState state);
 
 					/// <summary>
 					///		Sets the currently active depth stencil state.
 					/// </summary>
 					/// <param name="state">State handle</param>
-					void SetDepthStencilState(DepthStencilState state);
+					void SetDepthStencilState(HDepthStencilState state);
 
 					/// <summary>
 					///		Sets the currently active blend state.
 					/// </summary>
 					/// <param name="state">State handle</param>
-					void SetBlendState(BlendState state);
+					void SetBlendState(HBlendState state);
 
 					/// <summary>
 					///		Creates a new render texture.
@@ -1165,7 +1165,7 @@ namespace Magma
 					/// <param name="height">Texture height</param>
 					/// <param name="format">Texture data format</param>
 					/// <returns>Texture handle</returns>
-					RenderTexture CreateRenderTexture(mfmU64 width, mfmU64 height, Format format);
+					HRenderTexture CreateRenderTexture(mfmU64 width, mfmU64 height, Format format);
 
 					/// <summary>
 					///		Creates a new depth stencil texture.
@@ -1174,7 +1174,7 @@ namespace Magma
 					/// <param name="height">Texture height</param>
 					/// <param name="format">Texture data format</param>
 					/// <returns>Texture handle</returns>
-					DepthStencilTexture CreateDepthStencilTexture(mfmU64 width, mfmU64 height, Format format);
+					HDepthStencilTexture CreateDepthStencilTexture(mfmU64 width, mfmU64 height, Format format);
 
 					/// <summary>
 					///		Creates a new framebuffer.
@@ -1183,13 +1183,13 @@ namespace Magma
 					/// <param name="textures">Render texture handles</param>
 					/// <param name="depthStencilTexture">Depth stencil texture handle (optional, may be NULL)</param>
 					/// <returns>Framebuffer handle</returns>
-					Framebuffer CreateFramebuffer(mfmU64 textureCount, RenderTexture* textures, DepthStencilTexture depthStencilTexture);
+					HFramebuffer CreateFramebuffer(mfmU64 textureCount, HRenderTexture* textures, HDepthStencilTexture depthStencilTexture);
 
 					/// <summary>
 					///		Sets the currently active framebuffer.
 					/// </summary>
 					/// <param name="framebuffer">Framebuffer handle</param>
-					void SetFramebuffer(Framebuffer framebuffer);
+					void SetFramebuffer(HFramebuffer framebuffer);
 
 					/// <summary>
 					///		Clears the current framebuffer color textures.
@@ -1240,7 +1240,7 @@ namespace Magma
 				/// <param name="desc">Render device description</param>
 				/// <param name="allocator">Render device allocator</param>
 				/// <returns>Render device handle</returns>
-				RenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Input::WindowHandle window, const RenderDeviceDesc* desc, Memory::AllocatorHandle allocator);
+				HRenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Input::HWindow window, const RenderDeviceDesc* desc, Memory::HAllocator allocator);
 			}
 		}
 	}

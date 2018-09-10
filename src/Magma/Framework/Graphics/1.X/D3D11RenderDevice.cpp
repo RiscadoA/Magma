@@ -1509,7 +1509,7 @@ public:
 
 #endif
 
-void Magma::Framework::Graphics::V1X::D3D11RenderDevice::Init(Input::WindowHandle * window, const RenderDeviceSettings & settings)
+void Magma::Framework::Graphics::V1X::D3D11RenderDevice::Init(Input::HWindow * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_DIRECTX)
 	m_settings = settings;
@@ -1533,7 +1533,7 @@ void Magma::Framework::Graphics::V1X::D3D11RenderDevice::Init(Input::WindowHandl
 		scd.OutputWindow = (HWND)mfiGetD3DWindowHandle(m_window->GetWindow());
 		scd.SampleDesc.Count = 1;
 		scd.SampleDesc.Quality = 0;
-		scd.Windowed = (window->GetMode() == Input::WindowHandle::Mode::Fullscreen) ? FALSE : TRUE;
+		scd.Windowed = (window->GetMode() == Input::HWindow::Mode::Fullscreen) ? FALSE : TRUE;
 
 		UINT flags = 0;
 

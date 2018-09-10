@@ -2,9 +2,9 @@
 #include "Exception.hpp"
 #include "Config.h"
 
-Magma::Framework::String::StreamHandle Magma::Framework::String::OutStream = NULL;
-Magma::Framework::String::StreamHandle Magma::Framework::String::ErrStream = NULL;
-Magma::Framework::String::StreamHandle Magma::Framework::String::InStream = NULL;
+Magma::Framework::String::HStream Magma::Framework::String::OutStream = NULL;
+Magma::Framework::String::HStream Magma::Framework::String::ErrStream = NULL;
+Magma::Framework::String::HStream Magma::Framework::String::InStream = NULL;
 
 void Magma::Framework::String::InitStreams()
 {
@@ -20,7 +20,7 @@ void Magma::Framework::String::TerminateStreams()
 	OutStream.Release();
 }
 
-void Magma::Framework::String::StreamHandle::SeekBegin(mfmU64 position)
+void Magma::Framework::String::HStream::SeekBegin(mfmU64 position)
 {
 	mfError err = mfsSeekBegin(reinterpret_cast<mfsStream*>(&this->Get()), position);
 	if (err == MF_ERROR_OKAY)
@@ -28,7 +28,7 @@ void Magma::Framework::String::StreamHandle::SeekBegin(mfmU64 position)
 	throw StreamError(ErrorToString(err));
 }
 
-void Magma::Framework::String::StreamHandle::SeekEnd(mfmU64 position)
+void Magma::Framework::String::HStream::SeekEnd(mfmU64 position)
 {
 	mfError err = mfsSeekEnd(reinterpret_cast<mfsStream*>(&this->Get()), position);
 	if (err == MF_ERROR_OKAY)
@@ -36,7 +36,7 @@ void Magma::Framework::String::StreamHandle::SeekEnd(mfmU64 position)
 	throw StreamError(ErrorToString(err));
 }
 
-void Magma::Framework::String::StreamHandle::SeekHead(mfmI64 offset)
+void Magma::Framework::String::HStream::SeekHead(mfmI64 offset)
 {
 	mfError err = mfsSeekHead(reinterpret_cast<mfsStream*>(&this->Get()), offset);
 	if (err == MF_ERROR_OKAY)
@@ -44,7 +44,7 @@ void Magma::Framework::String::StreamHandle::SeekHead(mfmI64 offset)
 	throw StreamError(ErrorToString(err));
 }
 
-mfmU64 Magma::Framework::String::StreamHandle::Tell()
+mfmU64 Magma::Framework::String::HStream::Tell()
 {
 	mfmU64 pos = MFM_FALSE;
 	mfError err = mfsTell(reinterpret_cast<mfsStream*>(&this->Get()), &pos);
@@ -53,7 +53,7 @@ mfmU64 Magma::Framework::String::StreamHandle::Tell()
 	return pos;
 }
 
-bool Magma::Framework::String::StreamHandle::IsEOF()
+bool Magma::Framework::String::HStream::IsEOF()
 {
 	mfmBool eof = MFM_FALSE;
 	mfError err = mfsEOF(reinterpret_cast<mfsStream*>(&this->Get()), &eof);
@@ -62,7 +62,7 @@ bool Magma::Framework::String::StreamHandle::IsEOF()
 	return eof != MFM_FALSE;
 }
 
-mfmU64 Magma::Framework::String::StreamHandle::Write(const void * data, mfmU64 size)
+mfmU64 Magma::Framework::String::HStream::Write(const void * data, mfmU64 size)
 {
 	mfmU64 writtenSize = 0;
 	mfError err = mfsWrite(reinterpret_cast<mfsStream*>(&this->Get()), static_cast<const mfmU8*>(data), size, &writtenSize);
@@ -71,7 +71,7 @@ mfmU64 Magma::Framework::String::StreamHandle::Write(const void * data, mfmU64 s
 	throw StreamError(ErrorToString(err));
 }
 
-mfmU64 Magma::Framework::String::StreamHandle::ReadUntil(mfsUTF8CodeUnit * data, mfmU64 maxSize, const mfsUTF8CodeUnit * terminator)
+mfmU64 Magma::Framework::String::HStream::ReadUntil(mfsUTF8CodeUnit * data, mfmU64 maxSize, const mfsUTF8CodeUnit * terminator)
 {
 #ifdef MAGMA_FRAMEWORK_DEBUG
 	if (data == nullptr || terminator == nullptr)
@@ -129,7 +129,7 @@ mfmU64 Magma::Framework::String::StreamHandle::ReadUntil(mfsUTF8CodeUnit * data,
 	return size;
 }
 
-bool Magma::Framework::String::StreamHandle::GetByte(mfmU8 & byte)
+bool Magma::Framework::String::HStream::GetByte(mfmU8 & byte)
 {
 	mfError err = mfsGetByte(reinterpret_cast<mfsStream*>(&this->Get()), &byte);
 	if (err == MF_ERROR_OKAY)
@@ -139,7 +139,7 @@ bool Magma::Framework::String::StreamHandle::GetByte(mfmU8 & byte)
 	throw StreamError(ErrorToString(err));
 }
 
-void Magma::Framework::String::StreamHandle::Flush()
+void Magma::Framework::String::HStream::Flush()
 {
 	mfError err = mfsFlush(reinterpret_cast<mfsStream*>(&this->Get()));
 	if (err == MF_ERROR_OKAY)
@@ -147,7 +147,7 @@ void Magma::Framework::String::StreamHandle::Flush()
 	throw StreamError(ErrorToString(err));
 }
 
-bool Magma::Framework::String::StreamHandle::PutByte(mfmU8 byte)
+bool Magma::Framework::String::HStream::PutByte(mfmU8 byte)
 {
 	mfError err = mfsPutByte(reinterpret_cast<mfsStream*>(&this->Get()), byte);
 	if (err == MF_ERROR_OKAY)
@@ -157,7 +157,7 @@ bool Magma::Framework::String::StreamHandle::PutByte(mfmU8 byte)
 	throw StreamError(ErrorToString(err));
 }
 
-void Magma::Framework::String::StreamHandle::PutString(const mfsUTF8CodeUnit * str)
+void Magma::Framework::String::HStream::PutString(const mfsUTF8CodeUnit * str)
 {
 	mfError err = mfsPutString(reinterpret_cast<mfsStream*>(&this->Get()), str);
 	if (err == MF_ERROR_OKAY)
@@ -165,7 +165,7 @@ void Magma::Framework::String::StreamHandle::PutString(const mfsUTF8CodeUnit * s
 	throw StreamError(ErrorToString(err));
 }
 
-mfmU64 Magma::Framework::String::StreamHandle::Read(void * data, mfmU64 size)
+mfmU64 Magma::Framework::String::HStream::Read(void * data, mfmU64 size)
 {
 	mfmU64 readSize = 0;
 	mfError err = mfsRead(reinterpret_cast<mfsStream*>(&this->Get()), static_cast<mfmU8*>(data), size, &readSize);

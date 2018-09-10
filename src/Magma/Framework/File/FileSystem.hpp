@@ -35,24 +35,24 @@ namespace Magma
 			///		Used as an handle to an archive in the file system.
 			///		Automatically disposes of the archive if there are no more references to it.
 			/// </summary>
-			class ArchiveHandle : public Memory::Handle
+			class HArchive : public Memory::Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				inline ArchiveHandle(const Memory::Handle& object) : Memory::Handle(object) {}
+				inline HArchive(const Memory::Handle& object) : Memory::Handle(object) {}
 			};
 
 			/// <summary>
 			///		Used as an handle to a file in the file system.
 			///		Prevents the file from being deleted while there are still references to it.
 			/// </summary>
-			class FileHandle : public Memory::Handle
+			class HFile : public Memory::Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				inline FileHandle(const Memory::Handle& object) : Memory::Handle(object) {}
+				inline HFile(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Gets the file's type.
@@ -64,19 +64,19 @@ namespace Magma
 				///		Gets the first file in in this directory (if this file is a directory).
 				/// </summary>
 				/// <returns>First file in directory</returns>
-				FileHandle GetFirst();
+				HFile GetFirst();
 
 				/// <summary>
 				///		Gets the next file in the directory.
 				/// </summary>
 				/// <returns>Next file in directory</returns>
-				FileHandle GetNext();
+				HFile GetNext();
 
 				/// <summary>
 				///		Gets this file's parent directory.
 				/// </summary>
 				/// <returns>FileHandle's parent directory</returns>
-				FileHandle GetParent();
+				HFile GetParent();
 			};
 
 			/// <summary>
@@ -84,53 +84,53 @@ namespace Magma
 			/// </summary>
 			/// <param name="archive">ArchiveHandle handle</param>
 			/// <param name="name">ArchiveHandle name</param>
-			void RegisterArchive(ArchiveHandle archive, const mfsUTF8CodeUnit* name);
+			void RegisterArchive(HArchive archive, const mfsUTF8CodeUnit* name);
 
 			/// <summary>
 			///		Unregisters an archive from the file system.
 			/// </summary>
 			/// <param name="archive">ArchiveHandle handle</param>
-			void UnregisterArchive(ArchiveHandle archive);
+			void UnregisterArchive(HArchive archive);
 
 			/// <summary>
 			///		Gets a file from the file system.
 			/// </summary>
 			/// <param name="path">FileHandle path</param>
 			/// <returns>FileHandle handle (NULL if no file was found)</returns>
-			FileHandle GetFile(const mfsUTF8CodeUnit* path);
+			HFile GetFile(const mfsUTF8CodeUnit* path);
 
 			/// <summary>
 			///		Creates a new directory in the file system.
 			/// </summary>
 			/// <param name="path">Directory path</param>
 			/// <returns>Directory handle</returns>
-			FileHandle CreateDirectory(const mfsUTF8CodeUnit* path);
+			HFile CreateDirectory(const mfsUTF8CodeUnit* path);
 
 			/// <summary>
 			///		Deletes a directory in the file system.
 			/// </summary>
 			/// <param name="dir">Directory handle</param>
-			void DeleteDirectory(FileHandle& dir);
+			void DeleteDirectory(HFile& dir);
 
 			/// <summary>
 			///		Creates a new file in the file system.
 			/// </summary>
 			/// <param name="path">FileHandle path</param>
 			/// <returns>FileHandle handle</returns>
-			FileHandle CreateFile(const mfsUTF8CodeUnit* path);
+			HFile CreateFile(const mfsUTF8CodeUnit* path);
 
 			/// <summary>
 			///		Deletes a file in the file system.
 			/// </summary>
 			/// <param name="file">FileHandle handle</param>
-			void DeleteFile(FileHandle& file);
+			void DeleteFile(HFile& file);
 
 			/// <summary>
 			///		Opens a file stream.
 			/// </summary>
 			/// <param name="file">FileHandle handle</param>
 			/// <returns>FileHandle stream handle</returns>
-			String::StreamHandle OpenFile(FileHandle file, FileMode mode);
+			String::HStream OpenFile(HFile file, FileMode mode);
 		}
 	}
 }

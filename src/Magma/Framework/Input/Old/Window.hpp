@@ -17,7 +17,7 @@ namespace Magma
 			/// <summary>
 			///		Abstract class that handles window creations and events.
 			/// </summary>
-			class WindowHandle
+			class HWindow
 			{
 			public:
 				/// <summary>
@@ -32,12 +32,12 @@ namespace Magma
 				/// <summary>
 				///		Opens a window.
 				/// </summary>
-				WindowHandle() = default;
+				HWindow() = default;
 
 				/// <summary>
 				///		Closes a window.
 				/// </summary>
-				virtual ~WindowHandle() = default;
+				virtual ~HWindow() = default;
 
 				/// <summary>
 				///		Polls events from this window.
@@ -116,7 +116,7 @@ namespace Magma
 				///		Gets the window mode
 				/// </summary>
 				/// <returns>WindowHandle mode</returns>
-				virtual WindowHandle::Mode GetMode() = 0;
+				virtual HWindow::Mode GetMode() = 0;
 			};
 		}
 	}

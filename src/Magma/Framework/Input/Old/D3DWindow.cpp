@@ -61,7 +61,7 @@ static void mfiWindowMouseLeaveCallback(void* window)
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseLeave.Fire();
 }
 
-Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, WindowHandle::Mode mode)
+Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, HWindow::Mode mode)
 {
 	m_window = nullptr;
 	auto err = mfiCreateD3DWindow(&m_window, width, height, (mfiEnum)mode, title);

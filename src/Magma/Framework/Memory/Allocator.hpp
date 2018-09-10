@@ -13,12 +13,12 @@ namespace Magma
 			///		Used as an allocator handle.
 			///		Destroys the allocator automatically when there are no more references to it.
 			/// </summary>
-			class AllocatorHandle : public Handle
+			class HAllocator : public Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				inline AllocatorHandle(const Memory::Handle& object) : Memory::Handle(object) {}
+				inline HAllocator(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Allocates data on this allocator.
@@ -34,7 +34,7 @@ namespace Magma
 				void Deallocate(void* memory);
 			};
 
-			extern AllocatorHandle StandardAllocator;
+			extern HAllocator StandardAllocator;
 		}
 	}
 }

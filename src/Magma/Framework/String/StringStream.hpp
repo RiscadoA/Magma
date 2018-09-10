@@ -14,10 +14,10 @@ namespace Magma
 			///		Used as an object handle.
 			///		Destroys the object automatically when there are no more references to it.
 			/// </summary>
-			class StringStream : public StreamHandle
+			class HStringStream : public HStream
 			{
 			public:
-				using StreamHandle::StreamHandle;
+				using HStream::HStream;
 
 				/// <summary>
 				///		Clears the string stream.
@@ -32,7 +32,7 @@ namespace Magma
 			/// <param name="mode">FileHandle open mode</param>
 			/// <param name="allocator">AllocatorHandle where the string stream will be created</param>
 			/// <returns>StreamHandle handle</returns>
-			StringStream CreateStringStream(void* buffer, mfmU64 size, Memory::AllocatorHandle allocator = Memory::StandardAllocator);
+			HStringStream CreateStringStream(void* buffer, mfmU64 size, Memory::HAllocator allocator = Memory::StandardAllocator);
 		}
 	}
 }

@@ -18,7 +18,7 @@ int main(int argc, const char** argv)
 	Memory::StackAllocatorHandle alloc = Memory::CreateStackAllocator(2048);
 	Memory::Handle obj = String::CreateStringStream(buffer, sizeof(buffer), alloc);
 
-	String::StringStream ss = obj;
+	String::HStringStream ss = obj;
 	ss.PutString(u8"Sample text");
 	ss.Release();
 

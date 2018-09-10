@@ -1075,7 +1075,7 @@ public:
 	GLuint width, height;
 };
 
-void Magma::Framework::Graphics::V1X::OGL410RenderDevice::Init(Input::WindowHandle * window, const RenderDeviceSettings & settings)
+void Magma::Framework::Graphics::V1X::OGL410RenderDevice::Init(Input::HWindow * window, const RenderDeviceSettings & settings)
 {
 #if defined(MAGMA_FRAMEWORK_USE_OPENGL)
 	m_window = dynamic_cast<Input::OGLWindow*>(window);

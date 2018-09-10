@@ -13,12 +13,12 @@ namespace Magma
 			///		Used as a stream handle.
 			///		Destroys the stream automatically when there are no more references to it.
 			/// </summary>
-			class StreamHandle : public Memory::Handle
+			class HStream : public Memory::Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				inline StreamHandle(const Memory::Handle& object) : Memory::Handle(object) {}
+				inline HStream(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Seeks a position on the stream relative to its beginning.
@@ -102,9 +102,9 @@ namespace Magma
 				void Flush();
 			};
 
-			extern StreamHandle OutStream;
-			extern StreamHandle ErrStream;
-			extern StreamHandle InStream;
+			extern HStream OutStream;
+			extern HStream ErrStream;
+			extern HStream InStream;
 
 			void InitStreams();
 			void TerminateStreams();

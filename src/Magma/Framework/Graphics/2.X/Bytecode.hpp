@@ -17,12 +17,12 @@ namespace Magma
 				///		Used as a shader meta data handle.
 				///		Destroys the meta data automatically when there are no more references to it.
 				/// </summary>
-				class MetaDataHandle : public Memory::Handle
+				class HMetaData : public Memory::Handle
 				{
 				public:
 					using Handle::Handle;
 					using Handle::operator=;
-					explicit inline MetaDataHandle(const Memory::Handle& object) : Memory::Handle(object) {}
+					explicit inline HMetaData(const Memory::Handle& object) : Memory::Handle(object) {}
 				};
 
 				/// <summary>
@@ -32,7 +32,7 @@ namespace Magma
 				/// <param name="binarySize">Binary meta data size</param>
 				/// <param name="allocator">Allocator where the meta data will be allocated on</param>
 				/// <returns>Meta data handle</returns>
-				MetaDataHandle LoadMetaData(const mfmU8* binaryData, mfmU64 binarySize, Memory::AllocatorHandle allocator = Memory::StandardAllocator);
+				HMetaData LoadMetaData(const mfmU8* binaryData, mfmU64 binarySize, Memory::HAllocator allocator = Memory::StandardAllocator);
 			}
 		}
 	}
