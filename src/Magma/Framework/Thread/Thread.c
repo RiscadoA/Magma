@@ -27,7 +27,7 @@ static unsigned int __stdcall mftThreadFunc(void* args)
 	mftThread* thread = (mftThread*)args;
 	if (mftAtomic8Store(&thread->running, MFM_TRUE) != MF_ERROR_OKAY)
 		return 1;
-	thread->function(args);
+	thread->function(thread->args);
 	if (mftAtomic8Store(&thread->running, MFM_FALSE) != MF_ERROR_OKAY)
 		return 2;
 	return 0;
