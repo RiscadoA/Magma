@@ -11,6 +11,15 @@ namespace Magma
 		namespace Thread
 		{
 			/// <summary>
+			///		Thrown when there is an error related to atomics.
+			/// </summary>
+			class AtomicError : public std::runtime_error
+			{
+			public:
+				using std::runtime_error::runtime_error;
+			};
+
+			/// <summary>
 			///		Thrown when there is an error related to mutexes.
 			/// </summary>
 			class MutexError : public std::runtime_error

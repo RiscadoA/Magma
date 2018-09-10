@@ -12,6 +12,28 @@ extern "C"
 #endif
 
 	/// <summary>
+	///		Gets an atomic pointer value.
+	/// </summary>
+	/// <param name="atomic">Pointer to pointer atomic variable</param>
+	/// <param name="out">Output value</param>
+	/// <returns>
+	///		Returns MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns an error code.
+	/// </returns>
+	mfError mftAtomicPointerLoad(const volatile void** atomic, void** out);
+
+	/// <summary>
+	///		Sets an atomic pointer variable value.
+	/// </summary>
+	/// <param name="atomic">Pointer to pointer atomic variable</param>
+	/// <param name="value">New value</param>
+	/// <returns>
+	///		Returns MF_ERROR_OKAY if there were no errors.
+	///		Otherwise returns an error code.
+	/// </returns>
+	mfError mftAtomicPointerStore(volatile void** atomic, void* value);
+
+	/// <summary>
 	///		Gets an atomic 8 bit variable value.
 	/// </summary>
 	/// <param name="atomic">Pointer to 8 bit atomic variable</param>

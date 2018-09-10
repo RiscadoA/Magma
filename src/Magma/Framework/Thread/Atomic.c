@@ -5,7 +5,7 @@
 
 #include <Windows.h>
 
-mfError mftAtomic8Load(const mfmI8 * atomic, mfmI8 * out)
+mfError mftAtomicPointerLoad(const volatile void ** atomic, void ** out)
 {
 #if defined(MAGMA_FRAMEWORK_DEBUG)
 	if (atomic == NULL || out == NULL)
@@ -15,7 +15,27 @@ mfError mftAtomic8Load(const mfmI8 * atomic, mfmI8 * out)
 	return MF_ERROR_OKAY;
 }
 
-mfError mftAtomic8Store(mfmI8 * atomic, mfmI8 value)
+mfError mftAtomicPointerStore(volatile void ** atomic, void * value)
+{
+#if defined(MAGMA_FRAMEWORK_DEBUG)
+	if (atomic == NULL)
+		return MFT_ERROR_INVALID_ARGUMENTS;
+#endif
+	InterlockedExchangePointer(atomic, value);
+	return MF_ERROR_OKAY;
+}
+
+mfError mftAtomic8Load(const volatile mfmI8 * atomic, mfmI8 * out)
+{
+#if defined(MAGMA_FRAMEWORK_DEBUG)
+	if (atomic == NULL || out == NULL)
+		return MFT_ERROR_INVALID_ARGUMENTS;
+#endif
+	*out = *atomic;
+	return MF_ERROR_OKAY;
+}
+
+mfError mftAtomic8Store(volatile mfmI8 * atomic, mfmI8 value)
 {
 #if defined(MAGMA_FRAMEWORK_DEBUG)
 	if (atomic == NULL)
@@ -25,7 +45,7 @@ mfError mftAtomic8Store(mfmI8 * atomic, mfmI8 value)
 	return MF_ERROR_OKAY;
 }
 
-mfError mftAtomic16Load(const mfmI16 * atomic, mfmI16 * out)
+mfError mftAtomic16Load(const volatile mfmI16 * atomic, mfmI16 * out)
 {
 #if defined(MAGMA_FRAMEWORK_DEBUG)
 	if (atomic == NULL || out == NULL)
@@ -35,7 +55,7 @@ mfError mftAtomic16Load(const mfmI16 * atomic, mfmI16 * out)
 	return MF_ERROR_OKAY;
 }
 
-mfError mftAtomic16Store(mfmI16 * atomic, mfmI16 value)
+mfError mftAtomic16Store(volatile mfmI16 * atomic, mfmI16 value)
 {
 #if defined(MAGMA_FRAMEWORK_DEBUG)
 	if (atomic == NULL)
@@ -78,6 +98,3 @@ mfError mftAtomic32Add(const volatile mfmI32 * atomic, mfmI32 value)
 #else
 #error No magma framework thread library support
 #endif
-
-
-

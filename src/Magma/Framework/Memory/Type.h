@@ -62,6 +62,16 @@ extern "C"
 	typedef double mfmF64;
 
 	/// <summary>
+	///		Guaranteed to be an unsigned integer with the same size as a pointer.
+	/// </summary>
+	typedef uintptr_t mfmUPtr;
+
+	/// <summary>
+	///		Guaranteed to be a signed integer with the same size as a pointer.
+	/// </summary>
+	typedef intptr_t mfmIPtr;
+
+	/// <summary>
 	///		Used to store a boolean value (can be either MFM_TRUE or MFM_FALSE).
 	/// </summary>
 	typedef mfmU8 mfmBool;
