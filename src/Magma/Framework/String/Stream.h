@@ -169,6 +169,9 @@ extern "C"
 	/// </returns>
 	mfError mfsPutString(mfsStream* stream, const mfsUTF8CodeUnit* str);
 
+
+	//mfError mfsPrintU8(mfsStream* stream, mfmU8 value);
+
 	/// <summary>
 	///		Prints a formatted UTF-8 string to a stream.
 	/// </summary>

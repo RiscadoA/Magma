@@ -24,6 +24,10 @@ const mfsUTF8CodeUnit * mfsErrorToString(mfError err)
 			return u8"[MFS_ERROR_FAILED_TO_READ_ALL] Failed to read all of the data requested from stream";
 		case MFS_ERROR_FAILED_TO_WRITE_ALL:
 			return u8"[MFS_ERROR_FAILED_TO_WRITE_ALL] Failed to write all of the data requested to stream";
+		case MFS_ERROR_FAILED_TO_PARSE:
+			return u8"[MFS_ERROR_FAILED_TO_PARSE] Failed to parse";
+		case MFS_ERROR_NUMBER_TOO_BIG:
+			return u8"[MFS_ERROR_NUMBER_TOO_BIG] Number is too big";
 
 		default:
 			return NULL;

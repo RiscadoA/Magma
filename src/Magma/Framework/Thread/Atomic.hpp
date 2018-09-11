@@ -18,7 +18,6 @@ namespace Magma
 				inline Atomic() { static_assert(false); /* Unsupported atomic type */ }			
 			};
 
-
 			/// <summary>
 			///		Encapsulates an atomic pointer.
 			/// </summary>
