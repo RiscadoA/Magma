@@ -10,15 +10,12 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	String::OutStream.Print(u8"test: ");
-	String::OutStream.Print(2.0f);
-	String::OutStream.Print(u8" ; ");
-	String::OutStream.Print(2.2582);
-	String::OutStream.Print(u8" ; ");
-	String::OutStream.Print(-4298);
-	String::OutStream.Print(u8" ; ");
-	String::OutStream.Print('t');
+	String::OutStream << "Enter x: ";
+	mfmF32 x = String::InStream.ParseF32(u8"\n");
+	String::OutStream << "Enter y: ";
+	mfmF64 y = String::InStream.ParseF64(u8"\n");
 
+	String::OutStream << x << " + " << y << " = " << (x + y) << "\n";
 	String::InStream.ReadUntil(nullptr, 0, u8"\n");
 
 	Magma::Framework::Terminate();

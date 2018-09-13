@@ -109,6 +109,17 @@ namespace Magma
 				void Print(T value);
 
 				/// <summary>
+				///		Prints a value.
+				/// </summary>
+				/// <param name="value">Value</param>
+				template <typename T>
+				inline HStream& operator<<(T value)
+				{
+					this->Print<T>(value);
+					return *this;
+				}
+
+				/// <summary>
 				///		Prints an unsigned 8 bit integer.
 				/// </summary>
 				/// <param name="value">Value</param>
