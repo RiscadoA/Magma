@@ -187,7 +187,7 @@ mfError mfsRead(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outS
 
 mfError mfsReadUntil(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize, const mfsUTF8CodeUnit * terminator)
 {
-	if (stream == NULL || terminator == NULL)
+	if (stream == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
 
 	if (data != NULL)
@@ -207,14 +207,18 @@ mfError mfsReadUntil(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 *
 	mfmU64 terminatorIndex = 0;
 	while (size < dataSize - 1)
 	{
-		if (terminator[terminatorIndex] == '\0')
+		if (terminator != NULL && terminator[terminatorIndex] == '\0')
 			break;
 
 		mfsUTF8CodeUnit chr;
 		err = mfsGetByte(stream, (mfmU8*)&chr);
+
+		if (terminator == NULL && (chr == ' ' || chr == '\t' || chr == '\n'))
+			break;
+
 		if (err == MF_ERROR_OKAY)
 		{
-			if (chr == terminator[terminatorIndex])
+			if (terminator != NULL && chr == terminator[terminatorIndex])
 				++terminatorIndex;
 			else
 			{
@@ -228,7 +232,7 @@ mfError mfsReadUntil(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 *
 
 				terminatorIndex = 0;
 
-				if (chr == terminator[terminatorIndex])
+				if (terminator != NULL && chr == terminator[terminatorIndex])
 					++terminatorIndex;
 				else if (data != NULL)
 				{

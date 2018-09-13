@@ -83,9 +83,9 @@ namespace Magma
 				/// <summary>
 				///		Reads a string from a stream until a terminator string is found.
 				/// </summary>
-				/// <param name="data">Output string pointer</param>
+				/// <param name="data">Output string pointer (optional, can be NULL)</param>
 				/// <param name="maxSize">Max string size in bytes (including null terminator)</param>
-				/// <param name="terminator">Terminator string</param>
+				/// <param name="terminator">Terminator string (if NULL, reads until a whitespace is found)</param>
 				/// <returns>The size of the string read in bytes (including null terminator)</returns>
 				mfmU64 ReadUntil(mfsUTF8CodeUnit* data, mfmU64 maxSize, const mfsUTF8CodeUnit* terminator);
 
@@ -116,6 +116,24 @@ namespace Magma
 				inline HStream& operator<<(T value)
 				{
 					this->Print<T>(value);
+					return *this;
+				}
+
+				/// <summary>
+				///		Parses a value from the stream.
+				/// </summary>
+				/// <param name="value">Out value</param>
+				template <typename T>
+				void Parse(T& value);
+
+				/// <summary>
+				///		Parses a value from the stream.
+				/// </summary>
+				/// <param name="value">Value</param>
+				template <typename T>
+				inline HStream& operator>>(T& value)
+				{
+					this->Parse<T>(value);
 					return *this;
 				}
 
@@ -303,6 +321,30 @@ namespace Magma
 			inline void HStream::Print<mfsUTF8CodeUnit>(mfsUTF8CodeUnit value) { this->PutByte(value); }
 			template<>
 			inline void HStream::Print<const mfsUTF8CodeUnit*>(const mfsUTF8CodeUnit* value) { this->PutString(value); }
+
+			template<typename T>
+			inline void HStream::Parse(T & value) { static_assert(false); /* UNSUPPORTED TYPE */ };
+
+			template<>
+			inline void HStream::Parse<mfmU8>(mfmU8& value) { value = this->ParseU8(NULL); }
+			template<>
+			inline void HStream::Parse<mfmU16>(mfmU16& value) { value = this->ParseU16(NULL); }
+			template<>
+			inline void HStream::Parse<mfmU32>(mfmU32& value) { value = this->ParseU32(NULL); }
+			template<>
+			inline void HStream::Parse<mfmU64>(mfmU64& value) { value = this->ParseU64(NULL); }
+			template<>
+			inline void HStream::Parse<mfmI8>(mfmI8& value) { value = this->ParseI8(NULL); }
+			template<>
+			inline void HStream::Parse<mfmI16>(mfmI16& value) { value = this->ParseI16(NULL); }
+			template<>
+			inline void HStream::Parse<mfmI32>(mfmI32& value) { value = this->ParseI32(NULL); }
+			template<>
+			inline void HStream::Parse<mfmI64>(mfmI64& value) { value = this->ParseI64(NULL); }
+			template<>
+			inline void HStream::Parse<mfmF32>(mfmF32& value) { value = this->ParseF32(NULL); }
+			template<>
+			inline void HStream::Parse<mfmF64>(mfmF64& value) { value = this->ParseF64(NULL); }
 		}
 	}
 }

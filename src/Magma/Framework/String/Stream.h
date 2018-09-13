@@ -91,13 +91,13 @@ extern "C"
 	///		Reads raw data from a stream until a certain character sequence is found or the buffer is filled.
 	/// </summary>
 	/// <param name="stream">Stream handle</param>
-	/// <param name="data">Pointer to data</param>
+	/// <param name="data">Pointer to data (optional, can be NULL)</param>
 	/// <param name="dataSize">Max data size to read</param>
 	/// <param name="outSize">Size of the data that was read (optional, can be NULL)</param>
-	/// <param name="terminator">Terminating character sequence</param>
+	/// <param name="terminator">Terminating character sequence (if NULL, reads until whitespace)</param>
 	/// <returns>
 	///		MF_ERROR_OKAY if there were no errors.
-	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL or data is NULL.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NUL.
 	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
