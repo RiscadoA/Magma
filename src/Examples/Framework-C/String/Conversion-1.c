@@ -3,6 +3,7 @@
 #include <Magma/Framework/String/Conversion.h>
 #include <Magma/Framework/String/Stream.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 int main(int argc, const char** argv)
@@ -14,18 +15,18 @@ int main(int argc, const char** argv)
 
 	char buf[256] = { '\0' };
 
-	err = mfsPrintToBufferU64(buf, sizeof(buf), 0xffff'ffff'ffff'ffff, 16, NULL);
+	err = mfsPrintToBufferF64(buf, sizeof(buf), 200.0005, 10, 4, NULL);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	mfmU64 out;
-	err = mfsParseFromBufferU64(buf, sizeof(buf), &out, 16, NULL);
+	mfmF64 out;
+	err = mfsParseFromBufferF64(buf, sizeof(buf), &out, 10, NULL);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
 	memset(buf, 0, sizeof(buf));
 
-	err = mfsPrintToBufferU64(buf, sizeof(buf), out, 10, NULL);
+	err = mfsPrintToBufferF64(buf, sizeof(buf), out, 10, 4, NULL);
 	if (err != MF_ERROR_OKAY)
 		abort();
 

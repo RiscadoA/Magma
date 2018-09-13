@@ -9,11 +9,11 @@ int main(int argc, const char** argv)
 		abort();
 
 	mfError err;
-
+	
 	err = mfsPrintFormat(mfsOutStream, u8"Hello World!\n%d + %d = %f", 2, 3, 2.0f + 3.0f);
 	if (err != MF_ERROR_OKAY)
 		abort();
-
+	
 	err = mfsGetByte(mfsInStream, NULL);
 	if (err != MF_ERROR_OKAY)
 		abort();
