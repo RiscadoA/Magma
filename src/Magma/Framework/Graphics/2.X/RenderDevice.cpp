@@ -23,7 +23,7 @@
 #define CHECK_ERROR(err) do {} while(false)
 #endif
 
-void * Magma::Framework::Graphics::V2X::VertexShader::GetBindingPoint(const mfsUTF8CodeUnit * name)
+void * Magma::Framework::Graphics::V2X::HVertexShader::GetBindingPoint(const mfsUTF8CodeUnit * name)
 {
 	auto vs = (mfgV2XVertexShader*)&this->Get();
 	mfgV2XBindingPoint* bp = NULL;
@@ -33,7 +33,7 @@ void * Magma::Framework::Graphics::V2X::VertexShader::GetBindingPoint(const mfsU
 	return bp;
 }
 
-void * Magma::Framework::Graphics::V2X::PixelShader::GetBindingPoint(const mfsUTF8CodeUnit * name)
+void * Magma::Framework::Graphics::V2X::HPixelShader::GetBindingPoint(const mfsUTF8CodeUnit * name)
 {
 	auto ps = (mfgV2XPixelShader*)&this->Get();
 	mfgV2XBindingPoint* bp = NULL;
@@ -43,7 +43,7 @@ void * Magma::Framework::Graphics::V2X::PixelShader::GetBindingPoint(const mfsUT
 	return bp;
 }
 
-void * Magma::Framework::Graphics::V2X::ConstantBuffer::Map()
+void * Magma::Framework::Graphics::V2X::HConstantBuffer::Map()
 {
 	auto cb = (mfgV2XConstantBuffer*)&this->Get();
 	void* mem;
@@ -52,56 +52,56 @@ void * Magma::Framework::Graphics::V2X::ConstantBuffer::Map()
 	return mem;
 }
 
-void Magma::Framework::Graphics::V2X::ConstantBuffer::Unmap()
+void Magma::Framework::Graphics::V2X::HConstantBuffer::Unmap()
 {
 	auto cb = (mfgV2XConstantBuffer*)&this->Get();
 	mfError err = mfgV2XUnmapConstantBuffer(cb->renderDevice, cb);
 	CHECK_ERROR(cb->renderDevice, err);
 }
 
-void Magma::Framework::Graphics::V2X::Texture1D::Update(mfmU32 dstX, mfmU32 width, const void * data)
+void Magma::Framework::Graphics::V2X::HTexture1D::Update(mfmU32 dstX, mfmU32 width, const void * data)
 {
 	auto tex = (mfgV2XTexture1D*)&this->Get();
 	mfError err = mfgV2XUpdateTexture1D(tex->renderDevice, tex, dstX, width, data);
 	CHECK_ERROR(tex->renderDevice, err);
 }
 
-void Magma::Framework::Graphics::V2X::Texture1D::GenerateMipmaps()
+void Magma::Framework::Graphics::V2X::HTexture1D::GenerateMipmaps()
 {
 	auto tex = (mfgV2XTexture1D*)&this->Get();
 	mfError err = mfgV2XGenerateTexture1DMipmaps(tex->renderDevice, tex);
 	CHECK_ERROR(tex->renderDevice, err);
 }
 
-void Magma::Framework::Graphics::V2X::Texture2D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void * data)
+void Magma::Framework::Graphics::V2X::HTexture2D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 width, mfmU32 height, const void * data)
 {
 	auto tex = (mfgV2XTexture2D*)&this->Get();
 	mfError err = mfgV2XUpdateTexture2D(tex->renderDevice, tex, dstX, dstY, width, height, data);
 	CHECK_ERROR(tex->renderDevice, err);
 }
 
-void Magma::Framework::Graphics::V2X::Texture2D::GenerateMipmaps()
+void Magma::Framework::Graphics::V2X::HTexture2D::GenerateMipmaps()
 {
 	auto tex = (mfgV2XTexture2D*)&this->Get();
 	mfError err = mfgV2XGenerateTexture2DMipmaps(tex->renderDevice, tex);
 	CHECK_ERROR(tex->renderDevice, err);
 }
 
-void Magma::Framework::Graphics::V2X::Texture3D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void * data)
+void Magma::Framework::Graphics::V2X::HTexture3D::Update(mfmU32 dstX, mfmU32 dstY, mfmU32 dstZ, mfmU32 width, mfmU32 height, mfmU32 depth, const void * data)
 {
 	auto tex = (mfgV2XTexture3D*)&this->Get();
 	mfError err = mfgV2XUpdateTexture3D(tex->renderDevice, tex, dstX, dstY, dstZ, width, height, depth, data);
 	CHECK_ERROR(tex->renderDevice, err);
 }
 
-void Magma::Framework::Graphics::V2X::Texture3D::GenerateMipmaps()
+void Magma::Framework::Graphics::V2X::HTexture3D::GenerateMipmaps()
 {
 	auto tex = (mfgV2XTexture3D*)&this->Get();
 	mfError err = mfgV2XGenerateTexture3DMipmaps(tex->renderDevice, tex);
 	CHECK_ERROR(tex->renderDevice, err);
 }
 
-void * Magma::Framework::Graphics::V2X::VertexBuffer::Map()
+void * Magma::Framework::Graphics::V2X::HVertexBuffer::Map()
 {
 	auto vb = (mfgV2XVertexBuffer*)&this->Get();
 	void* mem;
@@ -110,14 +110,14 @@ void * Magma::Framework::Graphics::V2X::VertexBuffer::Map()
 	return mem;
 }
 
-void Magma::Framework::Graphics::V2X::VertexBuffer::Unmap()
+void Magma::Framework::Graphics::V2X::HVertexBuffer::Unmap()
 {
 	auto vb = (mfgV2XVertexBuffer*)&this->Get();
 	mfError err = mfgV2XUnmapVertexBuffer(vb->renderDevice, vb);
 	CHECK_ERROR(vb->renderDevice, err);
 }
 
-void * Magma::Framework::Graphics::V2X::IndexBuffer::Map()
+void * Magma::Framework::Graphics::V2X::HIndexBuffer::Map()
 {
 	auto ib = (mfgV2XIndexBuffer*)&this->Get();
 	void* mem;
@@ -126,14 +126,14 @@ void * Magma::Framework::Graphics::V2X::IndexBuffer::Map()
 	return mem;
 }
 
-void Magma::Framework::Graphics::V2X::IndexBuffer::Unmap()
+void Magma::Framework::Graphics::V2X::HIndexBuffer::Unmap()
 {
 	auto ib = (mfgV2XIndexBuffer*)&this->Get();
 	mfError err = mfgV2XUnmapIndexBuffer(ib->renderDevice, ib);
 	CHECK_ERROR(ib->renderDevice, err);
 }
 
-Magma::Framework::Graphics::V2X::VertexShader Magma::Framework::Graphics::V2X::RenderDevice::CreateVertexShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData)
+Magma::Framework::Graphics::V2X::HVertexShader Magma::Framework::Graphics::V2X::HRenderDevice::CreateVertexShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, HMetaData metaData)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XVertexShader* vs = NULL;
@@ -142,7 +142,7 @@ Magma::Framework::Graphics::V2X::VertexShader Magma::Framework::Graphics::V2X::R
 	return vs;
 }
 
-Magma::Framework::Graphics::V2X::PixelShader Magma::Framework::Graphics::V2X::RenderDevice::CreatePixelShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, MetaDataHandle metaData)
+Magma::Framework::Graphics::V2X::HPixelShader Magma::Framework::Graphics::V2X::HRenderDevice::CreatePixelShader(const mfmU8 * bytecode, mfmU64 bytecodeSize, HMetaData metaData)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XVertexShader* ps = NULL;
@@ -151,7 +151,7 @@ Magma::Framework::Graphics::V2X::PixelShader Magma::Framework::Graphics::V2X::Re
 	return ps;
 }
 
-Magma::Framework::Graphics::V2X::Pipeline Magma::Framework::Graphics::V2X::RenderDevice::CreatePipeline(VertexShader vs, PixelShader ps)
+Magma::Framework::Graphics::V2X::HPipeline Magma::Framework::Graphics::V2X::HRenderDevice::CreatePipeline(HVertexShader vs, HPixelShader ps)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XPipeline* pp = NULL;
@@ -160,63 +160,63 @@ Magma::Framework::Graphics::V2X::Pipeline Magma::Framework::Graphics::V2X::Rende
 	return pp;
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SetPipeline(Pipeline pipeline)
+void Magma::Framework::Graphics::V2X::HRenderDevice::SetPipeline(HPipeline pipeline)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSetPipeline(rd, (mfgV2XPipeline*)pipeline.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::BindConstantBuffer(void * bp, ConstantBuffer cb)
+void Magma::Framework::Graphics::V2X::HRenderDevice::BindConstantBuffer(void * bp, HConstantBuffer cb)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XBindConstantBuffer(rd, (mfgV2XBindingPoint*)bp, (mfgV2XConstantBuffer*)&cb.Get());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::BindConstantBufferRange(void * bp, ConstantBuffer cb, mfmU64 offset, mfmU64 size)
+void Magma::Framework::Graphics::V2X::HRenderDevice::BindConstantBufferRange(void * bp, HConstantBuffer cb, mfmU64 offset, mfmU64 size)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XBindConstantBufferRange(rd, (mfgV2XBindingPoint*)bp, (mfgV2XConstantBuffer*)&cb.Get(), offset, size);
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::BindTexture1D(void * bp, Texture1D tex)
+void Magma::Framework::Graphics::V2X::HRenderDevice::BindTexture1D(void * bp, HTexture1D tex)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XBindTexture1D(rd, (mfgV2XBindingPoint*)bp, (mfgV2XTexture1D*)&tex.Get());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::BindTexture2D(void * bp, Texture2D tex)
+void Magma::Framework::Graphics::V2X::HRenderDevice::BindTexture2D(void * bp, HTexture2D tex)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XBindTexture2D(rd, (mfgV2XBindingPoint*)bp, (mfgV2XTexture2D*)tex.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::BindTexture3D(void * bp, Texture3D tex)
+void Magma::Framework::Graphics::V2X::HRenderDevice::BindTexture3D(void * bp, HTexture3D tex)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XBindTexture3D(rd, (mfgV2XBindingPoint*)bp, (mfgV2XTexture3D*)tex.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::BindRenderTexture(void * bp, RenderTexture tex)
+void Magma::Framework::Graphics::V2X::HRenderDevice::BindRenderTexture(void * bp, HRenderTexture tex)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XBindRenderTexture(rd, (mfgV2XBindingPoint*)bp, (mfgV2XRenderTexture*)tex.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::BindSampler(void * bp, Sampler sampler)
+void Magma::Framework::Graphics::V2X::HRenderDevice::BindSampler(void * bp, HSampler sampler)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XBindSampler(rd, (mfgV2XBindingPoint*)bp, (mfgV2XSampler*)sampler.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
-Magma::Framework::Graphics::V2X::ConstantBuffer Magma::Framework::Graphics::V2X::RenderDevice::CreateConstantBuffer(mfmU64 size, const void * data, Usage usage)
+Magma::Framework::Graphics::V2X::HConstantBuffer Magma::Framework::Graphics::V2X::HRenderDevice::CreateConstantBuffer(mfmU64 size, const void * data, Usage usage)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XConstantBuffer* cb = NULL;
@@ -225,7 +225,7 @@ Magma::Framework::Graphics::V2X::ConstantBuffer Magma::Framework::Graphics::V2X:
 	return cb;
 }
 
-Magma::Framework::Graphics::V2X::VertexBuffer Magma::Framework::Graphics::V2X::RenderDevice::CreateVertexBuffer(mfmU64 size, const void * data, Usage usage)
+Magma::Framework::Graphics::V2X::HVertexBuffer Magma::Framework::Graphics::V2X::HRenderDevice::CreateVertexBuffer(mfmU64 size, const void * data, Usage usage)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XVertexBuffer* vb = NULL;
@@ -234,7 +234,7 @@ Magma::Framework::Graphics::V2X::VertexBuffer Magma::Framework::Graphics::V2X::R
 	return vb;
 }
 
-Magma::Framework::Graphics::V2X::VertexLayout Magma::Framework::Graphics::V2X::RenderDevice::CreateVertexLayout(mfmU64 elementCount, const VertexElement * elements, VertexShader vs)
+Magma::Framework::Graphics::V2X::HVertexLayout Magma::Framework::Graphics::V2X::HRenderDevice::CreateVertexLayout(mfmU64 elementCount, const VertexElement * elements, HVertexShader vs)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 
@@ -255,7 +255,7 @@ Magma::Framework::Graphics::V2X::VertexLayout Magma::Framework::Graphics::V2X::R
 	return vl;
 }
 
-Magma::Framework::Graphics::V2X::VertexArray Magma::Framework::Graphics::V2X::RenderDevice::CreateVertexArray(mfmU64 bufferCount, VertexBuffer * buffers, VertexLayout layout)
+Magma::Framework::Graphics::V2X::HVertexArray Magma::Framework::Graphics::V2X::HRenderDevice::CreateVertexArray(mfmU64 bufferCount, HVertexBuffer * buffers, HVertexLayout layout)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 
@@ -269,14 +269,14 @@ Magma::Framework::Graphics::V2X::VertexArray Magma::Framework::Graphics::V2X::Re
 	return va;
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SetVertexArray(VertexArray va)
+void Magma::Framework::Graphics::V2X::HRenderDevice::SetVertexArray(HVertexArray va)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSetVertexArray(rd, (mfgV2XVertexArray*)va.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
-Magma::Framework::Graphics::V2X::IndexBuffer Magma::Framework::Graphics::V2X::RenderDevice::CreateIndexBuffer(mfmU64 size, const void * data, Type type, Usage usage)
+Magma::Framework::Graphics::V2X::HIndexBuffer Magma::Framework::Graphics::V2X::HRenderDevice::CreateIndexBuffer(mfmU64 size, const void * data, Type type, Usage usage)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XIndexBuffer* ib = NULL;
@@ -285,14 +285,14 @@ Magma::Framework::Graphics::V2X::IndexBuffer Magma::Framework::Graphics::V2X::Re
 	return ib;
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SetIndexBuffer(IndexBuffer ib)
+void Magma::Framework::Graphics::V2X::HRenderDevice::SetIndexBuffer(HIndexBuffer ib)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSetIndexBuffer(rd, (mfgV2XIndexBuffer*)ib.GetNoChecks());
 	CHECK_ERROR(rd, err);
 }
 
-Magma::Framework::Graphics::V2X::Texture1D Magma::Framework::Graphics::V2X::RenderDevice::CreateTexture1D(mfmU64 width, Format format, const void * data, Usage usage)
+Magma::Framework::Graphics::V2X::HTexture1D Magma::Framework::Graphics::V2X::HRenderDevice::CreateTexture1D(mfmU64 width, Format format, const void * data, Usage usage)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XTexture1D* tex = NULL;
@@ -301,7 +301,7 @@ Magma::Framework::Graphics::V2X::Texture1D Magma::Framework::Graphics::V2X::Rend
 	return tex;
 }
 
-Magma::Framework::Graphics::V2X::Texture2D Magma::Framework::Graphics::V2X::RenderDevice::CreateTexture2D(mfmU64 width, mfmU64 height, Format format, const void * data, Usage usage)
+Magma::Framework::Graphics::V2X::HTexture2D Magma::Framework::Graphics::V2X::HRenderDevice::CreateTexture2D(mfmU64 width, mfmU64 height, Format format, const void * data, Usage usage)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XTexture2D* tex = NULL;
@@ -310,7 +310,7 @@ Magma::Framework::Graphics::V2X::Texture2D Magma::Framework::Graphics::V2X::Rend
 	return tex;
 }
 
-Magma::Framework::Graphics::V2X::Texture3D Magma::Framework::Graphics::V2X::RenderDevice::CreateTexture3D(mfmU64 width, mfmU64 height, mfmU64 depth, Format format, const void * data, Usage usage)
+Magma::Framework::Graphics::V2X::HTexture3D Magma::Framework::Graphics::V2X::HRenderDevice::CreateTexture3D(mfmU64 width, mfmU64 height, mfmU64 depth, Format format, const void * data, Usage usage)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XTexture3D* tex = NULL;
@@ -319,7 +319,7 @@ Magma::Framework::Graphics::V2X::Texture3D Magma::Framework::Graphics::V2X::Rend
 	return tex;
 }
 
-Magma::Framework::Graphics::V2X::Sampler Magma::Framework::Graphics::V2X::RenderDevice::CreateSampler(const SamplerDesc & desc)
+Magma::Framework::Graphics::V2X::HSampler Magma::Framework::Graphics::V2X::HRenderDevice::CreateSampler(const SamplerDesc & desc)
 {
 	mfgV2XSamplerDesc c_desc;
 
@@ -342,7 +342,7 @@ Magma::Framework::Graphics::V2X::Sampler Magma::Framework::Graphics::V2X::Render
 	return sampler;
 }
 
-Magma::Framework::Graphics::V2X::RasterState Magma::Framework::Graphics::V2X::RenderDevice::CreateRasterState(const RasterStateDesc & desc)
+Magma::Framework::Graphics::V2X::HRasterState Magma::Framework::Graphics::V2X::HRenderDevice::CreateRasterState(const RasterStateDesc & desc)
 {
 	mfgV2XRasterStateDesc c_desc;
 
@@ -358,7 +358,7 @@ Magma::Framework::Graphics::V2X::RasterState Magma::Framework::Graphics::V2X::Re
 	return state;
 }
 
-Magma::Framework::Graphics::V2X::DepthStencilState Magma::Framework::Graphics::V2X::RenderDevice::CreateDepthStencilState(const DepthStencilStateDesc & desc)
+Magma::Framework::Graphics::V2X::HDepthStencilState Magma::Framework::Graphics::V2X::HRenderDevice::CreateDepthStencilState(const DepthStencilStateDesc & desc)
 {
 	mfgV2XDepthStencilStateDesc c_desc;
 
@@ -390,7 +390,7 @@ Magma::Framework::Graphics::V2X::DepthStencilState Magma::Framework::Graphics::V
 	return state;
 }
 
-Magma::Framework::Graphics::V2X::BlendState Magma::Framework::Graphics::V2X::RenderDevice::CreateBlendState(const BlendStateDesc & desc)
+Magma::Framework::Graphics::V2X::HBlendState Magma::Framework::Graphics::V2X::HRenderDevice::CreateBlendState(const BlendStateDesc & desc)
 {
 	mfgV2XBlendStateDesc c_desc;
 
@@ -409,28 +409,28 @@ Magma::Framework::Graphics::V2X::BlendState Magma::Framework::Graphics::V2X::Ren
 	return state;
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SetRasterState(RasterState state)
+void Magma::Framework::Graphics::V2X::HRenderDevice::SetRasterState(HRasterState state)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSetRasterState(rd, (mfgV2XRasterState*)&state.Get());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SetDepthStencilState(DepthStencilState state)
+void Magma::Framework::Graphics::V2X::HRenderDevice::SetDepthStencilState(HDepthStencilState state)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSetDepthStencilState(rd, (mfgV2XDepthStencilState*)&state.Get());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SetBlendState(BlendState state)
+void Magma::Framework::Graphics::V2X::HRenderDevice::SetBlendState(HBlendState state)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSetBlendState(rd, (mfgV2XBlendState*)&state.Get());
 	CHECK_ERROR(rd, err);
 }
 
-Magma::Framework::Graphics::V2X::RenderTexture Magma::Framework::Graphics::V2X::RenderDevice::CreateRenderTexture(mfmU64 width, mfmU64 height, Format format)
+Magma::Framework::Graphics::V2X::HRenderTexture Magma::Framework::Graphics::V2X::HRenderDevice::CreateRenderTexture(mfmU64 width, mfmU64 height, Format format)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XRenderTexture* tex = NULL;
@@ -439,7 +439,7 @@ Magma::Framework::Graphics::V2X::RenderTexture Magma::Framework::Graphics::V2X::
 	return tex;
 }
 
-Magma::Framework::Graphics::V2X::DepthStencilTexture Magma::Framework::Graphics::V2X::RenderDevice::CreateDepthStencilTexture(mfmU64 width, mfmU64 height, Format format)
+Magma::Framework::Graphics::V2X::HDepthStencilTexture Magma::Framework::Graphics::V2X::HRenderDevice::CreateDepthStencilTexture(mfmU64 width, mfmU64 height, Format format)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfgV2XDepthStencilTexture* tex = NULL;
@@ -448,7 +448,7 @@ Magma::Framework::Graphics::V2X::DepthStencilTexture Magma::Framework::Graphics:
 	return tex;
 }
 
-Magma::Framework::Graphics::V2X::Framebuffer Magma::Framework::Graphics::V2X::RenderDevice::CreateFramebuffer(mfmU64 textureCount, RenderTexture * textures, DepthStencilTexture depthStencilTexture)
+Magma::Framework::Graphics::V2X::HFramebuffer Magma::Framework::Graphics::V2X::HRenderDevice::CreateFramebuffer(mfmU64 textureCount, HRenderTexture * textures, HDepthStencilTexture depthStencilTexture)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 
@@ -462,56 +462,56 @@ Magma::Framework::Graphics::V2X::Framebuffer Magma::Framework::Graphics::V2X::Re
 	return fb;
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SetFramebuffer(Framebuffer framebuffer)
+void Magma::Framework::Graphics::V2X::HRenderDevice::SetFramebuffer(HFramebuffer framebuffer)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSetFramebuffer(rd, (mfgV2XFramebuffer*)&framebuffer.Get());
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::ClearColor(mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a)
+void Magma::Framework::Graphics::V2X::HRenderDevice::ClearColor(mfmF32 r, mfmF32 g, mfmF32 b, mfmF32 a)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XClearColor(rd, r, g, b, a);
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::ClearDepth(mfmF32 depth)
+void Magma::Framework::Graphics::V2X::HRenderDevice::ClearDepth(mfmF32 depth)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XClearDepth(rd, depth);
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::ClearStencil(mfmI32 stencil)
+void Magma::Framework::Graphics::V2X::HRenderDevice::ClearStencil(mfmI32 stencil)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XClearStencil(rd, stencil);
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::DrawTriangles(mfmU64 offset, mfmU64 count)
+void Magma::Framework::Graphics::V2X::HRenderDevice::DrawTriangles(mfmU64 offset, mfmU64 count)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XDrawTriangles(rd, offset, count);
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::DrawTrianglesIndexed(mfmU64 offset, mfmU64 count)
+void Magma::Framework::Graphics::V2X::HRenderDevice::DrawTrianglesIndexed(mfmU64 offset, mfmU64 count)
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XDrawTrianglesIndexed(rd, offset, count);
 	CHECK_ERROR(rd, err);
 }
 
-void Magma::Framework::Graphics::V2X::RenderDevice::SwapBuffers()
+void Magma::Framework::Graphics::V2X::HRenderDevice::SwapBuffers()
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 	mfError err = mfgV2XSwapBuffers(rd);
 	CHECK_ERROR(rd, err);
 }
 
-Magma::Framework::Graphics::V2X::RenderDevice Magma::Framework::Graphics::V2X::CreateRenderDevice(const mfsUTF8CodeUnit * type, Input::WindowHandle window, const RenderDeviceDesc * desc, Memory::AllocatorHandle allocator)
+Magma::Framework::Graphics::V2X::HRenderDevice Magma::Framework::Graphics::V2X::CreateRenderDevice(const mfsUTF8CodeUnit * type, Input::HWindow window, const RenderDeviceDesc * desc, Memory::HAllocator allocator)
 {
 	if (desc == NULL)
 		throw RenderDeviceError("Failed to create render device:\nThe render device description pointer is NULL");

@@ -20,12 +20,12 @@ namespace Magma
 			///		Used as a window handle.
 			///		Destroys the window automatically when there are no more references to it.
 			/// </summary>
-			class WindowHandle : public Memory::Handle
+			class HWindow : public Memory::Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				inline WindowHandle(const Memory::Handle& object) : Memory::Handle(object) {}
+				inline HWindow(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Polls events from this window.
@@ -135,7 +135,7 @@ namespace Magma
 			/// <param name="mode">WindowHandle mode</param>
 			/// <param name="title">WindowHandle title</param>
 			/// <returns>WindowHandle handle</returns>
-			WindowHandle CreateWindow(const mfsUTF8CodeUnit* type, mfmU32 width, mfmU32 height, WindowMode mode, const mfsUTF8CodeUnit* title);
+			HWindow CreateWindow(const mfsUTF8CodeUnit* type, mfmU32 width, mfmU32 height, WindowMode mode, const mfsUTF8CodeUnit* title);
 		}
 	}
 }

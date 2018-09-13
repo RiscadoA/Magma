@@ -14,8 +14,8 @@ int run()
 {
 	auto rd = Audio::CreateRenderDevice(NULL, Memory::StandardAllocator);
 
-	Audio::Buffer buf = NULL;
-	Audio::Source src = rd.CreateSource();
+	Audio::HBuffer buf = NULL;
+	Audio::HSource src = rd.CreateSource();
 
 	// Create audio buffer
 	{

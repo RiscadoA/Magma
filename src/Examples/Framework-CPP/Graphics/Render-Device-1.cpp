@@ -59,10 +59,10 @@ const mfsUTF8CodeUnit* psSource = u8R"(
 
 int run()
 {
-	Input::WindowHandle win = Input::CreateWindow("ogl", 800, 600, Input::WindowMode::Windowed, u8"Window");
+	Input::HWindow win = Input::CreateWindow("ogl", 800, 600, Input::WindowMode::Windowed, u8"Window");
 	win.SetOnCloseCallback(OnWindowClose);
 
-	Graphics::V2X::RenderDevice rd = NULL;
+	Graphics::V2X::HRenderDevice rd = NULL;
 
 	try
 	{
@@ -76,17 +76,17 @@ int run()
 		return 1;
 	}
 
-	Graphics::V2X::Pipeline pipeline = NULL;
-	Graphics::V2X::VertexArray va = NULL;
-	Graphics::V2X::Texture2D tex = NULL;
-	Graphics::V2X::Sampler sampler = NULL;
+	Graphics::V2X::HPipeline pipeline = NULL;
+	Graphics::V2X::HVertexArray va = NULL;
+	Graphics::V2X::HTexture2D tex = NULL;
+	Graphics::V2X::HSampler sampler = NULL;
 	void* texBP;
 
 	// Init render device objects
 	try
 	{
-		Graphics::V2X::VertexShader vs = NULL;
-		Graphics::V2X::PixelShader ps = NULL;
+		Graphics::V2X::HVertexShader vs = NULL;
+		Graphics::V2X::HPixelShader ps = NULL;
 
 		// Create pipeline
 		{
@@ -96,7 +96,7 @@ int run()
 				mfmU64 bBcSize;
 				mfmU8 bMd[512];
 				mfmU64 bMdSize;
-				Graphics::V2X::MetaDataHandle md = NULL;
+				Graphics::V2X::HMetaData md = NULL;
 
 				Graphics::V2X::MSL::Compile(vsSource, bBc, sizeof(bBc), &bBcSize, bMd, sizeof(bMd), &bMdSize, Graphics::V2X::MSL::ShaderType::Vertex);
 				md = Graphics::V2X::LoadMetaData(bMd, bMdSize);
@@ -109,7 +109,7 @@ int run()
 				mfmU64 bBcSize;
 				mfmU8 bMd[512];
 				mfmU64 bMdSize;
-				Graphics::V2X::MetaDataHandle md = NULL;
+				Graphics::V2X::HMetaData md = NULL;
 
 				Graphics::V2X::MSL::Compile(psSource, bBc, sizeof(bBc), &bBcSize, bMd, sizeof(bMd), &bMdSize, Graphics::V2X::MSL::ShaderType::Pixel);
 				md = Graphics::V2X::LoadMetaData(bMd, bMdSize);
@@ -121,8 +121,8 @@ int run()
 
 		// Create vertex array
 		{
-			Graphics::V2X::VertexBuffer buf = NULL;
-			Graphics::V2X::VertexLayout layout = NULL;
+			Graphics::V2X::HVertexBuffer buf = NULL;
+			Graphics::V2X::HVertexLayout layout = NULL;
 
 			// Create vertex buffer
 			{

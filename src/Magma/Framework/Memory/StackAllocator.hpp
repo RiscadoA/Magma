@@ -13,10 +13,10 @@ namespace Magma
 			/// <summary>
 			///		Encapsulates the magma framework C stack allocator declared on StackAllocatorHandle.h.
 			/// </summary>
-			class StackAllocatorHandle final : public AllocatorHandle
+			class StackAllocatorHandle final : public HAllocator
 			{
 			public:
-				using AllocatorHandle::AllocatorHandle;
+				using HAllocator::HAllocator;
 			};
 
 			/// <summary>

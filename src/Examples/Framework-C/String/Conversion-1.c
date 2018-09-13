@@ -1,7 +1,10 @@
 ﻿#include <Magma/Framework/Entry.h>
 #include <Magma/Framework/String/UTF8.h>
+#include <Magma/Framework/String/Conversion.h>
 #include <Magma/Framework/String/Stream.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 int main(int argc, const char** argv)
 {
@@ -9,17 +12,25 @@ int main(int argc, const char** argv)
 		abort();
 
 	mfError err;
-	
-	err = mfsPrintFormat(mfsOutStream, u8"Hello World!\n0x%%-bhi + %%u = %%-d1f\n", 'a', 16u, 32.0f + 16.0f);
-	if (err != MF_ERROR_OKAY)
-		abort();
-	
-	mfmF32 f32 = 0.0f;
-	err = mfsParseF32(mfsInStream, &f32, 10, u8"\n");
+
+	char buf[256] = { '\0' };
+
+	err = mfsPrintToBufferF64(buf, sizeof(buf), 200.0005, 10, 4, NULL);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mfsPrintFormat(mfsOutStream, u8"Parsed float from input: %%f\n", f32);
+	mfmF64 out;
+	err = mfsParseFromBufferF64(buf, sizeof(buf), &out, 10, NULL);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	memset(buf, 0, sizeof(buf));
+
+	err = mfsPrintToBufferF64(buf, sizeof(buf), out, 10, 4, NULL);
+	if (err != MF_ERROR_OKAY)
+		abort();
+
+	err = mfsPutString(mfsOutStream, buf);
 	if (err != MF_ERROR_OKAY)
 		abort();
 

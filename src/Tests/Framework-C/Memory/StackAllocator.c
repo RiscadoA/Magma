@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 		TEST_REQUIRE_FAIL(mfmAllocate(stack, &v1, sizeof(mfmU8) * 2) == MF_ERROR_OKAY);
 		TEST_REQUIRE_PASS(mfmAllocate(stack, &v2, sizeof(mfmU8) * 1) == MF_ERROR_OKAY);
 		TEST_REQUIRE_FAIL(mfmDeallocate(stack, v1) == MF_ERROR_OKAY);
-		TEST_REQUIRE_PASS(mfmDeallocate(stack, v0) == MF_ERROR_OKAY);
+		TEST_REQUIRE_PASS(mfmStackSetHead(stack, v0) == MF_ERROR_OKAY);
 		TEST_REQUIRE_PASS(mfmAllocate(stack, &v1, sizeof(mfmU8) * 3) == MF_ERROR_OKAY);
 
 		mfmDestroyStackAllocator(stack);

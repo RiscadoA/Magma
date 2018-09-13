@@ -15,8 +15,7 @@ extern "C"
 	{
 		mfsStream base;
 		void* allocator;
-		mfmU64 writeHead;
-		mfmU64 readHead;
+		mfmU64 head;
 	} mfsStringStream;
 
 	/// <summary>

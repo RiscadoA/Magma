@@ -1,5 +1,6 @@
 #include "RenderDevice.h"
 #include <string.h>
+#include <stdlib.h>
 
 struct
 {
@@ -77,7 +78,7 @@ mfError mfaCreateBuffer(mfaRenderDevice * rd, mfaBuffer ** buf, const void * dat
 void mfaDestroyBuffer(void * buf)
 {
 	if (buf == NULL)
-		return MFA_ERROR_INVALID_ARGUMENTS;
+		abort();
 	((mfmObject*)buf)->destructorFunc(buf);
 }
 
@@ -98,7 +99,7 @@ mfError mfaCreateSource(mfaRenderDevice * rd, mfaSource ** source)
 void mfaDestroySource(void * source)
 {
 	if (source == NULL)
-		return MFA_ERROR_INVALID_ARGUMENTS;
+		abort();
 	((mfmObject*)source)->destructorFunc(source);
 }
 

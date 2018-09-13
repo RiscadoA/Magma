@@ -61,7 +61,7 @@ static void mfiWindowMouseLeaveCallback(void* window)
 	reinterpret_cast<Magma::Framework::Input::D3DWindow*>(win->userAttribute)->OnMouseLeave.Fire();
 }
 
-Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, WindowHandle::Mode mode)
+Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, HWindow::Mode mode)
 {
 	m_window = nullptr;
 	auto err = mfiCreateD3DWindow(&m_window, width, height, (mfiEnum)mode, title);
@@ -104,7 +104,7 @@ void Magma::Framework::Input::D3DWindow::WaitForEvents()
 
 #else
 
-Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, WindowHandle::Mode mode)
+Magma::Framework::Input::D3DWindow::D3DWindow(mfmU32 width, mfmU32 height, const String::UTF8CodeUnit* title, HWindow::Mode mode)
 {
 	throw WindowError("Failed to construct D3DWindow: the project wasn't built for Windows (MAGMA_FRAMEWORK_WINDOWS_ENTRY_POINT must be defined)");
 }

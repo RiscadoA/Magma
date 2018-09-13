@@ -8,12 +8,12 @@ int main(int argc, const char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 
-	File::ArchiveHandle archive = NULL;
+	File::HArchive archive = NULL;
 
 	// Create archive and register it
 	{
 		mfsUTF8CodeUnit path[256];
-		String::StreamHandle ss = String::CreateStringStream(path, sizeof(path));
+		String::HStream ss = String::CreateStringStream(path, sizeof(path));
 		ss.PutString(mffMagmaRootDirectory);
 		ss.PutString(u8"/resources/FileSystem-Example");
 		archive = File::CreateFolderArchive(path);
@@ -21,11 +21,11 @@ int main(int argc, const char** argv)
 	}
 
 	// Create directory
-	File::FileHandle dir = File::CreateDirectory(u8"/temp/dir");
+	File::HFile dir = File::CreateDirectory(u8"/temp/dir");
 
-	File::FileHandle file = File::CreateFile(u8"/temp/dir/test.txt");
+	File::HFile file = File::CreateFile(u8"/temp/dir/test.txt");
 	
-	String::StreamHandle stream = File::OpenFile(file, File::FileMode::Write);
+	String::HStream stream = File::OpenFile(file, File::FileMode::Write);
 	stream.PutString(u8"test\n");
 	stream.Release();
 	dir.Release();

@@ -3,7 +3,7 @@
 #include "Exception.hpp"
 #include "../ErrorString.h"
 
-Magma::Framework::File::ArchiveHandle Magma::Framework::File::CreateFolderArchive(const mfsUTF8CodeUnit* path, Memory::AllocatorHandle allocator)
+Magma::Framework::File::HArchive Magma::Framework::File::CreateFolderArchive(const mfsUTF8CodeUnit* path, Memory::HAllocator allocator)
 {
 	mffArchive* archive = NULL;
 	mfError err;

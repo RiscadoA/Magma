@@ -27,12 +27,12 @@ namespace Magma
 			///		Used as a buffer handle.
 			///		Destroys the buffer automatically when there are no more references to it.
 			/// </summary>
-			class Buffer : public Memory::Handle
+			class HBuffer : public Memory::Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				explicit inline Buffer(const Memory::Handle& object) : Memory::Handle(object) {}
+				explicit inline HBuffer(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Updates a buffer's data.
@@ -48,12 +48,12 @@ namespace Magma
 			///		Used as a source handle.
 			///		Destroys the source automatically when there are no more references to it.
 			/// </summary>
-			class Source : public Memory::Handle
+			class HSource : public Memory::Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				explicit inline Source(const Memory::Handle& object) : Memory::Handle(object) {}
+				explicit inline HSource(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Plays audio on this source (asynchronously).
@@ -91,13 +91,13 @@ namespace Magma
 				///		Queues an audio buffer to later play on this source.
 				/// </summary>
 				/// <param name="buffer">Buffer handle</param>
-				void QueueBuffer(Buffer buffer);
+				void QueueBuffer(HBuffer buffer);
 
 				/// <summary>
 				///		Unqueues an audio buffer that was played by this source.
 				/// </summary>
 				/// <returns>Buffer handle</returns>
-				Buffer UnqueueBuffer();
+				HBuffer UnqueueBuffer();
 
 				/// <summary>
 				///		Sets the source position.
@@ -169,25 +169,25 @@ namespace Magma
 				///		Binds a buffer to this source.
 				/// </summary>
 				/// <param name="buffer">Buffer handle (set to NULL to unbind the current buffer)</param>
-				void Bind(Buffer buffer);
+				void Bind(HBuffer buffer);
 			};
 
 			/// <summary>
 			///		Used as a render device handle.
 			///		Destroys the render device automatically when there are no more references to it.
 			/// </summary>
-			class RenderDevice : public Memory::Handle
+			class HRenderDevice : public Memory::Handle
 			{
 			public:
 				using Handle::Handle;
 				using Handle::operator=;
-				explicit inline RenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
+				explicit inline HRenderDevice(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
 				///		Creates a new source object.
 				/// </summary>
 				/// <returns>New source object handle</returns>
-				Source CreateSource();
+				HSource CreateSource();
 
 				/// <summary>
 				///		Creates a new buffer object.
@@ -197,7 +197,7 @@ namespace Magma
 				/// <param name="format">Buffer data format</param>
 				/// <param name="frequency">Buffer data frequency</param>
 				/// <returns>New buffer object handle</returns>
-				Buffer CreateBuffer(const void* data, mfmU64 size, Format format, mfmU64 frequency);
+				HBuffer CreateBuffer(const void* data, mfmU64 size, Format format, mfmU64 frequency);
 
 				/// <summary>
 				///		Sets the listener gain.
@@ -239,7 +239,7 @@ namespace Magma
 			/// <param name="type">Render device type name</param>
 			/// <param name="allocator">Render device allocator</param>
 			/// <returns>Render device handle</returns>
-			RenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Memory::AllocatorHandle allocator);
+			HRenderDevice CreateRenderDevice(const mfsUTF8CodeUnit* type, Memory::HAllocator allocator);
 		}
 	}
 }
