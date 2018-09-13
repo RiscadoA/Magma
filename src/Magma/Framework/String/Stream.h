@@ -5,6 +5,8 @@
 #include "UTF8.h"
 #include "Error.h"
 
+#include <stdarg.h>
+
 /*
 	Stream and function declarations.
 */
@@ -169,8 +171,147 @@ extern "C"
 	/// </returns>
 	mfError mfsPutString(mfsStream* stream, const mfsUTF8CodeUnit* str);
 
+	/// <summary>
+	///		Prints an unsigned 8 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintU8(mfsStream* stream, mfmU8 value, mfmU64 base);
 
-	//mfError mfsPrintU8(mfsStream* stream, mfmU8 value);
+	/// <summary>
+	///		Prints an unsigned 16 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintU16(mfsStream* stream, mfmU16 value, mfmU64 base);
+
+	/// <summary>
+	///		Prints an unsigned 32 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintU32(mfsStream* stream, mfmU32 value, mfmU64 base);
+
+	/// <summary>
+	///		Prints an unsigned 64 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintU64(mfsStream* stream, mfmU64 value, mfmU64 base);
+
+	/// <summary>
+	///		Prints an signed 8 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintI8(mfsStream* stream, mfmI8 value, mfmU64 base);
+
+	/// <summary>
+	///		Prints an signed 16 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintI16(mfsStream* stream, mfmI16 value, mfmU64 base);
+
+	/// <summary>
+	///		Prints an signed 32 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintI32(mfsStream* stream, mfmI32 value, mfmU64 base);
+
+	/// <summary>
+	///		Prints an signed 64 bit integer to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintI64(mfsStream* stream, mfmI64 value, mfmU64 base);
+
+	/// <summary>
+	///		Prints a 32 bit floating point to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="decimalPlaces">How many decimal places should be shown</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintF32(mfsStream* stream, mfmF32 value, mfmU64 base, mfmU64 decimalPlaces);
+
+	/// <summary>
+	///		Prints a 64 bit floating point to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="decimalPlaces">How many decimal places should be shown</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintF64(mfsStream* stream, mfmF64 value, mfmU64 base, mfmU64 decimalPlaces);
 
 	/// <summary>
 	///		Prints a formatted UTF-8 string to a stream.
@@ -184,6 +325,20 @@ extern "C"
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
 	mfError mfsPrintFormat(mfsStream* stream, const mfsUTF8CodeUnit* format, ...);
+
+	/// <summary>
+	///		Prints a formatted UTF-8 string to a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="format">Format UTF-8 string</param>
+	/// <param name="list">Param list</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream or format are NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsPrintFormatList(mfsStream* stream, const mfsUTF8CodeUnit* format, va_list list);
 
 	/// <summary>
 	///		Seeks a position on a stream.
@@ -249,6 +404,156 @@ extern "C"
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
 	mfError mfsEOF(mfsStream* stream, mfmBool* eof);
+
+	/// <summary>
+	///		Parses an unsigned 8 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseU8(mfsStream* stream, mfmU8* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an unsigned 16 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseU16(mfsStream* stream, mfmU16* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an unsigned 32 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseU32(mfsStream* stream, mfmU32* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an unsigned 64 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseU64(mfsStream* stream, mfmU64* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an signed 8 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseI8(mfsStream* stream, mfmI8* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an signed 16 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseI16(mfsStream* stream, mfmI16* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an signed 32 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseI32(mfsStream* stream, mfmI32* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an signed 64 bit integer from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseI64(mfsStream* stream, mfmI64* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an 32 bit floating point from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseF32(mfsStream* stream, mfmF32* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
+
+	/// <summary>
+	///		Parses an 64 bit floating point from a stream.
+	/// </summary>
+	/// <param name="stream">Stream handle</param>
+	/// <param name="value">Out value</param>
+	/// <param name="base">Base (2-16)</param>
+	/// <param name="sep">String that separates input numbers</param>
+	/// <returns>
+	///		MF_ERROR_OKAY if there were no errors.
+	///		MFS_ERROR_INVALID_ARGUMENTS if stream is NULL.
+	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
+	///		Other error codes are returned by specific stream types.
+	/// </returns>
+	mfError mfsParseF64(mfsStream* stream, mfmF64* value, mfmU64 base, const mfsUTF8CodeUnit* sep);
 
 #ifdef __cplusplus
 }

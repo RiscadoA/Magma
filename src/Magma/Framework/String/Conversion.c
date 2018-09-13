@@ -1619,7 +1619,7 @@ mfError mfsParseFromBufferF32(const mfsUTF8CodeUnit * buffer, mfmU64 bufferSize,
 	// Integral part
 	for (;; ++index)
 	{
-		if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '.' || buffer[index] == '\0')
+		if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '.' || buffer[index] == '\0' || buffer[index] == 'E' || buffer[index] == 'e')
 			break;
 		else if (index >= bufferSize)
 			break;
@@ -1650,7 +1650,7 @@ mfError mfsParseFromBufferF32(const mfsUTF8CodeUnit * buffer, mfmU64 bufferSize,
 		++index;
 		for (;; ++index)
 		{
-			if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '\0')
+			if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '\0' || buffer[index] == 'E' || buffer[index] == 'e')
 			{
 				if (outSize != NULL)
 					*outSize = index;
@@ -1680,11 +1680,62 @@ mfError mfsParseFromBufferF32(const mfsUTF8CodeUnit * buffer, mfmU64 bufferSize,
 		}
 	}
 
-	if (outSize != NULL)
-		*outSize = index;
+	// Has exponent?
+	if (index < bufferSize && (buffer[index] == 'E' || buffer[index] == 'e'))
+	{
+		++index;
 
-	if (value != NULL)
-		*value = integral + fractional;
+		mfmI32 exponent = 0;
+		mfmBool isNegative = MFM_FALSE;
+		if (buffer[index] == '-')
+		{
+			isNegative = MFM_TRUE;
+			++index;
+		}
+
+		// Exponent part
+		for (;; ++index)
+		{
+			if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '\0')
+				break;
+			else if (index >= bufferSize)
+				break;
+
+			if (exponent <= MFM_I32_MAX / base)
+				exponent *= base;
+			else
+				return MFS_ERROR_NUMBER_TOO_BIG;
+
+			for (mfmU64 i = 0; i < base + 1; ++i)
+			{
+				if (i == base)
+					return MFS_ERROR_FAILED_TO_PARSE;
+				if (characters[i] == buffer[index])
+				{
+					if (MFM_I32_MAX - i < exponent)
+						return MFS_ERROR_NUMBER_TOO_BIG;
+					exponent += i;
+					break;
+				}
+			}
+		}
+
+		if (isNegative != MFM_FALSE)
+			exponent = -exponent;
+
+		if (outSize != NULL)
+			*outSize = index;
+		if (value != NULL)
+			*value = (integral + fractional) * pow(10, exponent);
+	}
+	// No exponent
+	else
+	{
+		if (outSize != NULL)
+			*outSize = index;
+		if (value != NULL)
+			*value = integral + fractional;
+	}
 
 	return MF_ERROR_OKAY;
 }
@@ -1714,7 +1765,7 @@ mfError mfsParseFromBufferF64(const mfsUTF8CodeUnit * buffer, mfmU64 bufferSize,
 	// Integral part
 	for (;; ++index)
 	{
-		if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '.' || buffer[index] == '\0')
+		if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '.' || buffer[index] == '\0' || buffer[index] == 'E' || buffer[index] == 'e')
 			break;
 		else if (index >= bufferSize)
 			break;
@@ -1745,7 +1796,7 @@ mfError mfsParseFromBufferF64(const mfsUTF8CodeUnit * buffer, mfmU64 bufferSize,
 		++index;
 		for (;; ++index)
 		{
-			if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '\0')
+			if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '\0' || buffer[index] == 'E' || buffer[index] == 'e')
 			{
 				if (outSize != NULL)
 					*outSize = index;
@@ -1775,11 +1826,62 @@ mfError mfsParseFromBufferF64(const mfsUTF8CodeUnit * buffer, mfmU64 bufferSize,
 		}
 	}
 
-	if (outSize != NULL)
-		*outSize = index;
+	// Has exponent?
+	if (index < bufferSize && (buffer[index] == 'E' || buffer[index] == 'e'))
+	{
+		++index;
 
-	if (value != NULL)
-		*value = integral + fractional;
+		mfmI64 exponent = 0;
+		mfmBool isNegative = MFM_FALSE;
+		if (buffer[index] == '-')
+		{
+			isNegative = MFM_TRUE;
+			++index;
+		}
+
+		// Exponent part
+		for (;; ++index)
+		{
+			if (buffer[index] == ' ' || buffer[index] == '\n' || buffer[index] == '\t' || buffer[index] == '\0')
+				break;
+			else if (index >= bufferSize)
+				break;
+
+			if (exponent <= MFM_I64_MAX / base)
+				exponent *= base;
+			else
+				return MFS_ERROR_NUMBER_TOO_BIG;
+
+			for (mfmU64 i = 0; i < base + 1; ++i)
+			{
+				if (i == base)
+					return MFS_ERROR_FAILED_TO_PARSE;
+				if (characters[i] == buffer[index])
+				{
+					if (MFM_I64_MAX - i < exponent)
+						return MFS_ERROR_NUMBER_TOO_BIG;
+					exponent += i;
+					break;
+				}
+			}
+		}
+
+		if (isNegative != MFM_FALSE)
+			exponent = -exponent;
+
+		if (outSize != NULL)
+			*outSize = index;
+		if (value != NULL)
+			*value = (integral + fractional) * pow(10, exponent);
+	}
+	// No exponent
+	else
+	{
+		if (outSize != NULL)
+			*outSize = index;
+		if (value != NULL)
+			*value = integral + fractional;
+	}
 
 	return MF_ERROR_OKAY;
 }

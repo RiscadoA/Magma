@@ -124,3 +124,193 @@ mfmU64 Magma::Framework::String::HStream::Read(void * data, mfmU64 size)
 		return readSize;
 	throw StreamError(ErrorToString(err));
 }
+
+void Magma::Framework::String::HStream::PrintU8(mfmU8 value, mfmU64 base)
+{
+	mfError err = mfsPrintU8(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintU16(mfmU16 value, mfmU64 base)
+{
+	mfError err = mfsPrintU16(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintU32(mfmU32 value, mfmU64 base)
+{
+	mfError err = mfsPrintU32(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintU64(mfmU64 value, mfmU64 base)
+{
+	mfError err = mfsPrintU64(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintI8(mfmI8 value, mfmU64 base)
+{
+	mfError err = mfsPrintI8(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintI16(mfmI16 value, mfmU64 base)
+{
+	mfError err = mfsPrintI16(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintI32(mfmI32 value, mfmU64 base)
+{
+	mfError err = mfsPrintI32(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintI64(mfmI64 value, mfmU64 base)
+{
+	mfError err = mfsPrintI64(reinterpret_cast<mfsStream*>(&this->Get()), value, base);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintF32(mfmF32 value, mfmU64 decimalPlaces, mfmU64 base)
+{
+	mfError err = mfsPrintF32(reinterpret_cast<mfsStream*>(&this->Get()), value, base, decimalPlaces);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintF64(mfmF64 value, mfmU64 decimalPlaces, mfmU64 base)
+{
+	mfError err = mfsPrintF64(reinterpret_cast<mfsStream*>(&this->Get()), value, base, decimalPlaces);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
+void Magma::Framework::String::HStream::PrintPointer(void * value, mfmU64 base)
+{
+	if (sizeof(value) == sizeof(mfmU32))
+	{
+		mfError err = mfsPrintU32(reinterpret_cast<mfsStream*>(&this->Get()), (mfmU32)value, base);
+		if (err == MF_ERROR_OKAY)
+			return;
+		throw StreamError(ErrorToString(err));
+	}
+	else if (sizeof(value) == sizeof(mfmU64))
+	{
+		mfError err = mfsPrintU64(reinterpret_cast<mfsStream*>(&this->Get()), (mfmU64)value, base);
+		if (err == MF_ERROR_OKAY)
+			return;
+		throw StreamError(ErrorToString(err));
+	}
+	else
+		abort();
+}
+
+mfmU8 Magma::Framework::String::HStream::ParseU8(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmU8 out;
+	mfError err = mfsParseU8(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmU16 Magma::Framework::String::HStream::ParseU16(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmU16 out;
+	mfError err = mfsParseU16(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmU32 Magma::Framework::String::HStream::ParseU32(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmU32 out;
+	mfError err = mfsParseU32(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmU64 Magma::Framework::String::HStream::ParseU64(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmU64 out;
+	mfError err = mfsParseU64(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmI8 Magma::Framework::String::HStream::ParseI8(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmI8 out;
+	mfError err = mfsParseI8(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmI16 Magma::Framework::String::HStream::ParseI16(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmI16 out;
+	mfError err = mfsParseI16(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmI32 Magma::Framework::String::HStream::ParseI32(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmI32 out;
+	mfError err = mfsParseI32(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmI64 Magma::Framework::String::HStream::ParseI64(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmI64 out;
+	mfError err = mfsParseI64(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmF32 Magma::Framework::String::HStream::ParseF32(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmF32 out;
+	mfError err = mfsParseF32(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}
+
+mfmF64 Magma::Framework::String::HStream::ParseF64(const mfsUTF8CodeUnit * terminator, mfmU64 base)
+{
+	mfmF64 out;
+	mfError err = mfsParseF64(reinterpret_cast<mfsStream*>(&this->Get()), &out, base, terminator);
+	if (err != MF_ERROR_OKAY)
+		throw StreamError(ErrorToString(err));
+	return out;
+}

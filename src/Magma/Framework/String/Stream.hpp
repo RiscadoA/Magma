@@ -100,6 +100,162 @@ namespace Magma
 				///		Flushes the stream.
 				/// </summary>
 				void Flush();
+
+				/// <summary>
+				///		Prints a value.
+				/// </summary>
+				/// <param name="value">Value</param>
+				template <typename T>
+				void Print(T value);
+
+				/// <summary>
+				///		Prints an unsigned 8 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintU8(mfmU8 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints an unsigned 16 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintU16(mfmU16 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints an unsigned 32 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintU32(mfmU32 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints an unsigned 64 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintU64(mfmU64 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints a signed 8 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintI8(mfmI8 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints a signed 16 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintI16(mfmI16 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints a signed 32 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintI32(mfmI32 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints a signed 64 bit integer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintI64(mfmI64 value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints a 32 bit floating point.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="decimalPlaces">Number of decimal places to show</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintF32(mfmF32 value, mfmU64 decimalPlaces = 4, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints a 64 bit floating point.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="decimalPlaces">Number of decimal places to show</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintF64(mfmF64 value, mfmU64 decimalPlaces = 4, mfmU64 base = 10);
+
+				/// <summary>
+				///		Prints a pointer.
+				/// </summary>
+				/// <param name="value">Value</param>
+				/// <param name="base">Base (2-16)</param>
+				void PrintPointer(void* value, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses an unsigned 8 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmU8 ParseU8(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses an unsigned 16 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmU16 ParseU16(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses an unsigned 32 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmU32 ParseU32(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses an unsigned 64 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmU64 ParseU64(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses a signed 8 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmI8 ParseI8(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses a signed 16 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmI16 ParseI16(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses a signed 32 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmI32 ParseI32(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses a signed 64 bit integer.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmI64 ParseI64(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses a 32 bit floating point.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmF32 ParseF32(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
+
+				/// <summary>
+				///		Parses a 64 bit floating point.
+				/// </summary>
+				/// <param name="terminator">Terminator string</param>
+				/// <param name="base">Base (2-16)</param>
+				mfmF64 ParseF64(const mfsUTF8CodeUnit* terminator, mfmU64 base = 10);
 			};
 
 			extern HStream OutStream;
@@ -108,6 +264,34 @@ namespace Magma
 
 			void InitStreams();
 			void TerminateStreams();
+
+			template<typename T>
+			inline void HStream::Print(T) { static_assert(false); /* UNSUPPORTED TYPE */};
+
+			template<>
+			inline void HStream::Print<mfmU8>(mfmU8 value) { this->PrintU8(value); }
+			template<>
+			inline void HStream::Print<mfmU16>(mfmU16 value) { this->PrintU16(value); }
+			template<>
+			inline void HStream::Print<mfmU32>(mfmU32 value) { this->PrintU32(value); }
+			template<>
+			inline void HStream::Print<mfmU64>(mfmU64 value) { this->PrintU64(value); }
+			template<>
+			inline void HStream::Print<mfmI8>(mfmI8 value) { this->PrintI8(value); }
+			template<>
+			inline void HStream::Print<mfmI16>(mfmI16 value) { this->PrintI16(value); }
+			template<>
+			inline void HStream::Print<mfmI32>(mfmI32 value) { this->PrintI32(value); }
+			template<>
+			inline void HStream::Print<mfmI64>(mfmI64 value) { this->PrintI64(value); }
+			template<>
+			inline void HStream::Print<mfmF32>(mfmF32 value) { this->PrintF32(value); }
+			template<>
+			inline void HStream::Print<mfmF64>(mfmF64 value) { this->PrintF64(value); }
+			template<>
+			inline void HStream::Print<mfsUTF8CodeUnit>(mfsUTF8CodeUnit value) { this->PutByte(value); }
+			template<>
+			inline void HStream::Print<const mfsUTF8CodeUnit*>(const mfsUTF8CodeUnit* value) { this->PutString(value); }
 		}
 	}
 }
