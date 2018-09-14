@@ -81,6 +81,7 @@ if (err != AL_NO_ERROR) abort();\
 #endif
 
 static void mfaOALDestroyBuffer(void* buf);
+static mfError mfaOALUpdateBuffer(mfaRenderDevice* rd, mfaBuffer* buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency);
 
 static mfError mfaOALCreateBuffer(mfaRenderDevice* rd, mfaBuffer** buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency)
 {
@@ -139,7 +140,7 @@ static void mfaOALDestroyBuffer(void* buf)
 	mfError err;
 
 	// Deinit source
-	err = mfmDestroyObject(&oalBuf->base.object);
+	err = mfmDeinitObject(&oalBuf->base.object);
 	if (err != MF_ERROR_OKAY)
 		return abort();
 
@@ -239,15 +240,15 @@ static void mfaOALDestroySource(void* source)
 	mfError err;
 
 	for (mfmU32 i = 0; i < MFA_OAL_MAX_QUEUED_BUFFERS; ++i)
-		if (oalSource->queueBuffers[i] != NULL && mfmDecObjectRef(oalSource->queueBuffers[i]) != MF_ERROR_OKAY)
+		if (oalSource->queueBuffers[i] != NULL && mfmReleaseObject(oalSource->queueBuffers[i]) != MF_ERROR_OKAY)
 			abort();
 
 	if (oalSource->boundBuffer != NULL)
-		if (mfmDecObjectRef(oalSource->boundBuffer) != MF_ERROR_OKAY)
+		if (mfmReleaseObject(oalSource->boundBuffer) != MF_ERROR_OKAY)
 			abort();
 
 	// Deinit source
-	err = mfmDestroyObject(&oalSource->base.object);
+	err = mfmDeinitObject(&oalSource->base.object);
 	if (err != MF_ERROR_OKAY)
 		return abort();
 
@@ -582,7 +583,7 @@ static mfError mfaOALSetSourceBuffer(mfaRenderDevice* rd, mfaSource* source, mfa
 
 	if (oalSource->boundBuffer != NULL)
 	{
-		err = mfmDecObjectRef(oalSource->boundBuffer);
+		err = mfmReleaseObject(oalSource->boundBuffer);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -595,7 +596,7 @@ static mfError mfaOALSetSourceBuffer(mfaRenderDevice* rd, mfaSource* source, mfa
 	else
 	{
 		oalSource->boundBuffer = oalBuffer;
-		err = mfmIncObjectRef(oalSource->boundBuffer);
+		err = mfmAcquireObject(oalSource->boundBuffer);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		alSourcei(oalSource->id, AL_BUFFER, oalBuffer->id);
@@ -862,7 +863,7 @@ void mfaDestroyOALRenderDevice(void * renderDevice)
 	mfmDestroyPoolAllocator(rd->bufferPool);
 
 	// Deallocate render device
-	if (mfmDestroyObject(&rd->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&rd->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(rd->allocator, rd) != MF_ERROR_OKAY)
 		abort();

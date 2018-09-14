@@ -329,7 +329,7 @@ void mfiDestroyGLWindow(void * window)
 	// Destroy window
 	mfiOGLWindow* OGLWindow = (mfiOGLWindow*)window;
 	glfwDestroyWindow(OGLWindow->glfwWindow);
-	if (mfmDestroyObject(&OGLWindow->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&OGLWindow->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(NULL, OGLWindow) != MF_ERROR_OKAY)
 		abort();

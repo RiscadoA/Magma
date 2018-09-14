@@ -9,7 +9,7 @@ mfError mfmAllocate(void * allocator, void ** memory, mfmU64 size)
 
 	if (allocator == NULL)
 	{
-		*memory = malloc(size);
+		*memory = malloc((size_t)size);
 		if (*memory == NULL)
 			return MFM_ERROR_ALLOCATION_FAILED;
 		else
@@ -48,7 +48,7 @@ mfError mfmReallocate(void * allocator, void * memory, mfmU64 prevSize, mfmU64 s
 
 	if (allocator == NULL)
 	{
-		*newMemory = realloc(memory, size);
+		*newMemory = realloc(memory, (size_t)size);
 		if (*newMemory == NULL)
 			return MFM_ERROR_ALLOCATION_FAILED;
 		else
@@ -63,7 +63,7 @@ mfError mfmReallocate(void * allocator, void * memory, mfmU64 prevSize, mfmU64 s
 
 mfError mfmAllocateAligned(void * allocator, void ** memory, mfmU64 size, mfmU64 alignment)
 {
-	if (memory == NULL || size == 0 || alignment == 0)
+	if (memory == NULL || size == 0 || alignment == 0 || alignment > 256)
 		return MFM_ERROR_INVALID_ARGUMENTS;
 
 	mfmU64 realSize = size + alignment;
@@ -77,7 +77,7 @@ mfError mfmAllocateAligned(void * allocator, void ** memory, mfmU64 size, mfmU64
 	mfmU64 offset = alignment - remainder;
 
 	*memory = (mfmU8*)realMemory + offset;
-	((mfmU8*)*memory)[-1] = offset;
+	((mfmU8*)*memory)[-1] = (mfmU8)offset;
 
 	return MF_ERROR_OKAY;
 }

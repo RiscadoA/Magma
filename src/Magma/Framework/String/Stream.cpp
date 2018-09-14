@@ -207,14 +207,14 @@ void Magma::Framework::String::HStream::PrintF64(mfmF64 value, mfmU64 decimalPla
 
 void Magma::Framework::String::HStream::PrintPointer(void * value, mfmU64 base)
 {
-	if (sizeof(value) == sizeof(mfmU32))
+	if constexpr (sizeof(value) == sizeof(mfmU32))
 	{
 		mfError err = mfsPrintU32(reinterpret_cast<mfsStream*>(&this->Get()), (mfmU32)value, base);
 		if (err == MF_ERROR_OKAY)
 			return;
 		throw StreamError(ErrorToString(err));
 	}
-	else if (sizeof(value) == sizeof(mfmU64))
+	else if constexpr (sizeof(value) == sizeof(mfmU64))
 	{
 		mfError err = mfsPrintU64(reinterpret_cast<mfsStream*>(&this->Get()), (mfmU64)value, base);
 		if (err == MF_ERROR_OKAY)
@@ -222,7 +222,7 @@ void Magma::Framework::String::HStream::PrintPointer(void * value, mfmU64 base)
 		throw StreamError(ErrorToString(err));
 	}
 	else
-		abort();
+		abort(); // Invalid size
 }
 
 mfmU8 Magma::Framework::String::HStream::ParseU8(const mfsUTF8CodeUnit * terminator, mfmU64 base)

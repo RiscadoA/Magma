@@ -238,7 +238,7 @@ Magma::Framework::Graphics::V2X::HVertexLayout Magma::Framework::Graphics::V2X::
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 
-	auto c_elements = (mfgV2XVertexElement*)alloca(sizeof(mfgV2XVertexElement) * elementCount);
+	auto c_elements = (mfgV2XVertexElement*)alloca(sizeof(mfgV2XVertexElement) * (size_t)elementCount);
 	for (mfmU64 i = 0; i < elementCount; ++i)
 	{
 		c_elements[i].bufferIndex = elements[i].bufferIndex;
@@ -259,7 +259,7 @@ Magma::Framework::Graphics::V2X::HVertexArray Magma::Framework::Graphics::V2X::H
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 
-	auto c_buffers = (mfgV2XVertexBuffer**)alloca(sizeof(mfgV2XVertexBuffer*) * bufferCount);
+	auto c_buffers = (mfgV2XVertexBuffer**)alloca(sizeof(mfgV2XVertexBuffer*) * (size_t)bufferCount);
 	for (mfmU64 i = 0; i < bufferCount; ++i)
 		c_buffers[i] = (mfgV2XVertexBuffer*)&buffers[i].Get();
 
@@ -452,7 +452,7 @@ Magma::Framework::Graphics::V2X::HFramebuffer Magma::Framework::Graphics::V2X::H
 {
 	auto rd = (mfgV2XRenderDevice*)&this->Get();
 
-	auto c_textures = (mfgV2XRenderTexture**)alloca(sizeof(mfgV2XRenderTexture*) * textureCount);
+	auto c_textures = (mfgV2XRenderTexture**)alloca(sizeof(mfgV2XRenderTexture*) * (size_t)textureCount);
 	for (mfmU64 i = 0; i < textureCount; ++i)
 		c_textures[i] = (mfgV2XRenderTexture*)&textures[i].Get();
 

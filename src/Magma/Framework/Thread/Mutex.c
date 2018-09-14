@@ -57,7 +57,7 @@ mfError mftDestroyMutex(mftMutex * mutex)
 		return MFT_ERROR_INTERNAL;
 	
 	// Destroy and deallocate mutex
-	err = mfmDestroyObject(&mutex->object);
+	err = mfmDeinitObject(&mutex->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 

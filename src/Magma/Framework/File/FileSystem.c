@@ -42,7 +42,7 @@ mfError mffTerminateFileSystem(void)
 		if (mffFileSystem.archives[i] == NULL)
 			continue;
 
-		err = mfmDecObjectRef(&mffFileSystem.archives[i]->object);
+		err = mfmReleaseObject(&mffFileSystem.archives[i]->object);
 		if (err != MF_ERROR_OKAY)
 		{
 			mftUnlockMutex(mffFileSystem.mutex);
@@ -78,7 +78,7 @@ mfError mffRegisterArchive(mffArchive * archive, const mfsUTF8CodeUnit* name)
 		strcpy(mffFileSystem.archiveNames[i], name);
 
 		mffFileSystem.archives[i] = archive;
-		err = mfmIncObjectRef(&mffFileSystem.archives[i]->object);
+		err = mfmAcquireObject(&mffFileSystem.archives[i]->object);
 		if (err != MF_ERROR_OKAY)
 		{
 			mftUnlockMutex(mffFileSystem.mutex);
@@ -112,7 +112,7 @@ mfError mffUnregisterArchive(mffArchive * archive)
 		if (mffFileSystem.archives[i] != archive)
 			continue;
 
-		err = mfmDecObjectRef(&mffFileSystem.archives[i]->object);
+		err = mfmReleaseObject(&mffFileSystem.archives[i]->object);
 		mffFileSystem.archives[i] = NULL;
 		if (err != MF_ERROR_OKAY)
 		{

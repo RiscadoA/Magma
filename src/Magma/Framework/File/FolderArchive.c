@@ -45,7 +45,7 @@ static void mffDestroyFile(void* file)
 	mfError err;
 	mffFolderFile* folderFile = file;
 
-	err = mfmDestroyObject(&folderFile->base.object);
+	err = mfmDeinitObject(&folderFile->base.object);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
@@ -238,7 +238,7 @@ static mfError mffArchiveCreateDirectoryUnsafe(mffArchive* archive, mffDirectory
 		if (err != MF_ERROR_OKAY)
 			return err;
 
-		err = mfmIncObjectRef(&file->base.object);
+		err = mfmAcquireObject(&file->base.object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 
@@ -332,7 +332,7 @@ static mfError mffArchiveDeleteDirectoryUnsafe(mffArchive* archive, mffDirectory
 
 		if (refCount != 1)return MFM_ERROR_STILL_HAS_REFERENCES;
 
-		err = mfmDecObjectRef(&dir->object);
+		err = mfmReleaseObject(&dir->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -497,7 +497,7 @@ static mfError mffArchiveCreateFileUnsafe(mffArchive* archive, mffFile** outFile
 		if (err != MF_ERROR_OKAY)
 			return err;
 
-		err = mfmIncObjectRef(&file->base.object);
+		err = mfmAcquireObject(&file->base.object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 
@@ -588,7 +588,7 @@ static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
 
 		if (refCount != 1)return MFM_ERROR_STILL_HAS_REFERENCES;
 
-		err = mfmDecObjectRef(&file->object);
+		err = mfmReleaseObject(&file->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -681,11 +681,11 @@ static void mffArchiveCloseFileUnsafe(mffFolderFileStream* stream)
 {
 	mfError err;
 
-	err = mfmDestroyObject(&stream->base.object);
+	err = mfmDeinitObject(&stream->base.object);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mfmDecObjectRef(&stream->file->base.object);
+	err = mfmReleaseObject(&stream->file->base.object);
 	if (err != MF_ERROR_OKAY)
 		abort();
 
@@ -871,7 +871,7 @@ static mfError mffArchiveOpenFileUnsafe(mffArchive* archive, mfsStream** outStre
 		return err;
 	stream->base.object.destructorFunc = &mffArchiveCloseFile;
 
-	err = mfmIncObjectRef(file);
+	err = mfmAcquireObject(file);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -966,7 +966,7 @@ static mfError mffFillWindowsFiles(mffFolderArchive * archive, void* allocator, 
 				if (err != MF_ERROR_OKAY)
 					return err;
 
-				err = mfmIncObjectRef(&file->base.object);
+				err = mfmAcquireObject(&file->base.object);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1018,7 +1018,7 @@ static mfError mffFillWindowsFiles(mffFolderArchive * archive, void* allocator, 
 				if (err != MF_ERROR_OKAY)
 					return err;
 
-				err = mfmIncObjectRef(&file->base.object);
+				err = mfmAcquireObject(&file->base.object);
 				if (err != MF_ERROR_OKAY)
 					return err;
 
@@ -1105,7 +1105,7 @@ void mffDestroyFolderArchive(void * archive)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	err = mfmDestroyObject(&folderArchive->base.object);
+	err = mfmDeinitObject(&folderArchive->base.object);
 	if (err != MF_ERROR_OKAY)
 		abort();
 	

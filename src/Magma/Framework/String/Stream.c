@@ -74,7 +74,7 @@ static mfError mfsFileSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
 
 static void mfsDestroyFileStream(void* stream)
 {
-	if (mfmDestroyObject(stream) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(stream) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(NULL, stream) != MF_ERROR_OKAY)
 		abort();
@@ -116,19 +116,19 @@ mfError mfsInitStream()
 
 	// Initialize mfsInStream stream
 	mfsInStream = mfsCreateFileStream(stdin, mfsInDefaultBuffer, sizeof(mfsInDefaultBuffer));
-	err = mfmIncObjectRef(&mfsInStream->object);
+	err = mfmAcquireObject(&mfsInStream->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	
 	// Initialize mfsOutStream stream
 	mfsOutStream = mfsCreateFileStream(stdout, mfsOutDefaultBuffer, sizeof(mfsOutDefaultBuffer));
-	err = mfmIncObjectRef(&mfsOutStream->object);
+	err = mfmAcquireObject(&mfsOutStream->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
 	// Initialize mfsErrStream stream
 	mfsErrStream = mfsCreateFileStream(stderr, mfsErrDefaultBuffer, sizeof(mfsErrDefaultBuffer));
-	err = mfmIncObjectRef(&mfsErrStream->object);
+	err = mfmAcquireObject(&mfsErrStream->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -141,21 +141,21 @@ mfError mfsTerminateStream()
 
 	if (mfsInStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsInStream->object);
+		err = mfmReleaseObject(&mfsInStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 
 	if (mfsOutStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsOutStream->object);
+		err = mfmReleaseObject(&mfsOutStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 
 	if (mfsErrStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsErrStream->object);
+		err = mfmReleaseObject(&mfsErrStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -163,7 +163,7 @@ mfError mfsTerminateStream()
 	return err;
 }
 
-mfError mfsWrite(mfsStream * stream, const mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize)
+mfError mfsWrite(mfsStream * stream, const void * data, mfmU64 dataSize, mfmU64 * outSize)
 {
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
@@ -171,10 +171,10 @@ mfError mfsWrite(mfsStream * stream, const mfmU8 * data, mfmU64 dataSize, mfmU64
 		return MF_ERROR_OKAY;
 	if (stream->write == NULL)
 		return MFS_ERROR_UNSUPPORTED_FUNCTION;
-	return stream->write(stream, data, dataSize, outSize);
+	return stream->write(stream, (const mfmU8*)data, dataSize, outSize);
 }
 
-mfError mfsRead(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize)
+mfError mfsRead(mfsStream * stream, void * data, mfmU64 dataSize, mfmU64 * outSize)
 {
 	if (stream == NULL || data == NULL)
 		return MFS_ERROR_INVALID_ARGUMENTS;
@@ -182,7 +182,7 @@ mfError mfsRead(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outS
 		return MF_ERROR_OKAY;
 	if (stream->read == NULL)
 		return MFS_ERROR_UNSUPPORTED_FUNCTION;
-	return stream->read(stream, data, dataSize, outSize);
+	return stream->read(stream, (mfmU8*)data, dataSize, outSize);
 }
 
 mfError mfsReadUntil(mfsStream * stream, mfmU8 * data, mfmU64 dataSize, mfmU64 * outSize, const mfsUTF8CodeUnit * terminator)

@@ -86,7 +86,7 @@ mfError mftDestroyThread(mftThread * thread)
 		return MFT_ERROR_INTERNAL;
 
 	// Destroy and deallocate thread
-	err = mfmDestroyObject(&thread->object);
+	err = mfmDeinitObject(&thread->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 

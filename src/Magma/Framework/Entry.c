@@ -7,12 +7,16 @@
 #include "Input/OGLWindow.h"
 #include "Input/D3DWindow.h"
 
+#include "Graphics/TextureLoader.h"
+
 #include "Graphics/2.X/RenderDevice.h"
 #include "Graphics/2.X/OGL4RenderDevice.h"
 #include "Graphics/2.X/D3D11RenderDevice.h"
 
 #include "Audio/RenderDevice.h"
 #include "Audio/OALRenderDevice.h"
+
+#include <stdlib.h>
 
 static mfmBool mfInitialized = MFM_FALSE;
 
@@ -105,7 +109,7 @@ void mfTerminate()
 	// Terminate texture loader
 	err = mfgTerminateTextureLoader();
 	if (err != MF_ERROR_OKAY)
-		return err;
+		abort();
 
 	// Terminate windows library
 	mfiTerminateWindows();
