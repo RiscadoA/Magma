@@ -74,7 +74,7 @@ static mfError mfsFileSetBuffer(void* stream, mfmU8* buffer, mfmU64 bufferSize)
 
 static void mfsDestroyFileStream(void* stream)
 {
-	if (mfmDestroyObject(stream) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(stream) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(NULL, stream) != MF_ERROR_OKAY)
 		abort();
@@ -116,19 +116,19 @@ mfError mfsInitStream()
 
 	// Initialize mfsInStream stream
 	mfsInStream = mfsCreateFileStream(stdin, mfsInDefaultBuffer, sizeof(mfsInDefaultBuffer));
-	err = mfmIncObjectRef(&mfsInStream->object);
+	err = mfmAcquireObject(&mfsInStream->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 	
 	// Initialize mfsOutStream stream
 	mfsOutStream = mfsCreateFileStream(stdout, mfsOutDefaultBuffer, sizeof(mfsOutDefaultBuffer));
-	err = mfmIncObjectRef(&mfsOutStream->object);
+	err = mfmAcquireObject(&mfsOutStream->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
 	// Initialize mfsErrStream stream
 	mfsErrStream = mfsCreateFileStream(stderr, mfsErrDefaultBuffer, sizeof(mfsErrDefaultBuffer));
-	err = mfmIncObjectRef(&mfsErrStream->object);
+	err = mfmAcquireObject(&mfsErrStream->object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -141,21 +141,21 @@ mfError mfsTerminateStream()
 
 	if (mfsInStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsInStream->object);
+		err = mfmReleaseObject(&mfsInStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 
 	if (mfsOutStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsOutStream->object);
+		err = mfmReleaseObject(&mfsOutStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
 
 	if (mfsErrStream != NULL)
 	{
-		err = mfmDecObjectRef(&mfsErrStream->object);
+		err = mfmReleaseObject(&mfsErrStream->object);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}

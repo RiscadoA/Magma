@@ -298,7 +298,7 @@ void mfiDestroyD3DWindow(void * window)
 	// Destroy window
 	mfiD3DWindow* d3dWindow = (mfiD3DWindow*)window;
 	DestroyWindow(d3dWindow->hwnd);
-	if (mfmDestroyObject(&d3dWindow->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dWindow->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(NULL, d3dWindow) != MF_ERROR_OKAY)
 		abort();

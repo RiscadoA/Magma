@@ -11,7 +11,7 @@ Magma::Framework::Memory::Handle::Handle()
 Magma::Framework::Memory::Handle::Handle(mfmObject & obj)
 {
 	m_obj = &obj;
-	mfError err = mfmIncObjectRef(m_obj);
+	mfError err = mfmAcquireObject(m_obj);
 	if (err != MF_ERROR_OKAY)
 		throw ObjectError("Failed to increase object reference count");
 }
@@ -21,7 +21,7 @@ Magma::Framework::Memory::Handle::Handle(void * obj)
 	m_obj = static_cast<mfmObject*>(obj);
 	if (m_obj != NULL)
 	{
-		mfError err = mfmIncObjectRef(m_obj);
+		mfError err = mfmAcquireObject(m_obj);
 		if (err != MF_ERROR_OKAY)
 			throw ObjectError("Failed to increase object reference count");
 	}
@@ -32,7 +32,7 @@ Magma::Framework::Memory::Handle::Handle(const Handle & rhs)
 	m_obj = rhs.m_obj;
 	if(m_obj != nullptr)
 	{
-		mfError err = mfmIncObjectRef(m_obj);
+		mfError err = mfmAcquireObject(m_obj);
 		if (err != MF_ERROR_OKAY)
 			throw ObjectError("Failed to increase object reference count");
 	}
@@ -48,7 +48,7 @@ Magma::Framework::Memory::Handle::~Handle()
 {
 	if (m_obj != nullptr)
 	{
-		mfError err = mfmDecObjectRef(m_obj);
+		mfError err = mfmReleaseObject(m_obj);
 		if (err != MF_ERROR_OKAY)
 			throw ObjectError("Failed to decrease object reference count");
 	}
@@ -58,14 +58,14 @@ void Magma::Framework::Memory::Handle::Set(mfmObject& obj)
 {
 	if (m_obj != nullptr)
 	{
-		mfError err = mfmDecObjectRef(m_obj);
+		mfError err = mfmReleaseObject(m_obj);
 		if (err != MF_ERROR_OKAY)
 			throw ObjectError("Failed to decrease object reference count");
 	}
 	m_obj = &obj;
 	if (m_obj != nullptr)
 	{
-		mfError err = mfmIncObjectRef(m_obj);
+		mfError err = mfmAcquireObject(m_obj);
 		if (err != MF_ERROR_OKAY)
 			throw ObjectError("Failed to increase object reference count");
 	}
@@ -75,7 +75,7 @@ bool Magma::Framework::Memory::Handle::Release()
 {
 	if (m_obj == nullptr)
 		return false;
-	mfError err = mfmDecObjectRef(m_obj);
+	mfError err = mfmReleaseObject(m_obj);
 	if (err != MF_ERROR_OKAY)
 		throw ObjectError("Failed to decrease object reference count");
 	m_obj = nullptr;

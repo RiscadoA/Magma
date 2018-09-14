@@ -255,7 +255,7 @@ mfError mfgLoadMetaData(const mfmU8 * metaData, mfmU64 size, mfgMetaData ** outD
 
 void mfgUnloadMetaData(void * metaData)
 {
-	mfError err = mfmDestroyObject(&((mfgMetaData*)metaData)->object);
+	mfError err = mfmDeinitObject(&((mfgMetaData*)metaData)->object);
 	if (err != MF_ERROR_OKAY)
 		abort();
 	err = mfmDeallocate(((mfgMetaData*)metaData)->allocator, metaData);

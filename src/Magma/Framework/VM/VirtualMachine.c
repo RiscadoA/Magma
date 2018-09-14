@@ -50,7 +50,7 @@ mfError mfvCreateVirtualMachine(mfvVirtualMachine ** vm, const mfvVirtualMachine
 	(*vm)->allocator = allocator;
 	if ((*vm)->allocator != NULL)
 	{
-		mfError err = mfmIncObjectRef(((mfmObject*)(*vm)->allocator));
+		mfError err = mfmAcquireObject(((mfmObject*)(*vm)->allocator));
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -87,11 +87,11 @@ void mfvDestroyVirtualMachine(void * vm)
 	mfvVirtualMachine* v = (mfvVirtualMachine*)vm;
 	if (v->allocator != NULL)
 	{
-		mfError err = mfmDecObjectRef((mfmObject*)v->allocator);
+		mfError err = mfmReleaseObject((mfmObject*)v->allocator);
 		if (err != MF_ERROR_OKAY)
 			abort();
 	}
-	if (mfmDestroyObject(&v->object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&v->object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(v->allocator, v) != MF_ERROR_OKAY)
 		abort();

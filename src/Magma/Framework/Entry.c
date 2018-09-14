@@ -7,6 +7,8 @@
 #include "Input/OGLWindow.h"
 #include "Input/D3DWindow.h"
 
+#include "Graphics/TextureLoader.h"
+
 #include "Graphics/2.X/RenderDevice.h"
 #include "Graphics/2.X/OGL4RenderDevice.h"
 #include "Graphics/2.X/D3D11RenderDevice.h"

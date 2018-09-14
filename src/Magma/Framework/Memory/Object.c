@@ -13,7 +13,7 @@ mfError mfmInitObject(mfmObject * obj)
 	return MF_ERROR_OKAY;
 }
 
-mfError mfmDestroyObject(mfmObject* obj)
+mfError mfmDeinitObject(mfmObject* obj)
 {
 	if (obj == NULL)
 		return MFM_ERROR_INVALID_ARGUMENTS;
@@ -26,7 +26,7 @@ mfError mfmDestroyObject(mfmObject* obj)
 	return MF_ERROR_OKAY;
 }
 
-mfError mfmIncObjectRef(mfmObject* obj)
+mfError mfmAcquireObject(mfmObject* obj)
 {
 	if (obj == NULL)
 		return MFM_ERROR_INVALID_ARGUMENTS;
@@ -36,7 +36,7 @@ mfError mfmIncObjectRef(mfmObject* obj)
 	return MF_ERROR_OKAY;
 }
 
-mfError mfmDecObjectRef(mfmObject* obj)
+mfError mfmReleaseObject(mfmObject* obj)
 {
 	if (obj == NULL)
 		return MFM_ERROR_INVALID_ARGUMENTS;
@@ -53,7 +53,7 @@ mfError mfmDecObjectRef(mfmObject* obj)
 
 	if (refCount == 1)
 	{
-		err = mfmDestroyObject(obj);
+		err = mfmDeinitObject(obj);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		obj->destructorFunc(obj);

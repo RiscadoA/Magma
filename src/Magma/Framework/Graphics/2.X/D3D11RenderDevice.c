@@ -276,11 +276,11 @@ void mfgD3D11DestroyVertexShader(void* vs)
 	mfgD3D11VertexShader* d3dVS = vs;
 	d3dVS->shader->lpVtbl->Release(d3dVS->shader);
 	
-	if (mfmDecObjectRef(d3dVS->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dVS->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDecObjectRef(d3dVS->md) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dVS->md) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dVS->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dVS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVS->base.renderDevice)->pool512, d3dVS) != MF_ERROR_OKAY)
 		abort();
@@ -388,12 +388,12 @@ mfError mfgD3D11CreateVertexShader(mfgV2XRenderDevice* rd, mfgV2XVertexShader** 
 		}
 	}
 
-	err = mfmIncObjectRef(metaData);
+	err = mfmAcquireObject(metaData);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
 
 	*vs = d3dVS;
-	err = mfmIncObjectRef(rd);
+	err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -428,11 +428,11 @@ void mfgD3D11DestroyPixelShader(void* ps)
 
 	mfgD3D11PixelShader* d3dPS = ps;
 	d3dPS->shader->lpVtbl->Release(d3dPS->shader);
-	if (mfmDecObjectRef(d3dPS->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dPS->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDecObjectRef(d3dPS->md) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dPS->md) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dPS->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dPS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPS->base.renderDevice)->pool512, d3dPS) != MF_ERROR_OKAY)
 		abort();
@@ -540,12 +540,12 @@ mfError mfgD3D11CreatePixelShader(mfgV2XRenderDevice* rd, mfgV2XPixelShader** ps
 		}
 	}
 
-	err = mfmIncObjectRef(metaData);
+	err = mfmAcquireObject(metaData);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on meta data");
 
 	*ps = d3dPS;
-	err = mfmIncObjectRef(rd);
+	err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -585,7 +585,7 @@ mfError mfgD3D11BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* b
 	mfError err;
 	if (d3dBP->boundObject != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundObject);
+		err = mfmReleaseObject(d3dBP->boundObject);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -600,7 +600,7 @@ mfError mfgD3D11BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* b
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
@@ -615,7 +615,7 @@ mfError mfgD3D11BindConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* b
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers(d3dRD->deviceContext, d3dBP->index, 1, &d3dCB->buffer);
@@ -638,7 +638,7 @@ mfError mfgD3D11BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoi
 	mfError err;
 	if (d3dBP->boundObject != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundObject);
+		err = mfmReleaseObject(d3dBP->boundObject);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -656,7 +656,7 @@ mfError mfgD3D11BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoi
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
@@ -671,7 +671,7 @@ mfError mfgD3D11BindConstantBufferRange(mfgV2XRenderDevice* rd, mfgV2XBindingPoi
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetConstantBuffers1(d3dRD->deviceContext, d3dBP->index, 1, d3dCB->buffer, &d3dOffset, &d3dSize);
@@ -694,7 +694,7 @@ mfError mfgD3D11BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 	mfError err;
 	if (d3dBP->boundObject != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundObject);
+		err = mfmReleaseObject(d3dBP->boundObject);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -709,7 +709,7 @@ mfError mfgD3D11BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -724,7 +724,7 @@ mfError mfgD3D11BindTexture1D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -747,7 +747,7 @@ mfError mfgD3D11BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 	mfError err;
 	if (d3dBP->boundObject != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundObject);
+		err = mfmReleaseObject(d3dBP->boundObject);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -762,7 +762,7 @@ mfError mfgD3D11BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -777,7 +777,7 @@ mfError mfgD3D11BindTexture2D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -800,7 +800,7 @@ mfError mfgD3D11BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 	mfError err;
 	if (d3dBP->boundObject != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundObject);
+		err = mfmReleaseObject(d3dBP->boundObject);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -815,7 +815,7 @@ mfError mfgD3D11BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -830,7 +830,7 @@ mfError mfgD3D11BindTexture3D(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mf
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -853,7 +853,7 @@ mfError mfgD3D11BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 	mfError err;
 	if (d3dBP->boundObject != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundObject);
+		err = mfmReleaseObject(d3dBP->boundObject);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -868,7 +868,7 @@ mfError mfgD3D11BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -883,7 +883,7 @@ mfError mfgD3D11BindRenderTexture(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundObject);
+			err = mfmAcquireObject(d3dBP->boundObject);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetShaderResources(d3dRD->deviceContext, d3dBP->index, 1, &d3dTex->view);
@@ -906,7 +906,7 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 	mfError err;
 	if (d3dBP->boundSampler != NULL)
 	{
-		err = mfmDecObjectRef(d3dBP->boundSampler);
+		err = mfmReleaseObject(d3dBP->boundSampler);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -921,7 +921,7 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundSampler);
+			err = mfmAcquireObject(d3dBP->boundSampler);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->VSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
@@ -936,7 +936,7 @@ mfError mfgD3D11BindSampler(mfgV2XRenderDevice* rd, mfgV2XBindingPoint* bp, mfgV
 		}
 		else
 		{
-			err = mfmIncObjectRef(d3dBP->boundSampler);
+			err = mfmAcquireObject(d3dBP->boundSampler);
 			if (err != MF_ERROR_OKAY)
 				return err;
 			d3dRD->deviceContext->lpVtbl->PSSetSamplers(d3dRD->deviceContext, d3dBP->index, 1, &d3dSampler->sampler);
@@ -953,15 +953,15 @@ void mfgD3D11DestroyPipeline(void* pp)
 #endif
 
 	mfgD3D11Pipeline* d3dPP = pp;
-	mfError err = mfmDecObjectRef(&d3dPP->vertex->base.object);
+	mfError err = mfmReleaseObject(&d3dPP->vertex->base.object);
 	if (err != MF_ERROR_OKAY)
 		return err;
-	err = mfmDecObjectRef(&d3dPP->pixel->base.object);
+	err = mfmReleaseObject(&d3dPP->pixel->base.object);
 	if (err != MF_ERROR_OKAY)
 		return err;
-	if (mfmDecObjectRef(d3dPP->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dPP->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dPP->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dPP->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dPP->base.renderDevice)->pool48, d3dPP) != MF_ERROR_OKAY)
 		abort();
@@ -995,15 +995,15 @@ mfError mfgD3D11CreatePipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline** pp, mfgV
 
 	mfError err;
 
-	err = mfmIncObjectRef(&d3dPP->vertex->base.object);
+	err = mfmAcquireObject(&d3dPP->vertex->base.object);
 	if (err != MF_ERROR_OKAY)
 		return err;
-	err = mfmIncObjectRef(&d3dPP->pixel->base.object);
+	err = mfmAcquireObject(&d3dPP->pixel->base.object);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
 	*pp = d3dPP;
-	err = mfmIncObjectRef(rd);
+	err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -1022,7 +1022,7 @@ mfError mfgD3D11SetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pp)
 	mfError err;
 	if (d3dRD->currentPipeline != NULL)
 	{
-		err = mfmDecObjectRef(d3dRD->currentPipeline);
+		err = mfmReleaseObject(d3dRD->currentPipeline);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -1035,7 +1035,7 @@ mfError mfgD3D11SetPipeline(mfgV2XRenderDevice* rd, mfgV2XPipeline* pp)
 	}
 	else
 	{
-		err = mfmIncObjectRef(pp);
+		err = mfmAcquireObject(pp);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		d3dRD->deviceContext->lpVtbl->VSSetShader(d3dRD->deviceContext, d3dPP->vertex->shader, NULL, 0);
@@ -1053,9 +1053,9 @@ void mfgD3D11DestroyConstantBuffer(void* buffer)
 	
 	mfgD3D11ConstantBuffer* d3dCB = buffer;
 	d3dCB->buffer->lpVtbl->Release(d3dCB->buffer);
-	if (mfmDecObjectRef(d3dCB->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dCB->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dCB->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dCB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dCB->base.renderDevice)->pool48, d3dCB) != MF_ERROR_OKAY)
 		abort();
@@ -1122,7 +1122,7 @@ mfError mfgD3D11CreateConstantBuffer(mfgV2XRenderDevice* rd, mfgV2XConstantBuffe
 	}
 
 	*cb = d3dCB;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -1169,9 +1169,9 @@ void mfgD3D11DestroyVertexBuffer(void* buffer)
 
 	mfgD3D11VertexBuffer* d3dVB = buffer;
 	d3dVB->buffer->lpVtbl->Release(d3dVB->buffer);
-	if (mfmDecObjectRef(d3dVB->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dVB->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dVB->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dVB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVB->base.renderDevice)->pool48, d3dVB) != MF_ERROR_OKAY)
 		abort();
@@ -1237,7 +1237,7 @@ mfError mfgD3D11CreateVertexBuffer(mfgV2XRenderDevice* rd, mfgV2XVertexBuffer** 
 	}
 
 	*vb = d3dVB;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -1285,9 +1285,9 @@ void mfgD3D11DestroyIndexBuffer(void* buffer)
 	
 	mfgD3D11IndexBuffer* d3dIB = buffer;
 	d3dIB->buffer->lpVtbl->Release(d3dIB->buffer);
-	if (mfmDecObjectRef(d3dIB->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dIB->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dIB->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dIB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dIB->base.renderDevice)->pool48, d3dIB) != MF_ERROR_OKAY)
 		abort();
@@ -1360,7 +1360,7 @@ mfError mfgD3D11CreateIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer** ib
 	}
 
 	*ib = d3dIB;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -1412,7 +1412,7 @@ mfError mfgD3D11SetIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
 	mfError err;
 	if (d3dRD->currentIndexBuffer != NULL)
 	{
-		err = mfmDecObjectRef(d3dRD->currentIndexBuffer);
+		err = mfmReleaseObject(d3dRD->currentIndexBuffer);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -1422,7 +1422,7 @@ mfError mfgD3D11SetIndexBuffer(mfgV2XRenderDevice* rd, mfgV2XIndexBuffer* ib)
 		d3dRD->deviceContext->lpVtbl->IASetIndexBuffer(d3dRD->deviceContext, NULL, 0, 0);
 	else
 	{
-		err = mfmIncObjectRef(d3dRD->currentIndexBuffer);
+		err = mfmAcquireObject(d3dRD->currentIndexBuffer);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		d3dRD->deviceContext->lpVtbl->IASetIndexBuffer(d3dRD->deviceContext, d3dIB->buffer, d3dIB->format, 0);
@@ -1440,9 +1440,9 @@ void mfgD3D11DestroyVertexLayout(void* vl)
 	mfgD3D11VertexLayout* d3dVL = vl;
 	d3dVL->inputLayout->lpVtbl->Release(d3dVL->inputLayout);
 
-	if (mfmDecObjectRef(d3dVL->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dVL->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dVL->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dVL->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVL->base.renderDevice)->pool256, d3dVL) != MF_ERROR_OKAY)
 		abort();
@@ -1583,7 +1583,7 @@ mfError mfgD3D11CreateVertexLayout(mfgV2XRenderDevice* rd, mfgV2XVertexLayout** 
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateInputLayout failed");
 
 	*vl = d3dVL;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -1597,18 +1597,18 @@ void mfgD3D11DestroyVertexArray(void* va)
 #endif
 
 	mfgD3D11VertexArray* d3dVA = va;
-	if (mfmDecObjectRef(d3dVA->layout) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dVA->layout) != MF_ERROR_OKAY)
 		abort();
 	for (mfmU64 i = 0; i < 16; ++i)
 	{
 		if (d3dVA->vb[i] == NULL)
 			continue;
-		if (mfmDecObjectRef(d3dVA->vb[i]) != MF_ERROR_OKAY)
+		if (mfmReleaseObject(d3dVA->vb[i]) != MF_ERROR_OKAY)
 			abort();
 	}
-	if (mfmDecObjectRef(d3dVA->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dVA->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dVA->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dVA->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dVA->base.renderDevice)->pool512, d3dVA) != MF_ERROR_OKAY)
 		abort();
@@ -1637,7 +1637,7 @@ mfError mfgD3D11CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va
 	d3dVA->base.renderDevice = rd;
 
 	mfError err;
-	err = mfmIncObjectRef(vl);
+	err = mfmAcquireObject(vl);
 	if (err != MF_ERROR_OKAY)
 		return err;
 
@@ -1650,7 +1650,7 @@ mfError mfgD3D11CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va
 	for (mfmU64 i = 0; i < bufferCount; ++i)
 	{
 		d3dVA->vb[i] = buffers[i];
-		err = mfmIncObjectRef(d3dVA->vb[i]);
+		err = mfmAcquireObject(d3dVA->vb[i]);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		d3dVA->buffers[i] = ((mfgD3D11VertexBuffer*)buffers[i])->buffer;
@@ -1658,7 +1658,7 @@ mfError mfgD3D11CreateVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray** va
 	d3dVA->layout = vl;
 
 	*va = d3dVA;
-	err = mfmIncObjectRef(rd);
+	err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -1677,7 +1677,7 @@ mfError mfgD3D11SetVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray* va)
 	mfError err;
 	if (d3dRD->currentVertexArray != NULL)
 	{
-		err = mfmDecObjectRef(d3dRD->currentVertexArray);
+		err = mfmReleaseObject(d3dRD->currentVertexArray);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -1690,7 +1690,7 @@ mfError mfgD3D11SetVertexArray(mfgV2XRenderDevice* rd, mfgV2XVertexArray* va)
 	}
 	else
 	{
-		err = mfmIncObjectRef(d3dRD->currentVertexArray);
+		err = mfmAcquireObject(d3dRD->currentVertexArray);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		d3dRD->deviceContext->lpVtbl->IASetInputLayout(d3dRD->deviceContext, d3dVA->layout->inputLayout);
@@ -1710,9 +1710,9 @@ void mfgD3D11DestroyTexture1D(void* tex)
 	mfgD3D11Texture1D* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
-	if (mfmDecObjectRef(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dTex->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MF_ERROR_OKAY)
 		abort();
@@ -1833,7 +1833,7 @@ mfError mfgD3D11CreateTexture1D(mfgV2XRenderDevice* rd, mfgV2XTexture1D** tex, m
 	}
 
 	*tex = d3dTex;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -1887,9 +1887,9 @@ void mfgD3D11DestroyTexture2D(void* tex)
 	mfgD3D11Texture2D* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
-	if (mfmDecObjectRef(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dTex->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MF_ERROR_OKAY)
 		abort();
@@ -2015,7 +2015,7 @@ mfError mfgD3D11CreateTexture2D(mfgV2XRenderDevice* rd, mfgV2XTexture2D** tex, m
 	}
 
 	*tex = d3dTex;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -2070,9 +2070,9 @@ void mfgD3D11DestroyTexture3D(void* tex)
 	mfgD3D11Texture3D* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
-	if (mfmDecObjectRef(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dTex->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MF_ERROR_OKAY)
 		abort();
@@ -2197,7 +2197,7 @@ mfError mfgD3D11CreateTexture3D(mfgV2XRenderDevice* rd, mfgV2XTexture3D** tex, m
 	}
 
 	*tex = d3dTex;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -2252,9 +2252,9 @@ void mfgD3D11DestroySampler(void* sampler)
 
 	mfgD3D11Sampler* d3dS = sampler;
 	d3dS->sampler->lpVtbl->Release(d3dS->sampler);
-	if (mfmDecObjectRef(d3dS->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dS->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dS->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dS->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dS->base.renderDevice)->pool48, d3dS) != MF_ERROR_OKAY)
 		abort();
@@ -2348,7 +2348,7 @@ mfError mfgD3D11CreateSampler(mfgV2XRenderDevice* rd, mfgV2XSampler** sampler, c
 		MFG_RETURN_ERROR(MFG_ERROR_INTERNAL, u8"CreateSamplerState failed");
 
 	*sampler = d3dS;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -2365,9 +2365,9 @@ void mfgD3D11DestroyRenderTexture(void* tex)
 	d3dTex->target->lpVtbl->Release(d3dTex->target);
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
-	if (mfmDecObjectRef(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dTex->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MF_ERROR_OKAY)
 		abort();
@@ -2471,7 +2471,7 @@ mfError mfgD3D11CreateRenderTexture(mfgV2XRenderDevice* rd, mfgV2XRenderTexture*
 	}
 
 	*tex = d3dTex;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -2487,9 +2487,9 @@ void mfgD3D11DestroyDepthStencilTexture(void* tex)
 	mfgD3D11DepthStencilTexture* d3dTex = tex;
 	d3dTex->view->lpVtbl->Release(d3dTex->view);
 	d3dTex->texture->lpVtbl->Release(d3dTex->texture);
-	if (mfmDecObjectRef(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dTex->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dTex->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dTex->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dTex->base.renderDevice)->pool64, d3dTex) != MF_ERROR_OKAY)
 		abort();
@@ -2556,7 +2556,7 @@ mfError mfgD3D11CreateDepthStencilTexture(mfgV2XRenderDevice* rd, mfgV2XDepthSte
 	}
 
 	*tex = d3dTex;
-	mfError err = mfmIncObjectRef(rd);
+	mfError err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -2572,14 +2572,14 @@ void mfgD3D11DestroyFramebuffer(void* fb)
 	mfgD3D11Framebuffer* d3dFB = fb;
 	for (mfmU8 i = 0; i < 8; ++i)
 		if (d3dFB->textures[i] != NULL)
-			if (mfmDecObjectRef(d3dFB->textures[i]) != MF_ERROR_OKAY)
+			if (mfmReleaseObject(d3dFB->textures[i]) != MF_ERROR_OKAY)
 				abort();
 	if (d3dFB->depthStencilTexture != NULL)
-		if (mfmDecObjectRef(d3dFB->depthStencilTexture) != MF_ERROR_OKAY)
+		if (mfmReleaseObject(d3dFB->depthStencilTexture) != MF_ERROR_OKAY)
 			abort();
-	if (mfmDecObjectRef(d3dFB->base.renderDevice) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(d3dFB->base.renderDevice) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDestroyObject(&d3dFB->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&d3dFB->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)d3dFB->base.renderDevice)->pool256, d3dFB) != MF_ERROR_OKAY)
 		abort();
@@ -2627,7 +2627,7 @@ mfError mfgD3D11CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb
 			MFG_RETURN_ERROR(MFG_ERROR_INVALID_ARGUMENTS, u8"All color textures attached to a framebuffer must have the same width and height");
 		d3dFB->renderTargets[i] = ((mfgD3D11RenderTexture*)textures[i])->target;
 		d3dFB->textures[i] = textures[i];
-		err = mfmIncObjectRef(textures[i]);
+		err = mfmAcquireObject(textures[i]);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -2637,7 +2637,7 @@ mfError mfgD3D11CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb
 	else
 	{
 		d3dFB->depthStencilTexture = depthStencilTexture;
-		err = mfmIncObjectRef(depthStencilTexture);
+		err = mfmAcquireObject(depthStencilTexture);
 		if (err != MF_ERROR_OKAY)
 			return err;
 		d3dFB->depthStencilView = ((mfgD3D11DepthStencilTexture*)depthStencilTexture)->view;
@@ -2652,7 +2652,7 @@ mfError mfgD3D11CreateFramebuffer(mfgV2XRenderDevice* rd, mfgV2XFramebuffer** fb
 	d3dFB->viewport.MaxDepth = 1.0f;
 
 	*fb = d3dFB;
-	err = mfmIncObjectRef(rd);
+	err = mfmAcquireObject(rd);
 	if (err != MF_ERROR_OKAY)
 		MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 
@@ -2767,9 +2767,9 @@ void mfgD3D11DestroyRasterState(void* state)
 	mfgD3D11RasterState* rs = state;
 	rs->state->lpVtbl->Release(rs->state);
 	if (rs != ((mfgD3D11RenderDevice*)rs->base.renderDevice)->defaultRasterState)
-		if (mfmDecObjectRef(rs->base.renderDevice) != MF_ERROR_OKAY)
+		if (mfmReleaseObject(rs->base.renderDevice) != MF_ERROR_OKAY)
 			abort();
-	if (mfmDestroyObject(&rs->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&rs->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)rs->base.renderDevice)->pool48, rs) != MF_ERROR_OKAY)
 		abort();
@@ -2836,7 +2836,7 @@ mfError mfgD3D11CreateRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState** st
 	*state = rs;
 	if (d3dRD->defaultRasterState != NULL)
 	{
-		mfError err = mfmIncObjectRef(rd);
+		mfError err = mfmAcquireObject(rd);
 		if (err != MF_ERROR_OKAY)
 			MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 	}
@@ -2862,12 +2862,12 @@ mfError mfgD3D11SetRasterState(mfgV2XRenderDevice* rd, mfgV2XRasterState* state)
 	{
 		if (((mfgD3D11RenderDevice*)rd)->currentRasterState != NULL)
 		{
-			err = mfmDecObjectRef(((mfgD3D11RenderDevice*)rd)->currentRasterState);
+			err = mfmReleaseObject(((mfgD3D11RenderDevice*)rd)->currentRasterState);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
 
-		err = mfmIncObjectRef(state);
+		err = mfmAcquireObject(state);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -2885,9 +2885,9 @@ void mfgD3D11DestroyDepthStencilState(void* state)
 	mfgD3D11DepthStencilState* dss = state;
 	dss->state->lpVtbl->Release(dss->state);
 	if (dss != ((mfgD3D11RenderDevice*)dss->base.renderDevice)->defaultDepthStencilState)
-		if (mfmDecObjectRef(dss->base.renderDevice) != MF_ERROR_OKAY)
+		if (mfmReleaseObject(dss->base.renderDevice) != MF_ERROR_OKAY)
 			abort();
-	if (mfmDestroyObject(&dss->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&dss->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)dss->base.renderDevice)->pool48, dss) != MF_ERROR_OKAY)
 		abort();
@@ -3046,7 +3046,7 @@ mfError mfgD3D11CreateDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStenc
 	*state = dss;
 	if (d3dRD->defaultDepthStencilState != NULL)
 	{
-		mfError err = mfmIncObjectRef(rd);
+		mfError err = mfmAcquireObject(rd);
 		if (err != MF_ERROR_OKAY)
 			MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 	}
@@ -3072,12 +3072,12 @@ mfError mfgD3D11SetDepthStencilState(mfgV2XRenderDevice* rd, mfgV2XDepthStencilS
 	{
 		if (((mfgD3D11RenderDevice*)rd)->currentDepthStencilState != NULL)
 		{
-			err = mfmDecObjectRef(((mfgD3D11RenderDevice*)rd)->currentDepthStencilState);
+			err = mfmReleaseObject(((mfgD3D11RenderDevice*)rd)->currentDepthStencilState);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
 
-		err = mfmIncObjectRef(state);
+		err = mfmAcquireObject(state);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -3095,9 +3095,9 @@ void mfgD3D11DestroyBlendState(void* state)
 	mfgD3D11BlendState* bs = state;
 	bs->state->lpVtbl->Release(bs->state);
 	if (bs != ((mfgD3D11RenderDevice*)bs->base.renderDevice)->defaultBlendState)
-		if (mfmDecObjectRef(bs->base.renderDevice) != MF_ERROR_OKAY)
+		if (mfmReleaseObject(bs->base.renderDevice) != MF_ERROR_OKAY)
 			abort();
-	if (mfmDestroyObject(&bs->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&bs->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(((mfgD3D11RenderDevice*)bs->base.renderDevice)->pool48, bs) != MF_ERROR_OKAY)
 		abort();
@@ -3222,7 +3222,7 @@ mfError mfgD3D11CreateBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState** stat
 	*state = bs;
 	if (d3dRD->defaultBlendState != NULL)
 	{
-		mfError err = mfmIncObjectRef(rd);
+		mfError err = mfmAcquireObject(rd);
 		if (err != MF_ERROR_OKAY)
 			MFG_RETURN_ERROR(err, u8"mfmIncObjectRef failed on render device");
 	}
@@ -3251,12 +3251,12 @@ mfError mfgD3D11SetBlendState(mfgV2XRenderDevice* rd, mfgV2XBlendState* state)
 	{
 		if (((mfgD3D11RenderDevice*)rd)->currentBlendState != NULL)
 		{
-			err = mfmDecObjectRef(((mfgD3D11RenderDevice*)rd)->currentBlendState);
+			err = mfmReleaseObject(((mfgD3D11RenderDevice*)rd)->currentBlendState);
 			if (err != MF_ERROR_OKAY)
 				return err;
 		}
 
-		err = mfmIncObjectRef(state);
+		err = mfmAcquireObject(state);
 		if (err != MF_ERROR_OKAY)
 			return err;
 	}
@@ -3682,14 +3682,14 @@ mfError mfgV2XCreateD3D11RenderDevice(mfgV2XRenderDevice ** renderDevice, mfiWin
 	rd->renderTargetCount = 1;
 	rd->depthStencilView = rd->defaultDepthStencilView;
 
-	if (mfmIncObjectRef(rd->defaultRasterState) != MF_ERROR_OKAY)
+	if (mfmAcquireObject(rd->defaultRasterState) != MF_ERROR_OKAY)
 		abort();
-	if (mfmIncObjectRef(rd->defaultDepthStencilState) != MF_ERROR_OKAY)
+	if (mfmAcquireObject(rd->defaultDepthStencilState) != MF_ERROR_OKAY)
 		abort();
-	if (mfmIncObjectRef(rd->defaultBlendState) != MF_ERROR_OKAY)
+	if (mfmAcquireObject(rd->defaultBlendState) != MF_ERROR_OKAY)
 		abort();
 
-	if (mfmIncObjectRef(rd->window) != MF_ERROR_OKAY)
+	if (mfmAcquireObject(rd->window) != MF_ERROR_OKAY)
 		abort();
 
 	// Successfully inited render device
@@ -3703,7 +3703,7 @@ void mfgV2XDestroyD3D11RenderDevice(void * renderDevice)
 		abort();
 
 	mfgD3D11RenderDevice* rd = (mfgD3D11RenderDevice*)renderDevice;
-	if (mfmDecObjectRef(rd->window) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(rd->window) != MF_ERROR_OKAY)
 		abort();
 
 	// Destroy default states
@@ -3714,11 +3714,11 @@ void mfgV2XDestroyD3D11RenderDevice(void * renderDevice)
 	if (mfgV2XSetBlendState(rd, NULL) != MF_ERROR_OKAY)
 		abort();
 
-	if (mfmDecObjectRef(rd->defaultRasterState) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(rd->defaultRasterState) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDecObjectRef(rd->defaultDepthStencilState) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(rd->defaultDepthStencilState) != MF_ERROR_OKAY)
 		abort();
-	if (mfmDecObjectRef(rd->defaultBlendState) != MF_ERROR_OKAY)
+	if (mfmReleaseObject(rd->defaultBlendState) != MF_ERROR_OKAY)
 		abort();
 
 	// Destroy pools
@@ -3736,7 +3736,7 @@ void mfgV2XDestroyD3D11RenderDevice(void * renderDevice)
 	rd->device->lpVtbl->Release(rd->device);
 
 	// Deallocate render device
-	if (mfmDestroyObject(&rd->base.object) != MF_ERROR_OKAY)
+	if (mfmDeinitObject(&rd->base.object) != MF_ERROR_OKAY)
 		abort();
 	if (mfmDeallocate(rd->allocator, rd) != MF_ERROR_OKAY)
 		abort();
