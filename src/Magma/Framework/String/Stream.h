@@ -70,7 +70,7 @@ extern "C"
 	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfError mfsWrite(mfsStream* stream, const mfmU8* data, mfmU64 dataSize, mfmU64* outSize);
+	mfError mfsWrite(mfsStream* stream, const void* data, mfmU64 dataSize, mfmU64* outSize);
 
 	/// <summary>
 	///		Reads raw data from a stream.
@@ -85,7 +85,7 @@ extern "C"
 	///		MFS_ERROR_UNSUPPORTED_FUNCTION if the stream doesn't support this function.
 	///		Other error codes are returned by specific stream types.
 	/// </returns>
-	mfError mfsRead(mfsStream* stream, mfmU8* data, mfmU64 dataSize, mfmU64* outSize);
+	mfError mfsRead(mfsStream* stream, void* data, mfmU64 dataSize, mfmU64* outSize);
 
 	/// <summary>
 	///		Reads raw data from a stream until a certain character sequence is found or the buffer is filled.

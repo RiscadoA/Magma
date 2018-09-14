@@ -107,7 +107,7 @@ void mfTerminate()
 	// Terminate texture loader
 	err = mfgTerminateTextureLoader();
 	if (err != MF_ERROR_OKAY)
-		return err;
+		abort();
 
 	// Terminate windows library
 	mfiTerminateWindows();

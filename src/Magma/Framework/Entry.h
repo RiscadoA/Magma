@@ -12,9 +12,11 @@ extern "C"
 {
 #endif
 
+#ifndef MF_ERROR_OKAY
 #define MF_ERROR_OKAY					0x00
 #define MF_ERROR_ALREADY_INITIALIZED	0x01
 #define MF_ERROR_NOT_INITIALIZED		0x02
+#endif
 
 	typedef mfmU32 mfEnum;
 

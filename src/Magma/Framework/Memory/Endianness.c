@@ -2,21 +2,21 @@
 
 #include <stdlib.h>
 
-mfmBool mfmIsLittleEndian()
+mfmBool mfmIsLittleEndian(void)
 {
 	union { mfmU32 w; mfmU8 b[4]; } check;
 	check.w = 1;
 	return (check.b[0] == 1) ? MFM_TRUE : MFM_FALSE;
 }
 
-mfmBool mfmIsBigEndian()
+mfmBool mfmIsBigEndian(void)
 {
 	union { mfmU32 w; mfmU8 b[4]; } check;
 	check.w = 1;
 	return (check.b[0] == 1) ? MFM_FALSE : MFM_TRUE;
 }
 
-void mfmSwapBytes8(void* src, void* dst)
+static void mfmSwapBytes8(const void* src, void* dst)
 {
 #if defined(_MSC_VER)
 	*((mfmU64*)dst) = _byteswap_uint64(*((mfmU64*)src));
@@ -35,7 +35,7 @@ void mfmSwapBytes8(void* src, void* dst)
 #endif
 }
 
-void mfmSwapBytes4(void* src, void* dst)
+static void mfmSwapBytes4(const void* src, void* dst)
 {
 #if defined(_MSC_VER)
 	*((mfmU32*)dst) = _byteswap_ulong(*((mfmU32*)src));
@@ -50,7 +50,7 @@ void mfmSwapBytes4(void* src, void* dst)
 #endif
 }
 
-void mfmSwapBytes2(void* src, void* dst)
+static void mfmSwapBytes2(const void* src, void* dst)
 {
 #if defined(_MSC_VER)
 	*((mfmU16*)dst) = _byteswap_ushort(*((mfmU16*)src));
@@ -63,7 +63,7 @@ void mfmSwapBytes2(void* src, void* dst)
 #endif
 }
 
-void mfmToLittleEndian8(void * src, void * dst)
+void mfmToLittleEndian8(const void * src, void * dst)
 {
 	if (mfmIsLittleEndian())
 		*((mfmU64*)dst) = *((mfmU64*)src);
@@ -71,7 +71,7 @@ void mfmToLittleEndian8(void * src, void * dst)
 		mfmSwapBytes8(src, dst);
 }
 
-void mfmToLittleEndian4(void * src, void * dst)
+void mfmToLittleEndian4(const void * src, void * dst)
 {
 	if (mfmIsLittleEndian())
 		*((mfmU32*)dst) = *((mfmU32*)src);
@@ -79,7 +79,7 @@ void mfmToLittleEndian4(void * src, void * dst)
 		mfmSwapBytes4(src, dst);
 }
 
-void mfmToLittleEndian2(void * src, void * dst)
+void mfmToLittleEndian2(const void * src, void * dst)
 {
 	if (mfmIsLittleEndian())
 		*((mfmU16*)dst) = *((mfmU16*)src);
@@ -87,7 +87,7 @@ void mfmToLittleEndian2(void * src, void * dst)
 		mfmSwapBytes2(src, dst);
 }
 
-void mfmFromLittleEndian8(void * src, void * dst)
+void mfmFromLittleEndian8(const void * src, void * dst)
 {
 	if (mfmIsLittleEndian())
 		*((mfmU64*)dst) = *((mfmU64*)src);
@@ -95,7 +95,7 @@ void mfmFromLittleEndian8(void * src, void * dst)
 		mfmSwapBytes8(src, dst);
 }
 
-void mfmFromLittleEndian4(void * src, void * dst)
+void mfmFromLittleEndian4(const void * src, void * dst)
 {
 	if (mfmIsLittleEndian())
 		*((mfmU32*)dst) = *((mfmU32*)src);
@@ -103,7 +103,7 @@ void mfmFromLittleEndian4(void * src, void * dst)
 		mfmSwapBytes4(src, dst);
 }
 
-void mfmFromLittleEndian2(void * src, void * dst)
+void mfmFromLittleEndian2(const void * src, void * dst)
 {
 	if (mfmIsLittleEndian())
 		*((mfmU16*)dst) = *((mfmU16*)src);
@@ -111,7 +111,7 @@ void mfmFromLittleEndian2(void * src, void * dst)
 		mfmSwapBytes2(src, dst);
 }
 
-void mfmToBigEndian8(void * src, void * dst)
+void mfmToBigEndian8(const void * src, void * dst)
 {
 	if (mfmIsBigEndian())
 		*((mfmU64*)dst) = *((mfmU64*)src);
@@ -119,7 +119,7 @@ void mfmToBigEndian8(void * src, void * dst)
 		mfmSwapBytes8(src, dst);
 }
 
-void mfmToBigEndian4(void * src, void * dst)
+void mfmToBigEndian4(const void * src, void * dst)
 {
 	if (mfmIsBigEndian())
 		*((mfmU32*)dst) = *((mfmU32*)src);
@@ -127,7 +127,7 @@ void mfmToBigEndian4(void * src, void * dst)
 		mfmSwapBytes4(src, dst);
 }
 
-void mfmToBigEndian2(void * src, void * dst)
+void mfmToBigEndian2(const void * src, void * dst)
 {
 	if (mfmIsBigEndian())
 		*((mfmU16*)dst) = *((mfmU16*)src);
@@ -135,7 +135,7 @@ void mfmToBigEndian2(void * src, void * dst)
 		mfmSwapBytes2(src, dst);
 }
 
-void mfmFromBigEndian8(void * src, void * dst)
+void mfmFromBigEndian8(const void * src, void * dst)
 {
 	if (mfmIsBigEndian())
 		*((mfmU64*)dst) = *((mfmU64*)src);
@@ -143,7 +143,7 @@ void mfmFromBigEndian8(void * src, void * dst)
 		mfmSwapBytes8(src, dst);
 }
 
-void mfmFromBigEndian4(void * src, void * dst)
+void mfmFromBigEndian4(const void * src, void * dst)
 {
 	if (mfmIsBigEndian())
 		*((mfmU32*)dst) = *((mfmU32*)src);
@@ -151,7 +151,7 @@ void mfmFromBigEndian4(void * src, void * dst)
 		mfmSwapBytes4(src, dst);
 }
 
-void mfmFromBigEndian2(void * src, void * dst)
+void mfmFromBigEndian2(const void * src, void * dst)
 {
 	if (mfmIsBigEndian())
 		*((mfmU16*)dst) = *((mfmU16*)src);

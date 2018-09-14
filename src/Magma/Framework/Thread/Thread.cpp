@@ -6,20 +6,6 @@
 using namespace Magma::Framework;
 using namespace Magma::Framework::Thread;
 
-class Test
-{
-public:
-	void test1(int x)
-	{
-
-	}
-};
-
-void test2(int y)
-{
-
-}
-
 struct ThreadData
 {
 	Memory::Functor<void(void*)> func;

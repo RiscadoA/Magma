@@ -66,6 +66,28 @@ set (MAGMA_ROOT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 configure_file(Config.h.in Config.h)
 
+if(MSVC)
+  if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W3" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
+  endif()
+
+  if(NOT CMAKE_C_FLAGS MATCHES "/WX")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
+  endif()
+
+   if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+  endif()
+
+  if(NOT CMAKE_CXX_FLAGS MATCHES "/WX")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
+  endif()
+endif()
+
 # Add files as library
 add_library(Magma-Framework ${Magma_Framework_Source} ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
 set_target_properties (Magma-Framework PROPERTIES FOLDER Magma)

@@ -10,97 +10,97 @@ extern "C"
 	///		Checks if the system uses little endianness.
 	/// </summary>
 	/// <returns>MFM_TRUE if yes, otherwise MFM_FALSE</returns>
-	mfmBool mfmIsLittleEndian();
+	mfmBool mfmIsLittleEndian(void);
 
 	/// <summary>
 	///		Checks if the system uses big endianness.
 	/// </summary>
 	/// <returns>MFM_TRUE if yes, otherwise MFM_FALSE</returns>
-	mfmBool mfmIsBigEndian();
+	mfmBool mfmIsBigEndian(void);
 
 	/// <summary>
 	///		Converts a 8 byte value from the system endianness to little endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmToLittleEndian8(void* src, void* dst);
+	void mfmToLittleEndian8(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 4 byte value from the system endianness to little endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmToLittleEndian4(void* src, void* dst);
+	void mfmToLittleEndian4(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 2 byte value from the system endianness to little endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmToLittleEndian2(void* src, void* dst);
+	void mfmToLittleEndian2(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 8 byte value from little endianness to the system endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmFromLittleEndian8(void* src, void* dst);
+	void mfmFromLittleEndian8(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 4 byte value from little endianness to the system endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmFromLittleEndian4(void* src, void* dst);
+	void mfmFromLittleEndian4(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 2 byte value from little endianness to the system endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmFromLittleEndian2(void* src, void* dst);
+	void mfmFromLittleEndian2(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 8 byte value from the system endianness to big endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmToBigEndian8(void* src, void* dst);
+	void mfmToBigEndian8(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 4 byte value from the system endianness to big endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmToBigEndian4(void* src, void* dst);
+	void mfmToBigEndian4(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 2 byte value from the system endianness to big endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmToBigEndian2(void* src, void* dst);
+	void mfmToBigEndian2(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 8 byte value from big endianness to the system endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmFromBigEndian8(void* src, void* dst);
+	void mfmFromBigEndian8(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 4 byte value from big endianness to the system endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmFromBigEndian4(void* src, void* dst);
+	void mfmFromBigEndian4(const void* src, void* dst);
 
 	/// <summary>
 	///		Converts a 2 byte value from big endianness to the system endianness.
 	/// </summary>
 	/// <param name="src">Source value pointer</param>
 	/// <param name="dst">Destination value pointer</param>
-	void mfmFromBigEndian2(void* src, void* dst);
+	void mfmFromBigEndian2(const void* src, void* dst);
 
 #ifdef __cplusplus
 }

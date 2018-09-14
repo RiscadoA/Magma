@@ -39,16 +39,16 @@ static mfError mfgV2XPutToken(mfgV2XLexerInternalState * state, const mfgV2XToke
 	else if (token == NULL)
 	{
 		mfsStringStream ss;
-		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPutString(&ss, u8"[mfgV2XPutToken : MFG_ERROR_INVALID_ARGUMENTS] Token is NULL");
+		mfsCreateLocalStringStream(&ss, (mfmU8*)state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPutString((mfsStream*)&ss, u8"[mfgV2XPutToken : MFG_ERROR_INVALID_ARGUMENTS] Token is NULL");
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_INVALID_ARGUMENTS;
 	}
 	else if (state->state->tokenCount + 1 >= state->maxTokenCount)
 	{
 		mfsStringStream ss;
-		mfsCreateLocalStringStream(&ss, state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
-		mfsPutString(&ss, u8"[mfgV2XPutToken : MFG_ERROR_TOKENS_OVERFLOW] Tokens array is already full (try increasing its size)");
+		mfsCreateLocalStringStream(&ss, (mfmU8*)state->state->errorMsg, MFG_V2X_MAX_ERROR_MESSAGE_SIZE);
+		mfsPutString((mfsStream*)&ss, u8"[mfgV2XPutToken : MFG_ERROR_TOKENS_OVERFLOW] Tokens array is already full (try increasing its size)");
 		mfsDestroyLocalStringStream(&ss);
 		return MFG_ERROR_TOKENS_OVERFLOW;
 	}
