@@ -31,7 +31,7 @@ void test2(mfmI32 x, mfmF32)
 	mfsPutString(mfsOutStream, u8"test2\n");
 }
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 

@@ -29,7 +29,7 @@ extern "C"
 	///		Returns MF_ERROR_OKAY if there was no error.
 	///		Otherwise returns an error code.
 	/// </returns>
-	mfError mfInit(int argc, const char** argv);
+	mfError mfInit(int argc, char** argv);
 
 	/// <summary>
 	///		Terminates the magma framework library.

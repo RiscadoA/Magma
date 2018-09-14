@@ -29,7 +29,7 @@ namespace Magma
 		/// </summary>
 		/// <param name="argc">Number of arguments</param>
 		/// <param name="argv">Argument array</param>
-		void Init(int argc, const char** argv);
+		void Init(int argc, char** argv);
 
 		/// <summary>
 		///		Terminates the magma framework library.

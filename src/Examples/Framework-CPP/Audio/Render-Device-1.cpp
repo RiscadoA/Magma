@@ -41,7 +41,7 @@ int run()
 	while (true);
 }
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
 	Magma::Framework::Init(argc, argv);
 

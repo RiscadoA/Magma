@@ -5,7 +5,7 @@
 #include "Input/D3DWindow.h"
 #include "Config.h"
 
-void Magma::Framework::Init(int argc, const char ** argv)
+void Magma::Framework::Init(int argc, char ** argv)
 {
 	mfError err = mfInit(argc, argv);
 	if (err == MF_ERROR_ALREADY_INITIALIZED)

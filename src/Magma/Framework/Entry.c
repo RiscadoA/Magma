@@ -20,7 +20,7 @@
 
 static mfmBool mfInitialized = MFM_FALSE;
 
-mfError mfInit(int argc, const char** argv)
+mfError mfInit(int argc, char** argv)
 {
 	if (mfInitialized == MFM_TRUE)
 		return MF_ERROR_ALREADY_INITIALIZED;
