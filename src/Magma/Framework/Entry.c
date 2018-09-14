@@ -16,6 +16,8 @@
 #include "Audio/RenderDevice.h"
 #include "Audio/OALRenderDevice.h"
 
+#include <stdlib.h>
+
 static mfmBool mfInitialized = MFM_FALSE;
 
 mfError mfInit(int argc, const char** argv)

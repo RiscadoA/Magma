@@ -50,7 +50,7 @@ Magma::Framework::Memory::Handle::~Handle()
 	{
 		mfError err = mfmReleaseObject(m_obj);
 		if (err != MF_ERROR_OKAY)
-			throw ObjectError("Failed to decrease object reference count");
+			abort();
 	}
 }
 

@@ -281,7 +281,7 @@ mfError mfaGetPropertyF(mfaRenderDevice * rd, mfaEnum id, mfmF32 * value)
 mfmBool mfaGetErrorString(mfaRenderDevice * rd, mfsUTF8CodeUnit * str, mfmU64 maxSize)
 {
 	if (rd == NULL)
-		return MFA_ERROR_INVALID_ARGUMENTS;
+		return MFM_FALSE;
 	return rd->getErrorString(rd, str, maxSize);
 }
 

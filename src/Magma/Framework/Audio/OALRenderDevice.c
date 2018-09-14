@@ -81,6 +81,7 @@ if (err != AL_NO_ERROR) abort();\
 #endif
 
 static void mfaOALDestroyBuffer(void* buf);
+static mfError mfaOALUpdateBuffer(mfaRenderDevice* rd, mfaBuffer* buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency);
 
 static mfError mfaOALCreateBuffer(mfaRenderDevice* rd, mfaBuffer** buf, const void* data, mfmU64 size, mfaEnum format, mfmU64 frequency)
 {
