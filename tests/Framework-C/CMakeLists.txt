@@ -6,10 +6,10 @@ SET(CTEST_OUTPUT_ON_FAILURE TRUE)
 
 foreach(file ${files})
 	string(REGEX REPLACE "(^.*\\/|\\.[^.]*$)" "" file_without_ext ${file})
-	set(file_without_ext Magma-Framework-Test_${file_without_ext})
+	set(file_without_ext Magma-Framework-C-Test_${file_without_ext})
 	add_executable(${file_without_ext} ${file})
 	target_link_libraries(${file_without_ext} Magma-Framework)
-	add_test(${file_without_ext} ${file_without_ext})
+	add_test(NAME ${file_without_ext} COMMAND ${file_without_ext})
 	set_tests_properties(${file_without_ext}
 		PROPERTIES
 		PASS_REGULAR_EXPRESSION "Test passed")
