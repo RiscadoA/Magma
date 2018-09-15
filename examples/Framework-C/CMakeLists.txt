@@ -1,4 +1,4 @@
-# ./src/Examples/Framework-C/CMakeLists.txt
+# ./examples/Framework-C/CMakeLists.txt
 
 file(GLOB_RECURSE files RELATIVE ${CMAKE_CURRENT_LIST_DIR} "*")
 foreach(file ${files})
@@ -8,8 +8,13 @@ foreach(file ${files})
 		message(STATUS ${executableName} " " ${file})
 		add_executable(${executableName} ${file})
 		target_link_libraries(${executableName} Magma-Framework)
-		include_directories(${CMAKE_CURRENT_LIST_DIR}/../../)
-		include_directories(${CMAKE_CURRENT_LIST_DIR}/../../../extern/glm/)
 		set_target_properties(${executableName} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/")
+	
+		if (DEFINED OPENAL_DLLS)
+			add_custom_command(TARGET ${executableName} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${OPENAL_DLLS}
+			$<TARGET_FILE_DIR:${executableName}>)
+		endif()
 	endif()
 endforeach()

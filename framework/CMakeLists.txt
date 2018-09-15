@@ -84,10 +84,43 @@ target_include_directories(Magma-Framework PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/)
 # Include public headers
 target_include_directories(Magma-Framework PUBLIC include)
 
-# Link external libraries
+# Add freetype
 find_package(freetype REQUIRED)
-target_link_libraries(Magma-Framework PRIVATE freetype)
+target_link_libraries(Magma-Framework PRIVATE Freetype::Freetype)
 
+# Add OpenAL if needed
+if(MAGMA_FRAMEWORK_USE_OPENAL)
+	find_package(OpenAL REQUIRED)
+	target_include_directories(Magma-Framework PRIVATE ${OPENAL_INCLUDE_DIR})
+	target_link_libraries(Magma-Framework PRIVATE ${OPENAL_LIBRARY})
+	
+	if (DEFINED OPENAL_DLLS)
+		add_custom_command(TARGET Magma-Framework POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${OPENAL_DLLS}
+		$<TARGET_FILE_DIR:Magma-Framework>)
+	endif()
+endif()
+
+# Add GLEW and GLFW if needed
+if(MAGMA_FRAMEWORK_USE_OPENGL)
+	find_package(OpenGL REQUIRED)
+	target_link_libraries(Magma-Framework PUBLIC OpenGL::GL)
+
+	set(GLEW_USE_STATIC_LIBS ON)
+	find_package(GLEW REQUIRED)
+	target_link_libraries(Magma-Framework PUBLIC GLEW::GLEW)
+
+	find_package(GLFW REQUIRED)
+	target_include_directories(Magma-Framework PRIVATE ${GLFW_INCLUDE_DIR})
+	target_link_libraries(Magma-Framework PUBLIC ${GLFW_LIBRARIES})
+endif()
+
+# Add ZLIB
+find_package(ZLIB REQUIRED)
+target_link_libraries(Magma-Framework PRIVATE ZLIB::ZLIB)
+
+# Add GLM and stb_image.h
 target_include_directories(
 	Magma-Framework
 	PRIVATE
@@ -95,26 +128,3 @@ target_include_directories(
 	PUBLIC
 		${CMAKE_SOURCE_DIR}/extern/glm/
 )
-
-target_link_libraries(Magma-Framework PRIVATE freetype)
-#target_link_libraries(Magma-Framework PRIVATE zlibstatic)
-
-#if(MAGMA_FRAMEWORK_USE_OPENGL)
-#	target_include_directories(
-#		Magma-Framework
-#		PRIVATE
-#			${CMAKE_SOURCE_DIR}/extern/glew/include/
-#			${CMAKE_SOURCE_DIR}/extern/glfw/include/
-#	)
-#	target_link_libraries(Magma-Framework PRIVATE glew_s)
-#	target_link_libraries(Magma-Framework PRIVATE glfw)
-#endif()
-
-#if(MAGMA_FRAMEWORK_USE_OPENAL)
-#	target_include_directories(
-#		Magma-Framework
-#		PRIVATE
-#			${CMAKE_SOURCE_DIR}/extern/openal-soft/include/
-#	)
-#	target_link_libraries(Magma-Framework PRIVATE OpenAL)
-#endif()

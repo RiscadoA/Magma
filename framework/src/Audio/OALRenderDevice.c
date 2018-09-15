@@ -21,8 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#include <al.h>
+#include <alc.h>
 
 #include <Magma/Framework/Memory/PoolAllocator.h>
 
