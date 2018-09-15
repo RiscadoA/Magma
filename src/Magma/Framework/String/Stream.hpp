@@ -21,6 +21,13 @@ namespace Magma
 				inline HStream(const Memory::Handle& object) : Memory::Handle(object) {}
 
 				/// <summary>
+				///		Sets the current buffer being used.
+				/// </summary>
+				/// <param name="buffer">New buffer</param>
+				/// <param name="size">New buffer size</param>
+				void SetBuffer(void* buffer, mfmU64 size);
+
+				/// <summary>
 				///		Seeks a position on the stream relative to its beginning.
 				/// </summary>
 				/// <param name="position">New position</param>
@@ -319,6 +326,8 @@ namespace Magma
 			inline void HStream::Print<mfmF64>(mfmF64 value) { this->PrintF64(value); }
 			template<>
 			inline void HStream::Print<mfsUTF8CodeUnit>(mfsUTF8CodeUnit value) { this->PutByte(value); }
+			template<>
+			inline void HStream::Print<mfsUTF8CodeUnit*>(mfsUTF8CodeUnit* value) { this->PutString(value); }
 			template<>
 			inline void HStream::Print<const mfsUTF8CodeUnit*>(const mfsUTF8CodeUnit* value) { this->PutString(value); }
 

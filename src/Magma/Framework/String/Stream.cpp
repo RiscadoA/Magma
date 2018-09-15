@@ -20,6 +20,14 @@ void Magma::Framework::String::TerminateStreams()
 	OutStream.Release();
 }
 
+void Magma::Framework::String::HStream::SetBuffer(void * buffer, mfmU64 size)
+{
+	mfError err = mfsSetBuffer(reinterpret_cast<mfsStream*>(&this->Get()), (mfmU8*)buffer, size);
+	if (err == MF_ERROR_OKAY)
+		return;
+	throw StreamError(ErrorToString(err));
+}
+
 void Magma::Framework::String::HStream::SeekBegin(mfmU64 position)
 {
 	mfError err = mfsSeekBegin(reinterpret_cast<mfsStream*>(&this->Get()), position);
