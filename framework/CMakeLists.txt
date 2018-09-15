@@ -76,7 +76,6 @@ file(
 # Add files as library
 add_library(Magma-Framework ${Magma_Framework_Source} ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
 target_compile_features(Magma-Framework PUBLIC cxx_std_17)
-set_target_properties (Magma-Framework PROPERTIES FOLDER Magma)
 
 # Include config file
 target_include_directories(Magma-Framework PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/)

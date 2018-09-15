@@ -51,12 +51,7 @@ mfError mfmReleaseObject(mfmObject* obj)
 		return err;
 
 	if (refCount == 1)
-	{
-		err = mfmDeinitObject(obj);
-		if (err != MF_ERROR_OKAY)
-			return err;
 		obj->destructorFunc(obj);
-	}
 
 	return MF_ERROR_OKAY;
 }

@@ -79,7 +79,6 @@ int main(int argc, const char** argv)
 	if (err != MF_ERROR_OKAY)
 		abort();
 
-	mffDestroyFolderArchive(archive);
 	mfTerminate();
 	return 0;
 }

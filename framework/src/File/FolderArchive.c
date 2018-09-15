@@ -331,10 +331,6 @@ static mfError mffArchiveDeleteDirectoryUnsafe(mffArchive* archive, mffDirectory
 		mfmGetObjectRefCount(&dir->object, &refCount);
 
 		if (refCount != 1)return MFM_ERROR_STILL_HAS_REFERENCES;
-
-		err = mfmReleaseObject(&dir->object);
-		if (err != MF_ERROR_OKAY)
-			return err;
 	}
 
 	// Delete file
@@ -384,8 +380,10 @@ static mfError mffArchiveDeleteDirectoryUnsafe(mffArchive* archive, mffDirectory
 		}
 	}
 
-	// Call file destructor
-	folderFile->base.object.destructorFunc(folderFile);
+	// Destroy file
+	err = mfmReleaseObject(&dir->object);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	return MF_ERROR_OKAY;
 }
@@ -586,11 +584,8 @@ static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
 		mfmI32 refCount;
 		mfmGetObjectRefCount(&file->object, &refCount);
 
-		if (refCount != 1)return MFM_ERROR_STILL_HAS_REFERENCES;
-
-		err = mfmReleaseObject(&file->object);
-		if (err != MF_ERROR_OKAY)
-			return err;
+		if (refCount != 1)
+			return MFM_ERROR_STILL_HAS_REFERENCES;
 	}
 
 	// Delete file
@@ -641,7 +636,9 @@ static mfError mffArchiveDeleteFileUnsafe(mffArchive* archive, mffFile* file)
 	}
 
 	// Call file destructor
-	folderFile->base.object.destructorFunc(folderFile);
+	err = mfmReleaseObject(&file->object);
+	if (err != MF_ERROR_OKAY)
+		return err;
 
 	return MF_ERROR_OKAY;
 }

@@ -73,7 +73,7 @@ else()
 		DOC "The GLFW library")
 endif()
 
-# Handle REQUIRD argument, define *_FOUND variable
+# Handle REQUIRED argument, define *_FOUND variable
 find_package_handle_standard_args(GLFW DEFAULT_MSG GLFW_INCLUDE_DIR GLFW_LIBRARY)
 
 # Define GLFW_LIBRARIES and GLFW_INCLUDE_DIRS

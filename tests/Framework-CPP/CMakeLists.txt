@@ -20,4 +20,11 @@ foreach(file ${files})
 	set_tests_properties(${file_without_ext}
 		PROPERTIES
 		TIMEOUT 120)
+	set_target_properties(${file_without_ext} PROPERTIES FOLDER Tests)
+	if (DEFINED OPENAL_DLLS)
+		add_custom_command(TARGET ${file_without_ext} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${OPENAL_DLLS}
+		$<TARGET_FILE_DIR:${file_without_ext}>)
+	endif()
 endforeach()
