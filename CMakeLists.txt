@@ -11,6 +11,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Build Framework
 add_subdirectory(framework/)
 
+# Build Engine
+add_subdirectory(engine/)
+
 # Build tests
 add_subdirectory(tests/)
 

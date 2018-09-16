@@ -1,6 +1,6 @@
 #include <Magma/Framework/String/UTF8.hpp>
-
-#include <sstream>
+#include <Magma/Framework/String/StringStream.hpp>
+#include <Magma/Framework/ErrorString.h>
 
 using namespace Magma::Framework::String;
 
@@ -13,142 +13,56 @@ mfmU64 Magma::Framework::String::GetU8CharSize(const UTF8CodeUnit * src)
 {
 	mfmU64 size;
 	auto err = mfsGetUTF8CharSize(src, &size);
-	switch (err)
-	{
-		case MF_ERROR_OKAY:
-			break;
-		case MFS_ERROR_INVALID_ARGUMENTS:
-		{
-			std::stringstream ss;
-			ss << "Failed to get UTF-8 character size:" << std::endl;
-			ss << "Invalid arguments:" << std::endl;
-			ss << "mfsGetUTF8CharSize returned MFS_ERROR_INVALID_ARGUMENTS";
-			throw StringError(ss.str());
-		}
-		case MFS_ERROR_INVALID_UTF8:
-		{
-			std::stringstream ss;
-			ss << "Failed to get UTF-8 character size:" << std::endl;
-			ss << "Invalid UTF-8:" << std::endl;
-			ss << "mfsGetUTF8CharSize returned MFS_ERROR_INVALID_UTF8";
-			throw StringError(ss.str());
-		}
-		default:
-		{
-			std::stringstream ss;
-			ss << "Failed to get UTF-8 character size:" << std::endl;
-			ss << "mfsGetUTF8CharSize returned '" << err << "'";
-			throw StringError(ss.str());
-		}
-	}
+	if (err == MF_ERROR_OKAY)
+		return size;
 
-	return size;
+	mfsUTF8CodeUnit msg[512];
+	auto ss = String::StringStream(msg, sizeof(msg));
+	ss.Get() << "Failed to get UTF-8 character size:\n";
+	ss.Get() << "mfsGetUTF8CharSize returned '" << mfErrorToString(err) << "'";
+	throw StringError(msg);
 }
 
 mfmU64 Magma::Framework::String::GetU8CharSize(UnicodePoint up)
 {
 	mfmU64 size;
 	auto err = mfsGetSizeAsUTF8(up, &size);
-	switch (err)
-	{
-		case MF_ERROR_OKAY:
-			break;
-		case MFS_ERROR_INVALID_UNICODE:
-		{
-			std::stringstream ss;
-			ss << "Failed to get unicode point value size as UTF-8:" << std::endl;
-			ss << "Invalid unicode point value:" << std::endl;
-			ss << "mfsGetSizeAsUTF8 returned MFS_ERROR_INVALID_UNICODE";
-			throw StringError(ss.str());
-		}
-		default:
-		{
-			std::stringstream ss;
-			ss << "Failed to get unicode point value size as UTF-8:" << std::endl;
-			ss << "mfsGetSizeAsUTF8 returned '" << err << "'";
-			throw StringError(ss.str());
-		}
-	}
+	if (err == MF_ERROR_OKAY)
+		return size;
 
-	return size;
+	mfsUTF8CodeUnit msg[512];
+	auto ss = String::StringStream(msg, sizeof(msg));
+	ss.Get() << "Failed to get unicode point value size as UTF-8:\n";
+	ss.Get() << "mfsGetSizeAsUTF8 returned '" << mfErrorToString(err) << "'";
+	throw StringError(msg);
 }
 
 UnicodePoint Magma::Framework::String::GetU8Char(const UTF8CodeUnit * src)
 {
 	mfsUnicodePoint up;
 	auto err = mfsGetUTF8Char(src, &up);
-	switch (err)
-	{
-		case MF_ERROR_OKAY:
-			break;
-		case MFS_ERROR_INVALID_ARGUMENTS:
-		{
-			std::stringstream ss;
-			ss << "Failed to get unicode point value from UTF-8 character:" << std::endl;
-			ss << "Invalid arguments:" << std::endl;
-			ss << "mfsGetUTF8Char returned MFS_ERROR_INVALID_ARGUMENTS";
-			throw StringError(ss.str());
-		}
-		case MFS_ERROR_INVALID_UTF8:
-		{
-			std::stringstream ss;
-			ss << "Failed to get unicode point value from UTF-8 character:" << std::endl;
-			ss << "Invalid unicode point value:" << std::endl;
-			ss << "mfsGetUTF8Char returned MFS_ERROR_INVALID_UTF8";
-			throw StringError(ss.str());
-		}
-		default:
-		{
-			std::stringstream ss;
-			ss << "Failed to get unicode point value from UTF-8 character:" << std::endl;
-			ss << "mfsGetUTF8Char returned '" << err << "'";
-			throw StringError(ss.str());
-		}
-	}
-	return up;
+	if (err == MF_ERROR_OKAY)
+		return up;
+
+	mfsUTF8CodeUnit msg[512];
+	auto ss = String::StringStream(msg, sizeof(msg));
+	ss.Get() << "Failed to get unicode point value from UTF-8 character:\n";
+	ss.Get() << "mfsGetUTF8Char returned '" << mfErrorToString(err) << "'";
+	throw StringError(msg);
 }
 
 mfmU64 Magma::Framework::String::SetU8Char(UTF8CodeUnit * dst, UnicodePoint up, mfmU64 maxSize)
 {
 	mfmU64 size;
 	auto err = mfsSetUTF8Char(up, dst, &size, maxSize);
-	switch (err)
-	{
-		case MF_ERROR_OKAY:
-			break;
-		case MFS_ERROR_INVALID_ARGUMENTS:
-		{
-			std::stringstream ss;
-			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
-			ss << "Invalid arguments:" << std::endl;
-			ss << "mfsSetUTF8Char returned MFS_ERROR_INVALID_ARGUMENTS";
-			throw StringError(ss.str());
-		}
-		case MFS_ERROR_INVALID_UNICODE:
-		{
-			std::stringstream ss;
-			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
-			ss << "Invalid unicode point value:" << std::endl;
-			ss << "mfsSetUTF8Char returned MFS_ERROR_INVALID_UNICODE";
-			throw StringError(ss.str());
-		}
-		case MFS_ERROR_CHARACTER_TOO_BIG:
-		{
-			std::stringstream ss;
-			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
-			ss << "The character is bigger than the passed max size:" << std::endl;
-			ss << "mfsSetUTF8Char returned MFS_ERROR_CHARACTER_TOO_BIG";
-			throw StringError(ss.str());
-		}
-		default:
-		{
-			std::stringstream ss;
-			ss << "Failed to set UTF-8 character to unicode point value:" << std::endl;
-			ss << "mfsSetUTF8Char returned '" << err << "'";
-			throw StringError(ss.str());
-		}
-	}
-	return size;
+	if (err == MF_ERROR_OKAY)
+		return size;
+
+	mfsUTF8CodeUnit msg[512];
+	auto ss = String::StringStream(msg, sizeof(msg));
+	ss.Get() << "Failed to set UTF-8 character to unicode point value:\n";
+	ss.Get() << "mfsSetUTF8Char returned '" << mfErrorToString(err) << "'";
+	throw StringError(msg);
 }
 
 UTF8CodeUnit * Magma::Framework::String::NextU8Char(UTF8CodeUnit * chr)

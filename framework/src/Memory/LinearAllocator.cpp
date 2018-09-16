@@ -1,72 +1,27 @@
 #include <Magma/Framework/Memory/LinearAllocator.hpp>
+#include <Magma/Framework/ErrorString.h>
 
-#include <sstream>
-
-Magma::Framework::Memory::LinearAllocator::LinearAllocator(mfmU64 size)
+void Magma::Framework::Memory::HLinearAllocator::Reset()
 {
-	m_linear = nullptr;
-	auto err = ::mfmCreateLinearAllocator(&m_linear, size);
-	switch (err)
-	{
-		case MF_ERROR_OKAY:
-			break;
-		case MFM_ERROR_ALLOCATION_FAILED:
-		{
-			std::stringstream ss;
-			ss << "Failed to create LinearAllocator:" << std::endl;
-			ss << "mfmCreateLinearAllocator returned MFM_ERROR_ALLOCATION_FAILED";
-			throw AllocatorError(ss.str());
-		}
-		case MFM_ERROR_INVALID_ARGUMENTS:
-		{
-			std::stringstream ss;
-			ss << "Failed to create LinearAllocator:" << std::endl;
-			ss << "mfmCreateLinearAllocator returned MFM_ERROR_INVALID_ARGUMENTS";
-			throw AllocatorError(ss.str());
-		}
-		default:
-		{
-			std::stringstream ss;
-			ss << "Failed to create LinearAllocator:" << std::endl;
-			ss << "mfmCreateLinearAllocator returned '" << err << "'";
-			throw AllocatorError(ss.str());
-		}
-	}
+	mfError err = mfmLinearReset((mfmLinearAllocator*)&this->Get());
+	if (err != MF_ERROR_OKAY)
+		throw AllocatorError(mfErrorToString(err));
 }
 
-Magma::Framework::Memory::LinearAllocator::~LinearAllocator()
+Magma::Framework::Memory::HLinearAllocator Magma::Framework::Memory::CreateLinearAllocator(mfmU64 size)
 {
-	if (m_linear != nullptr)
-		::mfmDestroyLinearAllocator(m_linear);
+	mfmLinearAllocator* alloc;
+	mfError err = mfmCreateLinearAllocator(&alloc, size);
+	if (err != MF_ERROR_OKAY)
+		throw AllocatorError(mfErrorToString(err));
+	return alloc;
 }
 
-void * Magma::Framework::Memory::LinearAllocator::Allocate(mfmU64 size)
+Magma::Framework::Memory::HLinearAllocator Magma::Framework::Memory::CreateLinearAllocatorOnMemory(mfmU64 size, void * memory, mfmU64 memorySize)
 {
-	void* memory;
-	auto err = ::mfmLinearAllocate(m_linear, &memory, size);
-	switch (err)
-	{
-		case MF_ERROR_OKAY:
-			break;
-		case MFM_ERROR_ALLOCATOR_OVERFLOW:
-		{
-			std::stringstream ss;
-			ss << "Failed to allocate on LinearAllocator:" << std::endl;
-			ss << "mfmLinearAllocate returned MFM_ERROR_ALLOCATOR_OVERFLOW";
-			throw AllocatorError(ss.str());
-		}
-		default:
-		{
-			std::stringstream ss;
-			ss << "Failed to allocate on LinearAllocator:" << std::endl;
-			ss << "mfmLinearAllocate returned '" << err << "'";
-			throw AllocatorError(ss.str());
-		}
-	}
-	return memory;
-}
-
-void Magma::Framework::Memory::LinearAllocator::Reset()
-{
-	::mfmLinearReset(m_linear);
+	mfmLinearAllocator* alloc;
+	mfError err = mfmCreateLinearAllocatorOnMemory(&alloc, size, memory, memorySize);
+	if (err != MF_ERROR_OKAY)
+		throw AllocatorError(mfErrorToString(err));
+	return alloc;
 }

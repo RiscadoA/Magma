@@ -1,9 +1,6 @@
 #pragma once
 
-#include <stdexcept>
-
-#include "UTF8.h"
-#include "Error.h"
+#include <Magma/Framework/Exception.hpp>
 
 namespace Magma
 {
@@ -12,30 +9,30 @@ namespace Magma
 		namespace String
 		{
 			/// <summary>
-			///		Thrown when there is a string related error
+			///		Thrown when there is a string related error.
 			/// </summary>
-			class StringError : public std::runtime_error
+			class StringError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
-			///		Thrown when there is a document related error
+			///		Thrown when there is a document related error.
 			/// </summary>
-			class DocumentError : public std::runtime_error
+			class DocumentError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
-			///		Thrown when there is a document related error
+			///		Thrown when there is a document related error.
 			/// </summary>
-			class StreamError : public std::runtime_error
+			class StreamError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 		}
 	}

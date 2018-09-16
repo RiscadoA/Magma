@@ -67,10 +67,12 @@ configure_file(Config.h.in Config.h)
 # Get source files
 file(
 	GLOB_RECURSE Magma_Framework_Source
-    "*.hpp"
-    "*.cpp"
-	"*.h"
-	"*.c"
+    "src/*.hpp"
+    "src/*.cpp"
+	"src/*.h"
+	"src/*.c"
+	"include/*.hpp"
+	"include/*.h"
 )
 
 # Add files as library

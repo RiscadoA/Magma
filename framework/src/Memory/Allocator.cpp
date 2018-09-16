@@ -13,6 +13,15 @@ void * Magma::Framework::Memory::HAllocator::Allocate(mfmU64 size)
 	return mem;
 }
 
+void * Magma::Framework::Memory::HAllocator::Reallocate(void * memory, mfmU64 prevSize, mfmU64 newSize)
+{
+	void* mem;
+	mfError err = mfmReallocate(this->GetNoChecks(), memory, prevSize, newSize, &mem);
+	if (err != MF_ERROR_OKAY)
+		throw AllocatorError(mfErrorToString(err));
+	return mem;
+}
+
 void Magma::Framework::Memory::HAllocator::Deallocate(void * memory)
 {
 	mfError err = mfmDeallocate(this->GetNoChecks(), memory);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdexcept>
+#include <Magma/Framework/Exception.hpp>
 
 namespace Magma
 {
@@ -11,28 +11,28 @@ namespace Magma
 			/// <summary>
 			///		Thrown when there is an error related to shaders
 			/// </summary>
-			class ShaderError : public std::runtime_error
+			class ShaderError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
-			///		Thrown when a Graphics::V1X render device encounters an exception
+			///		Thrown when a graphics render device encounters an exception
 			/// </summary>
-			class RenderDeviceError : public std::runtime_error
+			class RenderDeviceError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
 			///		Thrown when there is a text related error
 			/// </summary>
-			class TextError : public std::runtime_error
+			class TextError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 		}
 	}

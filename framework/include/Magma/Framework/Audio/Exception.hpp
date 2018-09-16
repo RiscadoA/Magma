@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdexcept>
+#include <Magma/Framework/Exception.hpp>
 
 namespace Magma
 {
@@ -11,19 +11,19 @@ namespace Magma
 			/// <summary>
 			///		Thrown when an audio render device encounters an exception
 			/// </summary>
-			class RenderDeviceError : public std::runtime_error
+			class RenderDeviceError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
 			///		Thrown when there is an error related to WAV loading
 			/// </summary>
-			class LoaderError : public std::runtime_error
+			class LoaderError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 		}
 	}

@@ -109,7 +109,8 @@ namespace Magma
 						m_callable->~ICallable();
 						m_allocator.Deallocate(m_callable);
 					}
-					m_callable = new (m_allocator.Allocate(sizeof(FuncCallable))) FuncCallable(func);
+					if (func != nullptr)
+						m_callable = new (m_allocator.Allocate(sizeof(FuncCallable))) FuncCallable(func);
 					return *this;
 				}
 
@@ -126,6 +127,8 @@ namespace Magma
 						m_callable = func.m_callable->Clone(m_allocator);
 					return *this;
 				}
+
+				inline bool IsNull() { return m_callable == nullptr; }
 
 				inline ~Functor()
 				{

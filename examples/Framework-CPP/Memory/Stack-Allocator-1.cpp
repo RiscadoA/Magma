@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 	mfsUTF8CodeUnit buffer[256];
 	memset(buffer, 0, sizeof(buffer));
 
-	Memory::StackAllocatorHandle alloc = Memory::CreateStackAllocator(2048);
+	Memory::HStackAllocator alloc = Memory::CreateStackAllocator(2048);
 	Memory::Handle obj = String::CreateStringStream(buffer, sizeof(buffer), alloc);
 
 	String::HStringStream ss = obj;

@@ -8,7 +8,7 @@ foreach(file ${files})
 		message(STATUS ${executableName} " " ${file})
 		add_executable(${executableName} ${file})
 		target_link_libraries(${executableName} Magma-Framework)
-		set_target_properties(${executableName} PROPERTIES FOLDER Examples)
+		set_target_properties(${executableName} PROPERTIES FOLDER Examples/Framework-CPP)
 		if (DEFINED OPENAL_DLLS)
 			add_custom_command(TARGET ${executableName} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different

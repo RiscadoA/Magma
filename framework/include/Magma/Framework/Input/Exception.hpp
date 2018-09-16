@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdexcept>
+#include <Magma/Framework/Exception.hpp>
 
 namespace Magma
 {
@@ -11,10 +11,10 @@ namespace Magma
 			/// <summary>
 			///		Thrown when there is an error related to window handling.
 			/// </summary>
-			class WindowError : public std::runtime_error
+			class WindowError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 		}
 	}

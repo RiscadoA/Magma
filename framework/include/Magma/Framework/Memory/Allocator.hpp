@@ -28,6 +28,15 @@ namespace Magma
 				void* Allocate(mfmU64 size);
 
 				/// <summary>
+				///		Reallocates data on this allocator.
+				/// </summary>
+				/// <param name="memory">Old data</param>
+				/// <param name="prevSize">Previous data size in bytes</param>
+				/// <param name="newSize">New data size in bytes</param>
+				/// <returns>Pointer to reallocated data</returns>
+				void* Reallocate(void* memory, mfmU64 prevSize, mfmU64 newSize);
+
+				/// <summary>
 				///		Deallocates data previously allocated by Allocate.
 				/// </summary>
 				/// <param name="data">Data pointer</param>

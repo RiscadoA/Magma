@@ -2,6 +2,7 @@
 
 #include "Exception.hpp"
 #include "LinearAllocator.h"
+#include "Allocator.hpp"
 
 namespace Magma
 {
@@ -9,38 +10,32 @@ namespace Magma
 	{
 		namespace Memory
 		{
-			/// <summary>
-			///		Encapsulates the magma framework C linear allocator declared on LinearAllocator.h.
-			/// </summary>
-			class LinearAllocator final
+			class HLinearAllocator : public HAllocator
 			{
 			public:
-				/// <summary>
-				///		Creates a simple linear allocator
-				/// </summary>
-				/// <param name="size">Linear allocator size in bytes</param>
-				LinearAllocator(mfmU64 size);
+				using HAllocator::HAllocator;
+				using HAllocator::operator=;
+				inline HLinearAllocator(const Memory::Handle& object) : Memory::HAllocator(object) {}
 
-				/// <summary>
-				///		Destroys a simple linear allocator
-				/// </summary>
-				~LinearAllocator();
-
-				/// <summary>
-				///		Allocates on a linear allocator
-				/// </summary>
-				/// <param name="size">Allocation size</param>
-				/// <returns>Returns the allocated memory pointer</returns>
-				void* Allocate(mfmU64 size);
-
-				/// <summary>
-				///		Resets the linear allocator head.
-				/// </summary>
 				void Reset();
-
-			private:
-				::mfmLinearAllocator * m_linear;
 			};
+
+			/// <summary>
+			///		Creates a linear allocator.
+			/// </summary>
+			/// <param name="size">Linear allocator size</param>
+			/// <returns>Linear allocator handle</returns>
+			HLinearAllocator CreateLinearAllocator(mfmU64 size);
+
+			/// <summary>
+			///		Creates a linear allocator on a predefined memory region.
+			///		Use the macro MFM_LINEAR_ALLOCATOR_SIZE to get the minimum memory size that a linear allocator of a certain size needs.
+			/// </summary>
+			/// <param name="size">Linear allocator size</param>
+			/// <param name="memory">Memory region</param>
+			/// <param name="memorySize">Memory region size</param>
+			/// <returns>Linear allocator handle</returns>
+			HLinearAllocator CreateLinearAllocatorOnMemory(mfmU64 size, void* memory, mfmU64 memorySize);
 		}
 	}
 }

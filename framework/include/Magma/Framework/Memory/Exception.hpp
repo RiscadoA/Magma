@@ -1,9 +1,6 @@
 #pragma once
 
-#include <stdexcept>
-
-#include "Error.h"
-#include "../String/UTF8.h"
+#include <Magma/Framework/Exception.hpp>
 
 namespace Magma
 {
@@ -14,28 +11,28 @@ namespace Magma
 			/// <summary>
 			///		Thrown when there is an error related to memory allocation.
 			/// </summary>
-			class AllocatorError : public std::runtime_error
+			class AllocatorError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
 			///		Thrown when there is an error related to null pointers.
 			/// </summary>
-			class NullPointerError : public std::runtime_error
+			class NullPointerError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
 			///		Thrown when there is an error related to objects.
 			/// </summary>
-			class ObjectError : public std::runtime_error
+			class ObjectError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 		}
 	}

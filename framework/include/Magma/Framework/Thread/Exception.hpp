@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stdexcept>
-
-#include "Error.h"
+#include <Magma/Framework/Exception.hpp>
 
 namespace Magma
 {
@@ -13,28 +11,28 @@ namespace Magma
 			/// <summary>
 			///		Thrown when there is an error related to atomics.
 			/// </summary>
-			class AtomicError : public std::runtime_error
+			class AtomicError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
 			///		Thrown when there is an error related to mutexes.
 			/// </summary>
-			class MutexError : public std::runtime_error
+			class MutexError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 
 			/// <summary>
 			///		Thrown when there is an error related to threads.
 			/// </summary>
-			class ThreadError : public std::runtime_error
+			class ThreadError : public Exception
 			{
 			public:
-				using std::runtime_error::runtime_error;
+				using Exception::Exception;
 			};
 		}
 	}
