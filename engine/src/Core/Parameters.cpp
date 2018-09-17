@@ -43,11 +43,6 @@ void Magma::Core::Parameters::Parse(mfsUTF8CodeUnit** argv)
 			}
 
 		if (i == MaxParserCount)
-		{
-			mfsUTF8CodeUnit msg[512];
-			Framework::String::StringStream ss(msg, sizeof(msg));
-			ss.Get() << u8"Failed to parse parameters on Magma::Core::Parameters: no parser found for parameter '" << *argv << "'";
-			throw Core::Exception(msg);
-		}
+			++argv;
 	}
 }

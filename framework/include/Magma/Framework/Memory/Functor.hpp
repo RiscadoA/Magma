@@ -108,6 +108,7 @@ namespace Magma
 					{
 						m_callable->~ICallable();
 						m_allocator.Deallocate(m_callable);
+						m_callable = nullptr;
 					}
 					if (func != nullptr)
 						m_callable = new (m_allocator.Allocate(sizeof(FuncCallable))) FuncCallable(func);

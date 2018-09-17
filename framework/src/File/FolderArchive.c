@@ -919,8 +919,6 @@ static mfError mffArchiveOpenFile(mffArchive* archive, mfsStream** outStream, mf
 #if defined(MAGMA_FRAMEWORK_USE_WINDOWS_FILESYSTEM)
 static mfError mffFillWindowsFiles(mffFolderArchive * archive, void* allocator, const mfsUTF8CodeUnit* path, const mfsUTF8CodeUnit* internalPath, mffFolderFile* parent, mffFolderFile** first)
 {
-	
-
 	mfError err;
 	WIN32_FIND_DATA data;
 	HANDLE hFind;
@@ -1041,6 +1039,8 @@ static mfError mffFillWindowsFiles(mffFolderArchive * archive, void* allocator, 
 		}
 		while (FindNextFile(hFind, &data));
 	}
+
+	return MF_ERROR_OKAY;
 }
 #endif
 

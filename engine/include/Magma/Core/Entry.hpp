@@ -18,7 +18,7 @@ namespace Magma
 			~Engine();
 
 		private:
-			mfsUTF8CodeUnit** ParseDirectoryParam(void*, mfsUTF8CodeUnit** arg);
+			static mfsUTF8CodeUnit** ParseDirectoryParam(void* opaque, mfsUTF8CodeUnit** arg);
 
 			mfsUTF8CodeUnit m_rootDirectory[512];
 			Framework::Memory::HAllocator m_allocator;

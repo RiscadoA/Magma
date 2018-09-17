@@ -15,7 +15,7 @@ Magma::Core::Engine::Engine(mfsUTF8CodeUnit** argv, Framework::Memory::HAllocato
 	// Parse paremeters
 	{
 		Parameters p;
-		p.AddParser(this, u8"-dir", Framework::Memory::GetMethod(*this, &ParseDirectoryParam));
+		p.AddParser(this, u8"-dir", &ParseDirectoryParam);
 		p.Parse(argv);
 	}
 
@@ -51,9 +51,10 @@ Magma::Core::Engine::~Engine()
 	m_gameArchive.Release();
 }
 
-mfsUTF8CodeUnit ** Magma::Core::Engine::ParseDirectoryParam(void *, mfsUTF8CodeUnit ** arg)
+mfsUTF8CodeUnit ** Magma::Core::Engine::ParseDirectoryParam(void * opaque, mfsUTF8CodeUnit ** arg)
 {
-	auto ss = Framework::String::StringStream(m_rootDirectory, sizeof(m_rootDirectory));
+	auto engine = static_cast<Engine*>(opaque);
+	auto ss = Framework::String::StringStream(engine->m_rootDirectory, sizeof(engine->m_rootDirectory));
 	ss.Get() << *arg;
 	++arg;
 	return arg;

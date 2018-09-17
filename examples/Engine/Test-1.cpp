@@ -7,7 +7,17 @@ using namespace Magma;
 // Magma Engine entry point
 int run(int argc, char** argv)
 {
-	auto engine = Core::Engine(argv, Framework::Memory::StandardAllocator);
+	try
+	{
+		auto engine = Core::Engine(argv, Framework::Memory::StandardAllocator);
+
+	}
+	catch (Framework::Exception& e)
+	{
+		Framework::String::ErrStream << "Caught Framework::Exception on run():\n";
+		Framework::String::ErrStream << e.GetMessage() << "\n";
+		abort();
+	}
 
 	return 0;
 }
