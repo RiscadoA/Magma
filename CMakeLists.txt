@@ -3,8 +3,19 @@ cmake_minimum_required(VERSION 3.8)
 project(Magma)
 include(CTest)
 
-# Add external dependencies
-add_subdirectory(extern/)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Add games and framework
-add_subdirectory(src/)
+# Build Framework
+add_subdirectory(framework/)
+
+# Build Engine
+add_subdirectory(engine/)
+
+# Build tests
+add_subdirectory(tests/)
+
+# Build examples
+add_subdirectory(examples/)
